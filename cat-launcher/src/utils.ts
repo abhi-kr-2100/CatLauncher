@@ -1,8 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { GameVariantInfo } from "./generated-types/GameVariantInfo";
+import type { GameRelease } from "./generated-types/GameRelease";
 
-export interface GameVariantInfo {
-    name: string;
-    description: string;
+export async function fetchReleasesForVariant(variant: GameVariantInfo): Promise<GameRelease[]> {
+    const response = await invoke("fetch_releases_for_variant", { variant: variant.id });
+    return response as GameRelease[];
 }
 
 export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {

@@ -3,11 +3,16 @@ pub mod commands;
 use crate::variants::GameVariant;
 
 pub trait GameVariantBasicInfo {
+    fn id(&self) -> &'static str;
     fn name(&self) -> &'static str;
     fn description(&self) -> &'static str;
 }
 
 impl GameVariantBasicInfo for GameVariant {
+    fn id(&self) -> &'static str {
+        self.into()
+    }
+    
     fn name(&self) -> &'static str {
         match self {
             GameVariant::DarkDaysAhead => "Dark Days Ahead",
