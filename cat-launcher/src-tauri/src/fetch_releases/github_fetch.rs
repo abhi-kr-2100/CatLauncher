@@ -1,11 +1,23 @@
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use chrono::{DateTime, Utc};
+use crate::infra::rfc3339;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct GithubRelease {
+    pub id: u64,
     pub tag_name: String,
     pub prerelease: bool,
+    pub assets: Vec<GithubAsset>,
+    #[serde(with = "rfc3339")]
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct GithubAsset {
+    pub id: u64,
+    pub browser_download_url: String,
 }
 
 
