@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { GameVariantInfo } from "./generated-types/GameVariantInfo";
-import { fetchReleasesForVariant } from "./utils";
 import type { GameRelease } from './generated-types/GameRelease';
+import { fetchReleasesForVariant } from "@/lib/utils";
 
 export interface GameVariantProps {
     variant: GameVariantInfo;
