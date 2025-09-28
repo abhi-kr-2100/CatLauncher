@@ -1,0 +1,4 @@
+.env
+
+# Generated types
+cat-launcher/src/generated-types/*
