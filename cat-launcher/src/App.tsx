@@ -22,7 +22,7 @@ function App() {
   }
 
   return (
-    <main className="container">
+    <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
       {gameVariantsInfo.map((variant) => (
         <GameVariant key={variant.name} variant={variant} />
       ))}
