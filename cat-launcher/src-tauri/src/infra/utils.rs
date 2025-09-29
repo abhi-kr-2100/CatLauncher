@@ -1,5 +1,9 @@
-use std::{error::Error, fs, path::Path};
+use std::error::Error;
+use std::fs;
+use std::path::Path;
+
 use serde::de::DeserializeOwned;
+
 use crate::variants::GameVariant;
 
 pub fn get_safe_filename(name: &str) -> String {
