@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
@@ -30,16 +31,21 @@ pub fn write_cached_releases(variant: &GameVariant, releases: &Vec<GithubRelease
         let _ = create_dir_all(parent);
     }
 
-    let non_prereleases = releases.iter().filter(|r| !r.prerelease).take(100);
-    let mut prereleases: Vec<&GithubRelease> = releases.iter().filter(|r| r.prerelease).collect();
+    let _ = write_to_file(&cache_path, &releases);
+}
 
-    prereleases.sort_by(|a, b| b.created_at.cmp(&a.created_at));
-    let prereleases_to_cache = prereleases.into_iter().take(10);
+pub fn select_releases_for_cache(releases: &Vec<GithubRelease>) -> Vec<GithubRelease> {
+    let (non_prereleases, mut prereleases): (Vec<&GithubRelease>, Vec<&GithubRelease>) =
+        releases.iter().partition(|r| !r.prerelease);
 
-    let mut to_cache: Vec<GithubRelease> = non_prereleases.cloned().collect();
-    to_cache.extend(prereleases_to_cache.cloned());
+    prereleases.sort_by_key(|r| Reverse(r.created_at));
 
-    let _ = write_to_file(&cache_path, &to_cache);
+    non_prereleases
+        .into_iter()
+        .take(100)
+        .cloned()
+        .chain(prereleases.into_iter().take(10).cloned())
+        .collect()
 }
 
 pub fn get_cache_path_for_repo(repo: &str) -> PathBuf {
