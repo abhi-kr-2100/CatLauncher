@@ -8,7 +8,7 @@ pub enum FetchReleasesError {
 }
 
 #[derive(Debug, ThisError)]
-pub(crate) enum GithubFetchError {
+pub enum GithubFetchError {
     #[error("Request failed: {0}")]
     Request(#[from] ReqwestError),
 

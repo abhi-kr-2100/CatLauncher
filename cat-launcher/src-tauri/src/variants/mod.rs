@@ -1,10 +1,3 @@
-use serde::{Deserialize, Serialize};
-use strum_macros::{EnumIter, IntoStaticStr};
-use ts_rs::TS;
+pub mod game_variant;
 
-#[derive(Debug, EnumIter, Clone, Deserialize, Serialize, IntoStaticStr, TS)]
-pub enum GameVariant {
-    DarkDaysAhead,
-    BrightNights,
-    TheLastGeneration,
-}
+pub use game_variant::GameVariant;
