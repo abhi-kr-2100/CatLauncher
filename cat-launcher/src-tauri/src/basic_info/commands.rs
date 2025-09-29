@@ -12,13 +12,17 @@ pub struct GameVariantInfo {
     pub description: &'static str,
 }
 
-#[command]
-pub fn get_game_variants_info() -> Vec<GameVariantInfo> {
-    GameVariant::iter()
-        .map(|variant| GameVariantInfo {
+impl From<GameVariant> for GameVariantInfo {
+    fn from(variant: GameVariant) -> Self {
+        GameVariantInfo {
             id: variant.id(),
             name: variant.name(),
             description: variant.description(),
-        })
-        .collect()
+        }
+    }
+}
+
+#[command]
+pub fn get_game_variants_info() -> Vec<GameVariantInfo> {
+    GameVariant::iter().map(GameVariantInfo::from).collect()
 }
