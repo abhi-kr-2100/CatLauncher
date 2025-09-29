@@ -1,5 +1,8 @@
 {
     "rust-analyzer.linkedProjects": [
         "./cat-launcher/src-tauri/Cargo.toml"
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": true
 }
