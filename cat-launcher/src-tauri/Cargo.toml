@@ -28,3 +28,4 @@ thiserror = "2.0.16"
 reqwest = { version = "0.12.23", features = ["json"] }
 async-trait = "0.1.89"
 ts-rs = "11.0"
+chrono = { version = "0.4.42", features = ["serde"] }
