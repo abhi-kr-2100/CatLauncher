@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import "./App.css";
-import { fetchGameVariantsInfo } from "./utils";
-import GameVariant from "./GameVariant";
-
+import { fetchGameVariantsInfo } from "@/lib/utils";
+import GameVariant from "@/GameVariant";
 
 function App() {
   const {
