@@ -9,7 +9,6 @@ pub enum ReleaseType {
     Experimental,
 }
 
-
 #[derive(Debug, Clone, Deserialize, Serialize, TS)]
 #[ts(export)]
 pub struct GameRelease {
