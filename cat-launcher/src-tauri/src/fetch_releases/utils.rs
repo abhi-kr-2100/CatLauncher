@@ -50,9 +50,11 @@ pub fn select_releases_for_cache(releases: &[GithubRelease]) -> Vec<GithubReleas
 
 pub fn get_cache_path_for_repo(repo: &str) -> PathBuf {
     let safe = get_safe_filename(repo);
-    let path = format!("CatLauncherCache/Releases/{}.json", safe);
+    let mut path = PathBuf::from("CatLauncherCache");
+    path.push("Releases");
+    path.push(format!("{}.json", safe));
 
-    PathBuf::from(path)
+    path
 }
 
 pub fn merge_releases(fetched: &[GithubRelease], cached: &[GithubRelease]) -> Vec<GithubRelease> {
