@@ -15,7 +15,7 @@ impl GameVariant {
             fetch_github_releases(&HTTP_CLIENT, repo).await?;
         let cached_releases: Vec<GithubRelease> = get_cached_releases(&self);
 
-        let all_releases = merge_releases(fetched_releases, cached_releases);
+        let all_releases = merge_releases(&fetched_releases, &cached_releases);
         let to_cache = select_releases_for_cache(&all_releases);
         write_cached_releases(&self, &to_cache);
 
