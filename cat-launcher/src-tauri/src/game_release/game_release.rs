@@ -5,6 +5,7 @@ use ts_rs::TS;
 
 use crate::fetch_releases::utils::get_assets;
 use crate::game_release::error::GameReleaseError;
+use crate::infra::github::asset::GitHubAsset;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
@@ -22,7 +23,7 @@ pub struct GameRelease {
 }
 
 impl GameRelease {
-    pub fn get_asset_download_url(&self) -> Result<String, GameReleaseError> {
+    pub fn get_asset(&self) -> Result<GitHubAsset, GameReleaseError> {
         let assets = get_assets(self);
 
         let asset = match (self.variant, OS) {
@@ -40,7 +41,7 @@ impl GameRelease {
         .and_then(|substring| assets.iter().find(|a| a.name.contains(substring)));
 
         asset
-            .map(|a| a.browser_download_url.clone())
+            .map(|a| a.clone())
             .ok_or(GameReleaseError::NoCompatibleAssetFound)
     }
 }
