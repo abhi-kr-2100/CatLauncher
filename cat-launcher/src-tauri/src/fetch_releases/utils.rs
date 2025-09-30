@@ -23,7 +23,7 @@ pub fn get_cached_releases(variant: &GameVariant) -> Vec<GithubRelease> {
     }
 }
 
-pub fn write_cached_releases(variant: &GameVariant, releases: &Vec<GithubRelease>) -> () {
+pub fn write_cached_releases(variant: &GameVariant, releases: &[GithubRelease]) -> () {
     let repo = get_github_repo_for_variant(variant);
     let cache_path = get_cache_path_for_repo(repo);
 
@@ -34,7 +34,7 @@ pub fn write_cached_releases(variant: &GameVariant, releases: &Vec<GithubRelease
     let _ = write_to_file(&cache_path, &releases);
 }
 
-pub fn select_releases_for_cache(releases: &Vec<GithubRelease>) -> Vec<GithubRelease> {
+pub fn select_releases_for_cache(releases: &[GithubRelease]) -> Vec<GithubRelease> {
     let (non_prereleases, mut prereleases): (Vec<&GithubRelease>, Vec<&GithubRelease>) =
         releases.iter().partition(|r| !r.prerelease);
 
@@ -55,19 +55,12 @@ pub fn get_cache_path_for_repo(repo: &str) -> PathBuf {
     PathBuf::from(path)
 }
 
-pub fn merge_releases(
-    fetched: Vec<GithubRelease>,
-    cached: Vec<GithubRelease>,
-) -> Vec<GithubRelease> {
-    let mut map: HashMap<u64, GithubRelease> = HashMap::new();
+pub fn merge_releases(fetched: &[GithubRelease], cached: &[GithubRelease]) -> Vec<GithubRelease> {
+    let map: HashMap<u64, GithubRelease> = cached
+        .iter()
+        .chain(fetched.iter())
+        .map(|r| (r.id, r.clone()))
+        .collect();
 
-    for r in cached {
-        map.insert(r.id, r);
-    }
-
-    for r in fetched {
-        map.insert(r.id, r);
-    }
-
-    map.values().cloned().collect()
+    map.into_values().collect()
 }
