@@ -1,7 +1,8 @@
+use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
-use chrono::{DateTime, Utc};
+
+use super::error::GithubFetchError;
 use crate::infra::rfc3339;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -20,30 +21,22 @@ pub struct GithubAsset {
     pub browser_download_url: String,
 }
 
-
-#[derive(Debug, Error)]
-pub enum GithubFetchError {
-    #[error("Request failed: {0}")]
-    Request(#[from] reqwest::Error),
-    #[error("Deserialization failed: {0}")]
-    Deserialize(String),
-}
-pub async fn fetch_github_releases(client: &Client, repo: &str) -> Result<Vec<GithubRelease>, GithubFetchError> {
+pub async fn fetch_github_releases(
+    client: &Client,
+    repo: &str,
+) -> Result<Vec<GithubRelease>, GithubFetchError> {
     let url = format!("https://api.github.com/repos/{}/releases", repo);
     let response = client
         .get(&url)
         .send()
         .await
         .map_err(GithubFetchError::Request)?;
-    let releases = response
-        .json::<Vec<GithubRelease>>()
-        .await
-        .map_err(|e| {
-            if e.is_decode() {
-                GithubFetchError::Deserialize(e.to_string())
-            } else {
-                GithubFetchError::Request(e)
-            }
-        })?;
+    let releases = response.json::<Vec<GithubRelease>>().await.map_err(|e| {
+        if e.is_decode() {
+            GithubFetchError::Deserialize(e.to_string())
+        } else {
+            GithubFetchError::Request(e)
+        }
+    })?;
     Ok(releases)
 }

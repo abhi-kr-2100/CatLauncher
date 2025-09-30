@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
-use serde::{self, Deserialize, Deserializer, Serializer};
+use serde::de::Error as SerdeError;
+use serde::{Deserialize, Deserializer, Serializer};
 
 pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
 where
@@ -16,5 +17,5 @@ where
     let s = String::deserialize(deserializer)?;
     DateTime::parse_from_rfc3339(&s)
         .map(|dt| dt.with_timezone(&Utc))
-        .map_err(serde::de::Error::custom)
+        .map_err(SerdeError::custom)
 }
