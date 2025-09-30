@@ -22,7 +22,7 @@ impl GameVariant {
         let game_releases = to_cache
             .into_iter()
             .map(|r| GameRelease {
-                variant: self.clone(),
+                variant: *self,
                 version: r.tag_name,
                 release_type: if r.prerelease {
                     ReleaseType::Experimental
