@@ -33,7 +33,7 @@ pub async fn fetch_github_releases(
         .map_err(GithubFetchError::Request)?;
     let releases = response.json::<Vec<GithubRelease>>().await.map_err(|e| {
         if e.is_decode() {
-            GithubFetchError::Deserialize(e.to_string())
+            GithubFetchError::Deserialize(e)
         } else {
             GithubFetchError::Request(e)
         }
