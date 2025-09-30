@@ -1,7 +1,5 @@
 pub mod commands;
 pub mod error;
+pub mod utils;
 
 mod fetch_releases;
-mod game_release;
-mod github_fetch;
-mod utils;
