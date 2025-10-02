@@ -12,6 +12,7 @@ impl GameRelease {
         let mut downloader = Downloader::builder()
             .download_folder(&download_dir)
             .parallel_requests(4)
+            .user_agent("cat-launcher")
             .build()?;
 
         let asset = self.get_asset()?;

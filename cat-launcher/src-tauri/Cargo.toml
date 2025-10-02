@@ -26,8 +26,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.16"
 reqwest = { version = "0.12.23", features = ["json"] }
-tokio = { version = "1.41.0", features = ["rt", "macros", "fs"] }
-async-trait = "0.1.89"
 ts-rs = "11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-downloader = "0.2.8"
+downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", branch = "main" }
