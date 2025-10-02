@@ -1,15 +1,18 @@
 use std::cmp::Reverse;
 use std::collections::HashMap;
+use std::env::consts::OS;
 use std::fs::create_dir_all;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::game_release::game_release::GameRelease;
+use crate::game_release::utils::get_platform_asset_substr;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{
     get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file, WriteToFileError,
 };
+use crate::install_release::utils::get_asset_download_dir;
 use crate::variants::GameVariant;
 
 pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
@@ -90,4 +93,26 @@ pub fn get_assets(release: &GameRelease, cache_dir: &Path) -> Vec<GitHubAsset> {
     } else {
         Vec::new()
     }
+}
+
+pub fn is_release_ready_to_play(
+    variant: &GameVariant,
+    assets: &[GitHubAsset],
+    data_dir: &Path,
+) -> bool {
+    let asset = get_platform_asset_substr(variant, OS)
+        .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)));
+
+    if asset.is_none() {
+        return false;
+    }
+    let asset = asset.unwrap();
+
+    let dir = match get_asset_download_dir(&variant, data_dir) {
+        Ok(dir) => dir,
+        Err(_) => return false,
+    };
+    let filepath = dir.join(&asset.name);
+
+    filepath.exists()
 }

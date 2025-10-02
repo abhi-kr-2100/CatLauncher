@@ -5,10 +5,7 @@ use std::path::{Path, PathBuf};
 use crate::infra::utils::get_safe_filename;
 use crate::variants::GameVariant;
 
-pub(crate) fn get_asset_download_dir(
-    variant: &GameVariant,
-    data_dir: &Path,
-) -> Result<PathBuf, IoError> {
+pub fn get_asset_download_dir(variant: &GameVariant, data_dir: &Path) -> Result<PathBuf, IoError> {
     let safe_variant_name = get_safe_filename(variant.into());
 
     let dir = data_dir
