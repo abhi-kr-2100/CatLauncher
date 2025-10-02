@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::asset::GitHubAsset;
@@ -11,9 +11,9 @@ use crate::infra::utils::{
 };
 use crate::variants::GameVariant;
 
-pub fn get_cached_releases(variant: &GameVariant) -> Vec<GitHubRelease> {
+pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
     let repo = get_github_repo_for_variant(variant);
-    let cache_path = get_cache_path_for_repo(repo);
+    let cache_path = get_cache_path_for_repo(repo, cache_dir);
 
     if !cache_path.exists() {
         return Vec::new();
@@ -25,9 +25,9 @@ pub fn get_cached_releases(variant: &GameVariant) -> Vec<GitHubRelease> {
     }
 }
 
-pub fn write_cached_releases(variant: &GameVariant, releases: &[GitHubRelease]) {
+pub fn write_cached_releases(variant: &GameVariant, releases: &[GitHubRelease], cache_dir: &Path) {
     let repo = get_github_repo_for_variant(variant);
-    let cache_path = get_cache_path_for_repo(repo);
+    let cache_path = get_cache_path_for_repo(repo, cache_dir);
 
     if let Some(parent) = cache_path.parent() {
         let _ = create_dir_all(parent);
@@ -50,13 +50,9 @@ pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubReleas
         .collect()
 }
 
-pub fn get_cache_path_for_repo(repo: &str) -> PathBuf {
+pub fn get_cache_path_for_repo(repo: &str, cache_dir: &Path) -> PathBuf {
     let safe = get_safe_filename(repo);
-    let mut path = PathBuf::from("CatLauncherCache");
-    path.push("Releases");
-    path.push(format!("{}.json", safe));
-
-    path
+    cache_dir.join("Releases").join(format!("{}.json", safe))
 }
 
 pub fn merge_releases(fetched: &[GitHubRelease], cached: &[GitHubRelease]) -> Vec<GitHubRelease> {
@@ -69,8 +65,8 @@ pub fn merge_releases(fetched: &[GitHubRelease], cached: &[GitHubRelease]) -> Ve
     map.into_values().collect()
 }
 
-pub fn get_assets(release: &GameRelease) -> Vec<GitHubAsset> {
-    let cached_releases = get_cached_releases(&release.variant);
+pub fn get_assets(release: &GameRelease, cache_dir: &Path) -> Vec<GitHubAsset> {
+    let cached_releases = get_cached_releases(&release.variant, cache_dir);
     let maybe_release = cached_releases
         .iter()
         .find(|r| r.tag_name == release.version);
