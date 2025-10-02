@@ -1,20 +1,49 @@
 use std::path::PathBuf;
 
+use serde::ser::SerializeStruct;
+use serde::Serializer;
+use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Manager};
 
 use crate::game_release::game_release::GameRelease;
 use crate::infra::http_client::HTTP_CLIENT;
-use crate::install_release::error::InstallReleaseError;
+use crate::install_release::install_release::ReleaseInstallationError;
+
+#[derive(thiserror::Error, Debug, IntoStaticStr)]
+pub enum InstallReleaseCommandError {
+    #[error("system directory not found: {0}")]
+    SystemDir(#[from] tauri::Error),
+
+    #[error("installation failed: {0}")]
+    Install(#[from] ReleaseInstallationError),
+}
 
 #[command]
 pub async fn install_release(
     app_handle: AppHandle,
     release: GameRelease,
-) -> Result<PathBuf, InstallReleaseError> {
+) -> Result<PathBuf, InstallReleaseCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    release
+    Ok(release
         .install_release(&HTTP_CLIENT, &cache_dir, &data_dir)
-        .await
+        .await?)
+}
+
+impl serde::Serialize for InstallReleaseCommandError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut st = serializer.serialize_struct("InstallReleaseCommandError", 2)?;
+
+        let err_type: &'static str = self.into();
+        st.serialize_field("type", &err_type)?;
+
+        let msg = self.to_string();
+        st.serialize_field("message", &msg)?;
+
+        st.end()
+    }
 }

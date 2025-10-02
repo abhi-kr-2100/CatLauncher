@@ -2,14 +2,19 @@ use std::path::Path;
 
 use reqwest::Client;
 
-use crate::fetch_releases::error::FetchReleasesError;
 use crate::fetch_releases::utils::{
     get_cached_releases, merge_releases, select_releases_for_cache, write_cached_releases,
 };
 use crate::game_release::game_release::{GameRelease, ReleaseType};
-use crate::infra::github::utils::fetch_github_releases;
+use crate::infra::github::utils::{fetch_github_releases, GitHubReleaseFetchError};
 use crate::infra::utils::get_github_repo_for_variant;
 use crate::variants::GameVariant;
+
+#[derive(thiserror::Error, Debug)]
+pub enum FetchReleasesError {
+    #[error("failed to fetch releases: {0}")]
+    Fetch(#[from] GitHubReleaseFetchError),
+}
 
 impl GameVariant {
     pub(crate) async fn fetch_releases(
@@ -24,7 +29,8 @@ impl GameVariant {
 
         let all_releases = merge_releases(&fetched_releases, &cached_releases);
         let to_cache = select_releases_for_cache(&all_releases);
-        write_cached_releases(&self, &to_cache, cache_dir);
+
+        let _ = write_cached_releases(&self, &to_cache, cache_dir);
 
         let game_releases = to_cache
             .into_iter()
