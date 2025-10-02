@@ -1,18 +1,22 @@
+use reqwest::Client;
+
 use crate::fetch_releases::error::FetchReleasesError;
 use crate::fetch_releases::utils::{
     get_cached_releases, merge_releases, select_releases_for_cache, write_cached_releases,
 };
 use crate::game_release::game_release::{GameRelease, ReleaseType};
 use crate::infra::github::utils::fetch_github_releases;
-use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::get_github_repo_for_variant;
 use crate::variants::GameVariant;
 
 impl GameVariant {
-    pub(crate) async fn fetch_releases(&self) -> Result<Vec<GameRelease>, FetchReleasesError> {
+    pub(crate) async fn fetch_releases(
+        &self,
+        client: &Client,
+    ) -> Result<Vec<GameRelease>, FetchReleasesError> {
         let repo = get_github_repo_for_variant(self);
 
-        let fetched_releases = fetch_github_releases(&HTTP_CLIENT, repo).await?;
+        let fetched_releases = fetch_github_releases(client, repo).await?;
         let cached_releases = get_cached_releases(&self);
 
         let all_releases = merge_releases(&fetched_releases, &cached_releases);
