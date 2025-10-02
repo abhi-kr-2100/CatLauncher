@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::fetch_releases::utils::get_assets;
-use crate::game_release::error::GameReleaseError;
 use crate::infra::github::asset::GitHubAsset;
 use crate::variants::GameVariant;
 
@@ -23,8 +22,14 @@ pub struct GameRelease {
     pub release_type: ReleaseType,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum GetAssetError {
+    #[error("no compatible asset found")]
+    NoCompatibleAssetFound,
+}
+
 impl GameRelease {
-    pub fn get_asset(&self, cache_dir: &Path) -> Result<GitHubAsset, GameReleaseError> {
+    pub fn get_asset(&self, cache_dir: &Path) -> Result<GitHubAsset, GetAssetError> {
         let assets = get_assets(self, cache_dir);
 
         let asset = match (self.variant, OS) {
@@ -41,6 +46,6 @@ impl GameRelease {
         }
         .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)));
 
-        asset.ok_or(GameReleaseError::NoCompatibleAssetFound)
+        asset.ok_or(GetAssetError::NoCompatibleAssetFound)
     }
 }
