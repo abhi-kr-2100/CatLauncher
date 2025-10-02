@@ -26,7 +26,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.16"
 reqwest = { version = "0.12.23", features = ["json"] }
-async-trait = "0.1.89"
 ts-rs = "11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-downloader = "0.2.8"
+downloader = { git = "https://github.com/hunger/downloader.git", rev = "197d47343aae450a442bb1f1f7b7e7d5f4aab3a2" }

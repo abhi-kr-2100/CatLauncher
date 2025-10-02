@@ -23,7 +23,7 @@ impl GitHubAsset {
                 Err(e) => Err(e.into()),
             }
         } else {
-            Err(GitHubError::Unknown)
+            Err(GitHubError::Unknown("No download result found".into()))
         }
     }
 }
