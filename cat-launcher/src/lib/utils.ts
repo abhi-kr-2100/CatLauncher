@@ -8,12 +8,26 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function fetchReleasesForVariant(variant: GameVariantInfo): Promise<GameRelease[]> {
-    const response = await invoke("fetch_releases_for_variant", { variant: variant.id });
-    return response as GameRelease[];
+export async function fetchReleasesForVariant(
+  variant: GameVariantInfo
+): Promise<GameRelease[]> {
+  const response = await invoke<GameRelease[]>("fetch_releases_for_variant", {
+    variant: variant.id,
+  });
+  return response;
 }
 
 export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
-    const response = await invoke("get_game_variants_info");
-    return response as GameVariantInfo[];
+  const response = await invoke<GameVariantInfo[]>("get_game_variants_info");
+  return response;
+}
+
+export async function installReleaseForVariant(
+  release: GameRelease
+): Promise<string> {
+  const response = await invoke<string>("install_release", {
+    release,
+  });
+
+  return response;
 }
