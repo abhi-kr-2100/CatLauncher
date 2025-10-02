@@ -1,5 +1,6 @@
 mod basic_info;
 mod fetch_releases;
+mod game_release;
 mod infra;
 mod variants;
 
