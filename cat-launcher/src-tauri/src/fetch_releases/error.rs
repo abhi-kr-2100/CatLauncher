@@ -11,8 +11,8 @@ pub enum FetchReleasesError {
     #[error("Failed to fetch releases from GitHub: {0}")]
     Github(#[from] GitHubError),
 
-    #[error("No cache directory found: {0}")]
-    NoCacheDir(#[from] TauriError),
+    #[error("System directory not found: {0}")]
+    SystemDirectoryNotFound(#[from] TauriError),
 }
 
 impl serde::Serialize for FetchReleasesError {

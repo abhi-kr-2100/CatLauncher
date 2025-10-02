@@ -24,8 +24,8 @@ pub enum InstallReleaseError {
     #[error("Failed to download asset: {0}")]
     Download(#[from] GitHubError),
 
-    #[error("No cache directory found: {0}")]
-    NoCacheDir(#[from] TauriError),
+    #[error("System directory not found: {0}")]
+    SystemDirectoryNotFound(#[from] TauriError),
 
     #[error("Unknown error")]
     Unknown,
