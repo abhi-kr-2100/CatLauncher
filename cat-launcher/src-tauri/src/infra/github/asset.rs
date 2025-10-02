@@ -3,8 +3,6 @@ use std::path::PathBuf;
 use downloader::{Download, Downloader};
 use serde::{Deserialize, Serialize};
 
-use crate::infra::github::error::GitHubError;
-
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct GitHubAsset {
     pub id: u64,
@@ -12,8 +10,20 @@ pub struct GitHubAsset {
     pub name: String,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum AssetDownloadError {
+    #[error("failed to download asset: {0}")]
+    Download(#[from] downloader::Error),
+
+    #[error("no download result found")]
+    NoDownloadResult,
+}
+
 impl GitHubAsset {
-    pub async fn download(&self, downloader: &mut Downloader) -> Result<PathBuf, GitHubError> {
+    pub async fn download(
+        &self,
+        downloader: &mut Downloader,
+    ) -> Result<PathBuf, AssetDownloadError> {
         let dl = Download::new(&self.browser_download_url);
         let results = downloader.async_download(&[dl]).await?;
 
@@ -23,7 +33,7 @@ impl GitHubAsset {
                 Err(e) => Err(e.into()),
             }
         } else {
-            Err(GitHubError::Unknown("No download result found".into()))
+            Err(AssetDownloadError::NoDownloadResult)
         }
     }
 }
