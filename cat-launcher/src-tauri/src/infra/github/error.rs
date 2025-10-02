@@ -15,8 +15,8 @@ pub enum GitHubError {
     #[error("Download error: {0}")]
     Download(DownloaderError),
 
-    #[error("Unknown error")]
-    Unknown,
+    #[error("Unknown error: {0}")]
+    Unknown(String),
 }
 
 impl From<ReqwestError> for GitHubError {
