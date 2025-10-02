@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { installReleaseForVariant } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,10 +30,15 @@ export default function GameVariant(props: GameVariantProps) {
     queryKey: ["releases", variant.name],
     queryFn: () => fetchReleasesForVariant(variant),
   });
+  const queryClient = useQueryClient();
 
   const [selectedReleaseId, setSelectedReleaseId] = useState<
     string | undefined
   >();
+  const selectedRelease = useMemo<GameRelease | undefined>(
+    () => releases?.find((r) => r.version === selectedReleaseId),
+    [releases, selectedReleaseId]
+  );
 
   const [downloading, setDownloading] = useState(false);
 
@@ -42,16 +47,26 @@ export default function GameVariant(props: GameVariantProps) {
       return;
     }
 
-    const release = releases.find(
-      (r) => `${r.variant}-${r.version}` === selectedReleaseId
-    );
-    if (!release) {
+    if (!selectedRelease || selectedRelease.is_ready_to_play) {
       return;
     }
 
     setDownloading(true);
     try {
-      await installReleaseForVariant(release);
+      await installReleaseForVariant(selectedRelease);
+      queryClient.setQueryData(
+        ["releases", variant.name],
+        (old: GameRelease[]) =>
+          old.map((o) => {
+            if (o.version !== selectedReleaseId) {
+              return o;
+            }
+            return {
+              ...o,
+              is_ready_to_play: true,
+            };
+          })
+      );
     } catch (e) {
       console.error("install_release_for_variant failed", e);
     } finally {
@@ -62,8 +77,8 @@ export default function GameVariant(props: GameVariantProps) {
   const comboboxItems = useMemo<ComboboxItem[]>(
     () =>
       releases?.map((r) => ({
-        value: `${r.variant}-${r.version}`,
-        label: `${r.version}`,
+        value: r.version,
+        label: r.version,
       })) ?? [],
     [releases]
   );
@@ -80,6 +95,14 @@ export default function GameVariant(props: GameVariantProps) {
     : comboboxItems.length === 0
     ? "No releases available."
     : "Select a release";
+
+  const actionButtonLabel = downloading ? (
+    <Loader2 className="animate-spin" />
+  ) : selectedRelease?.is_ready_to_play ? (
+    "Play"
+  ) : (
+    "Download"
+  );
 
   return (
     <Card>
@@ -108,7 +131,7 @@ export default function GameVariant(props: GameVariantProps) {
           onClick={handleDownload}
           disabled={isDownloadButtonDisabled}
         >
-          {downloading ? <Loader2 className="animate-spin" /> : "Download"}
+          {actionButtonLabel}
         </Button>
       </CardFooter>
     </Card>

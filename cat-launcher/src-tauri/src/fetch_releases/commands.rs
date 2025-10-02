@@ -10,8 +10,8 @@ use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
 pub enum FetchReleasesCommandError {
-    #[error("no cache directory found: {0}")]
-    NoCacheDir(#[from] tauri::Error),
+    #[error("system directory not found: {0}")]
+    SystemDir(#[from] tauri::Error),
 
     #[error("failed to fetch releases: {0}")]
     Fetch(#[from] FetchReleasesError),
@@ -23,8 +23,11 @@ pub async fn fetch_releases_for_variant(
     variant: GameVariant,
 ) -> Result<Vec<GameRelease>, FetchReleasesCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
+    let data_dir = app_handle.path().app_local_data_dir()?;
 
-    Ok(variant.fetch_releases(&HTTP_CLIENT, &cache_dir).await?)
+    Ok(variant
+        .fetch_releases(&HTTP_CLIENT, &cache_dir, &data_dir)
+        .await?)
 }
 
 impl serde::Serialize for FetchReleasesCommandError {

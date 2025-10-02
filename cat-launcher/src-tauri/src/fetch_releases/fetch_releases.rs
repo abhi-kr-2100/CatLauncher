@@ -3,7 +3,8 @@ use std::path::Path;
 use reqwest::Client;
 
 use crate::fetch_releases::utils::{
-    get_cached_releases, merge_releases, select_releases_for_cache, write_cached_releases,
+    get_cached_releases, is_release_ready_to_play, merge_releases, select_releases_for_cache,
+    write_cached_releases,
 };
 use crate::game_release::game_release::{GameRelease, ReleaseType};
 use crate::infra::github::utils::{fetch_github_releases, GitHubReleaseFetchError};
@@ -21,6 +22,7 @@ impl GameVariant {
         &self,
         client: &Client,
         cache_dir: &Path,
+        data_dir: &Path,
     ) -> Result<Vec<GameRelease>, FetchReleasesError> {
         let repo = get_github_repo_for_variant(self);
 
@@ -42,6 +44,7 @@ impl GameVariant {
                 } else {
                     ReleaseType::Stable
                 },
+                is_ready_to_play: is_release_ready_to_play(self, &r.assets, data_dir),
             })
             .collect();
 
