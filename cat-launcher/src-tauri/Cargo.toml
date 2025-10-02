@@ -29,3 +29,4 @@ reqwest = { version = "0.12.23", features = ["json"] }
 async-trait = "0.1.89"
 ts-rs = "11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
+downloader = "0.2.8"

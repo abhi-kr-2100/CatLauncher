@@ -3,13 +3,15 @@ use std::collections::HashMap;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 
-use super::github_fetch::GithubRelease;
+use crate::game_release::game_release::GameRelease;
+use crate::infra::github::asset::GitHubAsset;
+use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{
     get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file,
 };
 use crate::variants::GameVariant;
 
-pub fn get_cached_releases(variant: &GameVariant) -> Vec<GithubRelease> {
+pub fn get_cached_releases(variant: &GameVariant) -> Vec<GitHubRelease> {
     let repo = get_github_repo_for_variant(variant);
     let cache_path = get_cache_path_for_repo(repo);
 
@@ -17,13 +19,13 @@ pub fn get_cached_releases(variant: &GameVariant) -> Vec<GithubRelease> {
         return Vec::new();
     }
 
-    match read_from_file::<Vec<GithubRelease>>(&cache_path) {
+    match read_from_file::<Vec<GitHubRelease>>(&cache_path) {
         Ok(releases) => releases,
         _ => Vec::new(),
     }
 }
 
-pub fn write_cached_releases(variant: &GameVariant, releases: &[GithubRelease]) -> () {
+pub fn write_cached_releases(variant: &GameVariant, releases: &[GitHubRelease]) {
     let repo = get_github_repo_for_variant(variant);
     let cache_path = get_cache_path_for_repo(repo);
 
@@ -34,8 +36,8 @@ pub fn write_cached_releases(variant: &GameVariant, releases: &[GithubRelease]) 
     let _ = write_to_file(&cache_path, &releases);
 }
 
-pub fn select_releases_for_cache(releases: &[GithubRelease]) -> Vec<GithubRelease> {
-    let (non_prereleases, mut prereleases): (Vec<&GithubRelease>, Vec<&GithubRelease>) =
+pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubRelease> {
+    let (non_prereleases, mut prereleases): (Vec<&GitHubRelease>, Vec<&GitHubRelease>) =
         releases.iter().partition(|r| !r.prerelease);
 
     prereleases.sort_by_key(|r| Reverse(r.created_at));
@@ -57,12 +59,25 @@ pub fn get_cache_path_for_repo(repo: &str) -> PathBuf {
     path
 }
 
-pub fn merge_releases(fetched: &[GithubRelease], cached: &[GithubRelease]) -> Vec<GithubRelease> {
-    let map: HashMap<u64, GithubRelease> = cached
+pub fn merge_releases(fetched: &[GitHubRelease], cached: &[GitHubRelease]) -> Vec<GitHubRelease> {
+    let map: HashMap<u64, GitHubRelease> = cached
         .iter()
         .chain(fetched.iter())
         .map(|r| (r.id, r.clone()))
         .collect();
 
     map.into_values().collect()
+}
+
+pub fn get_assets(release: &GameRelease) -> Vec<GitHubAsset> {
+    let cached_releases = get_cached_releases(&release.variant);
+    let maybe_release = cached_releases
+        .iter()
+        .find(|r| r.tag_name == release.version);
+
+    if let Some(release) = maybe_release {
+        release.assets.clone()
+    } else {
+        Vec::new()
+    }
 }
