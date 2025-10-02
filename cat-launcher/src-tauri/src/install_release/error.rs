@@ -4,6 +4,7 @@ use downloader::Error as DownloaderError;
 use serde::ser::{SerializeStruct, Serializer};
 use serde::Serialize;
 use strum_macros::IntoStaticStr;
+use tauri::Error as TauriError;
 use thiserror::Error as ThisError;
 
 use crate::game_release::error::GameReleaseError;
@@ -22,6 +23,9 @@ pub enum InstallReleaseError {
 
     #[error("Failed to download asset: {0}")]
     Download(#[from] GitHubError),
+
+    #[error("No cache directory found: {0}")]
+    NoCacheDir(#[from] TauriError),
 
     #[error("Unknown error")]
     Unknown,

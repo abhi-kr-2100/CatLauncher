@@ -1,4 +1,5 @@
 use std::env::consts::OS;
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -23,8 +24,8 @@ pub struct GameRelease {
 }
 
 impl GameRelease {
-    pub fn get_asset(&self) -> Result<GitHubAsset, GameReleaseError> {
-        let assets = get_assets(self);
+    pub fn get_asset(&self, cache_dir: &Path) -> Result<GitHubAsset, GameReleaseError> {
+        let assets = get_assets(self, cache_dir);
 
         let asset = match (self.variant, OS) {
             (GameVariant::DarkDaysAhead, "windows") => Some("windows-with-graphics-and-sounds"),
