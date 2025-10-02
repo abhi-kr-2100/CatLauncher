@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use reqwest::Client;
 
 use crate::fetch_releases::error::FetchReleasesError;
@@ -13,15 +15,16 @@ impl GameVariant {
     pub(crate) async fn fetch_releases(
         &self,
         client: &Client,
+        cache_dir: &Path,
     ) -> Result<Vec<GameRelease>, FetchReleasesError> {
         let repo = get_github_repo_for_variant(self);
 
         let fetched_releases = fetch_github_releases(client, repo).await?;
-        let cached_releases = get_cached_releases(&self);
+        let cached_releases = get_cached_releases(&self, cache_dir);
 
         let all_releases = merge_releases(&fetched_releases, &cached_releases);
         let to_cache = select_releases_for_cache(&all_releases);
-        write_cached_releases(&self, &to_cache);
+        write_cached_releases(&self, &to_cache, cache_dir);
 
         let game_releases = to_cache
             .into_iter()
