@@ -1,13 +1,14 @@
 use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs::create_dir_all;
+use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{
-    get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file,
+    get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file, WriteToFileError,
 };
 use crate::variants::GameVariant;
 
@@ -25,15 +26,28 @@ pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHu
     }
 }
 
-pub fn write_cached_releases(variant: &GameVariant, releases: &[GitHubRelease], cache_dir: &Path) {
+#[derive(thiserror::Error, Debug)]
+pub enum WriteCacheError {
+    #[error("failed to create directory: {0}")]
+    CreateDirectory(#[from] io::Error),
+
+    #[error("failed to cache releases: {0}")]
+    Cache(#[from] WriteToFileError),
+}
+
+pub fn write_cached_releases(
+    variant: &GameVariant,
+    releases: &[GitHubRelease],
+    cache_dir: &Path,
+) -> Result<(), WriteCacheError> {
     let repo = get_github_repo_for_variant(variant);
     let cache_path = get_cache_path_for_repo(repo, cache_dir);
 
     if let Some(parent) = cache_path.parent() {
-        let _ = create_dir_all(parent);
+        create_dir_all(parent)?;
     }
 
-    let _ = write_to_file(&cache_path, &releases);
+    Ok(write_to_file(&cache_path, &releases)?)
 }
 
 pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubRelease> {
