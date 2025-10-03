@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { installReleaseForVariant } from "@/lib/utils";
+import { installReleaseForVariant, launchGame } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -74,6 +74,18 @@ export default function GameVariant(props: GameVariantProps) {
     }
   }
 
+  async function handlePlay() {
+    if (!selectedRelease || !selectedRelease.is_ready_to_play) {
+      return;
+    }
+
+    try {
+      await launchGame(selectedRelease);
+    } catch (e) {
+      console.error("launch_game failed", e);
+    }
+  }
+
   const comboboxItems = useMemo<ComboboxItem[]>(
     () =>
       releases?.map((r) => ({
@@ -85,7 +97,7 @@ export default function GameVariant(props: GameVariantProps) {
 
   const isReleaseSelectionDisabled =
     isLoading || Boolean(error) || comboboxItems.length === 0 || downloading;
-  const isDownloadButtonDisabled =
+  const isActionButtonDisabled =
     isReleaseSelectionDisabled || !selectedReleaseId;
 
   const placeholderText = isLoading
@@ -128,8 +140,10 @@ export default function GameVariant(props: GameVariantProps) {
       <CardFooter>
         <Button
           className="w-full"
-          onClick={handleDownload}
-          disabled={isDownloadButtonDisabled}
+          onClick={
+            selectedRelease?.is_ready_to_play ? handlePlay : handleDownload
+          }
+          disabled={isActionButtonDisabled}
         >
           {actionButtonLabel}
         </Button>

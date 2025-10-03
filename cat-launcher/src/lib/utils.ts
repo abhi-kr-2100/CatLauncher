@@ -24,8 +24,16 @@ export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
 
 export async function installReleaseForVariant(
   release: GameRelease
-): Promise<string> {
-  const response = await invoke<string>("install_release", {
+): Promise<void> {
+  const response = await invoke<void>("install_release", {
+    release,
+  });
+
+  return response;
+}
+
+export async function launchGame(release: GameRelease): Promise<void> {
+  const response = await invoke<void>("launch_game", {
     release,
   });
 
