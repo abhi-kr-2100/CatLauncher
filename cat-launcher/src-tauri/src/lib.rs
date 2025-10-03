@@ -3,11 +3,13 @@ mod fetch_releases;
 mod game_release;
 mod infra;
 mod install_release;
+mod launch_game;
 mod variants;
 
 use crate::basic_info::commands::get_game_variants_info;
 use crate::fetch_releases::commands::fetch_releases_for_variant;
 use crate::install_release::commands::install_release;
+use crate::launch_game::commands::launch_game;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -17,6 +19,7 @@ pub fn run() {
             get_game_variants_info,
             fetch_releases_for_variant,
             install_release,
+            launch_game,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
