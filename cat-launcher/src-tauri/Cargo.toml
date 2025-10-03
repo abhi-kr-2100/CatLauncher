@@ -28,4 +28,4 @@ thiserror = "2.0.16"
 reqwest = { version = "0.12.23", features = ["json"] }
 ts-rs = "11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-downloader = { git = "https://github.com/hunger/downloader.git", rev = "197d47343aae450a442bb1f1f7b7e7d5f4aab3a2" }
+downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "e6227daac8dbb5ad14011c936031d0d41b8ac4e2" }
