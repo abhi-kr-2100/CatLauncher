@@ -5,7 +5,7 @@ use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetExecutablePathError {
-    #[error("installation directory does not exist")]
+    #[error("launcher file does not exist")]
     DoesNotExist,
 
     #[error("failed to get executable path: {0}")]
