@@ -47,7 +47,7 @@ export default function GameVariant(props: GameVariantProps) {
       return;
     }
 
-    if (!selectedRelease || selectedRelease.is_ready_to_play) {
+    if (!selectedRelease || selectedRelease.status === "ReadyToPlay") {
       return;
     }
 
@@ -56,14 +56,14 @@ export default function GameVariant(props: GameVariantProps) {
       await installReleaseForVariant(selectedRelease);
       queryClient.setQueryData(
         ["releases", variant.name],
-        (old: GameRelease[]) =>
-          old.map((o) => {
+        (old: GameRelease[] | undefined) =>
+          old?.map((o) => {
             if (o.version !== selectedReleaseId) {
               return o;
             }
             return {
               ...o,
-              is_ready_to_play: true,
+              status: "ReadyToPlay",
             };
           })
       );
@@ -75,7 +75,7 @@ export default function GameVariant(props: GameVariantProps) {
   }
 
   async function handlePlay() {
-    if (!selectedRelease || !selectedRelease.is_ready_to_play) {
+    if (!selectedRelease || selectedRelease.status !== "ReadyToPlay") {
       return;
     }
 
@@ -110,7 +110,7 @@ export default function GameVariant(props: GameVariantProps) {
 
   const actionButtonLabel = downloading ? (
     <Loader2 className="animate-spin" />
-  ) : selectedRelease?.is_ready_to_play ? (
+  ) : selectedRelease?.status === "ReadyToPlay" ? (
     "Play"
   ) : (
     "Download"
@@ -141,7 +141,9 @@ export default function GameVariant(props: GameVariantProps) {
         <Button
           className="w-full"
           onClick={
-            selectedRelease?.is_ready_to_play ? handlePlay : handleDownload
+            selectedRelease?.status === "ReadyToPlay"
+              ? handlePlay
+              : handleDownload
           }
           disabled={isActionButtonDisabled}
         >
