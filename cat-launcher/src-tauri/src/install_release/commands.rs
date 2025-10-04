@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
@@ -22,13 +20,15 @@ pub enum InstallReleaseCommandError {
 pub async fn install_release(
     app_handle: AppHandle,
     release: GameRelease,
-) -> Result<PathBuf, InstallReleaseCommandError> {
+) -> Result<(), InstallReleaseCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    Ok(release
+    release
         .install_release(&HTTP_CLIENT, &cache_dir, &data_dir)
-        .await?)
+        .await?;
+
+    Ok(())
 }
 
 impl serde::Serialize for InstallReleaseCommandError {
