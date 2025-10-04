@@ -1,4 +1,3 @@
-use std::io;
 use std::path::Path;
 
 use reqwest::Client;
@@ -7,12 +6,18 @@ use crate::game_release::game_release::{GameRelease, GetAssetError};
 use crate::infra::archive_extractor::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
-use crate::install_release::utils::{get_asset_download_dir, get_asset_extraction_dir};
+use crate::install_release::utils::{
+    get_asset_download_dir, get_asset_extraction_dir, AssetDownloadDirError,
+    AssetExtractionDirError,
+};
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError {
     #[error("failed to get download directory: {0}")]
-    DownloadDir(#[from] io::Error),
+    DownloadDir(#[from] AssetDownloadDirError),
+
+    #[error("failed to get extraction directory: {0}")]
+    ExtractionDir(#[from] AssetExtractionDirError),
 
     #[error("failed to create downloader: {0}")]
     Downloader(#[from] downloader::Error),
@@ -39,7 +44,7 @@ impl GameRelease {
         let asset = self.get_asset(cache_dir)?;
         let filepath = asset.download(&mut downloader).await?;
 
-        let extraction_dir = get_asset_extraction_dir(&self, &download_dir)?;
+        let extraction_dir = get_asset_extraction_dir(&self.version, &download_dir)?;
         extract_archive(&filepath, &extraction_dir).await?;
 
         Ok(())
