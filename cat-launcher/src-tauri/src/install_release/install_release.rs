@@ -2,7 +2,7 @@ use std::path::Path;
 
 use reqwest::Client;
 
-use crate::game_release::game_release::{GameRelease, GetAssetError};
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus, GetAssetError};
 use crate::infra::archive_extractor::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
@@ -39,13 +39,21 @@ impl GameRelease {
         cache_dir: &Path,
         data_dir: &Path,
     ) -> Result<(), ReleaseInstallationError> {
+        if self.status == GameReleaseStatus::ReadyToPlay {
+            return Ok(());
+        }
+
         let download_dir = get_asset_download_dir(&self.variant, data_dir)?;
-        let mut downloader = create_downloader(client.clone(), &download_dir)?;
         let asset = self.get_asset(cache_dir)?;
-        let filepath = asset.download(&mut downloader).await?;
+        let download_filepath = download_dir.join(&asset.name);
+
+        if self.status == GameReleaseStatus::NotDownloaded {
+            let mut downloader = create_downloader(client.clone(), &download_dir)?;
+            let _ = asset.download(&mut downloader).await?;
+        }
 
         let extraction_dir = get_asset_extraction_dir(&self.version, &download_dir)?;
-        extract_archive(&filepath, &extraction_dir).await?;
+        extract_archive(&download_filepath, &extraction_dir).await?;
 
         Ok(())
     }
