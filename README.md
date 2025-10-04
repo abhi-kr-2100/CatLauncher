@@ -2,10 +2,14 @@
 
 An opiniated cross-platform launcher for Cataclysm games with modern social features.
 
+## Screenshots
+
+![Main Screen](/screenshots/main-screen.png?raw=true "Main Screen")
+
 ## Features
 
-- [ ] First-class support for Cataclysm variants including Dark Days Ahead, Bright Nights, and The Last Generation.
-- [ ] Play multiple versions completely independently of each other.
+- [x] First-class support for Cataclysm variants including Dark Days Ahead, Bright Nights, and The Last Generation.
+- [x] Play multiple versions completely independently of each other.
 - [ ] Or, migrate saves from one version to another by either upgrading or downgrading.
 - [ ] Support for third-party soundpacks, tilesets, fonts, and mods.
 - [ ] Backup and restore saves.
