@@ -3,8 +3,8 @@ use std::path::Path;
 use reqwest::Client;
 
 use crate::fetch_releases::utils::{
-    get_cached_releases, is_release_ready_to_play, merge_releases, select_releases_for_cache,
-    write_cached_releases,
+    get_cached_releases, get_release_status, merge_releases, select_releases_for_cache,
+    write_cached_releases, GetReleaseStatusError,
 };
 use crate::game_release::game_release::{GameRelease, ReleaseType};
 use crate::infra::github::utils::{fetch_github_releases, GitHubReleaseFetchError};
@@ -15,11 +15,15 @@ use crate::variants::GameVariant;
 pub enum FetchReleasesError {
     #[error("failed to fetch releases: {0}")]
     Fetch(#[from] GitHubReleaseFetchError),
+
+    #[error("failed to get release status: {0}")]
+    Status(#[from] GetReleaseStatusError),
 }
 
 impl GameVariant {
     pub(crate) async fn fetch_releases(
         &self,
+        os: &str,
         client: &Client,
         cache_dir: &Path,
         data_dir: &Path,
@@ -36,17 +40,19 @@ impl GameVariant {
 
         let game_releases = to_cache
             .into_iter()
-            .map(|r| GameRelease {
-                variant: *self,
-                version: r.tag_name,
-                release_type: if r.prerelease {
-                    ReleaseType::Experimental
-                } else {
-                    ReleaseType::Stable
-                },
-                is_ready_to_play: is_release_ready_to_play(self, &r.assets, data_dir),
+            .map(|r| {
+                Ok(GameRelease {
+                    variant: *self,
+                    version: r.tag_name.clone(),
+                    release_type: if r.prerelease {
+                        ReleaseType::Experimental
+                    } else {
+                        ReleaseType::Stable
+                    },
+                    status: get_release_status(self, &r.tag_name, &r.assets, os, data_dir)?,
+                })
             })
-            .collect();
+            .collect::<Result<Vec<_>, GetReleaseStatusError>>()?;
 
         Ok(game_releases)
     }
