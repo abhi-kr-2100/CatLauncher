@@ -1,3 +1,3 @@
 pub mod commands;
-pub mod install_release;
+pub mod launch_game;
 pub mod utils;
