@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 
 export interface ComboboxItem {
   value: string;
-  label: string;
+  label: ReactNode;
 }
 
 interface ComboboxProps {
@@ -75,7 +75,7 @@ export function Combobox({
             disabled={disabled}
             className="w-full"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between w-full">
               {value
                 ? items.find((i) => i.value === value)?.label
                 : placeholder}
