@@ -41,6 +41,10 @@ impl GameRelease {
             .current_dir(executable_dir)
             .spawn()?;
 
+        let _ = self
+            .variant
+            .set_last_played_version(&self.version, data_dir);
+
         Ok(())
     }
 }
