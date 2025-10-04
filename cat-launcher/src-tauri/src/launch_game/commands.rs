@@ -1,3 +1,5 @@
+use std::env::consts::OS;
+
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
@@ -22,7 +24,7 @@ pub fn launch_game(
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    release.launch_game(&data_dir)?;
+    release.launch_game(OS, &data_dir)?;
 
     Ok(())
 }
