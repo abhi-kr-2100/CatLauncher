@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { installReleaseForVariant } from "@/lib/utils";
+import { installReleaseForVariant, launchGame } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import {
@@ -30,10 +30,15 @@ export default function GameVariant(props: GameVariantProps) {
     queryKey: ["releases", variant.name],
     queryFn: () => fetchReleasesForVariant(variant),
   });
+  const queryClient = useQueryClient();
 
   const [selectedReleaseId, setSelectedReleaseId] = useState<
     string | undefined
   >();
+  const selectedRelease = useMemo<GameRelease | undefined>(
+    () => releases?.find((r) => r.version === selectedReleaseId),
+    [releases, selectedReleaseId]
+  );
 
   const [downloading, setDownloading] = useState(false);
 
@@ -42,16 +47,26 @@ export default function GameVariant(props: GameVariantProps) {
       return;
     }
 
-    const release = releases.find(
-      (r) => `${r.variant}-${r.version}` === selectedReleaseId
-    );
-    if (!release) {
+    if (!selectedRelease || selectedRelease.status === "ReadyToPlay") {
       return;
     }
 
     setDownloading(true);
     try {
-      await installReleaseForVariant(release);
+      await installReleaseForVariant(selectedRelease);
+      queryClient.setQueryData(
+        ["releases", variant.name],
+        (old: GameRelease[] | undefined) =>
+          old?.map((o) => {
+            if (o.version !== selectedReleaseId) {
+              return o;
+            }
+            return {
+              ...o,
+              status: "ReadyToPlay",
+            };
+          })
+      );
     } catch (e) {
       console.error("install_release_for_variant failed", e);
     } finally {
@@ -59,18 +74,30 @@ export default function GameVariant(props: GameVariantProps) {
     }
   }
 
+  async function handlePlay() {
+    if (!selectedRelease || selectedRelease.status !== "ReadyToPlay") {
+      return;
+    }
+
+    try {
+      await launchGame(selectedRelease);
+    } catch (e) {
+      console.error("launch_game failed", e);
+    }
+  }
+
   const comboboxItems = useMemo<ComboboxItem[]>(
     () =>
       releases?.map((r) => ({
-        value: `${r.variant}-${r.version}`,
-        label: `${r.version}`,
+        value: r.version,
+        label: r.version,
       })) ?? [],
     [releases]
   );
 
   const isReleaseSelectionDisabled =
     isLoading || Boolean(error) || comboboxItems.length === 0 || downloading;
-  const isDownloadButtonDisabled =
+  const isActionButtonDisabled =
     isReleaseSelectionDisabled || !selectedReleaseId;
 
   const placeholderText = isLoading
@@ -80,6 +107,14 @@ export default function GameVariant(props: GameVariantProps) {
     : comboboxItems.length === 0
     ? "No releases available."
     : "Select a release";
+
+  const actionButtonLabel = downloading ? (
+    <Loader2 className="animate-spin" />
+  ) : selectedRelease?.status === "ReadyToPlay" ? (
+    "Play"
+  ) : (
+    "Download"
+  );
 
   return (
     <Card>
@@ -105,10 +140,14 @@ export default function GameVariant(props: GameVariantProps) {
       <CardFooter>
         <Button
           className="w-full"
-          onClick={handleDownload}
-          disabled={isDownloadButtonDisabled}
+          onClick={
+            selectedRelease?.status === "ReadyToPlay"
+              ? handlePlay
+              : handleDownload
+          }
+          disabled={isActionButtonDisabled}
         >
-          {downloading ? <Loader2 className="animate-spin" /> : "Download"}
+          {actionButtonLabel}
         </Button>
       </CardFooter>
     </Card>

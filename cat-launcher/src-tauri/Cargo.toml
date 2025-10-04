@@ -29,3 +29,8 @@ reqwest = { version = "0.12.23", features = ["json"] }
 ts-rs = "11.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "e6227daac8dbb5ad14011c936031d0d41b8ac4e2" }
+zip = "5.1.1"
+tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
+tar = "0.4.44"
+flate2 = "1.1.2"
+sha2 = "0.10.8"
