@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
 use std::{fs::read_dir, io};
 
+use crate::variants::GameVariant;
+
 #[derive(thiserror::Error, Debug)]
 pub enum GetExecutablePathError {
     #[error("installation directory does not exist")]
@@ -10,10 +12,11 @@ pub enum GetExecutablePathError {
     Get(#[from] io::Error),
 
     #[error("unsupported OS: {0}")]
-    UnsupportedOS(String),
+    UnsupportedOS(#[from] LauncherFilenameError),
 }
 
 pub fn get_executable_path(
+    variant: &GameVariant,
     os: &str,
     installation_dir: &Path,
 ) -> Result<PathBuf, GetExecutablePathError> {
@@ -32,15 +35,36 @@ pub fn get_executable_path(
         }
     };
 
-    let launcher_path = match os {
-        "linux" | "macos" => launcher_dir.join("cataclysm-launcher"),
-        "windows" => launcher_dir.join("cataclysm-launcher.exe"),
-        _ => return Err(GetExecutablePathError::UnsupportedOS(os.to_string())),
-    };
+    let launcher_path = launcher_dir.join(get_launcher_filename(variant, os)?);
 
     if !launcher_path.exists() || !launcher_path.is_file() {
         return Err(GetExecutablePathError::DoesNotExist);
     }
 
     Ok(launcher_path)
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum LauncherFilenameError {
+    #[error("unsupported OS: {0}")]
+    UnsupportedOS(String),
+}
+
+fn get_launcher_filename(
+    variant: &GameVariant,
+    os: &str,
+) -> Result<&'static str, LauncherFilenameError> {
+    match (variant, os) {
+        (GameVariant::BrightNights | GameVariant::DarkDaysAhead, "linux" | "macos") => {
+            Ok("cataclysm-launcher")
+        }
+        (GameVariant::BrightNights | GameVariant::DarkDaysAhead, "windows") => {
+            Ok("cataclysm-launcher.exe")
+        }
+
+        (GameVariant::TheLastGeneration, "linux" | "macos") => Ok("cataclysm-tlg-tiles"),
+        (GameVariant::TheLastGeneration, "windows") => Ok("cataclysm-tlg-tiles.exe"),
+
+        _ => Err(LauncherFilenameError::UnsupportedOS(os.to_string())),
+    }
 }
