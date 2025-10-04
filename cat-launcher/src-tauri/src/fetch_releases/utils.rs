@@ -144,7 +144,12 @@ pub fn get_release_status(
     }
 
     let extraction_dir = get_asset_extraction_dir(version, &download_dir)?;
-    let executable_path = get_executable_path(variant, os, &extraction_dir)?;
+    let executable_path = match get_executable_path(variant, os, &extraction_dir) {
+        Ok(path) => path,
+        Err(GetExecutablePathError::DoesNotExist) => return Ok(GameReleaseStatus::NotInstalled),
+        Err(e) => return Err(GetReleaseStatusError::ExecutableDir(e)),
+    };
+
     if !executable_path.exists() {
         return Ok(GameReleaseStatus::NotInstalled);
     }
