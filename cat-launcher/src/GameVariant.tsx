@@ -25,6 +25,28 @@ export interface GameVariantProps {
   variant: GameVariantInfo;
 }
 
+function get_short_version_name(variantID: string, version: string): string {
+  switch (variantID) {
+    case "BrightNights": {
+      return version;
+    }
+    case "DarkDaysAhead": {
+      if (version.startsWith("cdda-experimental-")) {
+        return version.slice("cdda-experimental-".length);
+      }
+      return version;
+    }
+    case "TheLastGeneration": {
+      if (version.startsWith("cataclysm-tlg-")) {
+        return version.slice("cataclysm-tlg-".length);
+      }
+      return version;
+    }
+  }
+
+  return version;
+}
+
 export default function GameVariant({ variant }: GameVariantProps) {
   const queryClient = useQueryClient();
 
@@ -104,22 +126,31 @@ export default function GameVariant({ variant }: GameVariantProps) {
     }
   }
 
-  const comboboxItems = useMemo<ComboboxItem[]>(
-    () =>
-      releases?.map((r) => ({
-        value: r.version,
-        label:
-          r.version === lastPlayedVersion ? (
-            <div className="flex items-center gap-2 w-full">
-              <span>{r.version}</span>
-              <Badge>Last Played</Badge>
-            </div>
-          ) : (
-            r.version
-          ),
-      })) ?? [],
-    [releases, lastPlayedVersion]
-  );
+  const comboboxItems = useMemo<ComboboxItem[]>(() => {
+    const latestVersionName = releases?.[0]?.version;
+
+    return (
+      releases?.map((r) => {
+        const shortVersionName = get_short_version_name(variant.id, r.version);
+        const isLastPlayed = r.version === lastPlayedVersion;
+        const isLatest = r.version === latestVersionName;
+
+        return {
+          value: r.version,
+          label:
+            isLastPlayed || isLatest ? (
+              <div className="flex items-center gap-2 w-full">
+                <span>{shortVersionName}</span>
+                {isLatest && <Badge>Latest</Badge>}
+                {isLastPlayed && <Badge>Last Played</Badge>}
+              </div>
+            ) : (
+              shortVersionName
+            ),
+        };
+      }) ?? []
+    );
+  }, [releases, lastPlayedVersion]);
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
