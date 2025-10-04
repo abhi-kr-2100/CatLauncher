@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 
 export interface ComboboxItem {
   value: string;
-  label: string;
+  label: ReactNode;
 }
 
 interface ComboboxProps {
@@ -28,7 +28,7 @@ interface ComboboxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  autoselect?: boolean;
+  autoselect?: boolean | ((items: ComboboxItem[]) => ComboboxItem | undefined);
 }
 
 export function Combobox({
@@ -42,14 +42,23 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
 
-  // Auto-select the first item if autoselect is enabled.
+  // Auto-select an item if autoselect is enabled.
   useEffect(() => {
-    if (!autoselect || value || items.length === 0) {
+    if (value || items.length === 0 || !autoselect) {
       return;
     }
 
-    const first = items[0].value;
-    onChange(first);
+    let selectedValue: string | undefined;
+
+    if (typeof autoselect === "function") {
+      selectedValue = autoselect(items)?.value;
+    } else if (autoselect) {
+      selectedValue = items[0]?.value;
+    }
+
+    if (selectedValue) {
+      onChange(selectedValue);
+    }
   }, [autoselect, value, items, onChange]);
 
   return (
@@ -66,7 +75,7 @@ export function Combobox({
             disabled={disabled}
             className="w-full"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between w-full">
               {value
                 ? items.find((i) => i.value === value)?.label
                 : placeholder}
