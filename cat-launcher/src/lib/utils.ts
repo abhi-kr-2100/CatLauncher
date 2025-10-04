@@ -22,6 +22,17 @@ export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
   return response;
 }
 
+export async function getLastPlayedVersion(
+  variant: GameVariantInfo
+): Promise<string> {
+  const response = await invoke<string | null>("get_last_played_version", {
+    variant: variant.id,
+  });
+
+  // useQuery doesn't work with null/undefined query data. That's why "" is returned.
+  return response ?? "";
+}
+
 export async function installReleaseForVariant(
   release: GameRelease
 ): Promise<void> {

@@ -1,7 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { installReleaseForVariant, launchGame } from "@/lib/utils";
+import { useCallback, useMemo, useState } from "react";
+import {
+  installReleaseForVariant,
+  launchGame,
+  getLastPlayedVersion,
+} from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import {
   Card,
@@ -20,17 +25,48 @@ export interface GameVariantProps {
   variant: GameVariantInfo;
 }
 
-export default function GameVariant(props: GameVariantProps) {
-  const { variant } = props;
+function get_short_version_name(variantID: string, version: string): string {
+  switch (variantID) {
+    case "BrightNights": {
+      return version;
+    }
+    case "DarkDaysAhead": {
+      if (version.startsWith("cdda-experimental-")) {
+        return version.slice("cdda-experimental-".length);
+      }
+      return version;
+    }
+    case "TheLastGeneration": {
+      if (version.startsWith("cataclysm-tlg-")) {
+        return version.slice("cataclysm-tlg-".length);
+      }
+      return version;
+    }
+  }
+
+  return version;
+}
+
+export default function GameVariant({ variant }: GameVariantProps) {
+  const queryClient = useQueryClient();
+
   const {
     data: releases,
-    isLoading,
-    error,
+    isLoading: isReleasesLoading,
+    error: releasesError,
   } = useQuery<GameRelease[]>({
     queryKey: ["releases", variant.name],
     queryFn: () => fetchReleasesForVariant(variant),
   });
-  const queryClient = useQueryClient();
+
+  const {
+    data: lastPlayedVersion,
+    isLoading: isLastPlayedVersionLoading,
+    error: lastPlayedVersionError,
+  } = useQuery<string | undefined>({
+    queryKey: ["last_played_version", variant.name],
+    queryFn: () => getLastPlayedVersion(variant),
+  });
 
   const [selectedReleaseId, setSelectedReleaseId] = useState<
     string | undefined
@@ -81,28 +117,67 @@ export default function GameVariant(props: GameVariantProps) {
 
     try {
       await launchGame(selectedRelease);
+      queryClient.setQueryData(
+        ["last_played_version", variant.name],
+        () => selectedReleaseId
+      );
     } catch (e) {
       console.error("launch_game failed", e);
     }
   }
 
-  const comboboxItems = useMemo<ComboboxItem[]>(
-    () =>
-      releases?.map((r) => ({
-        value: r.version,
-        label: r.version,
-      })) ?? [],
-    [releases]
+  const comboboxItems = useMemo<ComboboxItem[]>(() => {
+    const latestVersionName = releases?.[0]?.version;
+
+    return (
+      releases?.map((r) => {
+        const shortVersionName = get_short_version_name(variant.id, r.version);
+        const isLastPlayed = r.version === lastPlayedVersion;
+        const isLatest = r.version === latestVersionName;
+
+        return {
+          value: r.version,
+          label:
+            isLastPlayed || isLatest ? (
+              <div className="flex items-center gap-2 w-full">
+                <span>{shortVersionName}</span>
+                {isLatest && <Badge>Latest</Badge>}
+                {isLastPlayed && <Badge>Last Played</Badge>}
+              </div>
+            ) : (
+              shortVersionName
+            ),
+        };
+      }) ?? []
+    );
+  }, [releases, lastPlayedVersion]);
+
+  const autoselect = useCallback(
+    (items: ComboboxItem[]) => {
+      if (isLastPlayedVersionLoading) {
+        return;
+      }
+
+      if (lastPlayedVersionError || lastPlayedVersion === "") {
+        return items[0];
+      }
+
+      return items.find((i) => i.value === lastPlayedVersion) ?? items[0];
+    },
+    [lastPlayedVersion, isLastPlayedVersionLoading, lastPlayedVersionError]
   );
 
   const isReleaseSelectionDisabled =
-    isLoading || Boolean(error) || comboboxItems.length === 0 || downloading;
+    isReleasesLoading ||
+    Boolean(releasesError) ||
+    comboboxItems.length === 0 ||
+    downloading;
   const isActionButtonDisabled =
     isReleaseSelectionDisabled || !selectedReleaseId;
 
-  const placeholderText = isLoading
+  const placeholderText = isReleasesLoading
     ? "Loading..."
-    : error
+    : releasesError
     ? "Error loading releases."
     : comboboxItems.length === 0
     ? "No releases available."
@@ -132,7 +207,7 @@ export default function GameVariant(props: GameVariantProps) {
           items={comboboxItems}
           value={selectedReleaseId}
           onChange={setSelectedReleaseId}
-          autoselect
+          autoselect={autoselect}
           placeholder={placeholderText}
           disabled={isReleaseSelectionDisabled}
         />
