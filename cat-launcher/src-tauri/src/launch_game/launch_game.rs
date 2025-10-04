@@ -1,4 +1,3 @@
-use std::env::consts::OS;
 use std::io;
 use std::path::Path;
 use std::process::Command;
@@ -29,11 +28,11 @@ pub enum LaunchGameError {
 }
 
 impl GameRelease {
-    pub fn launch_game(&self, data_dir: &Path) -> Result<(), LaunchGameError> {
+    pub fn launch_game(&self, os: &str, data_dir: &Path) -> Result<(), LaunchGameError> {
         let download_dir = get_asset_download_dir(&self.variant, data_dir)?;
         let game_dir = get_asset_extraction_dir(&self.version, &download_dir)?;
 
-        let executable_path = get_executable_path(OS, &game_dir)?;
+        let executable_path = get_executable_path(&self.variant, os, &game_dir)?;
         let executable_dir = executable_path
             .parent()
             .ok_or(LaunchGameError::ExecutableDir)?;
