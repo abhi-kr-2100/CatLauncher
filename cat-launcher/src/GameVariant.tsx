@@ -6,6 +6,7 @@ import {
   getLastPlayedVersion,
 } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import {
   Card,
@@ -107,9 +108,17 @@ export default function GameVariant({ variant }: GameVariantProps) {
     () =>
       releases?.map((r) => ({
         value: r.version,
-        label: r.version,
+        label:
+          r.version === lastPlayedVersion ? (
+            <div className="flex items-center gap-2 w-full">
+              <span>{r.version}</span>
+              <Badge>Last Played</Badge>
+            </div>
+          ) : (
+            r.version
+          ),
       })) ?? [],
-    [releases]
+    [releases, lastPlayedVersion]
   );
 
   const autoselect = useCallback(
