@@ -1,3 +1,5 @@
+use std::env::consts::OS;
+
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
@@ -26,7 +28,7 @@ pub async fn fetch_releases_for_variant(
     let data_dir = app_handle.path().app_local_data_dir()?;
 
     Ok(variant
-        .fetch_releases(&HTTP_CLIENT, &cache_dir, &data_dir)
+        .fetch_releases(OS, &HTTP_CLIENT, &cache_dir, &data_dir)
         .await?)
 }
 

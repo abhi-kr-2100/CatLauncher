@@ -21,7 +21,16 @@ pub struct GameRelease {
     pub variant: GameVariant,
     pub version: String,
     pub release_type: ReleaseType,
-    pub is_ready_to_play: bool,
+    pub status: GameReleaseStatus,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
+#[ts(export)]
+pub enum GameReleaseStatus {
+    NotAvailable,
+    NotDownloaded,
+    NotInstalled,
+    ReadyToPlay,
 }
 
 #[derive(thiserror::Error, Debug)]

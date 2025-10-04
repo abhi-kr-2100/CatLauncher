@@ -1,18 +1,24 @@
 use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::env::consts::OS;
-use std::fs::create_dir_all;
+use std::fs::{create_dir_all, File};
 use std::io;
 use std::path::{Path, PathBuf};
 
-use crate::game_release::game_release::GameRelease;
+use sha2::{Digest, Sha256};
+
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::game_release::utils::get_platform_asset_substr;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{
     get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file, WriteToFileError,
 };
-use crate::install_release::utils::get_asset_download_dir;
+use crate::install_release::utils::{
+    get_asset_download_dir, get_asset_extraction_dir, AssetDownloadDirError,
+    AssetExtractionDirError,
+};
+use crate::launch_game::utils::{get_executable_path, GetExecutablePathError};
 use crate::variants::GameVariant;
 
 pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
@@ -95,24 +101,78 @@ pub fn get_assets(release: &GameRelease, cache_dir: &Path) -> Vec<GitHubAsset> {
     }
 }
 
-pub fn is_release_ready_to_play(
+#[derive(thiserror::Error, Debug)]
+pub enum GetReleaseStatusError {
+    #[error("failed to get asset download directory: {0}")]
+    AssetDownloadDir(#[from] AssetDownloadDirError),
+
+    #[error("failed to get asset extraction directory: {0}")]
+    AssetExtractionDir(#[from] AssetExtractionDirError),
+
+    #[error("failed to get executable directory: {0}")]
+    ExecutableDir(#[from] GetExecutablePathError),
+
+    #[error("failed to verify asset: {0}")]
+    Verify(#[from] DigestComputationError),
+}
+
+pub fn get_release_status(
     variant: &GameVariant,
+    version: &str,
     assets: &[GitHubAsset],
+    os: &str,
     data_dir: &Path,
-) -> bool {
-    let asset = get_platform_asset_substr(variant, OS)
+) -> Result<GameReleaseStatus, GetReleaseStatusError> {
+    let asset = get_platform_asset_substr(&variant, OS)
         .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)));
 
     if asset.is_none() {
-        return false;
+        return Ok(GameReleaseStatus::NotAvailable);
     }
     let asset = asset.unwrap();
 
-    let dir = match get_asset_download_dir(&variant, data_dir) {
-        Ok(dir) => dir,
-        Err(_) => return false,
-    };
-    let filepath = dir.join(&asset.name);
+    let download_dir = get_asset_download_dir(&variant, &data_dir)?;
 
-    filepath.exists()
+    let asset_file = download_dir.join(&asset.name);
+    if !asset_file.exists() {
+        return Ok(GameReleaseStatus::NotDownloaded);
+    }
+
+    let is_uncorrupted = uncorrupted(&asset_file, &asset.digest)?;
+    if !is_uncorrupted {
+        return Ok(GameReleaseStatus::NotDownloaded);
+    }
+
+    let extraction_dir = get_asset_extraction_dir(version, &download_dir)?;
+    let executable_path = get_executable_path(os, &extraction_dir)?;
+    if !executable_path.exists() {
+        return Ok(GameReleaseStatus::NotInstalled);
+    }
+
+    Ok(GameReleaseStatus::ReadyToPlay)
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum DigestComputationError {
+    #[error("failed to compute digest: {0}")]
+    Compute(#[from] io::Error),
+}
+
+pub fn uncorrupted(path: &Path, digest: &str) -> Result<bool, DigestComputationError> {
+    let parts: Vec<&str> = digest.split(':').collect();
+    if parts.len() != 2 || parts[0] != "sha256" {
+        return Ok(false);
+    }
+    let expected_hash = parts[1].to_ascii_lowercase();
+
+    let mut file = match File::open(path) {
+        Ok(file) => file,
+        Err(_) => return Ok(false),
+    };
+
+    let mut hasher = Sha256::new();
+    io::copy(&mut file, &mut hasher)?;
+    let actual_hash = hasher.finalize();
+
+    Ok(format!("{:x}", actual_hash) == expected_hash)
 }
