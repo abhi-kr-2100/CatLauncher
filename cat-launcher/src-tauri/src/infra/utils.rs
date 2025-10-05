@@ -5,11 +5,7 @@ use serde::de::DeserializeOwned;
 
 use crate::variants::GameVariant;
 
-pub fn get_safe_filename(name: &str) -> String {
-    name.chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
-        .collect()
-}
+
 
 pub fn get_github_repo_for_variant(variant: &GameVariant) -> &'static str {
     match variant {

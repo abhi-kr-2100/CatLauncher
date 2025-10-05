@@ -2,12 +2,12 @@ use std::io;
 use std::path::Path;
 use std::process::Command;
 
-use crate::game_release::GameRelease;
-use crate::install_release::utils::{
-    get_asset_download_dir, get_asset_extraction_dir, AssetDownloadDirError,
-    AssetExtractionDirError,
+use crate::filesystem::paths::{get_game_executable_filepath, AssetDownloadDirError,
+    AssetExtractionDirError, GetExecutablePathError,
 };
-use crate::launch_game::utils::{get_executable_path, GetExecutablePathError};
+use crate::game_release::GameRelease;
+use crate::last_played::last_played::LastPlayedError;
+use crate::launch_game::utils::{backup_and_copy_save_files, BackupAndCopyError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum LaunchGameError {
@@ -25,25 +25,47 @@ pub enum LaunchGameError {
 
     #[error("failed to launch game: {0}")]
     Launch(#[from] io::Error),
+
+    #[error("failed to get last played version: {0}")]
+    LastPlayed(#[from] LastPlayedError),
+
+    #[error("failed to backup and copy saves: {0}")]
+    BackupAndCopy(#[from] BackupAndCopyError),
 }
 
 impl GameRelease {
-    pub fn launch_game(&self, os: &str, data_dir: &Path) -> Result<(), LaunchGameError> {
-        let download_dir = get_asset_download_dir(&self.variant, data_dir)?;
-        let game_dir = get_asset_extraction_dir(&self.version, &download_dir)?;
-
-        let executable_path = get_executable_path(&self.variant, os, &game_dir)?;
+    pub async fn launch_game(
+        &self,
+        os: &str,
+        timestamp: u64,
+        data_dir: &Path,
+    ) -> Result<(), LaunchGameError> {
+        let executable_path =
+            get_game_executable_filepath(&self.variant, &self.version, os, data_dir)?;
         let executable_dir = executable_path
             .parent()
             .ok_or(LaunchGameError::ExecutableDir)?;
+
+        let last_played_version = self
+            .variant
+            .get_last_played_version(data_dir)?
+            .unwrap_or(self.version.clone());
+
+        backup_and_copy_save_files(
+            &last_played_version,
+            &self.version,
+            &self.variant,
+            &data_dir,
+            timestamp,
+        )
+        .await?;
 
         Command::new(&executable_path)
             .current_dir(executable_dir)
             .spawn()?;
 
-        let _ = self
-            .variant
-            .set_last_played_version(&self.version, data_dir);
+        self.variant
+            .set_last_played_version(&self.version, data_dir)?;
 
         Ok(())
     }
