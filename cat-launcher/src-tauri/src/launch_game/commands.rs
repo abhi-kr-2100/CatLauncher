@@ -1,4 +1,5 @@
 use std::env::consts::OS;
+use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use serde::ser::SerializeStruct;
 use serde::Serializer;
@@ -15,16 +16,21 @@ pub enum LaunchGameCommandError {
 
     #[error("system directory not found: {0}")]
     SystemDirectoryNotFound(#[from] tauri::Error),
+
+    #[error("failed to get system time: {0}")]
+    SystemTime(#[from] SystemTimeError),
 }
 
 #[command]
-pub fn launch_game(
+pub async fn launch_game(
     app_handle: AppHandle,
     release: GameRelease,
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    release.launch_game(OS, &data_dir)?;
+    let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+
+    release.launch_game(OS, time, &data_dir).await?;
 
     Ok(())
 }
