@@ -3,8 +3,8 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+use crate::filesystem::paths::{get_last_played_filepath, LastPlayedFileError};
 use crate::infra::utils::{read_from_file, write_to_file, ReadFromFileError, WriteToFileError};
-use crate::last_played::utils::{get_last_played_file_path, LastPlayedFileError};
 use crate::variants::GameVariant;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -29,7 +29,7 @@ impl GameVariant {
         &self,
         data_dir: &Path,
     ) -> Result<Option<String>, LastPlayedError> {
-        let file_path = get_last_played_file_path(self, data_dir)?;
+        let file_path = get_last_played_filepath(self, data_dir)?;
 
         if !file_path.exists() {
             return Ok(None);
@@ -46,7 +46,7 @@ impl GameVariant {
         version: &str,
         data_dir: &Path,
     ) -> Result<(), LastPlayedError> {
-        let file_path = get_last_played_file_path(self, data_dir)?;
+        let file_path = get_last_played_filepath(self, data_dir)?;
 
         let mut data = if file_path.exists() {
             read_from_file(&file_path)?

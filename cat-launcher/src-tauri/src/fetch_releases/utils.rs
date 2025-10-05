@@ -3,33 +3,28 @@ use std::collections::HashMap;
 use std::env::consts::OS;
 use std::fs::{create_dir_all, File};
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use sha2::{Digest, Sha256};
 
+use crate::filesystem::paths::{get_game_executable_filepath, get_or_create_asset_download_dir,
+    get_releases_cache_filepath, AssetDownloadDirError, AssetExtractionDirError, GetExecutablePathError,
+};
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::game_release::utils::get_platform_asset_substr;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::{
-    get_github_repo_for_variant, get_safe_filename, read_from_file, write_to_file, WriteToFileError,
-};
-use crate::install_release::utils::{
-    get_asset_download_dir, get_asset_extraction_dir, AssetDownloadDirError,
-    AssetExtractionDirError,
-};
-use crate::launch_game::utils::{get_executable_path, GetExecutablePathError};
+use crate::infra::utils::{read_from_file, write_to_file, WriteToFileError};
 use crate::variants::GameVariant;
 
 pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
-    let repo = get_github_repo_for_variant(variant);
-    let cache_path = get_cache_path_for_repo(repo, cache_dir);
+    let cache_file = get_releases_cache_filepath(variant, cache_dir);
 
-    if !cache_path.exists() {
+    if !cache_file.exists() {
         return Vec::new();
     }
 
-    match read_from_file::<Vec<GitHubRelease>>(&cache_path) {
+    match read_from_file::<Vec<GitHubRelease>>(&cache_file) {
         Ok(releases) => releases,
         _ => Vec::new(),
     }
@@ -49,8 +44,7 @@ pub fn write_cached_releases(
     releases: &[GitHubRelease],
     cache_dir: &Path,
 ) -> Result<(), WriteCacheError> {
-    let repo = get_github_repo_for_variant(variant);
-    let cache_path = get_cache_path_for_repo(repo, cache_dir);
+    let cache_path = get_releases_cache_filepath(variant, cache_dir);
 
     if let Some(parent) = cache_path.parent() {
         create_dir_all(parent)?;
@@ -71,11 +65,6 @@ pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubReleas
         .cloned()
         .chain(prereleases.into_iter().take(10).cloned())
         .collect()
-}
-
-pub fn get_cache_path_for_repo(repo: &str, cache_dir: &Path) -> PathBuf {
-    let safe = get_safe_filename(repo);
-    cache_dir.join("Releases").join(format!("{}.json", safe))
 }
 
 pub fn merge_releases(fetched: &[GitHubRelease], cached: &[GitHubRelease]) -> Vec<GitHubRelease> {
@@ -131,7 +120,7 @@ pub fn get_release_status(
     }
     let asset = asset.unwrap();
 
-    let download_dir = get_asset_download_dir(&variant, &data_dir)?;
+    let download_dir = get_or_create_asset_download_dir(&variant, &data_dir)?;
 
     let asset_file = download_dir.join(&asset.name);
     if !asset_file.exists() {
@@ -143,8 +132,7 @@ pub fn get_release_status(
         return Ok(GameReleaseStatus::NotDownloaded);
     }
 
-    let extraction_dir = get_asset_extraction_dir(version, &download_dir)?;
-    let executable_path = match get_executable_path(variant, os, &extraction_dir) {
+    let executable_path = match get_game_executable_filepath(variant, version, os, data_dir) {
         Ok(path) => path,
         Err(GetExecutablePathError::DoesNotExist) => return Ok(GameReleaseStatus::NotInstalled),
         Err(e) => return Err(GetReleaseStatusError::ExecutableDir(e)),
