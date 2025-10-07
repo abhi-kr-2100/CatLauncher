@@ -6,7 +6,7 @@ use crate::filesystem::paths::{get_game_executable_filepath, AssetDownloadDirErr
     AssetExtractionDirError, GetExecutablePathError,
 };
 use crate::game_release::GameRelease;
-use crate::last_played::last_played::LastPlayedError;
+use crate::last_played::state::LastPlayedError;
 use crate::launch_game::utils::{backup_and_copy_save_files, BackupAndCopyError};
 
 #[derive(thiserror::Error, Debug)]

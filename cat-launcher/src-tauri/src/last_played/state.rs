@@ -35,10 +35,10 @@ impl GameVariant {
             return Ok(None);
         }
 
-        let mut data: LastPlayedData = read_from_file(&file_path)?;
+        let data: LastPlayedData = read_from_file(&file_path)?;
         let variant_key: &'static str = self.into();
 
-        Ok(data.versions.remove(variant_key))
+        Ok(data.versions.get(variant_key).cloned())
     }
 
     pub fn set_last_played_version(

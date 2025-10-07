@@ -2,7 +2,7 @@ use serde::{ser::SerializeStruct, Serializer};
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Manager};
 
-use crate::{last_played::last_played::LastPlayedError, variants::GameVariant};
+use crate::{last_played::state::LastPlayedError, variants::GameVariant};
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
 pub enum LastPlayedCommandError {
