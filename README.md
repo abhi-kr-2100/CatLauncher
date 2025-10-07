@@ -1,6 +1,6 @@
 # CatLauncher
 
-An opiniated cross-platform launcher for Cataclysm games with modern social features.
+An opinionated cross-platform launcher for Cataclysm games with modern social features.
 
 ## Screenshots
 
