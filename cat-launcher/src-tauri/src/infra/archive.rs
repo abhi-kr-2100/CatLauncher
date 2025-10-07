@@ -48,7 +48,25 @@ pub async fn extract_archive(
             Some("zip") => {
                 let file = File::open(&archive_path)?;
                 let mut archive = zip::ZipArchive::new(file)?;
-                archive.extract(&target_dir)?;
+                for i in 0..archive.len() {
+                    let mut file = archive.by_index(i)?;
+                    let outpath = match file.enclosed_name() {
+                        Some(path) => target_dir.join(path),
+                        None => continue,
+                    };
+
+                    if (*file.name()).ends_with('/') {
+                        create_dir_all(&outpath)?;
+                    } else {
+                        if let Some(p) = outpath.parent() {
+                            if !p.exists() {
+                                create_dir_all(&p)?;
+                            }
+                        }
+                        let mut outfile = File::create(&outpath)?;
+                        io::copy(&mut file, &mut outfile)?;
+                    }
+                }
             }
 
             Some("gz") => match file_stem_extension {
