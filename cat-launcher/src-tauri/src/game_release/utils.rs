@@ -1,7 +1,7 @@
 use crate::variants::GameVariant;
 
 pub fn get_platform_asset_substr(variant: &GameVariant, os: &str) -> Option<&'static str> {
-    match (variant, os) {
+    match (variant, os.to_lowercase().as_str()) {
         (GameVariant::DarkDaysAhead, "windows") => Some("windows-with-graphics-and-sounds"),
         (GameVariant::DarkDaysAhead, "macos") => Some("osx-terminal-only"),
         (GameVariant::DarkDaysAhead, "linux") => Some("linux-with-graphics-and-sounds"),
