@@ -5,9 +5,22 @@ import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
+import { toast } from "sonner";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function toastCL(
+  level: "error" | "warning",
+  message: string,
+  error: unknown
+) {
+  toast[level](message);
+
+  if (import.meta.env.DEV) {
+    toast.info(JSON.stringify(error));
+  }
 }
 
 export async function fetchReleasesForVariant(
