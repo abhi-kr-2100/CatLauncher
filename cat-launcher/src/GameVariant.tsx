@@ -4,6 +4,7 @@ import {
   installReleaseForVariant,
   launchGame,
   getLastPlayedVersion,
+  getInstallationStatus,
 } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
-import type { GameRelease } from "@/generated-types/GameRelease";
+import type { GameRelease, GameReleaseStatus } from "@/generated-types/GameRelease";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { fetchReleasesForVariant } from "@/lib/utils";
 
@@ -50,31 +51,27 @@ function get_short_version_name(variantID: string, version: string): string {
 export default function GameVariant({ variant }: GameVariantProps) {
   const queryClient = useQueryClient();
 
-  const {
-    data: releases,
-    isLoading: isReleasesLoading,
-    error: releasesError,
-  } = useQuery<GameRelease[]>({
+  const { data: releases, isLoading: isReleasesLoading, error: releasesError, } = useQuery<GameRelease[]>({
     queryKey: ["releases", variant.name],
     queryFn: () => fetchReleasesForVariant(variant),
   });
 
-  const {
-    data: lastPlayedVersion,
-    isLoading: isLastPlayedVersionLoading,
-    error: lastPlayedVersionError,
-  } = useQuery<string | undefined>({
+  const { data: lastPlayedVersion, isLoading: isLastPlayedVersionLoading, error: lastPlayedVersionError, } = useQuery<string | undefined>({
     queryKey: ["last_played_version", variant.name],
     queryFn: () => getLastPlayedVersion(variant),
   });
 
-  const [selectedReleaseId, setSelectedReleaseId] = useState<
-    string | undefined
-  >();
+  const [selectedReleaseId, setSelectedReleaseId] = useState<string | undefined>();
   const selectedRelease = useMemo<GameRelease | undefined>(
     () => releases?.find((r) => r.version === selectedReleaseId),
     [releases, selectedReleaseId]
   );
+
+  const { data: installationStatus, isLoading: isInstallationStatusLoading, } = useQuery<GameReleaseStatus>({
+    queryKey: ["installation_status", variant.name, selectedReleaseId],
+    queryFn: () => getInstallationStatus(selectedRelease!),
+    enabled: !!selectedRelease,
+  });
 
   const [downloading, setDownloading] = useState(false);
 
@@ -83,13 +80,13 @@ export default function GameVariant({ variant }: GameVariantProps) {
       return;
     }
 
-    if (!selectedRelease || selectedRelease.status === "ReadyToPlay") {
+    if (!selectedRelease || installationStatus === "ReadyToPlay") {
       return;
     }
 
     setDownloading(true);
     try {
-      await installReleaseForVariant(selectedRelease);
+      const updatedRelease = await installReleaseForVariant(selectedRelease);
       queryClient.setQueryData(
         ["releases", variant.name],
         (old: GameRelease[] | undefined) =>
@@ -97,28 +94,32 @@ export default function GameVariant({ variant }: GameVariantProps) {
             if (o.version !== selectedReleaseId) {
               return o;
             }
-            return {
-              ...o,
-              status: "ReadyToPlay",
-            };
+            return updatedRelease;
           })
+      );
+      queryClient.setQueryData(
+        ["installation_status", variant.id, selectedReleaseId],
+        (): GameReleaseStatus => "ReadyToPlay"
       );
     } catch (e) {
       console.error("install_release_for_variant failed", e);
     } finally {
-      setDownloading(false);
+      setInstalling(false);
     }
   }
 
   async function handlePlay() {
-    if (!selectedRelease || selectedRelease.status !== "ReadyToPlay") {
+    if (
+      !selectedRelease ||
+      selectedReleaseInstallationStatus !== "ReadyToPlay"
+    ) {
       return;
     }
 
     try {
       await launchGame(selectedRelease);
       queryClient.setQueryData(
-        ["last_played_version", variant.name],
+        ["last_played_version", variant.id],
         () => selectedReleaseId
       );
     } catch (e) {
@@ -171,9 +172,11 @@ export default function GameVariant({ variant }: GameVariantProps) {
     isReleasesLoading ||
     Boolean(releasesError) ||
     comboboxItems.length === 0 ||
-    downloading;
+    installing;
   const isActionButtonDisabled =
-    isReleaseSelectionDisabled || !selectedReleaseId;
+    isReleaseSelectionDisabled ||
+    !selectedReleaseId ||
+    isSelectedReleaseInstallationStatusLoading;
 
   const placeholderText = isReleasesLoading
     ? "Loading..."
@@ -183,13 +186,14 @@ export default function GameVariant({ variant }: GameVariantProps) {
     ? "No releases available."
     : "Select a release";
 
-  const actionButtonLabel = downloading ? (
-    <Loader2 className="animate-spin" />
-  ) : selectedRelease?.status === "ReadyToPlay" ? (
-    "Play"
-  ) : (
-    "Download"
-  );
+  const actionButtonLabel =
+    installing || isSelectedReleaseInstallationStatusLoading ? (
+      <Loader2 className="animate-spin" />
+    ) : selectedReleaseInstallationStatus === "ReadyToPlay" ? (
+      "Play"
+    ) : (
+      "Install"
+    );
 
   return (
     <Card>
@@ -216,9 +220,9 @@ export default function GameVariant({ variant }: GameVariantProps) {
         <Button
           className="w-full"
           onClick={
-            selectedRelease?.status === "ReadyToPlay"
+            selectedReleaseInstallationStatus === "ReadyToPlay"
               ? handlePlay
-              : handleDownload
+              : handleInstall
           }
           disabled={isActionButtonDisabled}
         >
