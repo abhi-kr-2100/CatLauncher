@@ -48,9 +48,9 @@ pub async fn get_installation_status(
     let data_dir = app_handle.path().app_local_data_dir()?;
     let cache_dir = app_handle.path().app_cache_dir()?;
 
-    let release = get_release_by_id(&variant, OS, &data_dir, &cache_dir, release_id).await?;
+    let release = get_release_by_id(&variant, release_id, OS, &cache_dir, &data_dir).await?;
 
     Ok(release
-        .get_installation_status(OS, &data_dir, &cache_dir)
+        .get_installation_status(OS, &cache_dir, &data_dir)
         .await?)
 }
