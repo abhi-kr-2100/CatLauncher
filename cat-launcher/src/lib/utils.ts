@@ -3,6 +3,7 @@ import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import clsx, { type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,8 +36,8 @@ export async function getLastPlayedVersion(
 
 export async function installReleaseForVariant(
   release: GameRelease
-): Promise<void> {
-  const response = await invoke<void>("install_release", {
+): Promise<GameRelease> {
+  const response = await invoke<GameRelease>("install_release", {
     release,
   });
 
@@ -45,6 +46,16 @@ export async function installReleaseForVariant(
 
 export async function launchGame(release: GameRelease): Promise<void> {
   const response = await invoke<void>("launch_game", {
+    release,
+  });
+
+  return response;
+}
+
+export async function getInstallationStatus(
+  release: GameRelease
+): Promise<GameReleaseStatus> {
+  const response = await invoke<GameReleaseStatus>("get_installation_status", {
     release,
   });
 
