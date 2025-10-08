@@ -44,10 +44,11 @@ impl GameRelease {
             return Ok(GameReleaseStatus::NotDownloaded);
         }
 
-        let is_uncorrupted = uncorrupted(&asset_file, &asset.digest)?;
-        if !is_uncorrupted {
-            return Ok(GameReleaseStatus::Corrupted);
-        }
+        // Checksum verification is very slow; skip it for now
+        // let is_uncorrupted = uncorrupted(&asset_file, &asset.digest)?;
+        // if !is_uncorrupted {
+        //     return Ok(GameReleaseStatus::Corrupted);
+        // }
 
         let executable_path =
             match get_game_executable_filepath(&self.variant, &self.version, os, data_dir) {
@@ -66,6 +67,7 @@ impl GameRelease {
     }
 }
 
+#[allow(dead_code)]
 pub fn uncorrupted(path: &Path, digest: &str) -> Result<bool, DigestComputationError> {
     let parts: Vec<&str> = digest.split(':').collect();
     if parts.len() != 2 || parts[0] != "sha256" {
