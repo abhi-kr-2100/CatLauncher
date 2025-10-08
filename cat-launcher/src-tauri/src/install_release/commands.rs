@@ -32,7 +32,7 @@ pub async fn install_release(
     let cache_dir = app_handle.path().app_cache_dir()?;
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    let mut release = get_release_by_id(&variant, OS, &data_dir, &cache_dir, release_id).await?;
+    let mut release = get_release_by_id(&variant, release_id, OS, &cache_dir, &data_dir).await?;
     release
         .install_release(&HTTP_CLIENT, OS, &cache_dir, &data_dir)
         .await?;

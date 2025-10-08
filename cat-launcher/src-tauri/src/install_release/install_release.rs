@@ -46,7 +46,7 @@ impl GameRelease {
     ) -> Result<(), ReleaseInstallationError> {
         if self.status == GameReleaseStatus::Unknown {
             self.status = self
-                .get_installation_status(os, data_dir, cache_dir)
+                .get_installation_status(os, cache_dir, data_dir)
                 .await?;
         }
 
