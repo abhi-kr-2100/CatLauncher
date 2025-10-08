@@ -39,7 +39,7 @@ export default function InteractionButton({
     );
 
   async function handleInstall() {
-    if (!selectedReleaseId || installationStatusError) {
+    if (!selectedReleaseId || installationStatusError || installing) {
       return;
     }
 
@@ -94,7 +94,9 @@ export default function InteractionButton({
     !selectedReleaseId ||
     installing ||
     isInstallationStatusLoading ||
-    Boolean(installationStatusError);
+    Boolean(installationStatusError) ||
+    installationStatus === "Unknown" ||
+    installationStatus === "NotAvailable";
 
   return (
     <Button
