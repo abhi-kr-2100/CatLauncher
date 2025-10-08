@@ -37,11 +37,11 @@ export async function getLastPlayedVersion(
 
 export async function installReleaseForVariant(
   variant: GameVariant,
-  release_id: string
+  releaseId: string
 ): Promise<GameRelease> {
   const response = await invoke<GameRelease>("install_release", {
     variant,
-    release_id,
+    releaseId,
   });
 
   return response;
@@ -49,11 +49,11 @@ export async function installReleaseForVariant(
 
 export async function launchGame(
   variant: GameVariant,
-  release_id: string
+  releaseId: string
 ): Promise<void> {
   const response = await invoke<void>("launch_game", {
     variant,
-    release_id,
+    releaseId,
   });
 
   return response;
@@ -61,11 +61,11 @@ export async function launchGame(
 
 export async function getInstallationStatus(
   variant: GameVariant,
-  release_id: string
+  releaseId: string
 ): Promise<GameReleaseStatus> {
   const response = await invoke<GameReleaseStatus>("get_installation_status", {
     variant,
-    release_id,
+    releaseId,
   });
 
   return response;
