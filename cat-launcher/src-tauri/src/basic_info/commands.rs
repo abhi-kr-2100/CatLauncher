@@ -7,7 +7,7 @@ use crate::variants::GameVariant;
 #[derive(serde::Serialize, TS)]
 #[ts(export)]
 pub struct GameVariantInfo {
-    pub id: &'static str,
+    pub id: GameVariant,
     pub name: &'static str,
     pub description: &'static str,
 }
@@ -15,7 +15,7 @@ pub struct GameVariantInfo {
 impl From<GameVariant> for GameVariantInfo {
     fn from(variant: GameVariant) -> Self {
         GameVariantInfo {
-            id: variant.id(),
+            id: variant,
             name: variant.name(),
             description: variant.description(),
         }

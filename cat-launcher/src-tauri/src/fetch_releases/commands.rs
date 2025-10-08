@@ -1,12 +1,10 @@
-use std::env::consts::OS;
-
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Manager};
 
 use crate::fetch_releases::fetch_releases::FetchReleasesError;
-use crate::game_release::GameRelease;
+use crate::game_release::game_release::GameRelease;
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::variants::GameVariant;
 
@@ -25,11 +23,8 @@ pub async fn fetch_releases_for_variant(
     variant: GameVariant,
 ) -> Result<Vec<GameRelease>, FetchReleasesCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
-    let data_dir = app_handle.path().app_local_data_dir()?;
 
-    Ok(variant
-        .fetch_releases(OS, &HTTP_CLIENT, &cache_dir, &data_dir)
-        .await?)
+    Ok(variant.fetch_releases(&HTTP_CLIENT, &cache_dir).await?)
 }
 
 impl serde::Serialize for FetchReleasesCommandError {
