@@ -36,10 +36,10 @@ pub enum GetReleaseError {
 
 pub async fn get_release_by_id(
     variant: &GameVariant,
-    os: &str,
-    data_dir: &Path,
-    cache_dir: &Path,
     release_id: &str,
+    os: &str,
+    cache_dir: &Path,
+    data_dir: &Path,
 ) -> Result<GameRelease, GetReleaseError> {
     let gh_releases = get_cached_releases(variant, cache_dir);
     let gh_release = match gh_releases.into_iter().find(|r| r.tag_name == release_id) {
@@ -58,7 +58,7 @@ pub async fn get_release_by_id(
         status: GameReleaseStatus::Unknown,
     };
     release.status = release
-        .get_installation_status(os, data_dir, cache_dir)
+        .get_installation_status(os, cache_dir, data_dir)
         .await?;
 
     Ok(release)

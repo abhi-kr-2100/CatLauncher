@@ -29,8 +29,8 @@ impl GameRelease {
     pub async fn get_installation_status(
         &self,
         os: &str,
-        data_dir: &Path,
         cache_dir: &Path,
+        data_dir: &Path,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
         let asset = match self.get_asset(os, cache_dir) {
             Some(asset) => asset,
