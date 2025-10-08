@@ -2,9 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { fetchReleasesForVariant, getLastPlayedVersion } from "@/lib/utils";
+import {
+  fetchReleasesForVariant,
+  getLastPlayedVersion,
+  toastCL,
+} from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 export default function ReleaseSelector({
   variant,
@@ -20,6 +24,14 @@ export default function ReleaseSelector({
     queryFn: () => fetchReleasesForVariant(variant),
   });
 
+  useEffect(() => {
+    if (!releasesError) {
+      return;
+    }
+
+    toastCL("error", `Failed to fetch releases for ${variant}.`, releasesError);
+  }, [releasesError, variant]);
+
   const {
     data: lastPlayedVersion,
     isLoading: isLastPlayedVersionLoading,
@@ -28,6 +40,18 @@ export default function ReleaseSelector({
     queryKey: ["last_played_version", variant],
     queryFn: () => getLastPlayedVersion(variant),
   });
+
+  useEffect(() => {
+    if (!lastPlayedVersionError) {
+      return;
+    }
+
+    toastCL(
+      "warning",
+      `Failed to get last played version of ${variant}.`,
+      lastPlayedVersionError
+    );
+  }, [lastPlayedVersionError]);
 
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
     const latestVersionName = releases?.[0]?.version;

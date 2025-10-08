@@ -6,10 +6,11 @@ import {
   getInstallationStatus,
   installReleaseForVariant,
   launchGame,
+  toastCL,
 } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function InteractionButton({
   variant,
@@ -26,6 +27,18 @@ export default function InteractionButton({
     queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
     enabled: Boolean(selectedReleaseId),
   });
+
+  useEffect(() => {
+    if (!installationStatusError) {
+      return;
+    }
+
+    toastCL(
+      "error",
+      `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
+      installationStatusError
+    );
+  }, [installationStatusError, variant, selectedReleaseId]);
 
   const [installing, setInstalling] = useState(false);
 
@@ -68,7 +81,7 @@ export default function InteractionButton({
         (): GameReleaseStatus => "ReadyToPlay"
       );
     } catch (e) {
-      console.error("install_release_for_variant failed", e);
+      toastCL("error", "Failed to install release.", e);
     } finally {
       setInstalling(false);
     }
@@ -86,7 +99,7 @@ export default function InteractionButton({
         () => selectedReleaseId
       );
     } catch (e) {
-      console.error("launch_game failed", e);
+      toastCL("error", "Failed to launch game.", e);
     }
   }
 
