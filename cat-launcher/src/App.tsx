@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchGameVariantsInfo } from "@/lib/utils";
-import GameVariant from "@/GameVariant";
+import GameVariantCard from "./PlayPage/GameVariantCard";
 
 function App() {
   const {
@@ -23,8 +23,8 @@ function App() {
 
   return (
     <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
-      {gameVariantsInfo.map((variant) => (
-        <GameVariant key={variant.name} variant={variant} />
+      {gameVariantsInfo.map((variantInfo) => (
+        <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
       ))}
     </main>
   );
