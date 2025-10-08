@@ -6,7 +6,7 @@ use crate::filesystem::paths::{
     get_or_create_asset_download_dir, get_or_create_asset_installation_dir, AssetDownloadDirError,
     AssetExtractionDirError,
 };
-use crate::game_release::game_release::{GameRelease, GameReleaseStatus, GetAssetError};
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
@@ -22,8 +22,8 @@ pub enum ReleaseInstallationError {
     #[error("failed to create downloader: {0}")]
     Downloader(#[from] downloader::Error),
 
-    #[error("failed to choose asset: {0}")]
-    Asset(#[from] GetAssetError),
+    #[error("no compatible asset found")]
+    NoCompatibleAsset,
 
     #[error("failed to download asset: {0}")]
     Download(#[from] AssetDownloadError),
@@ -34,8 +34,9 @@ pub enum ReleaseInstallationError {
 
 impl GameRelease {
     pub async fn install_release(
-        &self,
+        &mut self,
         client: &Client,
+        os: &str,
         cache_dir: &Path,
         data_dir: &Path,
     ) -> Result<(), ReleaseInstallationError> {
@@ -44,17 +45,25 @@ impl GameRelease {
         }
 
         let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir)?;
-        let asset = self.get_asset(cache_dir)?;
-        let download_filepath = download_dir.join(&asset.name);
+        let asset = self
+            .get_asset(os, cache_dir)
+            .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 
-        if self.status == GameReleaseStatus::NotDownloaded {
+        if self.status == GameReleaseStatus::NotDownloaded
+            || self.status == GameReleaseStatus::Corrupted
+            || self.status == GameReleaseStatus::Unknown
+        {
             let mut downloader = create_downloader(client.clone(), &download_dir)?;
-            let _ = asset.download(&mut downloader).await?;
+            asset.download(&mut downloader).await?;
+            self.status = GameReleaseStatus::NotInstalled;
         }
 
+        let download_filepath = download_dir.join(&asset.name);
         let installation_dir =
             get_or_create_asset_installation_dir(&self.variant, &self.version, data_dir)?;
         extract_archive(&download_filepath, &installation_dir).await?;
+
+        self.status = GameReleaseStatus::ReadyToPlay;
 
         Ok(())
     }

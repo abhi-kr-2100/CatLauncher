@@ -1,3 +1,5 @@
+use std::env::consts::OS;
+
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
@@ -19,16 +21,16 @@ pub enum InstallReleaseCommandError {
 #[command]
 pub async fn install_release(
     app_handle: AppHandle,
-    release: GameRelease,
-) -> Result<(), InstallReleaseCommandError> {
+    mut release: GameRelease,
+) -> Result<GameRelease, InstallReleaseCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
     let data_dir = app_handle.path().app_local_data_dir()?;
 
     release
-        .install_release(&HTTP_CLIENT, &cache_dir, &data_dir)
+        .install_release(&HTTP_CLIENT, OS, &cache_dir, &data_dir)
         .await?;
 
-    Ok(())
+    Ok(release)
 }
 
 impl serde::Serialize for InstallReleaseCommandError {
