@@ -10,6 +10,7 @@ use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
+use crate::install_release::installation_status::status::GetInstallationStatusError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError {
@@ -30,6 +31,9 @@ pub enum ReleaseInstallationError {
 
     #[error("failed to extract asset: {0}")]
     Extract(#[from] ExtractionError),
+
+    #[error("failed to get release status: {0}")]
+    ReleaseStatus(#[from] GetInstallationStatusError),
 }
 
 impl GameRelease {
@@ -40,6 +44,12 @@ impl GameRelease {
         cache_dir: &Path,
         data_dir: &Path,
     ) -> Result<(), ReleaseInstallationError> {
+        if self.status == GameReleaseStatus::Unknown {
+            self.status = self
+                .get_installation_status(os, data_dir, cache_dir)
+                .await?;
+        }
+
         if self.status == GameReleaseStatus::ReadyToPlay {
             return Ok(());
         }
