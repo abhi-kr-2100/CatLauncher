@@ -1,4 +1,3 @@
-use std::env::consts::OS;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
@@ -29,23 +28,17 @@ pub struct GameRelease {
 pub enum GameReleaseStatus {
     NotAvailable,
     NotDownloaded,
+    Corrupted,
     NotInstalled,
     ReadyToPlay,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum GetAssetError {
-    #[error("no compatible asset found")]
-    NoCompatibleAssetFound,
+    Unknown,
 }
 
 impl GameRelease {
-    pub fn get_asset(&self, cache_dir: &Path) -> Result<GitHubAsset, GetAssetError> {
+    pub fn get_asset(&self, os: &str, cache_dir: &Path) -> Option<GitHubAsset> {
         let assets = get_assets(self, cache_dir);
 
-        let asset = get_platform_asset_substr(&self.variant, OS)
-            .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)));
-
-        asset.ok_or(GetAssetError::NoCompatibleAssetFound)
+        get_platform_asset_substr(&self.variant, os)
+            .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)))
     }
 }
