@@ -5,8 +5,8 @@ use serde::Serializer;
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Manager};
 
-use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
-use crate::game_release::game_release::ReleaseType;
+use crate::game_release::game_release::GameReleaseStatus;
+use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
@@ -17,6 +17,9 @@ pub enum InstallationStatusCommandError {
 
     #[error("failed to get installation status: {0}")]
     InstallationStatus(#[from] GetInstallationStatusError),
+
+    #[error("failed to obtain release: {0}")]
+    Release(#[from] GetReleaseError),
 }
 
 impl serde::Serialize for InstallationStatusCommandError {
@@ -40,26 +43,14 @@ impl serde::Serialize for InstallationStatusCommandError {
 pub async fn get_installation_status(
     app_handle: AppHandle,
     variant: GameVariant,
-    version: String,
-    release_type: ReleaseType,
+    release_id: &str,
 ) -> Result<GameReleaseStatus, InstallationStatusCommandError> {
-    let data_dir = app_handle
-        .path()
-        .app_local_data_dir()?;
+    let data_dir = app_handle.path().app_local_data_dir()?;
+    let cache_dir = app_handle.path().app_cache_dir()?;
 
-    let cache_dir = app_handle
-        .path()
-        .app_cache_dir()?;
+    let release = get_release_by_id(&variant, OS, &data_dir, &cache_dir, release_id).await?;
 
-    let release = GameRelease {
-        variant,
-        version,
-        release_type,
-        status: GameReleaseStatus::Unknown, // Placeholder status
-    };
-
-    release
+    Ok(release
         .get_installation_status(OS, &data_dir, &cache_dir)
-        .await
-        .map_err(|e| e.into())
+        .await?)
 }
