@@ -22,6 +22,23 @@ CatLauncher is an opinionated cross-platform launcher for Cataclysm games with m
 - `README.md`: Project README file.
 
 
+## ts-rs: TypeScript Type Generation
+
+This project uses the `ts-rs` crate to automatically generate TypeScript type definitions (`.d.ts` files) from Rust structs and enums. This ensures that the frontend and backend types are always in sync.
+
+### How it Works
+The type generation is integrated into the testing process. When you run the backend tests, a test case specifically for exporting types is executed. This test will:
+1.  Find all Rust types decorated with `#[ts(export)]`.
+2.  Generate the corresponding TypeScript types.
+3.  Save them to a gitignored directory within the frontend's source tree.
+
+### Agent Responsibility
+If you modify any Rust structs or enums that are shared with the frontend (i.e., they have a `#[ts(export)]` attribute), you **must** run the backend tests to regenerate the TypeScript types:
+```bash
+cargo test --manifest-path ./cat-launcher/src-tauri/Cargo.toml
+```
+This ensures the frontend has access to the latest type definitions.
+
 ## Running Tests
 
 The project has both frontend and backend tests.
@@ -45,8 +62,8 @@ To quickly check your Rust code for syntax errors without compiling, you can run
 When working on this project, please follow these guidelines:
 
 1.  **Understand the Architecture:** Before making changes, familiarize yourself with the Tauri architecture, which separates the backend (Rust) and frontend (web view).
-2.  **Run Tests:** After making any changes, run the relevant tests to ensure that you haven't introduced any regressions.
-3.  **Update Documentation:** If you add or modify features, update this `AGENTS.md` file and the `README.md` as needed.
-4.  **Keep Dependencies Updated:** Regularly check for and update outdated dependencies.
-5.  **Handle TypeScript Type Generation:** This project uses the `ts-rs` crate to generate TypeScript types from Rust structs and enums. These generated types are stored in a gitignored directory. If you modify any Rust types that are exported to the frontend, you **must** run the tests (`cargo test --manifest-path ./cat-launcher/src-tauri/Cargo.toml`). The tests are configured to automatically regenerate the TypeScript bindings, ensuring that the frontend has access to the updated types.
+2.  **Perform Self-Review:** After making any change, run `cr review --plain -t uncommitted` if the command is available. Address any feedback provided before proceeding.
+3.  **Run Tests:** After making any changes, run the relevant tests to ensure that you haven't introduced any regressions.
+4.  **Update Documentation:** If you add or modify features, update this `AGENTS.md` file and the `README.md` as needed.
+5.  **Keep Dependencies Updated:** Regularly check for and update outdated dependencies.
 6.  **Follow Existing Conventions:** Adhere to the coding style and conventions already present in the codebase.
