@@ -18,6 +18,12 @@ Within each slice, the principles of **Clean Architecture** are applied:
 - **Framework Agnostic Core:** The core business logic (e.g., in `fetch_releases.rs`) is decoupled from the Tauri framework. It receives dependencies like paths and HTTP clients via arguments (dependency injection), making it easy to test in isolation.
 - **Framework Bridge:** The `commands.rs` file in each module is the only part that interacts directly with Tauri. It acts as a bridge, exposing the core logic to the frontend as Tauri commands.
 
+There is **no database** in this project. Data persistence, such as caching release information or storing the last played version, is handled by writing directly to the local filesystem in platform-appropriate directories provided by Tauri.
+
+### Frontend Architecture
+
+The frontend is a standard React application and does **not** follow the same vertical slice structure as the backend. It is organized by component features (e.g., `PlayPage`, `components/ui`).
+
 ### Frontend-Backend Interaction
 
 The frontend communicates with the backend by invoking the commands defined in the Rust `commands.rs` files. To keep the UI components decoupled from the backend implementation:
@@ -38,6 +44,21 @@ The frontend communicates with the backend by invoking the commands defined in t
     - `src/main.rs`: The main entry point for the Rust application.
     - `tauri.conf.json`: Tauri configuration file.
 - `README.md`: Project README file.
+
+## Key Files and Directories
+
+-   `cat-launcher/`: The root directory for the Tauri project.
+    -   `src/`: Contains all the frontend React source code.
+        -   `lib/utils.ts`: A crucial file that wraps all Tauri backend commands, decoupling the UI components from the backend API.
+        -   `PlayPage/`: An example of a feature-based component directory on the frontend.
+    -   `src-tauri/`: Contains all the backend Rust source code.
+        -   `src/`: The Rust crate for the backend.
+            -   `<feature>/`: Each directory here represents a vertical slice of the application's features (e.g., `fetch_releases/`, `install_release/`).
+                -   `commands.rs`: The bridge between the backend's core logic and the Tauri framework. This file exposes functions as commands to the frontend.
+            -   `main.rs`: The main entry point for the Rust application.
+    -   `tauri.conf.json`: The main configuration file for the Tauri application, defining permissions, the development server, and other settings.
+    -   `Cargo.toml`: The Rust package manager's manifest file, defining backend dependencies.
+    -   `package.json`: The Node.js package manager's manifest file, defining frontend dependencies and scripts.
 
 ## ts-rs: TypeScript Type Generation
 
