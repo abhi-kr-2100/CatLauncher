@@ -60,6 +60,101 @@ The frontend communicates with the backend by invoking the commands defined in t
     -   `Cargo.toml`: The Rust package manager's manifest file, defining backend dependencies.
     -   `package.json`: The Node.js package manager's manifest file, defining frontend dependencies and scripts.
 
+## Error Handling
+
+The project has a standardized approach to error handling to ensure that errors are managed gracefully and provide clear feedback to the user and developers.
+
+### Backend Error Handling
+
+The backend employs a two-tier error handling strategy to separate internal business logic errors from the errors exposed to the frontend.
+
+1.  **Internal Business Logic Errors**:
+    -   These errors are defined within the core logic files (e.g., `fetch_releases.rs`).
+    -   They use `thiserror::Error` for clean error propagation within the backend.
+    -   They are **not** intended to be sent to the frontend and therefore do **not** implement `serde::Serialize` or derive `strum::IntoStaticStr`.
+
+    *Example from `fetch_releases/fetch_releases.rs`*:
+    ```rust
+    #[derive(thiserror::Error, Debug)]
+    pub enum FetchReleasesError {
+        #[error("failed to fetch releases: {0}")]
+        Fetch(#[from] GitHubReleaseFetchError),
+    }
+    ```
+
+2.  **Serializable Command Errors**:
+    -   These errors are defined in the `commands.rs` file for each feature slice. They are the only errors the frontend will ever receive.
+    -   They wrap the internal business logic errors using the `#[from]` attribute provided by `thiserror`.
+    -   They **must** be serializable. They derive `strum::IntoStaticStr` and implement `serde::Serialize` to format the error into a structured JSON object with a `type` and `message`.
+
+    *Example from `fetch_releases/commands.rs`*:
+    ```rust
+    #[derive(thiserror::Error, Debug, IntoStaticStr)]
+    pub enum FetchReleasesCommandError {
+        #[error("system directory not found: {0}")]
+        SystemDir(#[from] tauri::Error),
+
+        // This wraps the internal FetchReleasesError
+        #[error("failed to fetch releases: {0}")]
+        Fetch(#[from] FetchReleasesError),
+    }
+
+    // The implementation of `serde::Serialize` follows...
+    ```
+    This pattern ensures that internal implementation details are not leaked to the frontend, which only receives a clean, structured, and serializable error object.
+
+### Frontend Error Handling
+
+The frontend uses `@tanstack/react-query` to manage API state and a centralized utility function to display toast notifications.
+
+1.  **API State Management**: Components use the `useQuery` hook from `react-query` to call backend commands. This hook automatically provides `data`, `isLoading`, and `error` states.
+
+    *Example from `PlayPage/ReleaseSelector.tsx`*:
+    ```tsx
+    const {
+      data: releases,
+      isLoading: isReleasesLoading,
+      error: releasesError,
+    } = useQuery<GameRelease[]>({
+      queryKey: ["releases", variant],
+      queryFn: () => fetchReleasesForVariant(variant),
+    });
+    ```
+
+2.  **Error Handling and Notification**: A `useEffect` hook monitors the `error` object from `useQuery`. If an error exists, it calls the `toastCL` utility to show a user-friendly message. This keeps the error-handling logic separate from the main component rendering.
+
+    *Example from `PlayPage/ReleaseSelector.tsx`*:
+    ```tsx
+    useEffect(() => {
+      if (!releasesError) {
+        return;
+      }
+
+      toastCL("error", `Failed to fetch releases for ${variant}.`, releasesError);
+    }, [releasesError, variant]);
+    ```
+
+3.  **Graceful Degradation**: The component uses the loading and error states from `useQuery` to render a responsive UI, such as showing a loading message or disabling elements when an error occurs.
+
+    *Example from `PlayPage/ReleaseSelector.tsx`*:
+    ```tsx
+    const placeholderText = isReleasesLoading
+      ? "Loading..."
+      : releasesError
+      ? "Error loading releases."
+      : "Select a release";
+
+    return (
+      <Combobox
+        // ...
+        placeholder={placeholderText}
+        disabled={Boolean(releasesError)}
+      />
+    );
+    ```
+
+This end-to-end system ensures that backend errors are structured, propagated cleanly to the frontend, and handled in a consistent, user-friendly manner.
+
 ## ts-rs: TypeScript Type Generation
 
 This project uses the `ts-rs` crate to automatically generate TypeScript type definitions (`.d.ts` files) from Rust structs and enums. This ensures that the frontend and backend types are always in sync.
