@@ -5,7 +5,8 @@ use serde::Serialize;
 use ts_rs::TS;
 
 use crate::fetch_releases::utils::{
-    get_cached_releases, merge_releases, select_releases_for_cache, write_cached_releases,
+    get_cached_releases, get_default_releases, merge_releases, select_releases_for_cache,
+    write_cached_releases,
 };
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus, ReleaseType};
 use crate::infra::github::release::GitHubRelease;
@@ -41,11 +42,22 @@ impl GameVariant {
         &self,
         client: &Client,
         cache_dir: &Path,
+        default_releases_dir: &Path,
         on_releases: F,
     ) -> Result<(), FetchReleasesError<E>>
     where
         F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
     {
+        let default_releases = get_default_releases(&self, default_releases_dir).await;
+        let default_game_releases = default_releases.iter().map(|r| (r, *self).into()).collect();
+
+        let payload = ReleasesUpdatePayload {
+            variant: *self,
+            releases: default_game_releases,
+            status: ReleasesUpdateStatus::InProgress,
+        };
+        on_releases(payload).map_err(FetchReleasesError::Callback)?;
+
         let cached_releases = get_cached_releases(self, cache_dir).await;
         let cached_game_releases: Vec<GameRelease> =
             cached_releases.iter().map(|r| (r, *self).into()).collect();
