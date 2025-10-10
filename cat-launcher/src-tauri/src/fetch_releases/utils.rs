@@ -11,6 +11,21 @@ use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{read_from_file, write_to_file, WriteToFileError};
 use crate::variants::GameVariant;
 
+pub fn get_default_releases(
+    variant: &GameVariant,
+    default_releases_dir: &Path,
+) -> Vec<GitHubRelease> {
+    let default_releases_file = default_releases_dir.join(format!("{}.json", variant.id()));
+    if !default_releases_file.is_file() {
+        return Vec::new();
+    }
+
+    match read_from_file::<Vec<GitHubRelease>>(&default_releases_file) {
+        Ok(releases) => releases,
+        _ => Vec::new(),
+    }
+}
+
 pub fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
     let cache_file = get_releases_cache_filepath(variant, cache_dir);
 

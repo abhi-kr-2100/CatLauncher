@@ -1,6 +1,7 @@
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
+use tauri::path::BaseDirectory;
 use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
@@ -22,6 +23,9 @@ pub async fn fetch_releases_for_variant(
     variant: GameVariant,
 ) -> Result<(), FetchReleasesCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
+    let default_releases_dir = app_handle
+        .path()
+        .resolve("releases/", BaseDirectory::Resource)?;
 
     let on_releases = move |payload: ReleasesUpdatePayload| {
         app_handle.emit("releases-update", payload)?;
@@ -29,7 +33,7 @@ pub async fn fetch_releases_for_variant(
     };
 
     variant
-        .fetch_releases(&HTTP_CLIENT, &cache_dir, on_releases)
+        .fetch_releases(&HTTP_CLIENT, &cache_dir, &default_releases_dir, on_releases)
         .await?;
 
     Ok(())
