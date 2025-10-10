@@ -26,6 +26,21 @@ pub async fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec
     }
 }
 
+pub async fn get_default_releases(
+    variant: &GameVariant,
+    default_releases_dir: &Path,
+) -> Vec<GitHubRelease> {
+    let default_releases_file = default_releases_dir.join(format!("{}.json", variant.id()));
+    if !default_releases_file.is_file() {
+        return Vec::new();
+    }
+
+    match read_from_file::<Vec<GitHubRelease>>(&default_releases_file).await {
+        Ok(releases) => releases,
+        _ => Vec::new(),
+    }
+}
+
 #[derive(thiserror::Error, Debug)]
 pub enum WriteCacheError {
     #[error("failed to create directory: {0}")]
