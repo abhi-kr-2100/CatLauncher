@@ -1,36 +1,44 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
+
 import { Badge } from "@/components/ui/badge";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
-import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
-  fetchReleasesForVariant,
   getLastPlayedVersion,
   toastCL,
+  triggerFetchReleasesForVariant,
 } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo } from "react";
+import { selectReleasesForVariant } from "@/store/releasesSlice";
+import { RootState } from "@/store/store";
+import { useReleaseEvents } from "./hooks";
 
 export default function ReleaseSelector({
   variant,
   selectedReleaseId,
   setSelectedReleaseId,
 }: ReleaseSelectorProps) {
+  useReleaseEvents();
+
+  const releases = useSelector((state: RootState) =>
+    selectReleasesForVariant(state, variant)
+  );
+
   const {
-    data: releases,
-    isLoading: isReleasesLoading,
+    mutate: fetchReleases,
     error: releasesError,
-  } = useQuery<GameRelease[]>({
-    queryKey: ["releases", variant],
-    queryFn: () => fetchReleasesForVariant(variant),
+    isPending: isReleasesLoading,
+  } = useMutation({
+    mutationFn: triggerFetchReleasesForVariant,
+    onError: (error: unknown) => {
+      toastCL("error", `Failed to fetch releases for ${variant}.`, error);
+    },
   });
 
   useEffect(() => {
-    if (!releasesError) {
-      return;
-    }
-
-    toastCL("error", `Failed to fetch releases for ${variant}.`, releasesError);
-  }, [releasesError, variant]);
+    fetchReleases(variant);
+  }, [variant, fetchReleases]);
 
   const {
     data: lastPlayedVersion,
@@ -51,7 +59,7 @@ export default function ReleaseSelector({
       `Failed to get last played version of ${variant}.`,
       lastPlayedVersionError
     );
-  }, [lastPlayedVersionError]);
+  }, [lastPlayedVersionError, variant]);
 
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
     const latestVersionName = releases?.[0]?.version;
