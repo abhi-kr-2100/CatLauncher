@@ -23,9 +23,17 @@ pub enum FetchReleasesError<E> {
 
 #[derive(Clone, Serialize, TS)]
 #[ts(export)]
+pub enum ReleasesUpdateStatus {
+    InProgress,
+    Finished,
+}
+
+#[derive(Clone, Serialize, TS)]
+#[ts(export)]
 pub struct ReleasesUpdatePayload {
     pub variant: GameVariant,
     pub releases: Vec<GameRelease>,
+    pub status: ReleasesUpdateStatus,
 }
 
 impl GameVariant {
@@ -45,6 +53,7 @@ impl GameVariant {
         let payload = ReleasesUpdatePayload {
             variant: *self,
             releases: cached_game_releases,
+            status: ReleasesUpdateStatus::InProgress,
         };
         on_releases(payload).map_err(FetchReleasesError::Callback)?;
 
@@ -62,6 +71,7 @@ impl GameVariant {
         let payload = ReleasesUpdatePayload {
             variant: *self,
             releases: game_releases,
+            status: ReleasesUpdateStatus::Finished,
         };
         on_releases(payload).map_err(FetchReleasesError::Callback)?;
 
