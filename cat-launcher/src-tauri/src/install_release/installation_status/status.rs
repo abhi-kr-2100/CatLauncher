@@ -49,18 +49,22 @@ impl GameRelease {
         // if !is_uncorrupted {
         //     return Ok(GameReleaseStatus::Corrupted);
         // }
+        //
+        // Since we don't verify the integrity of the downloaded file, if downloaded asset is present
+        // but the installation dir or executable file is missing, we still consider the asset to not
+        // be downloaded.
 
         let executable_path =
             match get_game_executable_filepath(&self.variant, &self.version, os, data_dir) {
                 Ok(path) => path,
                 Err(GetExecutablePathError::DoesNotExist) => {
-                    return Ok(GameReleaseStatus::NotInstalled)
+                    return Ok(GameReleaseStatus::NotDownloaded)
                 }
                 Err(e) => return Err(GetInstallationStatusError::ExecutableDir(e)),
             };
 
         if !executable_path.exists() {
-            return Ok(GameReleaseStatus::NotInstalled);
+            return Ok(GameReleaseStatus::NotDownloaded);
         }
 
         Ok(GameReleaseStatus::ReadyToPlay)

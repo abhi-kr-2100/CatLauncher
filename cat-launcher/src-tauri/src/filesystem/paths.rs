@@ -144,7 +144,14 @@ pub fn get_game_executable_filepath(
     os: &str,
     data_dir: &Path,
 ) -> Result<PathBuf, GetExecutablePathError> {
-    let dir = get_game_executable_dir(variant, release_version, data_dir)?;
+    let dir = match get_game_executable_dir(variant, release_version, data_dir) {
+        Ok(dir) => dir,
+        Err(GetGameExecutableDirError::NoInstallation) => {
+            return Err(GetExecutablePathError::DoesNotExist)
+        }
+        Err(err) => return Err(GetExecutablePathError::LauncherDirectory(err)),
+    };
+
     let filename = get_game_executable_filename(variant, os)?;
     let filepath = dir.join(filename);
 
