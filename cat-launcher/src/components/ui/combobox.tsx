@@ -29,6 +29,7 @@ interface ComboboxProps {
   placeholder?: string;
   disabled?: boolean;
   autoselect?: boolean | ((items: ComboboxItem[]) => ComboboxItem | undefined);
+  className?: string;
 }
 
 export function Combobox({
@@ -39,6 +40,7 @@ export function Combobox({
   placeholder,
   disabled,
   autoselect,
+  className,
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
 
@@ -62,7 +64,7 @@ export function Combobox({
   }, [autoselect, value, items, onChange]);
 
   return (
-    <div>
+    <div className={className}>
       {label ? (
         <div className="text-sm text-muted-foreground mb-2">{label}</div>
       ) : null}
