@@ -1,11 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
-import type { GameRelease } from "@/generated-types/GameRelease";
+import { listen } from "@tauri-apps/api/event";
 import clsx, { type ClassValue } from "clsx";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
+
+import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { toast } from "sonner";
+import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
+import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,13 +26,20 @@ export function toastCL(
   }
 }
 
-export async function fetchReleasesForVariant(
+export async function listenToReleasesUpdate(
+  onUpdate: (payload: ReleasesUpdatePayload) => void
+) {
+  return await listen<ReleasesUpdatePayload>("releases-update", (event) => {
+    onUpdate(event.payload);
+  });
+}
+
+export async function triggerFetchReleasesForVariant(
   variant: GameVariant
-): Promise<GameRelease[]> {
-  const response = await invoke<GameRelease[]>("fetch_releases_for_variant", {
+): Promise<void> {
+  await invoke("fetch_releases_for_variant", {
     variant,
   });
-  return response;
 }
 
 export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {

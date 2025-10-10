@@ -56,6 +56,7 @@ pub async fn get_release_by_id(
             ReleaseType::Stable
         },
         status: GameReleaseStatus::Unknown,
+        created_at: gh_release.created_at,
     };
     release.status = release
         .get_installation_status(os, cache_dir, data_dir)
