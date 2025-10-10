@@ -1,10 +1,9 @@
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, AppHandle, Emitter, Manager};
 
-use crate::fetch_releases::fetch_releases::FetchReleasesError;
-use crate::game_release::game_release::GameRelease;
+use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::variants::GameVariant;
 
@@ -14,17 +13,26 @@ pub enum FetchReleasesCommandError {
     SystemDir(#[from] tauri::Error),
 
     #[error("failed to fetch releases: {0}")]
-    Fetch(#[from] FetchReleasesError),
+    Fetch(#[from] FetchReleasesError<tauri::Error>),
 }
 
 #[command]
 pub async fn fetch_releases_for_variant(
     app_handle: AppHandle,
     variant: GameVariant,
-) -> Result<Vec<GameRelease>, FetchReleasesCommandError> {
+) -> Result<(), FetchReleasesCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
 
-    Ok(variant.fetch_releases(&HTTP_CLIENT, &cache_dir).await?)
+    let on_releases = move |payload: ReleasesUpdatePayload| {
+        app_handle.emit("releases-update", payload)?;
+        Ok(())
+    };
+
+    variant
+        .fetch_releases(&HTTP_CLIENT, &cache_dir, on_releases)
+        .await?;
+
+    Ok(())
 }
 
 impl serde::Serialize for FetchReleasesCommandError {

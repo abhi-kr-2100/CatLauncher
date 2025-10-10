@@ -21,6 +21,8 @@ pub struct GameRelease {
     pub version: String,
     pub release_type: ReleaseType,
     pub status: GameReleaseStatus,
+    #[ts(type = "string")]
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
