@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "This release adds last-played tracking, significantly improves the installation flow with better status checks and download skipping, and introduces error toast notifications.",
+  "pub_date": "2025-10-10T16:05:22Z",
+  "platforms": {
+    "linux-x86_64": {
+      "url": "",
+      "signature": ""
+    }
+  }
+}

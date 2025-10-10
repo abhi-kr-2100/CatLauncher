@@ -34,3 +34,6 @@ tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
 tar = "0.4.44"
 flate2 = "1.1.2"
 sha2 = "0.10.8"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
