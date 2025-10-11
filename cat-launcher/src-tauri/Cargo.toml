@@ -34,3 +34,4 @@ tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
 tar = "0.4.44"
 flate2 = "1.1.2"
 sha2 = "0.10.8"
+regex = "1.10.5"

@@ -455,6 +455,7 @@ dependencies = [
  "chrono",
  "downloader",
  "flate2",
+ "regex",
  "reqwest",
  "serde",
  "serde_json",
