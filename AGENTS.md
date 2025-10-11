@@ -185,6 +185,10 @@ cargo check --manifest-path ./cat-launcher/src-tauri/Cargo.toml
 
 When adding a field to a struct or a payload that represents a state, prefer using an enum over a boolean. For example, instead of `is_finished: bool`, prefer a `status: UpdateStatus` enum with variants like `InProgress` and `Finished`.
 
+### Avoid Methods that May Panic
+
+In Rust, avoid methods that may panic. Instead, use the `Result` type to handle errors gracefully. For example, instead of using `unwrap()` or `expect()` use `if let` or `match` to handle errors.
+
 ## Agent Workflow
 
 When working on this project, please follow these guidelines:
