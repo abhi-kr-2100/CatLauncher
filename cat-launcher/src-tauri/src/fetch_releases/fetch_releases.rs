@@ -46,7 +46,7 @@ impl GameVariant {
     where
         F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
     {
-        let cached_releases = get_cached_releases(self, cache_dir);
+        let cached_releases = get_cached_releases(self, cache_dir).await;
         let cached_game_releases: Vec<GameRelease> =
             cached_releases.iter().map(|r| (r, *self).into()).collect();
 
@@ -64,7 +64,7 @@ impl GameVariant {
         let to_cache = select_releases_for_cache(&all_releases);
 
         // Successfully writing to cache is not important. Ignore if an error happens.
-        let _ = write_cached_releases(self, &to_cache, cache_dir);
+        let _ = write_cached_releases(self, &to_cache, cache_dir).await;
 
         let game_releases: Vec<GameRelease> = to_cache.iter().map(|r| (r, *self).into()).collect();
 
