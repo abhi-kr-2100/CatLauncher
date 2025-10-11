@@ -189,6 +189,10 @@ When adding a field to a struct or a payload that represents a state, prefer usi
 
 In Rust, avoid methods that may panic. Instead, use the `Result` type to handle errors gracefully. For example, instead of using `unwrap()` or `expect()` use `if let` or `match` to handle errors.
 
+### Avoid Box<dyn Error>
+
+Instead, define a custom error type using the `thiserror` crate, and use it.
+
 ## Agent Workflow
 
 When working on this project, please follow these guidelines:
