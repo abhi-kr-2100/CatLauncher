@@ -55,12 +55,15 @@ async fn copy_save_files(
     variant: &GameVariant,
     data_dir: &Path,
 ) -> Result<(), SaveCopyError> {
-    let to_dir = get_game_executable_dir(variant, to_version, data_dir)?;
+    let to_dir = get_game_executable_dir(variant, to_version, data_dir).await?;
 
-    let save_dirs = get_game_save_dirs(variant, from_version, data_dir)?;
+    let save_dirs = get_game_save_dirs(variant, from_version, data_dir).await?;
 
     for save_dir in save_dirs {
-        if save_dir.is_dir() {
+        if let Ok(metadata) = tokio::fs::metadata(&save_dir).await {
+            if !metadata.is_dir() {
+                continue;
+            }
             let file_name = save_dir
                 .file_name()
                 .ok_or_else(|| SaveCopyError::InvalidSaveDirPath)?;
@@ -110,8 +113,8 @@ async fn backup_save_files(
     data_dir: &Path,
     timestamp: u64,
 ) -> Result<(), BackupError> {
-    let executable_dir = get_game_executable_dir(variant, version, data_dir)?;
-    let dirs_to_backup = get_game_save_dirs(variant, version, data_dir)?;
+    let executable_dir = get_game_executable_dir(variant, version, data_dir).await?;
+    let dirs_to_backup = get_game_save_dirs(variant, version, data_dir).await?;
     let archive_path =
         get_or_create_backup_archive_filepath(variant, version, data_dir, timestamp).await?;
 

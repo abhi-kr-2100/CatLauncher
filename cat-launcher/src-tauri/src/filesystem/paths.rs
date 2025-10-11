@@ -1,9 +1,9 @@
-use std::fs::{create_dir_all, read_dir};
 use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::filesystem::utils::get_safe_filename;
 use crate::variants::GameVariant;
+use tokio::fs::{create_dir_all, read_dir};
 
 pub fn get_releases_cache_filepath(variant: &GameVariant, cache_dir: &Path) -> PathBuf {
     cache_dir
@@ -17,13 +17,13 @@ pub enum AssetDownloadDirError {
     CreateDirectory(#[from] io::Error),
 }
 
-pub fn get_or_create_asset_download_dir(
+pub async fn get_or_create_asset_download_dir(
     variant: &GameVariant,
     data_dir: &Path,
 ) -> Result<PathBuf, AssetDownloadDirError> {
     let dir = data_dir.join("Assets").join(variant.id());
 
-    create_dir_all(&dir)?;
+    create_dir_all(&dir).await?;
 
     Ok(dir)
 }
@@ -34,7 +34,7 @@ pub enum AssetExtractionDirError {
     CreateDirectory(#[from] io::Error),
 }
 
-pub fn get_or_create_asset_installation_dir(
+pub async fn get_or_create_asset_installation_dir(
     variant: &GameVariant,
     release_version: &str,
     data_dir: &Path,
@@ -45,7 +45,7 @@ pub fn get_or_create_asset_installation_dir(
         .join(variant.id())
         .join(&safe_dir_name);
 
-    create_dir_all(&dir)?;
+    create_dir_all(&dir).await?;
 
     Ok(dir)
 }
@@ -56,12 +56,12 @@ pub enum LastPlayedFileError {
     CreateDir(#[from] std::io::Error),
 }
 
-pub fn get_last_played_filepath(
+pub async fn get_last_played_filepath(
     variant: &GameVariant,
     data_dir: &Path,
 ) -> Result<PathBuf, LastPlayedFileError> {
     let directory = data_dir.join("LastPlayed").join(variant.id());
-    create_dir_all(&directory)?;
+    create_dir_all(&directory).await?;
 
     let file_path = directory.join("last_played_versions.json");
 
@@ -83,17 +83,17 @@ pub enum GetGameExecutableDirError {
     AssetExtractionDir(#[from] AssetExtractionDirError),
 }
 
-pub fn get_game_executable_dir(
+pub async fn get_game_executable_dir(
     variant: &GameVariant,
     release_version: &str,
     data_dir: &Path,
 ) -> Result<PathBuf, GetGameExecutableDirError> {
     let installation_dir =
-        get_or_create_asset_installation_dir(variant, release_version, data_dir)?;
+        get_or_create_asset_installation_dir(variant, release_version, data_dir).await?;
 
-    for entry in read_dir(installation_dir)? {
-        let entry = entry?;
-        if entry.file_type()?.is_dir() {
+    let mut dir = read_dir(installation_dir).await?;
+    while let Some(entry) = dir.next_entry().await? {
+        if entry.file_type().await?.is_dir() {
             return Ok(entry.path());
         }
     }
@@ -138,13 +138,13 @@ pub enum GetExecutablePathError {
     UnsupportedOS(#[from] LauncherFilenameError),
 }
 
-pub fn get_game_executable_filepath(
+pub async fn get_game_executable_filepath(
     variant: &GameVariant,
     release_version: &str,
     os: &str,
     data_dir: &Path,
 ) -> Result<PathBuf, GetExecutablePathError> {
-    let dir = match get_game_executable_dir(variant, release_version, data_dir) {
+    let dir = match get_game_executable_dir(variant, release_version, data_dir).await {
         Ok(dir) => dir,
         Err(GetGameExecutableDirError::NoInstallation) => {
             return Err(GetExecutablePathError::DoesNotExist)
@@ -155,8 +155,13 @@ pub fn get_game_executable_filepath(
     let filename = get_game_executable_filename(variant, os)?;
     let filepath = dir.join(filename);
 
-    if !filepath.is_file() {
-        return Err(GetExecutablePathError::DoesNotExist);
+    match tokio::fs::metadata(&filepath).await {
+        Ok(metadata) => {
+            if !metadata.is_file() {
+                return Err(GetExecutablePathError::DoesNotExist);
+            }
+        }
+        Err(_) => return Err(GetExecutablePathError::DoesNotExist),
     }
 
     Ok(filepath)
@@ -174,14 +179,14 @@ pub enum GetVersionExecutableDirError {
     GameExecutableDir(#[from] GetGameExecutableDirError),
 }
 
-pub fn get_game_save_dirs(
+pub async fn get_game_save_dirs(
     variant: &GameVariant,
     release_version: &str,
     data_dir: &Path,
 ) -> Result<Vec<PathBuf>, GetGameExecutableDirError> {
     let dirs = &["achievements", "config", "memorial", "save", "templates"];
 
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir)?;
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir).await?;
     Ok(dirs.iter().map(|d| executable_dir.join(d)).collect())
 }
 
@@ -203,7 +208,7 @@ pub async fn get_or_create_backup_archive_filepath(
     data_dir: &Path,
     timestamp: u64,
 ) -> Result<PathBuf, GetBackupArchivePathError> {
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir)?;
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir).await?;
     let backup_dir = executable_dir.join("backups");
     tokio::fs::create_dir_all(&backup_dir).await?;
 

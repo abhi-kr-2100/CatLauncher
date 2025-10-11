@@ -1,11 +1,10 @@
+use std::io;
 use std::path::Path;
-use std::{fs, io};
 
 use serde::de::DeserializeOwned;
+use tokio::fs;
 
 use crate::variants::GameVariant;
-
-
 
 pub fn get_github_repo_for_variant(variant: &GameVariant) -> &'static str {
     match variant {
@@ -24,8 +23,8 @@ pub enum ReadFromFileError {
     Deserialize(#[from] serde_json::Error),
 }
 
-pub fn read_from_file<T: DeserializeOwned>(path: &Path) -> Result<T, ReadFromFileError> {
-    let contents = fs::read_to_string(path)?;
+pub async fn read_from_file<T: DeserializeOwned>(path: &Path) -> Result<T, ReadFromFileError> {
+    let contents = fs::read_to_string(path).await?;
     let v = serde_json::from_str(&contents)?;
     Ok(v)
 }
@@ -39,8 +38,11 @@ pub enum WriteToFileError {
     Write(#[from] std::io::Error),
 }
 
-pub fn write_to_file<T: serde::Serialize>(path: &Path, data: &T) -> Result<(), WriteToFileError> {
+pub async fn write_to_file<T: serde::Serialize>(
+    path: &Path,
+    data: &T,
+) -> Result<(), WriteToFileError> {
     let contents = serde_json::to_string_pretty(data)?;
-    fs::write(path, contents)?;
+    fs::write(path, contents).await?;
     Ok(())
 }

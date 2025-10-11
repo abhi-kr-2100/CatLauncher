@@ -1,8 +1,9 @@
-use std::fs::File;
-use std::io;
 use std::path::Path;
 
 use sha2::{Digest, Sha256};
+use tokio::fs;
+use tokio::fs::File;
+use tokio::io::{self, AsyncReadExt};
 
 use crate::filesystem::paths::{
     get_game_executable_filepath, get_or_create_asset_download_dir, AssetDownloadDirError,
@@ -32,20 +33,21 @@ impl GameRelease {
         cache_dir: &Path,
         data_dir: &Path,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
-        let asset = match self.get_asset(os, cache_dir) {
+        let asset = match self.get_asset(os, cache_dir).await {
             Some(asset) => asset,
             None => return Ok(GameReleaseStatus::NotAvailable),
         };
 
-        let download_dir = get_or_create_asset_download_dir(&self.variant, &data_dir)?;
+        let download_dir = get_or_create_asset_download_dir(&self.variant, &data_dir).await?;
 
         let asset_file = download_dir.join(&asset.name);
-        if !asset_file.exists() {
-            return Ok(GameReleaseStatus::NotDownloaded);
-        }
+        match fs::metadata(&asset_file).await {
+            Ok(metadata) if metadata.is_file() => {}
+            _ => return Ok(GameReleaseStatus::NotDownloaded),
+        };
 
         // Checksum verification is very slow; skip it for now
-        // let is_uncorrupted = uncorrupted(&asset_file, &asset.digest)?;
+        // let is_uncorrupted = uncorrupted(&asset_file, &asset.digest).await?;
         // if !is_uncorrupted {
         //     return Ok(GameReleaseStatus::Corrupted);
         // }
@@ -55,7 +57,7 @@ impl GameRelease {
         // be downloaded.
 
         let executable_path =
-            match get_game_executable_filepath(&self.variant, &self.version, os, data_dir) {
+            match get_game_executable_filepath(&self.variant, &self.version, os, data_dir).await {
                 Ok(path) => path,
                 Err(GetExecutablePathError::DoesNotExist) => {
                     return Ok(GameReleaseStatus::NotDownloaded)
@@ -63,8 +65,9 @@ impl GameRelease {
                 Err(e) => return Err(GetInstallationStatusError::ExecutableDir(e)),
             };
 
-        if !executable_path.exists() {
-            return Ok(GameReleaseStatus::NotDownloaded);
+        match fs::metadata(&executable_path).await {
+            Ok(metadata) if metadata.is_file() => {}
+            _ => return Ok(GameReleaseStatus::NotDownloaded),
         }
 
         Ok(GameReleaseStatus::ReadyToPlay)
@@ -72,17 +75,25 @@ impl GameRelease {
 }
 
 #[allow(dead_code)]
-pub fn uncorrupted(path: &Path, digest: &str) -> Result<bool, DigestComputationError> {
+pub async fn uncorrupted(path: &Path, digest: &str) -> Result<bool, DigestComputationError> {
     let parts: Vec<&str> = digest.split(':').collect();
     if parts.len() != 2 || parts[0] != "sha256" {
         return Err(DigestComputationError::InvalidFormat(digest.to_string()));
     }
     let expected_hash = parts[1].to_ascii_lowercase();
 
-    let mut file = File::open(path)?;
-
+    let mut file = File::open(path).await?;
     let mut hasher = Sha256::new();
-    io::copy(&mut file, &mut hasher)?;
+    let mut buffer = [0; 1024];
+
+    loop {
+        let n = file.read(&mut buffer).await?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buffer[..n]);
+    }
+
     let actual_hash = hasher.finalize();
 
     Ok(format!("{:x}", actual_hash) == expected_hash)
