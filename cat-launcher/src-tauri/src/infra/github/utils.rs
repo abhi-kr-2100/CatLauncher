@@ -30,12 +30,12 @@ pub async fn fetch_github_releases(
         return Ok(Vec::new());
     }
 
+    // GitHub API returns at most 1000 releases.
+    let limit = num_releases.unwrap_or(1000).min(1000);
+
     let mut all_releases = Vec::new();
 
-    let per_page = match num_releases {
-        Some(n) if n < 100 => n,
-        _ => 100,
-    };
+    let per_page = limit.min(100);
 
     let mut next_url = Some(format!(
         "https://api.github.com/repos/{}/releases?per_page={}",
@@ -43,6 +43,10 @@ pub async fn fetch_github_releases(
     ));
 
     while let Some(url) = next_url {
+        if all_releases.len() >= limit {
+            break;
+        }
+
         let response = client.get(&url).send().await?;
         response.error_for_status_ref()?;
 
@@ -64,12 +68,6 @@ pub async fn fetch_github_releases(
             }
             Err(e) => {
                 return Err(GitHubReleaseFetchError::Parse(e));
-            }
-        }
-
-        if let Some(n) = num_releases {
-            if all_releases.len() >= n {
-                next_url = None; // Stop fetching more pages
             }
         }
     }
