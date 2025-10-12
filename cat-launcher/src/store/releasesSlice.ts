@@ -61,8 +61,10 @@ export const releasesSlice = createSlice({
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
 
-      if (status === "Finished") {
+      if (status === "Success") {
         state.fetchStatusByVariant[variant] = FetchStatus.Idle;
+      } else if (status === "Error") {
+        state.fetchStatusByVariant[variant] = FetchStatus.Error;
       }
     },
   },

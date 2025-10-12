@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::path::Path;
 
 use reqwest::Client;
@@ -5,31 +6,27 @@ use serde::Serialize;
 use ts_rs::TS;
 
 use crate::fetch_releases::utils::{
-    get_cached_releases, get_default_releases, merge_releases, select_releases_for_cache,
-    write_cached_releases,
+    get_cached_releases, get_default_releases, get_releases_payload, merge_releases,
+    select_releases_for_cache, write_cached_releases, WriteCacheError,
 };
-use crate::game_release::game_release::{GameRelease, GameReleaseStatus, ReleaseType};
-use crate::infra::github::release::GitHubRelease;
+use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{fetch_github_releases, GitHubReleaseFetchError};
 use crate::infra::utils::get_github_repo_for_variant;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
-pub enum FetchReleasesError<E> {
-    #[error("failed to fetch releases: {0}")]
+pub enum FetchReleasesError<E: Error> {
+    #[error("failed to get releases from github: {0}")]
     Fetch(#[from] GitHubReleaseFetchError),
-    #[error("callback failed: {0}")]
-    Callback(E),
+
+    #[error("failed to cache releases: {0}")]
+    Cache(#[from] WriteCacheError),
+
+    #[error("failed to send release update: {0}")]
+    Send(E),
 }
 
-#[derive(Clone, Serialize, TS)]
-#[ts(export)]
-pub enum ReleasesUpdateStatus {
-    InProgress,
-    Finished,
-}
-
-#[derive(Clone, Serialize, TS)]
+#[derive(Debug, Clone, Serialize, TS)]
 #[ts(export)]
 pub struct ReleasesUpdatePayload {
     pub variant: GameVariant,
@@ -37,8 +34,16 @@ pub struct ReleasesUpdatePayload {
     pub status: ReleasesUpdateStatus,
 }
 
+#[derive(Debug, Clone, Serialize, TS, PartialEq, Eq)]
+#[ts(export)]
+pub enum ReleasesUpdateStatus {
+    Fetching,
+    Success,
+    Error,
+}
+
 impl GameVariant {
-    pub(crate) async fn fetch_releases<F, E>(
+    pub async fn fetch_releases<E, F>(
         &self,
         client: &Client,
         cache_dir: &Path,
@@ -46,63 +51,26 @@ impl GameVariant {
         on_releases: F,
     ) -> Result<(), FetchReleasesError<E>>
     where
+        E: Error,
         F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
     {
-        let default_releases = get_default_releases(&self, default_releases_dir).await;
-        let default_game_releases = default_releases.iter().map(|r| (r, *self).into()).collect();
-
-        let payload = ReleasesUpdatePayload {
-            variant: *self,
-            releases: default_game_releases,
-            status: ReleasesUpdateStatus::InProgress,
-        };
-        on_releases(payload).map_err(FetchReleasesError::Callback)?;
+        let default_releases = get_default_releases(self, default_releases_dir).await;
+        let payload = get_releases_payload(self, &default_releases, ReleasesUpdateStatus::Fetching);
+        on_releases(payload).map_err(FetchReleasesError::Send)?;
 
         let cached_releases = get_cached_releases(self, cache_dir).await;
-        let cached_game_releases: Vec<GameRelease> =
-            cached_releases.iter().map(|r| (r, *self).into()).collect();
-
-        let payload = ReleasesUpdatePayload {
-            variant: *self,
-            releases: cached_game_releases,
-            status: ReleasesUpdateStatus::InProgress,
-        };
-        on_releases(payload).map_err(FetchReleasesError::Callback)?;
+        let payload = get_releases_payload(self, &cached_releases, ReleasesUpdateStatus::Fetching);
+        on_releases(payload).map_err(FetchReleasesError::Send)?;
 
         let repo = get_github_repo_for_variant(self);
-        let fetched_releases = fetch_github_releases(client, repo).await?;
+        let fetched_releases = fetch_github_releases(client, repo, Some(10)).await?;
+        let payload = get_releases_payload(self, &fetched_releases, ReleasesUpdateStatus::Success);
+        on_releases(payload).map_err(FetchReleasesError::Send)?;
 
-        let all_releases = merge_releases(&fetched_releases, &cached_releases);
-        let to_cache = select_releases_for_cache(&all_releases);
-
-        // Successfully writing to cache is not important. Ignore if an error happens.
-        let _ = write_cached_releases(self, &to_cache, cache_dir).await;
-
-        let game_releases: Vec<GameRelease> = to_cache.iter().map(|r| (r, *self).into()).collect();
-
-        let payload = ReleasesUpdatePayload {
-            variant: *self,
-            releases: game_releases,
-            status: ReleasesUpdateStatus::Finished,
-        };
-        on_releases(payload).map_err(FetchReleasesError::Callback)?;
+        let merged = merge_releases(&cached_releases, &default_releases);
+        let to_cache = select_releases_for_cache(&merged);
+        write_cached_releases(self, &to_cache, cache_dir).await?;
 
         Ok(())
-    }
-}
-
-impl<'a> From<(&'a GitHubRelease, GameVariant)> for GameRelease {
-    fn from((r, variant): (&'a GitHubRelease, GameVariant)) -> Self {
-        GameRelease {
-            variant,
-            version: r.tag_name.clone(),
-            release_type: if r.prerelease {
-                ReleaseType::Experimental
-            } else {
-                ReleaseType::Stable
-            },
-            status: GameReleaseStatus::Unknown,
-            created_at: r.created_at,
-        }
     }
 }
