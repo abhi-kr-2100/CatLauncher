@@ -54,12 +54,13 @@ impl GameVariant {
         E: Error,
         F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
     {
+        // Both default and cached releases are stored locally, and are quick to fetch.
+        // We fetch them together so that if the last played release was cached, the frontend
+        // can preselect it.
         let default_releases = get_default_releases(self, default_releases_dir).await;
-        let payload = get_releases_payload(self, &default_releases, ReleasesUpdateStatus::Fetching);
-        on_releases(payload).map_err(FetchReleasesError::Send)?;
-
         let cached_releases = get_cached_releases(self, cache_dir).await;
-        let payload = get_releases_payload(self, &cached_releases, ReleasesUpdateStatus::Fetching);
+        let merged = merge_releases(&default_releases, &cached_releases);
+        let payload = get_releases_payload(self, &merged, ReleasesUpdateStatus::Fetching);
         on_releases(payload).map_err(FetchReleasesError::Send)?;
 
         let repo = get_github_repo_for_variant(self);
@@ -67,7 +68,7 @@ impl GameVariant {
         let payload = get_releases_payload(self, &fetched_releases, ReleasesUpdateStatus::Success);
         on_releases(payload).map_err(FetchReleasesError::Send)?;
 
-        let merged = merge_releases(&cached_releases, &default_releases);
+        let merged = merge_releases(&cached_releases, &fetched_releases);
         let to_cache = select_releases_for_cache(&merged);
         write_cached_releases(self, &to_cache, cache_dir).await?;
 
