@@ -1,0 +1,61 @@
+name: "Build Tauri Apps on Release"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: "macos-latest" # for ARM based Macs
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based Macs
+            args: "--target x86_64-apple-darwin"
+          - platform: "ubuntu-22.04"
+            args: ""
+          - platform: "windows-latest"
+            args: ""
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # These targets are only required for macOS. Falling back to '' for Windows and Linux speeds up their builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Install dependencies for Linux
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: pnpm --dir cat-launcher install --frozen-lockfile
+
+      - name: Build and publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: "./cat-launcher"
+          updaterJsonPreferNsis: true
+          updaterJsonKeepUniversal: true
+          tauriScript: pnpm tauri
+          args: ${{ matrix.args }}
+          releaseId: ${{ github.event.release.id }}
