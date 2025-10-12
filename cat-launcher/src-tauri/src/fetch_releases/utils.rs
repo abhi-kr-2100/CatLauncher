@@ -5,8 +5,9 @@ use std::path::Path;
 use tokio::fs;
 use tokio::fs::create_dir_all;
 
+use crate::fetch_releases::fetch_releases::{ReleasesUpdatePayload, ReleasesUpdateStatus};
 use crate::filesystem::paths::get_releases_cache_filepath;
-use crate::game_release::game_release::GameRelease;
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus, ReleaseType};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{read_from_file, write_to_file, WriteToFileError};
@@ -78,10 +79,10 @@ pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubReleas
         .collect()
 }
 
-pub fn merge_releases(fetched: &[GitHubRelease], cached: &[GitHubRelease]) -> Vec<GitHubRelease> {
-    let map: HashMap<u64, GitHubRelease> = cached
+pub fn merge_releases(r1: &[GitHubRelease], r2: &[GitHubRelease]) -> Vec<GitHubRelease> {
+    let map: HashMap<u64, GitHubRelease> = r2
         .iter()
-        .chain(fetched.iter())
+        .chain(r1.iter())
         .map(|r| (r.id, r.clone()))
         .collect();
 
@@ -98,5 +99,36 @@ pub async fn get_assets(release: &GameRelease, cache_dir: &Path) -> Vec<GitHubAs
         release.assets.clone()
     } else {
         Vec::new()
+    }
+}
+
+pub fn get_releases_payload(
+    variant: &GameVariant,
+    gh_releases: &[GitHubRelease],
+    status: ReleasesUpdateStatus,
+) -> ReleasesUpdatePayload {
+    let releases = gh_releases
+        .iter()
+        .map(|r| {
+            let release_type = if r.prerelease {
+                ReleaseType::Experimental
+            } else {
+                ReleaseType::Stable
+            };
+
+            GameRelease {
+                variant: *variant,
+                release_type,
+                version: r.tag_name.clone(),
+                created_at: r.created_at,
+                status: GameReleaseStatus::Unknown,
+            }
+        })
+        .collect();
+
+    ReleasesUpdatePayload {
+        variant: *variant,
+        releases,
+        status,
     }
 }
