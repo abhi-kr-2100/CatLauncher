@@ -1,3 +1,7 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -6,11 +10,9 @@ import {
   getInstallationStatus,
   installReleaseForVariant,
   launchGame,
-  toastCL,
-} from "@/lib/utils";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+} from "@/lib/commands";
+import { queryKeys } from "@/lib/queryKeys";
+import { toastCL } from "@/lib/utils";
 
 export default function InteractionButton({
   variant,
@@ -23,7 +25,7 @@ export default function InteractionButton({
     isLoading: isInstallationStatusLoading,
     error: installationStatusError,
   } = useQuery<GameReleaseStatus>({
-    queryKey: ["installation_status", variant, selectedReleaseId],
+    queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
     queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
     enabled: Boolean(selectedReleaseId),
   });
@@ -36,7 +38,7 @@ export default function InteractionButton({
     toastCL(
       "error",
       `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
-      installationStatusError
+      installationStatusError,
     );
   }, [installationStatusError, variant, selectedReleaseId]);
 
@@ -64,21 +66,21 @@ export default function InteractionButton({
     try {
       const updatedRelease = await installReleaseForVariant(
         variant,
-        selectedReleaseId
+        selectedReleaseId,
       );
       queryClient.setQueryData(
-        ["releases", variant],
+        queryKeys.releases(variant),
         (old: GameRelease[] | undefined) =>
           old?.map((o) => {
             if (o.version !== selectedReleaseId) {
               return o;
             }
             return updatedRelease;
-          })
+          }),
       );
       queryClient.setQueryData(
-        ["installation_status", variant, selectedReleaseId],
-        (): GameReleaseStatus => "ReadyToPlay"
+        queryKeys.installationStatus(variant, selectedReleaseId),
+        (): GameReleaseStatus => "ReadyToPlay",
       );
     } catch (e) {
       toastCL("error", "Failed to install release.", e);
@@ -95,8 +97,8 @@ export default function InteractionButton({
     try {
       await launchGame(variant, selectedReleaseId);
       queryClient.setQueryData(
-        ["last_played_version", variant],
-        () => selectedReleaseId
+        queryKeys.lastPlayedVersion(variant),
+        () => selectedReleaseId,
       );
     } catch (e) {
       toastCL("error", "Failed to launch game.", e);
