@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumIter, IntoStaticStr};
+use strum_macros::{Display, EnumIter, IntoStaticStr};
 use ts_rs::TS;
 
 #[derive(
     Debug,
+    Display,
     Clone,
     Copy,
     PartialEq,
@@ -14,11 +15,9 @@ use ts_rs::TS;
     Serialize,
     IntoStaticStr,
     TS,
-    Default,
 )]
 #[non_exhaustive]
 pub enum GameVariant {
-    #[default]
     DarkDaysAhead,
     BrightNights,
     TheLastGeneration,
