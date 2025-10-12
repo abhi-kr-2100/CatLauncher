@@ -41,14 +41,15 @@ impl GameRelease {
         data_dir: &Path,
     ) -> Result<(), LaunchGameError> {
         let executable_path =
-            get_game_executable_filepath(&self.variant, &self.version, os, data_dir)?;
+            get_game_executable_filepath(&self.variant, &self.version, os, data_dir).await?;
         let executable_dir = executable_path
             .parent()
             .ok_or(LaunchGameError::ExecutableDir)?;
 
         let last_played_version = self
             .variant
-            .get_last_played_version(data_dir)?
+            .get_last_played_version(data_dir)
+            .await?
             .unwrap_or(self.version.clone());
 
         backup_and_copy_save_files(
@@ -65,7 +66,8 @@ impl GameRelease {
             .spawn()?;
 
         self.variant
-            .set_last_played_version(&self.version, data_dir)?;
+            .set_last_played_version(&self.version, data_dir)
+            .await?;
 
         Ok(())
     }

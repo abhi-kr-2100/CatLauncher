@@ -41,7 +41,7 @@ pub async fn get_release_by_id(
     cache_dir: &Path,
     data_dir: &Path,
 ) -> Result<GameRelease, GetReleaseError> {
-    let gh_releases = get_cached_releases(variant, cache_dir);
+    let gh_releases = get_cached_releases(variant, cache_dir).await;
     let gh_release = match gh_releases.into_iter().find(|r| r.tag_name == release_id) {
         Some(r) => r,
         None => return Err(GetReleaseError::NotFound(release_id.into())),

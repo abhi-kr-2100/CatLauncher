@@ -1,9 +1,10 @@
-use std::fs::{create_dir_all, read_dir, File};
+use std::fs::{read_dir, File};
 use std::io;
 use std::path::{Path, PathBuf};
 
 use flate2::read::GzDecoder;
 use tar::Archive;
+use tokio::fs;
 use tokio::task::JoinError;
 use zip::result::ZipError;
 use zip::write::FileOptions;
@@ -32,6 +33,10 @@ pub async fn extract_archive(
     let archive_path = archive_path.to_owned();
     let target_dir = target_dir.to_owned();
 
+    if fs::metadata(&target_dir).await.is_err() {
+        fs::create_dir_all(&target_dir).await?;
+    }
+
     tokio::task::spawn_blocking(move || {
         let extension = archive_path.extension().and_then(|s| s.to_str());
 
@@ -39,10 +44,6 @@ pub async fn extract_archive(
             .file_stem()
             .and_then(|s| Path::new(s).extension())
             .and_then(|s| s.to_str());
-
-        if !target_dir.exists() {
-            create_dir_all(&target_dir)?;
-        }
 
         match extension {
             Some("zip") => {
@@ -98,12 +99,19 @@ pub async fn create_zip_archive(
     let source_dir = source_dir.to_owned();
     let archive_path = archive_path.to_owned();
 
-    if archive_path.is_dir() {
-        return Err(ArchiveCreationError::DestinationIsDirectory);
+    if let Ok(metadata) = fs::metadata(&archive_path).await {
+        if metadata.is_dir() {
+            return Err(ArchiveCreationError::DestinationIsDirectory);
+        }
     }
 
-    if !source_dir.is_dir() {
-        return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir);
+    match fs::metadata(&source_dir).await {
+        Ok(metadata) => {
+            if !metadata.is_dir() {
+                return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir);
+            }
+        }
+        Err(_) => return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir),
     }
 
     let paths_to_include: Vec<PathBuf> = paths_to_include.iter().map(|p| p.to_path_buf()).collect();
@@ -146,11 +154,12 @@ fn add_to_zip(
 
     let options: FileOptions<'_, ()> = FileOptions::default().compression_method(Deflated);
 
-    if path_to_add.is_file() {
+    let metadata = std::fs::metadata(path_to_add)?;
+    if metadata.is_file() {
         zip.start_file(relative_path.to_string_lossy(), options)?;
         let mut file = File::open(&path_to_add)?;
         io::copy(&mut file, zip)?;
-    } else if path_to_add.is_dir() {
+    } else if metadata.is_dir() {
         if !relative_path.as_os_str().is_empty() {
             let dir_path_str = format!("{}/", relative_path.to_string_lossy());
             zip.add_directory(&dir_path_str, options)?;
