@@ -2,8 +2,9 @@ use std::io;
 use std::path::Path;
 use std::process::Command;
 
-use crate::filesystem::paths::{get_game_executable_filepath, AssetDownloadDirError,
-    AssetExtractionDirError, GetExecutablePathError,
+use crate::filesystem::paths::{
+    get_game_executable_filepath, AssetDownloadDirError, AssetExtractionDirError,
+    GetExecutablePathError,
 };
 use crate::game_release::GameRelease;
 use crate::last_played::last_played::LastPlayedError;
