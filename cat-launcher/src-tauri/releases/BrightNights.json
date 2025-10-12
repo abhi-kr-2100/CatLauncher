@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": 215342457,
+    "tag_name": "v0.8.0",
+    "name": "Cataclysm-BN v0.8.0",
+    "prerelease": false,
+    "created_at": "2025-04-29T00:05:38Z",
+    "assets": [
+      {
+        "id": 250292097,
+        "name": "cbn-linux-tiles-x64-v0.8.0.tar.gz",
+        "digest": null,
+        "browser_download_url": "https://github.com/cataclysmbnteam/Cataclysm-BN/releases/download/v0.8.0/cbn-linux-tiles-x64-v0.8.0.tar.gz"
+      },
+      {
+        "id": 250291336,
+        "name": "cbn-osx-tiles-arm-v0.8.0.dmg",
+        "digest": null,
+        "browser_download_url": "https://github.com/cataclysmbnteam/Cataclysm-BN/releases/download/v0.8.0/cbn-osx-tiles-arm-v0.8.0.dmg"
+      },
+      {
+        "id": 250294484,
+        "name": "cbn-windows-tiles-x64-msvc-v0.8.0.zip",
+        "digest": null,
+        "browser_download_url": "https://github.com/cataclysmbnteam/Cataclysm-BN/releases/download/v0.8.0/cbn-windows-tiles-x64-msvc-v0.8.0.zip"
+      }
+    ]
+  }
+]
