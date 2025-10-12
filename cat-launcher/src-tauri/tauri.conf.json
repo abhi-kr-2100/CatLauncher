@@ -31,6 +31,15 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["releases/*.json"]
+    "resources": ["releases/*.json"],
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDRDRjlBOThDNTgwQzE0RkEKUldUNkZBeFlqS241VEtGNHhJRm9MRHhpVUc4blF0Zm1vQXF0NzJxeXBaMFZXM1hWeDNSRFBZMWkK",
+      "endpoints": [
+        "https://raw.githubusercontent.com/abhi-kr-2100/CatLauncher/refs/heads/release/latest.json"
+      ]
+    }
   }
 }
