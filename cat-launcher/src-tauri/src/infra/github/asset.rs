@@ -8,7 +8,7 @@ pub struct GitHubAsset {
     pub id: u64,
     pub browser_download_url: String,
     pub name: String,
-    pub digest: String,
+    pub digest: Option<String>,
 }
 
 #[derive(thiserror::Error, Debug)]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": 187090088,
+    "tag_name": "0.H-RELEASE",
+    "prerelease": false,
+    "created_at": "2024-11-23T03:33:01Z",
+    "assets": [
+      {
+        "id": 208602462,
+        "name": "cdda-linux-with-graphics-and-sounds-x64-2024-11-23-1857.tar.gz",
+        "digest": null,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-linux-with-graphics-and-sounds-x64-2024-11-23-1857.tar.gz"
+      },
+      {
+        "id": 208602528,
+        "name": "cdda-osx-with-graphics-universal-2024-11-23-1857.dmg",
+        "digest": null,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-osx-with-graphics-universal-2024-11-23-1857.dmg"
+      },
+      {
+        "id": 208602419,
+        "name": "cdda-windows-with-graphics-and-sounds-x64-2024-11-23-1857.zip",
+        "digest": null,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-windows-with-graphics-and-sounds-x64-2024-11-23-1857.zip"
+      }
+    ]
+  }
+]
