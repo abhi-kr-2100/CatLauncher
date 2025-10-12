@@ -64,7 +64,9 @@ impl GameVariant {
         on_releases(payload).map_err(FetchReleasesError::Send)?;
 
         let repo = get_github_repo_for_variant(self);
-        let fetched_releases = fetch_github_releases(client, repo, Some(10)).await?;
+        // Fetching 100 releases makes it likely that we have the last played release.
+        // TODO: Fetch the last played release separately.
+        let fetched_releases = fetch_github_releases(client, repo, Some(100)).await?;
         let payload = get_releases_payload(self, &fetched_releases, ReleasesUpdateStatus::Success);
         on_releases(payload).map_err(FetchReleasesError::Send)?;
 
