@@ -1,14 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import clsx, { type ClassValue } from "clsx";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-
-import type { GameRelease } from "@/generated-types/GameRelease";
-import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
-import type { GameVariant } from "@/generated-types/GameVariant";
-import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
-import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,79 +9,11 @@ export function cn(...inputs: ClassValue[]) {
 export function toastCL(
   level: "error" | "warning",
   message: string,
-  error: unknown
+  error: unknown,
 ) {
   toast[level](message);
 
   if (import.meta.env.DEV) {
     toast.info(JSON.stringify(error));
   }
-}
-
-export async function listenToReleasesUpdate(
-  onUpdate: (payload: ReleasesUpdatePayload) => void
-) {
-  return await listen<ReleasesUpdatePayload>("releases-update", (event) => {
-    onUpdate(event.payload);
-  });
-}
-
-export async function triggerFetchReleasesForVariant(
-  variant: GameVariant
-): Promise<void> {
-  await invoke("fetch_releases_for_variant", {
-    variant,
-  });
-}
-
-export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
-  const response = await invoke<GameVariantInfo[]>("get_game_variants_info");
-  return response;
-}
-
-export async function getLastPlayedVersion(
-  variant: GameVariant
-): Promise<string> {
-  const response = await invoke<string | null>("get_last_played_version", {
-    variant,
-  });
-
-  // useQuery doesn't work with null/undefined query data. That's why "" is returned.
-  return response ?? "";
-}
-
-export async function installReleaseForVariant(
-  variant: GameVariant,
-  releaseId: string
-): Promise<GameRelease> {
-  const response = await invoke<GameRelease>("install_release", {
-    variant,
-    releaseId,
-  });
-
-  return response;
-}
-
-export async function launchGame(
-  variant: GameVariant,
-  releaseId: string
-): Promise<void> {
-  const response = await invoke<void>("launch_game", {
-    variant,
-    releaseId,
-  });
-
-  return response;
-}
-
-export async function getInstallationStatus(
-  variant: GameVariant,
-  releaseId: string
-): Promise<GameReleaseStatus> {
-  const response = await invoke<GameReleaseStatus>("get_installation_status", {
-    variant,
-    releaseId,
-  });
-
-  return response;
 }
