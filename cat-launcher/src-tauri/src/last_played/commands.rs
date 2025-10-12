@@ -14,13 +14,13 @@ pub enum LastPlayedCommandError {
 }
 
 #[command]
-pub fn get_last_played_version(
+pub async fn get_last_played_version(
     app_handle: AppHandle,
     variant: GameVariant,
 ) -> Result<Option<String>, LastPlayedCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
 
-    let last_played_version = variant.get_last_played_version(&data_dir)?;
+    let last_played_version = variant.get_last_played_version(&data_dir).await?;
 
     Ok(last_played_version)
 }

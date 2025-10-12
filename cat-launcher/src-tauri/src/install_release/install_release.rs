@@ -54,9 +54,10 @@ impl GameRelease {
             return Ok(());
         }
 
-        let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir)?;
+        let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir).await?;
         let asset = self
             .get_asset(os, cache_dir)
+            .await
             .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 
         if self.status == GameReleaseStatus::NotDownloaded
@@ -70,7 +71,7 @@ impl GameRelease {
 
         let download_filepath = download_dir.join(&asset.name);
         let installation_dir =
-            get_or_create_asset_installation_dir(&self.variant, &self.version, data_dir)?;
+            get_or_create_asset_installation_dir(&self.variant, &self.version, data_dir).await?;
         extract_archive(&download_filepath, &installation_dir).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
