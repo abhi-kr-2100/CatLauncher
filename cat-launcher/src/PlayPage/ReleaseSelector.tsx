@@ -8,19 +8,20 @@ import { Button } from "@/components/ui/button";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
-  cn,
   getLastPlayedVersion,
-  toastCL,
   triggerFetchReleasesForVariant,
-} from "@/lib/utils";
+} from "@/lib/commands";
+import { queryKeys } from "@/lib/queryKeys";
+import { cn, toastCL } from "@/lib/utils";
 import {
   FetchStatus,
+  onFetchingReleasesFailed,
   selectFetchStatusForVariant,
   selectReleasesForVariant,
-  onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
 import { RootState } from "@/store/store";
+
 import { useReleaseEvents } from "./hooks";
 
 export default function ReleaseSelector({
@@ -60,7 +61,7 @@ export default function ReleaseSelector({
     isLoading: isLastPlayedVersionLoading,
     error: lastPlayedVersionError,
   } = useQuery<string | undefined>({
-    queryKey: ["last_played_version", variant],
+    queryKey: queryKeys.lastPlayedVersion(variant),
     queryFn: () => getLastPlayedVersion(variant),
   });
 
