@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
+use tokio::fs;
 
 use crate::filesystem::paths::{get_last_played_filepath, LastPlayedFileError};
 use crate::infra::utils::{read_from_file, write_to_file, ReadFromFileError, WriteToFileError};
@@ -25,35 +26,35 @@ pub enum LastPlayedError {
 }
 
 impl GameVariant {
-    pub fn get_last_played_version(
+    pub async fn get_last_played_version(
         &self,
         data_dir: &Path,
     ) -> Result<Option<String>, LastPlayedError> {
-        let file_path = get_last_played_filepath(self, data_dir)?;
+        let file_path = get_last_played_filepath(self, data_dir).await?;
 
-        if !file_path.exists() {
-            return Ok(None);
-        }
+        match fs::metadata(&file_path).await {
+            Ok(metadata) if metadata.is_file() => {}
+            _ => return Ok(None),
+        };
 
-        let mut data: LastPlayedData = read_from_file(&file_path)?;
+        let mut data: LastPlayedData = read_from_file(&file_path).await?;
         let variant_key: &'static str = self.into();
 
         Ok(data.versions.remove(variant_key))
     }
 
-    pub fn set_last_played_version(
+    pub async fn set_last_played_version(
         &self,
         version: &str,
         data_dir: &Path,
     ) -> Result<(), LastPlayedError> {
-        let file_path = get_last_played_filepath(self, data_dir)?;
+        let file_path = get_last_played_filepath(self, data_dir).await?;
 
-        let mut data = if file_path.exists() {
-            read_from_file(&file_path)?
-        } else {
-            LastPlayedData {
+        let mut data = match fs::metadata(&file_path).await {
+            Ok(metadata) if metadata.is_file() => read_from_file(&file_path).await?,
+            _ => LastPlayedData {
                 versions: std::collections::HashMap::new(),
-            }
+            },
         };
 
         let variant_key: &'static str = self.into();
@@ -61,7 +62,7 @@ impl GameVariant {
         data.versions
             .insert(variant_key.into(), version.to_string());
 
-        write_to_file(&file_path, &data)?;
+        write_to_file(&file_path, &data).await?;
 
         Ok(())
     }
