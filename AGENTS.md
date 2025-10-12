@@ -21,8 +21,9 @@ The frontend is a standard React application and follows a similar vertical slic
 ### Frontend-Backend Interaction
 
 The frontend communicates with the backend by invoking the commands defined in the Rust `commands.rs` files. To keep the UI components decoupled from the backend implementation:
-- All Tauri `invoke` calls are wrapped in async functions inside `src/lib/utils.ts`.
+- All Tauri `invoke` calls are wrapped in async functions inside `src/lib/commands.ts`.
 - UI components call these wrapper functions, remaining unaware of the underlying Tauri API. This makes the components more reusable and easier to test.
+- TanStack Query keys are collected into constants in `src/lib/queryKeys.ts`.
 
 ## Technology Stack
 
@@ -42,7 +43,9 @@ The frontend communicates with the backend by invoking the commands defined in t
 
 -   `cat-launcher/`: The root directory for the Tauri project.
     -   `src/`: Contains all the frontend React source code.
-        -   `lib/utils.ts`: A crucial file that wraps all Tauri backend commands, decoupling the UI components from the backend API.
+        -   `lib/commands.ts`: Wraps all Tauri backend commands, decoupling the UI components from the backend API.
+        -   `lib/queryKeys.ts`: Contains constants for TanStack Query keys.
+        -   `lib/utils.ts`: Contains utility functions.
         -   `PlayPage/`: An example of a screen-based vertical slice on the frontend.
     -   `src-tauri/`: Contains all the backend Rust source code.
         -   `src/`: The Rust crate for the backend.
@@ -198,7 +201,7 @@ Instead, define a custom error type using the `thiserror` crate, and use it.
 When working on this project, please follow these guidelines:
 
 1.  **Understand the Architecture:** Before making changes, familiarize yourself with the project's architecture as described in this document.
-2.  **Maintain Architecture:** When adding new features or modifying existing code, adhere to the established architectural patterns. For example, new backend features should be implemented as new vertical slices, and frontend-backend communication should continue to use the wrappers in `lib/utils.ts`.
+2.  **Maintain Architecture:** When adding new features or modifying existing code, adhere to the established architectural patterns. For example, new backend features should be implemented as new vertical slices, and frontend-backend communication should continue to use the wrappers in `lib/commands.ts`.
 3.  **Perform Self-Review:** After making any change, run `cr review --plain -t uncommitted` if the command is available. Address any feedback provided before proceeding.
 4.  **Run Tests:** After making any changes, run the relevant tests to ensure that you haven't introduced any regressions.
 5.  **Update Documentation:** If you add or modify features, update this `AGENTS.md` file and the `README.md` as needed.
