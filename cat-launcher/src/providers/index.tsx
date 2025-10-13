@@ -4,8 +4,10 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
 
+import AutoUpdateNotifier from "@/components/AutoUpdateNotifier";
 import { Toaster } from "@/components/ui/sonner";
 import { store } from "@/store/store";
+import { useFrontendReady } from "./hooks";
 
 export interface ProvidersProps {
   children: ReactNode;
@@ -14,11 +16,14 @@ export interface ProvidersProps {
 const queryClient = new QueryClient();
 
 export default function Providers({ children }: ProvidersProps) {
+  useFrontendReady();
+
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster />
+        <AutoUpdateNotifier />
         {import.meta.env.DEV && (
           <TanStackDevtools
             plugins={[
