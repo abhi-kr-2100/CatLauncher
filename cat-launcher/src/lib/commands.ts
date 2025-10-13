@@ -1,11 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
+import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
@@ -13,6 +14,18 @@ export async function listenToReleasesUpdate(
   return await listen<ReleasesUpdatePayload>("releases-update", (event) => {
     onUpdate(event.payload);
   });
+}
+
+export async function listenToAutoupdateStatus(
+  onUpdate: (payload: UpdateStatus) => void,
+) {
+  return await listen<UpdateStatus>("autoupdate-status", (event) => {
+    onUpdate(event.payload);
+  });
+}
+
+export async function onFrontendReady(): Promise<void> {
+  await emit("frontend-ready");
 }
 
 export async function triggerFetchReleasesForVariant(
