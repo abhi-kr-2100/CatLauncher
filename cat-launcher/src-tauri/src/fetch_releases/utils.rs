@@ -2,11 +2,12 @@ use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::io;
 use std::path::Path;
+
 use tokio::fs;
 use tokio::fs::create_dir_all;
 
 use crate::fetch_releases::fetch_releases::{ReleasesUpdatePayload, ReleasesUpdateStatus};
-use crate::filesystem::paths::get_releases_cache_filepath;
+use crate::filesystem::paths::{get_default_releases_file_path, get_releases_cache_filepath};
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus, ReleaseType};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
@@ -29,9 +30,9 @@ pub async fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec
 
 pub async fn get_default_releases(
     variant: &GameVariant,
-    default_releases_dir: &Path,
+    resources_dir: &Path,
 ) -> Vec<GitHubRelease> {
-    let default_releases_file = default_releases_dir.join(format!("{}.json", variant.id()));
+    let default_releases_file = get_default_releases_file_path(variant, resources_dir);
     if !default_releases_file.is_file() {
         return Vec::new();
     }
@@ -89,11 +90,16 @@ pub fn merge_releases(r1: &[GitHubRelease], r2: &[GitHubRelease]) -> Vec<GitHubR
     map.into_values().collect()
 }
 
-pub async fn get_assets(release: &GameRelease, cache_dir: &Path) -> Vec<GitHubAsset> {
+pub async fn get_assets(
+    release: &GameRelease,
+    cache_dir: &Path,
+    resources_dir: &Path,
+) -> Vec<GitHubAsset> {
     let cached_releases = get_cached_releases(&release.variant, cache_dir).await;
-    let maybe_release = cached_releases
-        .iter()
-        .find(|r| r.tag_name == release.version);
+    let default_releases = get_default_releases(&release.variant, resources_dir).await;
+    let all_releases = merge_releases(&cached_releases, &default_releases);
+
+    let maybe_release = all_releases.iter().find(|r| r.tag_name == release.version);
 
     if let Some(release) = maybe_release {
         release.assets.clone()
