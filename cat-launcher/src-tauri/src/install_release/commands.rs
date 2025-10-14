@@ -31,10 +31,19 @@ pub async fn install_release(
 ) -> Result<GameRelease, InstallReleaseCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
     let data_dir = app_handle.path().app_local_data_dir()?;
+    let resource_dir = app_handle.path().resource_dir()?;
 
-    let mut release = get_release_by_id(&variant, release_id, OS, &cache_dir, &data_dir).await?;
+    let mut release = get_release_by_id(
+        &variant,
+        release_id,
+        OS,
+        &cache_dir,
+        &data_dir,
+        &resource_dir,
+    )
+    .await?;
     release
-        .install_release(&HTTP_CLIENT, OS, &cache_dir, &data_dir)
+        .install_release(&HTTP_CLIENT, OS, &cache_dir, &data_dir, &resource_dir)
         .await?;
 
     Ok(release)

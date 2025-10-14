@@ -47,10 +47,17 @@ pub async fn get_installation_status(
 ) -> Result<GameReleaseStatus, InstallationStatusCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let cache_dir = app_handle.path().app_cache_dir()?;
+    let resource_dir = app_handle.path().resource_dir()?;
 
-    let release = get_release_by_id(&variant, release_id, OS, &cache_dir, &data_dir).await?;
+    let release = get_release_by_id(
+        &variant,
+        release_id,
+        OS,
+        &cache_dir,
+        &data_dir,
+        &resource_dir,
+    )
+    .await?;
 
-    Ok(release
-        .get_installation_status(OS, &cache_dir, &data_dir)
-        .await?)
+    Ok(release.status)
 }
