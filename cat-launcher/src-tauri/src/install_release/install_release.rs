@@ -43,10 +43,11 @@ impl GameRelease {
         os: &str,
         cache_dir: &Path,
         data_dir: &Path,
+        resources_dir: &Path,
     ) -> Result<(), ReleaseInstallationError> {
         if self.status == GameReleaseStatus::Unknown {
             self.status = self
-                .get_installation_status(os, cache_dir, data_dir)
+                .get_installation_status(os, cache_dir, data_dir, resources_dir)
                 .await?;
         }
 
@@ -56,7 +57,7 @@ impl GameRelease {
 
         let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir).await?;
         let asset = self
-            .get_asset(os, cache_dir)
+            .get_asset(os, cache_dir, resources_dir)
             .await
             .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 

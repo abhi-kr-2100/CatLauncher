@@ -37,8 +37,13 @@ pub enum GameReleaseStatus {
 }
 
 impl GameRelease {
-    pub async fn get_asset(&self, os: &str, cache_dir: &Path) -> Option<GitHubAsset> {
-        let assets = get_assets(self, cache_dir).await;
+    pub async fn get_asset(
+        &self,
+        os: &str,
+        cache_dir: &Path,
+        resources_dir: &Path,
+    ) -> Option<GitHubAsset> {
+        let assets = get_assets(self, cache_dir, resources_dir).await;
 
         get_platform_asset_substr(&self.variant, os)
             .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)))

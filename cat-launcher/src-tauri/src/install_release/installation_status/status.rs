@@ -1,8 +1,7 @@
 use std::path::Path;
 
 use sha2::{Digest, Sha256};
-use tokio::fs;
-use tokio::fs::File;
+use tokio::fs::{self, File};
 use tokio::io::{self, AsyncReadExt};
 
 use crate::filesystem::paths::{
@@ -32,8 +31,9 @@ impl GameRelease {
         os: &str,
         cache_dir: &Path,
         data_dir: &Path,
+        resources_dir: &Path,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
-        let asset = match self.get_asset(os, cache_dir).await {
+        let asset = match self.get_asset(os, cache_dir, resources_dir).await {
             Some(asset) => asset,
             None => return Ok(GameReleaseStatus::NotAvailable),
         };

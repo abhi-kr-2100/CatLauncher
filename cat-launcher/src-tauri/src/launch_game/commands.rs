@@ -33,8 +33,17 @@ pub async fn launch_game(
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let cache_dir = app_handle.path().app_cache_dir()?;
+    let resource_dir = app_handle.path().resource_dir()?;
 
-    let release = get_release_by_id(&variant, release_id, OS, &cache_dir, &data_dir).await?;
+    let release = get_release_by_id(
+        &variant,
+        release_id,
+        OS,
+        &cache_dir,
+        &data_dir,
+        &resource_dir,
+    )
+    .await?;
 
     let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 

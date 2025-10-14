@@ -14,6 +14,18 @@ Within each slice, the principles of **Clean Architecture** are applied:
 - **Framework Agnostic Core:** The core business logic (e.g., in `fetch_releases.rs`) is decoupled from the Tauri framework. It receives dependencies like paths and HTTP clients via arguments (dependency injection), making it easy to test in isolation.
 - **Framework Bridge:** The `commands.rs` file in each module is the only part that interacts directly with Tauri. It acts as a bridge, exposing the core logic to the frontend as Tauri commands.
 
+#### Directory and Path Handling
+
+To maintain a clean separation of concerns and enhance portability, business logic functions should not be tightly coupled to the application's directory structure.
+
+-   **Parameter Passing:** Business logic functions should only receive the top-level directory paths they need as parameters. These are typically:
+    -   `cache_dir`: The path to the application's cache directory.
+    -   `data_dir`: The path to the application's data directory.
+    -   `resources_dir`: The path to the application's resources directory.
+-   **Path Construction:** Inside the business logic functions, use the helper functions provided in `src-tauri/src/filesystem/paths.rs` to construct the exact paths to specific files or subdirectories.
+
+This approach ensures that the core logic is not cluttered with path manipulation and can be easily tested by passing in mock directory paths.
+
 ### Frontend Architecture
 
 The frontend is a standard React application and follows a similar vertical slice structure as the backend. It is organized by screens (e.g., `PlayPage`).

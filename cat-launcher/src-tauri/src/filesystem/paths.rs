@@ -1,9 +1,16 @@
 use std::io;
 use std::path::{Path, PathBuf};
 
+use tokio::fs::{create_dir_all, read_dir};
+
 use crate::filesystem::utils::get_safe_filename;
 use crate::variants::GameVariant;
-use tokio::fs::{create_dir_all, read_dir};
+
+pub fn get_default_releases_file_path(variant: &GameVariant, resources_dir: &Path) -> PathBuf {
+    resources_dir
+        .join("releases")
+        .join(format!("{}.json", variant.id()))
+}
 
 pub fn get_releases_cache_filepath(variant: &GameVariant, cache_dir: &Path) -> PathBuf {
     cache_dir
