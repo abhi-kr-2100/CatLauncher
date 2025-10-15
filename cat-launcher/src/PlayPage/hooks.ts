@@ -10,10 +10,15 @@ export function useReleaseEvents() {
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
+    let cancelled = false;
+
     listenToReleasesUpdate((payload) => {
       dispatch(updateReleasesForVariant(payload));
     })
       .then((unlistenFn) => {
+        if (cancelled) {
+          unlistenFn();
+        }
         unlisten = unlistenFn;
       })
       .catch((e) => {
@@ -21,6 +26,7 @@ export function useReleaseEvents() {
       });
 
     return () => {
+      cancelled = true;
       unlisten?.();
     };
   }, [dispatch]);

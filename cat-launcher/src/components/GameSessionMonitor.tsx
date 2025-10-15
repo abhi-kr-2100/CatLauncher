@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,65 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { listenToGameEvent } from "@/lib/commands";
 import { copyToClipboard, toastCL } from "@/lib/utils";
-import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
-import { Copy } from "lucide-react";
+import { GameStatus, useGameSessionEvents } from "@/providers/hooks";
 
 const GameSessionMonitor = () => {
-  const [isCrashDialogOpen, setIsCrashDialogOpen] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-
-    listenToGameEvent((event) => {
-      switch (event.type) {
-        case "Log":
-          setLogs((prev) => [...prev, event.payload]);
-          break;
-        case "Exit":
-          dispatch(clearCurrentlyPlaying());
-          // code is null if the process was terminated by a signal
-          if (event.payload.code !== 0) {
-            setIsCrashDialogOpen(true);
-          } else {
-            // Game exited successfully, clear logs
-            setLogs([]);
-          }
-          break;
-        case "Error":
-          dispatch(clearCurrentlyPlaying());
-          toastCL("error", "Game error", event.payload.message);
-          setLogs((prev) => [...prev, `ERROR: ${event.payload.message}`]);
-          setIsCrashDialogOpen(true);
-          break;
-      }
-    })
-      .then((fn) => {
-        unlisten = fn;
-      })
-      .catch((error) => {
-        toastCL("error", "Error listening to game events", error);
-      });
-
-    return () => {
-      unlisten?.();
-    };
-  }, [dispatch]);
-
-  const onOpenChange = (open: boolean) => {
-    setIsCrashDialogOpen(open);
-    if (!open) {
-      setLogs([]);
-    }
-  };
-
-  const logsText = logs.join("\n");
+  const { gameStatus, logsText, resetGameSessionMonitor } =
+    useGameSessionEvents();
 
   return (
-    <Dialog open={isCrashDialogOpen} onOpenChange={onOpenChange}>
+    <Dialog
+      open={gameStatus === GameStatus.CRASHED}
+      onOpenChange={resetGameSessionMonitor}
+    >
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Game exited unexpectedly</DialogTitle>
