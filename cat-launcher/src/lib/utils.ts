@@ -14,7 +14,7 @@ export function toastCL(
 ) {
   toast[level](message);
 
-  if (import.meta.env.DEV) {
+  if (import.meta.env.DEV && error !== undefined) {
     toast.info(JSON.stringify(error));
   }
 }
