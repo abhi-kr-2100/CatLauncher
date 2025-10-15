@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import releasesReducer from "./releasesSlice";
+import gameSessionReducer from "./gameSessionSlice";
 
 export const store = configureStore({
   reducer: {
     releases: releasesReducer,
+    gameSession: gameSessionReducer,
   },
 });
 

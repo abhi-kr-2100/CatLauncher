@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -13,12 +14,21 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
+import {
+  selectCurrentlyPlaying,
+  setCurrentlyPlaying,
+} from "@/store/gameSessionSlice";
 
 export default function InteractionButton({
   variant,
   selectedReleaseId,
 }: InteractionButtonProps) {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+
+  const currentlyPlaying = useSelector(selectCurrentlyPlaying);
+  const isThisVariantRunning = currentlyPlaying === variant;
+  const isAnyVariantRunning = currentlyPlaying !== null;
 
   const {
     data: installationStatus,
@@ -44,14 +54,15 @@ export default function InteractionButton({
 
   const [installing, setInstalling] = useState(false);
 
-  const actionButtonLabel =
-    installing || isInstallationStatusLoading ? (
-      <Loader2 className="animate-spin" />
-    ) : installationStatus === "ReadyToPlay" ? (
-      "Play"
-    ) : (
-      "Install"
-    );
+  const actionButtonLabel = isThisVariantRunning ? (
+    "Running..."
+  ) : installing || isInstallationStatusLoading ? (
+    <Loader2 className="animate-spin" />
+  ) : installationStatus === "ReadyToPlay" ? (
+    "Play"
+  ) : (
+    "Install"
+  );
 
   async function handleInstall() {
     if (!selectedReleaseId || installationStatusError || installing) {
@@ -96,6 +107,7 @@ export default function InteractionButton({
 
     try {
       await launchGame(variant, selectedReleaseId);
+      dispatch(setCurrentlyPlaying({ variant }));
       queryClient.setQueryData(
         queryKeys.lastPlayedVersion(variant),
         () => selectedReleaseId,
@@ -111,7 +123,8 @@ export default function InteractionButton({
     isInstallationStatusLoading ||
     Boolean(installationStatusError) ||
     installationStatus === "Unknown" ||
-    installationStatus === "NotAvailable";
+    installationStatus === "NotAvailable" ||
+    isAnyVariantRunning; // only one variant can be running at a time
 
   return (
     <Button

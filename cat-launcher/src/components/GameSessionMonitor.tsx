@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { listenToGameEvent } from "@/lib/commands";
 import { copyToClipboard, toastCL } from "@/lib/utils";
+import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
 import { Copy } from "lucide-react";
 
 const GameSessionMonitor = () => {
   const [isCrashDialogOpen, setIsCrashDialogOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -27,6 +30,7 @@ const GameSessionMonitor = () => {
           setLogs((prev) => [...prev, event.payload]);
           break;
         case "Exit":
+          dispatch(clearCurrentlyPlaying());
           // code is null if the process was terminated by a signal
           if (event.payload.code !== 0) {
             setIsCrashDialogOpen(true);
@@ -36,6 +40,7 @@ const GameSessionMonitor = () => {
           }
           break;
         case "Error":
+          dispatch(clearCurrentlyPlaying());
           toastCL("error", "Game error", event.payload.message);
           setLogs((prev) => [...prev, `ERROR: ${event.payload.message}`]);
           setIsCrashDialogOpen(true);
@@ -52,7 +57,7 @@ const GameSessionMonitor = () => {
     return () => {
       unlisten?.();
     };
-  }, []);
+  }, [dispatch]);
 
   const onOpenChange = (open: boolean) => {
     setIsCrashDialogOpen(open);
