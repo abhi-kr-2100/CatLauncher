@@ -4,10 +4,9 @@ use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, AppHandle, Emitter, Manager};
 
-use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::launch_game::launch_game::LaunchGameError;
+use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -20,9 +19,6 @@ pub enum LaunchGameCommandError {
 
     #[error("failed to get system time: {0}")]
     SystemTime(#[from] SystemTimeError),
-
-    #[error("failed to obtain release: {0}")]
-    Release(#[from] GetReleaseError),
 }
 
 #[command]
@@ -35,19 +31,28 @@ pub async fn launch_game(
     let cache_dir = app_handle.path().app_cache_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
 
-    let release = get_release_by_id(
+    let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+
+    let emitter = app_handle.clone();
+    let on_game_event = move |event: GameEvent| {
+        let emitter = emitter.clone();
+        async move {
+            // We cannot handle emit errors
+            let _ = emitter.emit("game-event", event);
+        }
+    };
+
+    launch_and_monitor_game(
         &variant,
         release_id,
         OS,
+        time,
         &cache_dir,
         &data_dir,
         &resource_dir,
+        on_game_event,
     )
     .await?;
-
-    let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
-
-    release.launch_game(OS, time, &data_dir).await?;
 
     Ok(())
 }
