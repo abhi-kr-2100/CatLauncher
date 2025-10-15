@@ -22,3 +22,7 @@ export function toastCL(
 export function openLink(url: string) {
   return openUrl(url);
 }
+
+export function copyToClipboard(text: string) {
+  return navigator.clipboard.writeText(text);
+}
