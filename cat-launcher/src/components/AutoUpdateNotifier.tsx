@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,36 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { listenToAutoupdateStatus } from "@/lib/commands";
 import { UPDATE_LINK } from "@/lib/constants";
-import { openLink, toastCL } from "@/lib/utils";
+import { openLink } from "@/lib/utils";
+import { AutoUpdateStatus, useAutoUpdateEvents } from "@/providers/hooks";
 
 const AutoUpdateNotifier = () => {
-  const [isFailureDialogOpen, setIsFailureDialogOpen] = useState(false);
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    listenToAutoupdateStatus((status) => {
-      switch (status.type) {
-        case "Failure":
-          setIsFailureDialogOpen(true);
-          break;
-      }
-    })
-      .then((unlistenFn) => {
-        unlisten = unlistenFn;
-      })
-      .catch((error) => {
-        toastCL("error", "Error listening to autoupdate status", error);
-      });
-
-    return () => {
-      unlisten?.();
-    };
-  }, []);
+  const { autoUpdateStatus, resetAutoUpdateStatus } = useAutoUpdateEvents();
 
   return (
-    <Dialog open={isFailureDialogOpen} onOpenChange={setIsFailureDialogOpen}>
+    <Dialog
+      open={autoUpdateStatus === AutoUpdateStatus.FAILURE}
+      onOpenChange={resetAutoUpdateStatus}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Autoupdate Failed</DialogTitle>
@@ -50,7 +30,7 @@ const AutoUpdateNotifier = () => {
               variant="link"
               onClick={() => {
                 openLink(UPDATE_LINK);
-                setIsFailureDialogOpen(false);
+                resetAutoUpdateStatus();
               }}
             >
               {UPDATE_LINK}
