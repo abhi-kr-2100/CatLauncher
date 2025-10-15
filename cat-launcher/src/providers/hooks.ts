@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 
+import { GameEvent } from "@/generated-types/GameEvent";
+import { UpdateStatus } from "@/generated-types/UpdateStatus";
 import {
   listenToAutoupdateStatus,
   listenToGameEvent,
   onFrontendReady,
 } from "@/lib/commands";
+import { setupEventListener } from "@/lib/utils";
 import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
-import { toastCL } from "@/lib/utils";
 
 export function useFrontendReady() {
   useEffect(() => {
@@ -34,10 +36,7 @@ export function useGameSessionEvents() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    let cancelled = false;
-
-    listenToGameEvent((event) => {
+    const gameEventHandler = (event: GameEvent) => {
       switch (event.type) {
         case "Log":
           setLogs((prev) => [...prev, event.payload]);
@@ -58,21 +57,15 @@ export function useGameSessionEvents() {
           setGameStatus(GameStatus.CRASHED);
           break;
       }
-    })
-      .then((unlistenFn) => {
-        if (cancelled) {
-          unlistenFn();
-        }
-        unlisten = unlistenFn;
-      })
-      .catch((error) => {
-        toastCL("error", "Error listening to game events", error);
-      });
-
-    return () => {
-      cancelled = true;
-      unlisten?.();
     };
+
+    const cleanup = setupEventListener(
+      listenToGameEvent,
+      gameEventHandler,
+      "Error listening to game events.",
+    );
+
+    return cleanup;
   }, [dispatch]);
 
   return { gameStatus, logsText, resetGameSessionMonitor };
@@ -92,31 +85,21 @@ export function useAutoUpdateEvents() {
   }, []);
 
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    let cancelled = false;
-
-    listenToAutoupdateStatus((status) => {
+    const autoUpdateHandler = (status: UpdateStatus) => {
       switch (status.type) {
         case "Failure":
           setAutoUpdateStatus(AutoUpdateStatus.FAILURE);
           break;
       }
-    })
-      .then((unlistenFn) => {
-        if (cancelled) {
-          unlistenFn();
-        }
-
-        unlisten = unlistenFn;
-      })
-      .catch((error) => {
-        toastCL("error", "Error listening to autoupdate status", error);
-      });
-
-    return () => {
-      cancelled = true;
-      unlisten?.();
     };
+
+    const cleanup = setupEventListener(
+      listenToAutoupdateStatus,
+      autoUpdateHandler,
+      "Error listening to autoupdate status.",
+    );
+
+    return cleanup;
   }, []);
 
   return {

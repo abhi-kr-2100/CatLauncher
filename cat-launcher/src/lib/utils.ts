@@ -26,3 +26,31 @@ export function openLink(url: string) {
 export function copyToClipboard(text: string) {
   return navigator.clipboard.writeText(text);
 }
+
+export function setupEventListener<T>(
+  listenFn: (handler: (payload: T) => void) => Promise<() => void>,
+  handler: (payload: T) => void,
+  listenErrorMessage: string,
+) {
+  let unlisten: (() => void) | undefined;
+  let cancelled = false;
+
+  listenFn(handler)
+    .then((unlistenFn) => {
+      if (cancelled) {
+        unlistenFn();
+      } else {
+        unlisten = unlistenFn;
+      }
+    })
+    .catch((error) => {
+      if (!cancelled) {
+        toastCL("error", listenErrorMessage, error);
+      }
+    });
+
+  return () => {
+    cancelled = true;
+    unlisten?.();
+  };
+}
