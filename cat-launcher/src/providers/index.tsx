@@ -8,6 +8,7 @@ import AutoUpdateNotifier from "@/components/AutoUpdateNotifier";
 import { Toaster } from "@/components/ui/sonner";
 import { store } from "@/store/store";
 import { useFrontendReady } from "./hooks";
+import GameSessionMonitor from "@/components/GameSessionMonitor";
 
 export interface ProvidersProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export default function Providers({ children }: ProvidersProps) {
         {children}
         <Toaster />
         <AutoUpdateNotifier />
+        <GameSessionMonitor />
         {import.meta.env.DEV && (
           <TanStackDevtools
             plugins={[
