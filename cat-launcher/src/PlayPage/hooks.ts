@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
 import { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import { listenToReleasesUpdate } from "@/lib/commands";
 import { setupEventListener } from "@/lib/utils";
+import { useAppDispatch } from "@/store/hooks";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
 
 export function useReleaseEvents() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const releaseUpdateHandler = (payload: ReleasesUpdatePayload) => {
