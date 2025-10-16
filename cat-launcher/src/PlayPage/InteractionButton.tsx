@@ -52,25 +52,25 @@ export default function InteractionButton({
   }, [installationStatusError, variant, selectedReleaseId]);
 
   const { mutate: install, isPending: isInstalling } = useMutation({
-    mutationFn: () => {
-      if (!selectedReleaseId) {
+    mutationFn: (releaseId: string | undefined) => {
+      if (!releaseId) {
         throw new Error("No release selected");
       }
-      return installReleaseForVariant(variant, selectedReleaseId);
+      return installReleaseForVariant(variant, releaseId);
     },
-    onSuccess: (updatedRelease) => {
+    onSuccess: (updatedRelease, releaseId) => {
       queryClient.setQueryData(
         queryKeys.releases(variant),
         (old: GameRelease[] | undefined) =>
           old?.map((o) => {
-            if (o.version !== selectedReleaseId) {
+            if (o.version !== releaseId) {
               return o;
             }
             return updatedRelease;
           }),
       );
       queryClient.setQueryData(
-        queryKeys.installationStatus(variant, selectedReleaseId!),
+        queryKeys.installationStatus(variant, releaseId),
         (): GameReleaseStatus => "ReadyToPlay",
       );
     },
@@ -80,17 +80,17 @@ export default function InteractionButton({
   });
 
   const { mutate: play } = useMutation({
-    mutationFn: () => {
-      if (!selectedReleaseId) {
+    mutationFn: (releaseId: string | undefined) => {
+      if (!releaseId) {
         throw new Error("No release selected");
       }
-      return launchGame(variant, selectedReleaseId);
+      return launchGame(variant, releaseId);
     },
-    onSuccess: () => {
+    onSuccess: (_, releaseId) => {
       dispatch(setCurrentlyPlaying({ variant }));
       queryClient.setQueryData(
         queryKeys.lastPlayedVersion(variant),
-        () => selectedReleaseId,
+        () => releaseId!,
       );
     },
     onError: (e) => {
@@ -121,7 +121,9 @@ export default function InteractionButton({
     <Button
       className="w-full"
       onClick={() =>
-        installationStatus === "ReadyToPlay" ? play() : install()
+        installationStatus === "ReadyToPlay"
+          ? play(selectedReleaseId)
+          : install(selectedReleaseId)
       }
       disabled={isActionButtonDisabled}
     >
