@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
-import type { RootState } from "./store";
 
 interface GameSessionState {
   currentlyPlaying: GameVariant | null;
@@ -29,8 +28,5 @@ export const gameSessionSlice = createSlice({
 
 export const { setCurrentlyPlaying, clearCurrentlyPlaying } =
   gameSessionSlice.actions;
-
-export const selectCurrentlyPlaying = (state: RootState) =>
-  state.gameSession.currentlyPlaying;
 
 export default gameSessionSlice.reducer;

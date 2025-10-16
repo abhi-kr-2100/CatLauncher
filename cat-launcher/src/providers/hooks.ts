@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
 
 import { GameEvent } from "@/generated-types/GameEvent";
 import { UpdateStatus } from "@/generated-types/UpdateStatus";
@@ -10,6 +9,7 @@ import {
 } from "@/lib/commands";
 import { setupEventListener } from "@/lib/utils";
 import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 export function useFrontendReady() {
   useEffect(() => {
@@ -33,7 +33,7 @@ export function useGameSessionEvents() {
     setGameStatus(GameStatus.IDLE);
   }, []);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const gameEventHandler = (event: GameEvent) => {

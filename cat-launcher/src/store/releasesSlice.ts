@@ -3,7 +3,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
-import { RootState } from "./store";
 
 export enum FetchStatus {
   Idle = "Idle",
@@ -75,15 +74,5 @@ export const {
   startFetchingReleases,
   updateReleasesForVariant,
 } = releasesSlice.actions;
-
-export const selectReleasesForVariant = (
-  state: RootState,
-  variant: GameVariant,
-) => state.releases.releasesByVariant[variant];
-
-export const selectFetchStatusForVariant = (
-  state: RootState,
-  variant: GameVariant,
-) => state.releases.fetchStatusByVariant[variant];
 
 export default releasesSlice.reducer;

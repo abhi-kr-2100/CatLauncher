@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -14,19 +13,19 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
-import {
-  selectCurrentlyPlaying,
-  setCurrentlyPlaying,
-} from "@/store/gameSessionSlice";
+import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function InteractionButton({
   variant,
   selectedReleaseId,
 }: InteractionButtonProps) {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const currentlyPlaying = useSelector(selectCurrentlyPlaying);
+  const currentlyPlaying = useAppSelector(
+    (state) => state.gameSession.currentlyPlaying,
+  );
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
