@@ -25,12 +25,16 @@ export enum GameStatus {
 export function useGameSessionEvents() {
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.IDLE);
   const [logs, setLogs] = useState<string[]>([]);
+  const [exitCode, setExitCode] = useState<number | null | undefined>(
+    undefined,
+  );
 
   const logsText = useMemo(() => logs.join("\n"), [logs]);
 
   const resetGameSessionMonitor = useCallback(() => {
     setLogs([]);
     setGameStatus(GameStatus.IDLE);
+    setExitCode(undefined);
   }, []);
 
   const dispatch = useAppDispatch();
@@ -41,16 +45,20 @@ export function useGameSessionEvents() {
         case "Log":
           setLogs((prev) => [...prev, event.payload]);
           break;
-        case "Exit":
+        case "Exit": {
           dispatch(clearCurrentlyPlaying());
-          // code is null if the process was terminated by a signal
-          if (event.payload.code !== 0) {
-            setGameStatus(GameStatus.CRASHED);
+          const code = event.payload.code;
+          setExitCode(code);
+
+          if (code === 0) {
+            // Game exited successfully
+            resetGameSessionMonitor();
           } else {
-            // Game exited successfully, clear logs
-            setLogs([]);
+            // Game crashed (non-zero exit code) or was terminated by signal (null)
+            setGameStatus(GameStatus.CRASHED);
           }
           break;
+        }
         case "Error":
           dispatch(clearCurrentlyPlaying());
           setLogs((prev) => [...prev, `ERROR: ${event.payload.message}`]);
@@ -68,7 +76,7 @@ export function useGameSessionEvents() {
     return cleanup;
   }, [dispatch]);
 
-  return { gameStatus, logsText, resetGameSessionMonitor };
+  return { gameStatus, logsText, exitCode, resetGameSessionMonitor };
 }
 
 export enum AutoUpdateStatus {
