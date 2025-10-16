@@ -40,10 +40,10 @@ export default function ReleaseSelector({
   const { mutate: triggerFetchReleases, isPending: isReleasesTriggerLoading } =
     useMutation({
       mutationFn: triggerFetchReleasesForVariant,
-      onMutate: () => {
+      onMutate: (variant: GameVariant) => {
         dispatch(startFetchingReleases({ variant }));
       },
-      onError: (error: unknown) => {
+      onError: (error: unknown, variant) => {
         dispatch(onFetchingReleasesFailed({ variant }));
         toastCL("error", `Failed to fetch releases for ${variant}.`, error);
       },
