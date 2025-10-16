@@ -7,6 +7,7 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
+import type { GameEvent } from "@/generated-types/GameEvent";
 
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
@@ -21,6 +22,12 @@ export async function listenToAutoupdateStatus(
 ) {
   return await listen<UpdateStatus>("autoupdate-status", (event) => {
     onUpdate(event.payload);
+  });
+}
+
+export async function listenToGameEvent(onEvent: (payload: GameEvent) => void) {
+  return await listen<GameEvent>("game-event", (event) => {
+    onEvent(event.payload);
   });
 }
 
