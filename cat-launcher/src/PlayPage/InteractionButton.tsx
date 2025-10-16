@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -14,19 +13,19 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
-import {
-  selectCurrentlyPlaying,
-  setCurrentlyPlaying,
-} from "@/store/gameSessionSlice";
+import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function InteractionButton({
   variant,
   selectedReleaseId,
 }: InteractionButtonProps) {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const currentlyPlaying = useSelector(selectCurrentlyPlaying);
+  const currentlyPlaying = useAppSelector(
+    (state) => state.gameSession.currentlyPlaying,
+  );
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
@@ -52,11 +51,56 @@ export default function InteractionButton({
     );
   }, [installationStatusError, variant, selectedReleaseId]);
 
-  const [installing, setInstalling] = useState(false);
+  const { mutate: install, isPending: isInstalling } = useMutation({
+    mutationFn: (releaseId: string | undefined) => {
+      if (!releaseId) {
+        throw new Error("No release selected");
+      }
+      return installReleaseForVariant(variant, releaseId);
+    },
+    onSuccess: (updatedRelease, releaseId) => {
+      queryClient.setQueryData(
+        queryKeys.releases(variant),
+        (old: GameRelease[] | undefined) =>
+          old?.map((o) => {
+            if (o.version !== releaseId) {
+              return o;
+            }
+            return updatedRelease;
+          }),
+      );
+      queryClient.setQueryData(
+        queryKeys.installationStatus(variant, releaseId),
+        (): GameReleaseStatus => "ReadyToPlay",
+      );
+    },
+    onError: (e) => {
+      toastCL("error", "Failed to install release.", e);
+    },
+  });
+
+  const { mutate: play } = useMutation({
+    mutationFn: (releaseId: string | undefined) => {
+      if (!releaseId) {
+        throw new Error("No release selected");
+      }
+      return launchGame(variant, releaseId);
+    },
+    onSuccess: (_, releaseId) => {
+      dispatch(setCurrentlyPlaying({ variant }));
+      queryClient.setQueryData(
+        queryKeys.lastPlayedVersion(variant),
+        () => releaseId!,
+      );
+    },
+    onError: (e) => {
+      toastCL("error", "Failed to launch game.", e);
+    },
+  });
 
   const actionButtonLabel = isThisVariantRunning ? (
     "Running..."
-  ) : installing || isInstallationStatusLoading ? (
+  ) : isInstalling || isInstallationStatusLoading ? (
     <Loader2 className="animate-spin" />
   ) : installationStatus === "ReadyToPlay" ? (
     "Play"
@@ -64,62 +108,9 @@ export default function InteractionButton({
     "Install"
   );
 
-  async function handleInstall() {
-    if (!selectedReleaseId || installationStatusError || installing) {
-      return;
-    }
-
-    if (installationStatus === "ReadyToPlay") {
-      return;
-    }
-
-    setInstalling(true);
-    try {
-      const updatedRelease = await installReleaseForVariant(
-        variant,
-        selectedReleaseId,
-      );
-      queryClient.setQueryData(
-        queryKeys.releases(variant),
-        (old: GameRelease[] | undefined) =>
-          old?.map((o) => {
-            if (o.version !== selectedReleaseId) {
-              return o;
-            }
-            return updatedRelease;
-          }),
-      );
-      queryClient.setQueryData(
-        queryKeys.installationStatus(variant, selectedReleaseId),
-        (): GameReleaseStatus => "ReadyToPlay",
-      );
-    } catch (e) {
-      toastCL("error", "Failed to install release.", e);
-    } finally {
-      setInstalling(false);
-    }
-  }
-
-  async function handlePlay() {
-    if (!selectedReleaseId || installationStatus !== "ReadyToPlay") {
-      return;
-    }
-
-    try {
-      await launchGame(variant, selectedReleaseId);
-      dispatch(setCurrentlyPlaying({ variant }));
-      queryClient.setQueryData(
-        queryKeys.lastPlayedVersion(variant),
-        () => selectedReleaseId,
-      );
-    } catch (e) {
-      toastCL("error", "Failed to launch game.", e);
-    }
-  }
-
   const isActionButtonDisabled =
     !selectedReleaseId ||
-    installing ||
+    isInstalling ||
     isInstallationStatusLoading ||
     Boolean(installationStatusError) ||
     installationStatus === "Unknown" ||
@@ -129,8 +120,10 @@ export default function InteractionButton({
   return (
     <Button
       className="w-full"
-      onClick={
-        installationStatus === "ReadyToPlay" ? handlePlay : handleInstall
+      onClick={() =>
+        installationStatus === "ReadyToPlay"
+          ? play(selectedReleaseId)
+          : install(selectedReleaseId)
       }
       disabled={isActionButtonDisabled}
     >

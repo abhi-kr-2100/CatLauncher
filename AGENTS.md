@@ -208,6 +208,10 @@ In Rust, avoid methods that may panic. Instead, use the `Result` type to handle 
 
 Instead, define a custom error type using the `thiserror` crate, and use it.
 
+### Pass Arguments to Mutation
+
+When using `useMutation`, pass arguments to the mutation function, instead of referencing variables that may change and cause a race condition.
+
 ## Agent Workflow
 
 When working on this project, please follow these guidelines:

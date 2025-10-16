@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,14 +12,12 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { cn, toastCL } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   FetchStatus,
   onFetchingReleasesFailed,
-  selectFetchStatusForVariant,
-  selectReleasesForVariant,
   startFetchingReleases,
 } from "@/store/releasesSlice";
-import { RootState } from "@/store/store";
 
 import { useReleaseEvents } from "./hooks";
 
@@ -31,22 +28,22 @@ export default function ReleaseSelector({
 }: ReleaseSelectorProps) {
   useReleaseEvents();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const releases = useSelector((state: RootState) =>
-    selectReleasesForVariant(state, variant),
+  const releases = useAppSelector(
+    (state) => state.releases.releasesByVariant[variant],
   );
-  const releasesFetchStatus = useSelector((state: RootState) =>
-    selectFetchStatusForVariant(state, variant),
+  const releasesFetchStatus = useAppSelector(
+    (state) => state.releases.fetchStatusByVariant[variant],
   );
 
   const { mutate: triggerFetchReleases, isPending: isReleasesTriggerLoading } =
     useMutation({
       mutationFn: triggerFetchReleasesForVariant,
-      onMutate: () => {
+      onMutate: (variant: GameVariant) => {
         dispatch(startFetchingReleases({ variant }));
       },
-      onError: (error: unknown) => {
+      onError: (error: unknown, variant) => {
         dispatch(onFetchingReleasesFailed({ variant }));
         toastCL("error", `Failed to fetch releases for ${variant}.`, error);
       },
