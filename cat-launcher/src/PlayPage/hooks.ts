@@ -1,27 +1,25 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
+import { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import { listenToReleasesUpdate } from "@/lib/commands";
-import { toastCL } from "@/lib/utils";
+import { setupEventListener } from "@/lib/utils";
+import { useAppDispatch } from "@/store/hooks";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
 
 export function useReleaseEvents() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    listenToReleasesUpdate((payload) => {
+    const releaseUpdateHandler = (payload: ReleasesUpdatePayload) => {
       dispatch(updateReleasesForVariant(payload));
-    })
-      .then((unlistenFn) => {
-        unlisten = unlistenFn;
-      })
-      .catch((e) => {
-        toastCL("error", "Failed to subscribe to releases.", e);
-      });
-
-    return () => {
-      unlisten?.();
     };
+
+    const cleanup = setupEventListener(
+      listenToReleasesUpdate,
+      releaseUpdateHandler,
+      "Failed to subscribe to releases.",
+    );
+
+    return cleanup;
   }, [dispatch]);
 }
