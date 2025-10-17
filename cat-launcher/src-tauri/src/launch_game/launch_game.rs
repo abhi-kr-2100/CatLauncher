@@ -15,7 +15,7 @@ use crate::filesystem::paths::{
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::infra::utils::OS;
+use crate::infra::utils::{Arch, OS};
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_and_copy_save_files, BackupAndCopyError};
 use crate::variants::GameVariant;
@@ -179,6 +179,7 @@ pub async fn launch_and_monitor_game<F, Fut>(
     variant: &GameVariant,
     release_id: &str,
     os: &OS,
+    arch: &Arch,
     timestamp: u64,
     cache_dir: &Path,
     data_dir: &Path,
@@ -189,8 +190,16 @@ where
     F: Fn(GameEvent) -> Fut + Send + Sync + 'static + Clone,
     Fut: Future<Output = ()> + Send,
 {
-    let release =
-        get_release_by_id(variant, release_id, os, cache_dir, data_dir, resource_dir).await?;
+    let release = get_release_by_id(
+        variant,
+        release_id,
+        os,
+        arch,
+        cache_dir,
+        data_dir,
+        resource_dir,
+    )
+    .await?;
 
     let command = release.prepare_launch(os, timestamp, data_dir).await?;
 
