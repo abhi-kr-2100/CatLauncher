@@ -15,6 +15,7 @@ use crate::filesystem::paths::{
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
+use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_and_copy_save_files, BackupAndCopyError};
 use crate::variants::GameVariant;
@@ -79,12 +80,12 @@ pub struct GameExitPayload {
 impl GameRelease {
     pub async fn prepare_launch(
         &self,
-        os: &str,
+        os: &OS,
         timestamp: u64,
         data_dir: &Path,
     ) -> Result<Command, LaunchGameError> {
         let executable_path =
-            get_game_executable_filepath(&self.variant, &self.version, os, data_dir).await?;
+            get_game_executable_filepath(&self.variant, &self.version, data_dir, os).await?;
 
         let executable_dir = executable_path
             .parent()
@@ -177,7 +178,7 @@ where
 pub async fn launch_and_monitor_game<F, Fut>(
     variant: &GameVariant,
     release_id: &str,
-    os: &str,
+    os: &OS,
     timestamp: u64,
     cache_dir: &Path,
     data_dir: &Path,

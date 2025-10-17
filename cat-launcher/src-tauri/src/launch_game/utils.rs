@@ -6,6 +6,7 @@ use crate::filesystem::paths::{
     GetBackupArchivePathError, GetGameExecutableDirError, GetVersionExecutableDirError,
 };
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
+use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -22,7 +23,7 @@ pub async fn backup_and_copy_save_files(
     to_version: &str,
     variant: &GameVariant,
     data_dir: &Path,
-    os: &str,
+    os: &OS,
     timestamp: u64,
 ) -> Result<(), BackupAndCopyError> {
     if from_version == to_version {
@@ -55,7 +56,7 @@ async fn copy_save_files(
     to_version: &str,
     variant: &GameVariant,
     data_dir: &Path,
-    os: &str,
+    os: &OS,
 ) -> Result<(), SaveCopyError> {
     let to_dir = get_game_executable_dir(variant, to_version, data_dir, os).await?;
 
@@ -113,7 +114,7 @@ async fn backup_save_files(
     variant: &GameVariant,
     version: &str,
     data_dir: &Path,
-    os: &str,
+    os: &OS,
     timestamp: u64,
 ) -> Result<(), BackupError> {
     let executable_dir = get_game_executable_dir(variant, version, data_dir, os).await?;

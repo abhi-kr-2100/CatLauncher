@@ -6,6 +6,7 @@ use ts_rs::TS;
 use crate::fetch_releases::utils::get_assets;
 use crate::game_release::utils::get_platform_asset_substr;
 use crate::infra::github::asset::GitHubAsset;
+use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
@@ -39,13 +40,13 @@ pub enum GameReleaseStatus {
 impl GameRelease {
     pub async fn get_asset(
         &self,
-        os: &str,
+        os: &OS,
         cache_dir: &Path,
         resources_dir: &Path,
     ) -> Option<GitHubAsset> {
         let assets = get_assets(self, cache_dir, resources_dir).await;
+        let substring = get_platform_asset_substr(&self.variant, os);
 
-        get_platform_asset_substr(&self.variant, os)
-            .and_then(|substring| assets.into_iter().find(|a| a.name.contains(substring)))
+        assets.into_iter().find(|a| a.name.contains(substring))
     }
 }
