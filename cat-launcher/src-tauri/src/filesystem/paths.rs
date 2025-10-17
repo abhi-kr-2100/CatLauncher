@@ -104,7 +104,11 @@ pub async fn get_game_executable_dir(
         return Ok(installation_dir);
     }
 
-    // On Linux and MacOS, the game directory is located one directory under
+    if os == &OS::MacOS {
+        return Ok(installation_dir.join("Cataclysm.app/Contents/MacOS"));
+    }
+
+    // On Linux, the game directory is located one directory under
     // the installation directory.
     let mut dir = read_dir(installation_dir).await?;
     while let Some(entry) = dir.next_entry().await? {
@@ -130,7 +134,8 @@ pub fn get_game_executable_filename(variant: &GameVariant, os: &OS) -> &'static 
             GameVariant::TheLastGeneration => "cataclysm-tiles.exe",
         },
 
-        (_, OS::Linux | OS::MacOS) => "cataclysm-launcher",
+        (_, OS::Linux) => "cataclysm-launcher",
+        (_, OS::MacOS) => "Cataclysm.sh",
     }
 }
 
