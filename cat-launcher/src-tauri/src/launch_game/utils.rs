@@ -22,14 +22,15 @@ pub async fn backup_and_copy_save_files(
     to_version: &str,
     variant: &GameVariant,
     data_dir: &Path,
+    os: &str,
     timestamp: u64,
 ) -> Result<(), BackupAndCopyError> {
     if from_version == to_version {
         return Ok(());
     }
 
-    backup_save_files(variant, from_version, data_dir, timestamp).await?;
-    copy_save_files(from_version, to_version, variant, data_dir).await?;
+    backup_save_files(variant, from_version, data_dir, os, timestamp).await?;
+    copy_save_files(from_version, to_version, variant, data_dir, os).await?;
 
     Ok(())
 }
@@ -54,10 +55,11 @@ async fn copy_save_files(
     to_version: &str,
     variant: &GameVariant,
     data_dir: &Path,
+    os: &str,
 ) -> Result<(), SaveCopyError> {
-    let to_dir = get_game_executable_dir(variant, to_version, data_dir).await?;
+    let to_dir = get_game_executable_dir(variant, to_version, data_dir, os).await?;
 
-    let save_dirs = get_game_save_dirs(variant, from_version, data_dir).await?;
+    let save_dirs = get_game_save_dirs(variant, from_version, data_dir, os).await?;
 
     for save_dir in save_dirs {
         if let Ok(metadata) = tokio::fs::metadata(&save_dir).await {
@@ -111,12 +113,13 @@ async fn backup_save_files(
     variant: &GameVariant,
     version: &str,
     data_dir: &Path,
+    os: &str,
     timestamp: u64,
 ) -> Result<(), BackupError> {
-    let executable_dir = get_game_executable_dir(variant, version, data_dir).await?;
-    let dirs_to_backup = get_game_save_dirs(variant, version, data_dir).await?;
+    let executable_dir = get_game_executable_dir(variant, version, data_dir, os).await?;
+    let dirs_to_backup = get_game_save_dirs(variant, version, data_dir, os).await?;
     let archive_path =
-        get_or_create_backup_archive_filepath(variant, version, data_dir, timestamp).await?;
+        get_or_create_backup_archive_filepath(variant, version, data_dir, timestamp, os).await?;
 
     create_zip_archive(&executable_dir, &dirs_to_backup, &archive_path).await?;
 

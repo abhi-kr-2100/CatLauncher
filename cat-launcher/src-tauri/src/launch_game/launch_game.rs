@@ -102,6 +102,7 @@ impl GameRelease {
             &self.version,
             &self.variant,
             data_dir,
+            os,
             timestamp,
         )
         .await?;
