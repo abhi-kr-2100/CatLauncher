@@ -3,6 +3,11 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -115,9 +120,11 @@ export default function InteractionButton({
     Boolean(installationStatusError) ||
     installationStatus === "Unknown" ||
     installationStatus === "NotAvailable" ||
-    isAnyVariantRunning; // only one variant can be running at a time
+    // Only one variant should be running at a time.
+    // Disable button if any variant is already running.
+    isAnyVariantRunning;
 
-  return (
+  const button = (
     <Button
       className="w-full"
       onClick={() =>
@@ -130,6 +137,23 @@ export default function InteractionButton({
       {actionButtonLabel}
     </Button>
   );
+
+  if (installationStatus === "NotAvailable") {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="w-full">{button}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>
+            This release is not yet available. Try again in a couple of hours.
+          </p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return button;
 }
 
 interface InteractionButtonProps {
