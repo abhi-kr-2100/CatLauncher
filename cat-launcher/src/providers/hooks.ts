@@ -9,7 +9,7 @@ import {
 } from "@/lib/commands";
 import { setupEventListener } from "@/lib/utils";
 import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export function useFrontendReady() {
   useEffect(() => {
@@ -39,6 +39,10 @@ export function useGameSessionEvents() {
 
   const dispatch = useAppDispatch();
 
+  const currentlyPlaying = useAppSelector(
+    (state) => state.gameSession.currentlyPlaying,
+  );
+
   useEffect(() => {
     const gameEventHandler = (event: GameEvent) => {
       switch (event.type) {
@@ -50,8 +54,9 @@ export function useGameSessionEvents() {
           const code = event.payload.code;
           setExitCode(code);
 
-          if (code === 0) {
-            // Game exited successfully
+          // BrightNights returns non-zero exit code almost always, even if it exited
+          // successfully. To not overwhelm the user, we don't show crash logs for it.
+          if (code === 0 || currentlyPlaying === "BrightNights") {
             resetGameSessionMonitor();
           } else {
             // Game crashed (non-zero exit code) or was terminated by signal (null)
@@ -74,7 +79,7 @@ export function useGameSessionEvents() {
     );
 
     return cleanup;
-  }, [dispatch]);
+  }, [dispatch, currentlyPlaying, resetGameSessionMonitor]);
 
   return { gameStatus, logsText, exitCode, resetGameSessionMonitor };
 }
