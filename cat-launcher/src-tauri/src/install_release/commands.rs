@@ -9,7 +9,7 @@ use tauri::{command, AppHandle, Manager};
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::http_client::HTTP_CLIENT;
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::install_release::install_release::ReleaseInstallationError;
 use crate::variants::GameVariant;
 
@@ -26,6 +26,9 @@ pub enum InstallReleaseCommandError {
 
     #[error("failed to get OS enum: {0}")]
     Os(#[from] OSNotSupportedError),
+
+    #[error("failed to get arch enum: {0}")]
+    Arch(#[from] ArchNotSupportedError),
 }
 
 #[command]
@@ -39,18 +42,27 @@ pub async fn install_release(
     let resource_dir = app_handle.path().resource_dir()?;
 
     let os = get_os_enum(OS)?;
+    let arch = get_arch_enum(std::env::consts::ARCH)?;
 
     let mut release = get_release_by_id(
         &variant,
         release_id,
         &os,
+        &arch,
         &cache_dir,
         &data_dir,
         &resource_dir,
     )
     .await?;
     release
-        .install_release(&HTTP_CLIENT, &os, &cache_dir, &data_dir, &resource_dir)
+        .install_release(
+            &HTTP_CLIENT,
+            &os,
+            &arch,
+            &cache_dir,
+            &data_dir,
+            &resource_dir,
+        )
         .await?;
 
     Ok(release)
