@@ -10,6 +10,7 @@ use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
+use crate::infra::utils::OS;
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 
 #[derive(thiserror::Error, Debug)]
@@ -40,7 +41,7 @@ impl GameRelease {
     pub async fn install_release(
         &mut self,
         client: &Client,
-        os: &str,
+        os: &OS,
         cache_dir: &Path,
         data_dir: &Path,
         resources_dir: &Path,
