@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use tokio::fs::{create_dir_all, read_dir};
 
 use crate::filesystem::utils::get_safe_filename;
+use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
 pub fn get_default_releases_file_path(variant: &GameVariant, resources_dir: &Path) -> PathBuf {
@@ -94,13 +95,26 @@ pub async fn get_game_executable_dir(
     variant: &GameVariant,
     release_version: &str,
     data_dir: &Path,
+    os: &OS,
 ) -> Result<PathBuf, GetGameExecutableDirError> {
     let installation_dir =
         get_or_create_asset_installation_dir(variant, release_version, data_dir).await?;
 
+    if os == &OS::Windows {
+        return Ok(installation_dir);
+    }
+
+    // On Linux and MacOS, the game directory is located one directory under
+    // the installation directory.
     let mut dir = read_dir(installation_dir).await?;
     while let Some(entry) = dir.next_entry().await? {
-        if entry.file_type().await?.is_dir() {
+        let file_name = entry.file_name();
+        if file_name
+            .to_string_lossy()
+            .to_lowercase()
+            .starts_with("cataclysm")
+            && entry.file_type().await?.is_dir()
+        {
             return Ok(entry.path());
         }
     }
@@ -108,28 +122,15 @@ pub async fn get_game_executable_dir(
     Err(GetGameExecutableDirError::NoInstallation)
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum LauncherFilenameError {
-    #[error("unsupported OS: {0}")]
-    UnsupportedOS(String),
-}
-
-pub fn get_game_executable_filename(
-    variant: &GameVariant,
-    os: &str,
-) -> Result<&'static str, LauncherFilenameError> {
+pub fn get_game_executable_filename(variant: &GameVariant, os: &OS) -> &'static str {
     match (variant, os) {
-        (GameVariant::BrightNights | GameVariant::DarkDaysAhead, "linux" | "macos") => {
-            Ok("cataclysm-launcher")
-        }
-        (GameVariant::BrightNights | GameVariant::DarkDaysAhead, "windows") => {
-            Ok("cataclysm-launcher.exe")
-        }
+        (g, OS::Windows) => match g {
+            GameVariant::BrightNights => "cataclysm-bn-tiles.exe",
+            GameVariant::DarkDaysAhead => "cataclysm-tiles.exe",
+            GameVariant::TheLastGeneration => "cataclysm-tiles.exe",
+        },
 
-        (GameVariant::TheLastGeneration, "linux" | "macos") => Ok("cataclysm-tlg-tiles"),
-        (GameVariant::TheLastGeneration, "windows") => Ok("cataclysm-tlg-tiles.exe"),
-
-        _ => Err(LauncherFilenameError::UnsupportedOS(os.to_string())),
+        (_, OS::Linux | OS::MacOS) => "cataclysm-launcher",
     }
 }
 
@@ -140,18 +141,15 @@ pub enum GetExecutablePathError {
 
     #[error("failed to get launcher directory: {0}")]
     LauncherDirectory(#[from] GetGameExecutableDirError),
-
-    #[error("unsupported OS: {0}")]
-    UnsupportedOS(#[from] LauncherFilenameError),
 }
 
 pub async fn get_game_executable_filepath(
     variant: &GameVariant,
     release_version: &str,
-    os: &str,
     data_dir: &Path,
+    os: &OS,
 ) -> Result<PathBuf, GetExecutablePathError> {
-    let dir = match get_game_executable_dir(variant, release_version, data_dir).await {
+    let dir = match get_game_executable_dir(variant, release_version, data_dir, os).await {
         Ok(dir) => dir,
         Err(GetGameExecutableDirError::NoInstallation) => {
             return Err(GetExecutablePathError::DoesNotExist)
@@ -159,7 +157,7 @@ pub async fn get_game_executable_filepath(
         Err(err) => return Err(GetExecutablePathError::LauncherDirectory(err)),
     };
 
-    let filename = get_game_executable_filename(variant, os)?;
+    let filename = get_game_executable_filename(variant, os);
     let filepath = dir.join(filename);
 
     match tokio::fs::metadata(&filepath).await {
@@ -190,10 +188,11 @@ pub async fn get_game_save_dirs(
     variant: &GameVariant,
     release_version: &str,
     data_dir: &Path,
+    os: &OS,
 ) -> Result<Vec<PathBuf>, GetGameExecutableDirError> {
     let dirs = &["achievements", "config", "memorial", "save", "templates"];
 
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir).await?;
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
     Ok(dirs.iter().map(|d| executable_dir.join(d)).collect())
 }
 
@@ -214,8 +213,9 @@ pub async fn get_or_create_backup_archive_filepath(
     release_version: &str,
     data_dir: &Path,
     timestamp: u64,
+    os: &OS,
 ) -> Result<PathBuf, GetBackupArchivePathError> {
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir).await?;
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
     let backup_dir = executable_dir.join("backups");
     tokio::fs::create_dir_all(&backup_dir).await?;
 

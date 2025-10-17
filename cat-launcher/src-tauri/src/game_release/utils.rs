@@ -3,21 +3,21 @@ use std::path::Path;
 use crate::fetch_releases::utils::{get_cached_releases, get_default_releases, merge_releases};
 use crate::game_release::game_release::{GameReleaseStatus, ReleaseType};
 use crate::game_release::GameRelease;
+use crate::infra::utils::OS;
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
-pub fn get_platform_asset_substr(variant: &GameVariant, os: &str) -> Option<&'static str> {
+pub fn get_platform_asset_substr(variant: &GameVariant, os: &OS) -> &'static str {
     match (variant, os) {
-        (GameVariant::DarkDaysAhead, "windows") => Some("windows-with-graphics-and-sounds"),
-        (GameVariant::DarkDaysAhead, "macos") => Some("osx-terminal-only"),
-        (GameVariant::DarkDaysAhead, "linux") => Some("linux-with-graphics-and-sounds"),
-        (GameVariant::BrightNights, "windows") => Some("windows-tiles"),
-        (GameVariant::BrightNights, "macos") => Some("osx-tiles-arm"),
-        (GameVariant::BrightNights, "linux") => Some("linux-tiles"),
-        (GameVariant::TheLastGeneration, "windows") => Some("windows-tiles-sounds-x64-msvc"),
-        (GameVariant::TheLastGeneration, "macos") => Some("osx-tiles-universal"),
-        (GameVariant::TheLastGeneration, "linux") => Some("linux-tiles-sounds"),
-        _ => None,
+        (GameVariant::DarkDaysAhead, OS::Windows) => "windows-with-graphics-and-sounds",
+        (GameVariant::DarkDaysAhead, OS::MacOS) => "osx-terminal-only",
+        (GameVariant::DarkDaysAhead, OS::Linux) => "linux-with-graphics-and-sounds",
+        (GameVariant::BrightNights, OS::Windows) => "windows-tiles",
+        (GameVariant::BrightNights, OS::MacOS) => "osx-tiles-arm",
+        (GameVariant::BrightNights, OS::Linux) => "linux-tiles",
+        (GameVariant::TheLastGeneration, OS::Windows) => "windows-tiles-sounds-x64-msvc",
+        (GameVariant::TheLastGeneration, OS::MacOS) => "osx-tiles-universal",
+        (GameVariant::TheLastGeneration, OS::Linux) => "linux-tiles-sounds",
     }
 }
 
@@ -33,7 +33,7 @@ pub enum GetReleaseError {
 pub async fn get_release_by_id(
     variant: &GameVariant,
     release_id: &str,
-    os: &str,
+    os: &OS,
     cache_dir: &Path,
     data_dir: &Path,
     resources_dir: &Path,
