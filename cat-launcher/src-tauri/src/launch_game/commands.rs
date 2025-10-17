@@ -6,7 +6,7 @@ use serde::Serializer;
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Emitter, Manager};
 
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
 use crate::variants::GameVariant;
 
@@ -23,6 +23,9 @@ pub enum LaunchGameCommandError {
 
     #[error("failed to get OS enum: {0}")]
     Os(#[from] OSNotSupportedError),
+
+    #[error("failed to get arch enum: {0}")]
+    Arch(#[from] ArchNotSupportedError),
 }
 
 #[command]
@@ -38,6 +41,7 @@ pub async fn launch_game(
     let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
     let os = get_os_enum(OS)?;
+    let arch = get_arch_enum(std::env::consts::ARCH)?;
 
     let emitter = app_handle.clone();
     let on_game_event = move |event: GameEvent| {
@@ -52,6 +56,7 @@ pub async fn launch_game(
         &variant,
         release_id,
         &os,
+        &arch,
         time,
         &cache_dir,
         &data_dir,

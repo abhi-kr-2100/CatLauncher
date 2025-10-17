@@ -10,7 +10,7 @@ use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::http_client::create_downloader;
-use crate::infra::utils::OS;
+use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 
 #[derive(thiserror::Error, Debug)]
@@ -42,13 +42,14 @@ impl GameRelease {
         &mut self,
         client: &Client,
         os: &OS,
+        arch: &Arch,
         cache_dir: &Path,
         data_dir: &Path,
         resources_dir: &Path,
     ) -> Result<(), ReleaseInstallationError> {
         if self.status == GameReleaseStatus::Unknown {
             self.status = self
-                .get_installation_status(os, cache_dir, data_dir, resources_dir)
+                .get_installation_status(os, arch, cache_dir, data_dir, resources_dir)
                 .await?;
         }
 
@@ -58,7 +59,7 @@ impl GameRelease {
 
         let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir).await?;
         let asset = self
-            .get_asset(os, cache_dir, resources_dir)
+            .get_asset(os, arch, cache_dir, resources_dir)
             .await
             .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 
@@ -74,7 +75,7 @@ impl GameRelease {
         let download_filepath = download_dir.join(&asset.name);
         let installation_dir =
             get_or_create_asset_installation_dir(&self.variant, &self.version, data_dir).await?;
-        extract_archive(&download_filepath, &installation_dir).await?;
+        extract_archive(&download_filepath, &installation_dir, os).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
 
