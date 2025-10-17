@@ -17,21 +17,34 @@ const GameSessionMonitor = () => {
   const { gameStatus, logsText, exitCode, resetGameSessionMonitor } =
     useGameSessionEvents();
 
+  const title =
+    gameStatus === GameStatus.CRASHED
+      ? "Game crashed"
+      : gameStatus === GameStatus.TERMINATED
+        ? "Game was terminated by an external source"
+        : gameStatus === GameStatus.ERROR
+          ? "Game exited unexpectedly or failed to start"
+          : null;
+
   return (
     <Dialog
-      open={gameStatus === GameStatus.CRASHED}
+      open={[
+        GameStatus.CRASHED,
+        GameStatus.ERROR,
+        GameStatus.TERMINATED,
+      ].includes(gameStatus)}
       onOpenChange={resetGameSessionMonitor}
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Game exited unexpectedly</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            The game may have crashed or exited with an error.
+            The following information may help you diagnose the issue.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <h3 className="font-semibold">Exit Status</h3>
+          <h3 className="font-semibold">Exit Code</h3>
           <pre className="text-sm bg-muted p-4 rounded-md">
             {exitCode ?? "Unknown"}
           </pre>

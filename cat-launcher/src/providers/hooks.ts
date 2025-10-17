@@ -20,6 +20,8 @@ export function useFrontendReady() {
 export enum GameStatus {
   IDLE = "IDLE",
   CRASHED = "CRASHED",
+  ERROR = "ERROR",
+  TERMINATED = "TERMINATED",
 }
 
 export function useGameSessionEvents() {
@@ -54,12 +56,14 @@ export function useGameSessionEvents() {
           const code = event.payload.code;
           setExitCode(code);
 
-          // BrightNights returns non-zero exit code almost always, even if it exited
-          // successfully. To not overwhelm the user, we don't show crash logs for it.
-          if (code === 0 || currentlyPlaying === "BrightNights") {
+          if (code === null) {
+            // Game was terminated by signal (null)
+            setGameStatus(GameStatus.TERMINATED);
+          } else if (code === 0 || currentlyPlaying === "BrightNights") {
+            // BrightNights returns non-zero exit code almost always, even if it exited
+            // successfully. To not overwhelm the user, we don't show crash logs for it.
             resetGameSessionMonitor();
           } else {
-            // Game crashed (non-zero exit code) or was terminated by signal (null)
             setGameStatus(GameStatus.CRASHED);
           }
           break;
@@ -67,7 +71,7 @@ export function useGameSessionEvents() {
         case "Error":
           dispatch(clearCurrentlyPlaying());
           setLogs((prev) => [...prev, `ERROR: ${event.payload.message}`]);
-          setGameStatus(GameStatus.CRASHED);
+          setGameStatus(GameStatus.ERROR);
           break;
       }
     };
