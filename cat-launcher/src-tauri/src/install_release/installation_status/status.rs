@@ -9,7 +9,7 @@ use crate::filesystem::paths::{
     AssetExtractionDirError, GetExecutablePathError,
 };
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
-use crate::infra::utils::OS;
+use crate::infra::utils::{Arch, OS};
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetInstallationStatusError {
@@ -30,11 +30,12 @@ impl GameRelease {
     pub async fn get_installation_status(
         &self,
         os: &OS,
+        arch: &Arch,
         cache_dir: &Path,
         data_dir: &Path,
         resources_dir: &Path,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
-        let asset = match self.get_asset(os, cache_dir, resources_dir).await {
+        let asset = match self.get_asset(os, arch, cache_dir, resources_dir).await {
             Some(asset) => asset,
             None => return Ok(GameReleaseStatus::NotAvailable),
         };
