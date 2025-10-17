@@ -5,6 +5,7 @@ use crate::filesystem::paths::{
     get_game_executable_dir, get_game_save_dirs, get_or_create_backup_archive_filepath,
     GetBackupArchivePathError, GetGameExecutableDirError, GetVersionExecutableDirError,
 };
+use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
@@ -49,6 +50,9 @@ pub enum SaveCopyError {
 
     #[error("invalid save directory path")]
     InvalidSaveDirPath,
+
+    #[error("failed to copy directory: {0}")]
+    Copy(#[from] CopyDirError),
 }
 
 async fn copy_save_files(
@@ -78,23 +82,6 @@ async fn copy_save_files(
     Ok(())
 }
 
-async fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
-    tokio::fs::create_dir_all(&dst).await?;
-    let mut entries = tokio::fs::read_dir(src).await?;
-    while let Some(entry) = entries.next_entry().await? {
-        let ty = entry.file_type().await?;
-        if ty.is_dir() {
-            Box::pin(copy_dir_all(
-                entry.path(),
-                dst.as_ref().join(entry.file_name()),
-            ))
-            .await?;
-        } else {
-            tokio::fs::copy(entry.path(), dst.as_ref().join(entry.file_name())).await?;
-        }
-    }
-    Ok(())
-}
 #[derive(thiserror::Error, Debug)]
 pub enum BackupError {
     #[error("failed to get version executable dir: {0}")]
