@@ -3,21 +3,22 @@ use std::path::Path;
 use crate::fetch_releases::utils::{get_cached_releases, get_default_releases, merge_releases};
 use crate::game_release::game_release::{GameReleaseStatus, ReleaseType};
 use crate::game_release::GameRelease;
-use crate::infra::utils::OS;
+use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
-pub fn get_platform_asset_substr(variant: &GameVariant, os: &OS) -> &'static str {
-    match (variant, os) {
-        (GameVariant::DarkDaysAhead, OS::Windows) => "windows-with-graphics-and-sounds",
-        (GameVariant::DarkDaysAhead, OS::MacOS) => "osx-terminal-only",
-        (GameVariant::DarkDaysAhead, OS::Linux) => "linux-with-graphics-and-sounds",
-        (GameVariant::BrightNights, OS::Windows) => "windows-tiles",
-        (GameVariant::BrightNights, OS::MacOS) => "osx-tiles-arm",
-        (GameVariant::BrightNights, OS::Linux) => "linux-tiles",
-        (GameVariant::TheLastGeneration, OS::Windows) => "windows-tiles-sounds-x64-msvc",
-        (GameVariant::TheLastGeneration, OS::MacOS) => "osx-tiles-universal",
-        (GameVariant::TheLastGeneration, OS::Linux) => "linux-tiles-sounds",
+pub fn get_platform_asset_substr(variant: &GameVariant, os: &OS, arch: &Arch) -> &'static str {
+    match (variant, os, arch) {
+        (GameVariant::DarkDaysAhead, OS::Windows, _) => "windows-with-graphics-and-sounds",
+        (GameVariant::DarkDaysAhead, OS::MacOS, _) => "osx-terminal-only",
+        (GameVariant::DarkDaysAhead, OS::Linux, _) => "linux-with-graphics-and-sounds",
+        (GameVariant::BrightNights, OS::Windows, _) => "windows-tiles",
+        (GameVariant::BrightNights, OS::MacOS, Arch::ARM64) => "osx-tiles-arm",
+        (GameVariant::BrightNights, OS::MacOS, Arch::X64) => "osx-tiles-x64",
+        (GameVariant::BrightNights, OS::Linux, _) => "linux-tiles",
+        (GameVariant::TheLastGeneration, OS::Windows, _) => "windows-tiles-sounds-x64-msvc",
+        (GameVariant::TheLastGeneration, OS::MacOS, _) => "osx-tiles-universal",
+        (GameVariant::TheLastGeneration, OS::Linux, _) => "linux-tiles-sounds",
     }
 }
 
@@ -34,6 +35,7 @@ pub async fn get_release_by_id(
     variant: &GameVariant,
     release_id: &str,
     os: &OS,
+    arch: &Arch,
     cache_dir: &Path,
     data_dir: &Path,
     resources_dir: &Path,
@@ -59,7 +61,7 @@ pub async fn get_release_by_id(
         created_at: gh_release.created_at,
     };
     release.status = release
-        .get_installation_status(os, cache_dir, data_dir, resources_dir)
+        .get_installation_status(os, arch, cache_dir, data_dir, resources_dir)
         .await?;
 
     Ok(release)
