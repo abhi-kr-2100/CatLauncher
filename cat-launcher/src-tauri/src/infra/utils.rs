@@ -2,7 +2,6 @@ use std::io;
 use std::path::Path;
 
 use serde::de::DeserializeOwned;
-use serde::Serialize;
 use tokio::fs;
 
 use crate::variants::GameVariant;
@@ -55,7 +54,7 @@ pub enum OS {
     MacOS,
 }
 
-#[derive(Debug, thiserror::Error, Serialize)]
+#[derive(Debug, thiserror::Error)]
 #[error("OS not supported: {os}")]
 pub struct OSNotSupportedError {
     os: &'static str,
@@ -67,5 +66,25 @@ pub fn get_os_enum(os: &'static str) -> Result<OS, OSNotSupportedError> {
         "windows" => Ok(OS::Windows),
         "macos" => Ok(OS::MacOS),
         _ => Err(OSNotSupportedError { os }),
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Arch {
+    ARM64,
+    X64,
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("Architecture not supported: {arch}")]
+pub struct ArchNotSupportedError {
+    arch: &'static str,
+}
+
+pub fn get_arch_enum(arch: &'static str) -> Result<Arch, ArchNotSupportedError> {
+    match arch {
+        "aarch64" => Ok(Arch::ARM64),
+        "x86_64" => Ok(Arch::X64),
+        _ => Err(ArchNotSupportedError { arch }),
     }
 }
