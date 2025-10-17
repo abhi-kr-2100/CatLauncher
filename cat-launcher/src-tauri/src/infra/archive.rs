@@ -13,6 +13,7 @@ use zip::CompressionMethod::Deflated;
 use zip::ZipWriter;
 
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
+use crate::infra::utils::OS;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractionError {
@@ -35,6 +36,7 @@ pub enum ExtractionError {
 pub async fn extract_archive(
     archive_path: &Path,
     target_dir: &Path,
+    os: &OS,
 ) -> Result<(), ExtractionError> {
     let archive_path = archive_path.to_owned();
     let target_dir = target_dir.to_owned();
@@ -82,7 +84,7 @@ pub async fn extract_archive(
             })
             .await??;
 
-            copy_dir_all(&handle.mount_point, &target_dir).await?;
+            copy_dir_all(&handle.mount_point, &target_dir, os).await?;
             return Ok(());
         }
 

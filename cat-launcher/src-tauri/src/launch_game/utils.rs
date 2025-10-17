@@ -75,7 +75,7 @@ async fn copy_save_files(
                 .file_name()
                 .ok_or_else(|| SaveCopyError::InvalidSaveDirPath)?;
             let dest_path = to_dir.join(file_name);
-            copy_dir_all(&save_dir, &dest_path).await?;
+            copy_dir_all(&save_dir, &dest_path, os).await?;
         }
     }
 

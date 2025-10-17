@@ -75,7 +75,7 @@ impl GameRelease {
         let download_filepath = download_dir.join(&asset.name);
         let installation_dir =
             get_or_create_asset_installation_dir(&self.variant, &self.version, data_dir).await?;
-        extract_archive(&download_filepath, &installation_dir).await?;
+        extract_archive(&download_filepath, &installation_dir, os).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
 
