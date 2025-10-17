@@ -2,6 +2,7 @@ use std::fs::{read_dir, File};
 use std::io;
 use std::path::{Path, PathBuf};
 
+use dmg;
 use flate2::read::GzDecoder;
 use tar::Archive;
 use tokio::fs;
@@ -10,6 +11,8 @@ use zip::result::ZipError;
 use zip::write::FileOptions;
 use zip::CompressionMethod::Deflated;
 use zip::ZipWriter;
+
+use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractionError {
@@ -21,6 +24,9 @@ pub enum ExtractionError {
 
     #[error("zip extraction failed: {0}")]
     Zip(#[from] ZipError),
+
+    #[error("failed to copy from DMG: {0}")]
+    Copy(#[from] CopyDirError),
 
     #[error("unexpected join error: {0}")]
     Join(#[from] JoinError),
@@ -37,37 +43,51 @@ pub async fn extract_archive(
         fs::create_dir_all(&target_dir).await?;
     }
 
-    tokio::task::spawn_blocking(move || {
-        let extension = archive_path.extension().and_then(|s| s.to_str());
+    let extension = archive_path.extension().and_then(|s| s.to_str());
 
-        let file_stem_extension = archive_path
-            .file_stem()
-            .and_then(|s| Path::new(s).extension())
-            .and_then(|s| s.to_str());
+    let file_stem_extension = archive_path
+        .file_stem()
+        .and_then(|s| Path::new(s).extension())
+        .and_then(|s| s.to_str());
 
-        match extension {
-            Some("zip") => {
+    match extension {
+        Some("zip") => {
+            tokio::task::spawn_blocking(move || {
                 let file = File::open(&archive_path)?;
                 let mut archive = zip::ZipArchive::new(file)?;
                 archive.extract(&target_dir)?;
-            }
+                Ok::<(), ExtractionError>(())
+            })
+            .await?
+        }
 
-            Some("gz") => match file_stem_extension {
-                Some("tar") => {
+        Some("gz") => match file_stem_extension {
+            Some("tar") => {
+                tokio::task::spawn_blocking(move || {
                     let file = File::open(&archive_path)?;
                     let tar = GzDecoder::new(file);
                     let mut archive = Archive::new(tar);
                     archive.unpack(&target_dir)?;
-                }
-                _ => return Err(ExtractionError::UnsupportedArchive),
-            },
-
+                    Ok::<(), ExtractionError>(())
+                })
+                .await?
+            }
             _ => return Err(ExtractionError::UnsupportedArchive),
+        },
+
+        Some("dmg") => {
+            let handle = tokio::task::spawn_blocking(move || {
+                let info = dmg::Attach::new(&archive_path).with()?;
+                Ok::<_, ExtractionError>(info)
+            })
+            .await??;
+
+            copy_dir_all(&handle.mount_point, &target_dir).await?;
+            return Ok(());
         }
 
-        Ok(())
-    })
-    .await?
+        _ => return Err(ExtractionError::UnsupportedArchive),
+    }
 }
 
 #[derive(thiserror::Error, Debug)]

@@ -429,6 +429,7 @@ name = "cat-launcher"
 version = "0.3.0"
 dependencies = [
  "chrono",
+ "dmg",
  "downloader",
  "flate2",
  "regex",
@@ -865,6 +866,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.106",
+]
+
+[[package]]
+name = "dmg"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "abc28c350337837f23b4750f774371f63db232338c9f89bdb9eb48523a7c4722"
+dependencies = [
+ "log",
+ "plist",
 ]
 
 [[package]]
