@@ -1,11 +1,11 @@
 {
-  "version": "0.4.0",
-  "notes": "CatLauncher v0.4.0",
-  "pub_date": "2025-10-17T19:23:32.972Z",
+  "version": "0.4.1",
+  "notes": "Bug fix: Prevent game launch failure due to missing directories.",
+  "pub_date": "2025-10-17T20:22:33.588Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNkZBeFlqS241VEhHWHZRVVdKUzhSeU9ETnlCOWc0VS93eldFdzgwdnZhTnFUK3FkcjQrQlh5TGxlZFV0dTcyODl2SHQrR0NUTW9VZHJHVW9oeElaZVlpM3lUUTZLS0FFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzYwNzI5MDExCWZpbGU6Y2F0LWxhdW5jaGVyXzAuNC4wX3g2NC1zZXR1cC5leGUKd3I0Vm5XZ3ZlVlBYL1dOR3dIYUZDT0pmb2NHVGs5aERrSnlGelFvRmF5U3pBWTlqSUNSZkljaTNGYzUreStUUzI1aklnWmJTREFsVzRoMVJCekNBQWc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.4.0/cat-launcher_0.4.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNkZBeFlqS241VERGbjY2SUNJelE5U0lMY3RyYnFOa0dzOFlCMEtLY3MwRXA0Ym5YL1VOVm5EOERsNXB6Rk1HRUxVY0NDMGQ3cTRGMk1VR2tTbFRWSXo1VjJ1SVVyNGdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzYwNzMyNTUxCWZpbGU6Y2F0LWxhdW5jaGVyXzAuNC4xX3g2NC1zZXR1cC5leGUKWjcrNWdOa2JmbXFsUUkxYVdDOUxmdHJEUnpnYWJQcnB3d2QvUTNLLzR0dTBhQk5UbGdyZnBESDJTUHdobjQzT2IxWGhSNUlWdURGWnZJbGlSbWF3RGc9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.4.1/cat-launcher_0.4.1_x64-setup.exe"
     }
   }
 }
