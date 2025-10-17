@@ -2,6 +2,7 @@ use std::io;
 use std::path::Path;
 
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use tokio::fs;
 
 use crate::variants::GameVariant;
@@ -45,4 +46,26 @@ pub async fn write_to_file<T: serde::Serialize>(
     let contents = serde_json::to_string_pretty(data)?;
     fs::write(path, contents).await?;
     Ok(())
+}
+
+#[derive(Debug, PartialEq)]
+pub enum OS {
+    Linux,
+    Windows,
+    MacOS,
+}
+
+#[derive(Debug, thiserror::Error, Serialize)]
+#[error("OS not supported: {os}")]
+pub struct OSNotSupportedError {
+    os: &'static str,
+}
+
+pub fn get_os_enum(os: &'static str) -> Result<OS, OSNotSupportedError> {
+    match os {
+        "linux" => Ok(OS::Linux),
+        "windows" => Ok(OS::Windows),
+        "macos" => Ok(OS::MacOS),
+        _ => Err(OSNotSupportedError { os }),
+    }
 }
