@@ -8,11 +8,20 @@ An opinionated cross-platform launcher for Cataclysm games with modern social fe
 
 ## Features
 
-- [x] First-class support for Cataclysm variants including Dark Days Ahead, Bright Nights, and The Last Generation.
+- [x] Supports Dark Days Ahead, Bright Nights, and The Last Generation.
+- [x] Works on Windows, macOS, and Linux.
 - [x] Automatic migration of saves and configs from your last played game.
 - [ ] Support for third-party soundpacks, tilesets, fonts, and mods.
 - [ ] Backup and restore saves.
 - [ ] Share saves with friends and strangers online.
+
+## Installation
+
+[Download](https://github.com/abhi-kr-2100/CatLauncher/releases/latest) the appropriate file for your operating system:
+
+- Windows: .exe
+- macOS: .dmg
+- Linux: .deb, .rpm
 
 ## License
 
