@@ -143,6 +143,10 @@ pub async fn create_zip_archive(
         let mut zip = ZipWriter::new(file);
 
         for path_to_add in &paths_to_include {
+            if !path_to_add.exists() {
+                continue;
+            }
+
             add_to_zip(&mut zip, &source_dir, path_to_add)?;
         }
 
