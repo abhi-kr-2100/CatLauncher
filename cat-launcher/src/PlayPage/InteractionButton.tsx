@@ -1,34 +1,24 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
+import { useAppSelector } from "@/store/hooks";
 import {
-  getInstallationStatus,
-  installReleaseForVariant,
-  launchGame,
-} from "@/lib/commands";
-import { queryKeys } from "@/lib/queryKeys";
-import { toastCL } from "@/lib/utils";
-import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useInstallationProgressStatus } from "./hooks";
+  useInstallationProgressStatus,
+  useInstallationStatus,
+  useInstallRelease,
+  usePlayGame,
+} from "./hooks";
 
 export default function InteractionButton({
   variant,
   selectedReleaseId,
 }: InteractionButtonProps) {
-  const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
-
   const currentlyPlaying = useAppSelector(
     (state) => state.gameSession.currentlyPlaying,
   );
@@ -39,73 +29,17 @@ export default function InteractionButton({
     useInstallationProgressStatus(selectedReleaseId);
 
   const {
-    data: installationStatus,
-    isLoading: isInstallationStatusLoading,
-    error: installationStatusError,
-  } = useQuery<GameReleaseStatus>({
-    queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
-    queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
-    enabled: Boolean(selectedReleaseId),
-  });
+    installationStatus,
+    isInstallationStatusLoading,
+    installationStatusError,
+  } = useInstallationStatus(variant, selectedReleaseId);
 
-  useEffect(() => {
-    if (!installationStatusError) {
-      return;
-    }
+  const { install, isInstalling } = useInstallRelease(
+    variant,
+    selectedReleaseId,
+  );
 
-    toastCL(
-      "error",
-      `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
-      installationStatusError,
-    );
-  }, [installationStatusError, variant, selectedReleaseId]);
-
-  const { mutate: install, isPending: isInstalling } = useMutation({
-    mutationFn: (releaseId: string | undefined) => {
-      if (!releaseId) {
-        throw new Error("No release selected");
-      }
-      return installReleaseForVariant(variant, releaseId);
-    },
-    onSuccess: (updatedRelease, releaseId) => {
-      queryClient.setQueryData(
-        queryKeys.releases(variant),
-        (old: GameRelease[] | undefined) =>
-          old?.map((o) => {
-            if (o.version !== releaseId) {
-              return o;
-            }
-            return updatedRelease;
-          }),
-      );
-      queryClient.setQueryData(
-        queryKeys.installationStatus(variant, releaseId),
-        (): GameReleaseStatus => "ReadyToPlay",
-      );
-    },
-    onError: (e) => {
-      toastCL("error", "Failed to install release.", e);
-    },
-  });
-
-  const { mutate: play } = useMutation({
-    mutationFn: (releaseId: string | undefined) => {
-      if (!releaseId) {
-        throw new Error("No release selected");
-      }
-      return launchGame(variant, releaseId);
-    },
-    onSuccess: (_, releaseId) => {
-      dispatch(setCurrentlyPlaying({ variant }));
-      queryClient.setQueryData(
-        queryKeys.lastPlayedVersion(variant),
-        () => releaseId!,
-      );
-    },
-    onError: (e) => {
-      toastCL("error", "Failed to launch game.", e);
-    },
-  });
+  const { play } = usePlayGame(variant);
 
   const actionButtonLabel = getActionButtonLabel({
     isThisVariantRunning,
