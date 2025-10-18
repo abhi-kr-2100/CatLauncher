@@ -1,13 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
+import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
+import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
+import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
-import type { GameEvent } from "@/generated-types/GameEvent";
 
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
@@ -29,6 +31,20 @@ export async function listenToGameEvent(onEvent: (payload: GameEvent) => void) {
   return await listen<GameEvent>("game-event", (event) => {
     onEvent(event.payload);
   });
+}
+
+export async function listenToInstallationStatusUpdate(
+  selectedReleaseId: string,
+  onUpdate: (payload: InstallationProgressStatus) => void,
+) {
+  return await listen<InstallationProgressPayload>(
+    "installation-status-update",
+    (event) => {
+      if (event.payload.release_id === selectedReleaseId) {
+        onUpdate(event.payload.status);
+      }
+    },
+  );
 }
 
 export async function onFrontendReady(): Promise<void> {
