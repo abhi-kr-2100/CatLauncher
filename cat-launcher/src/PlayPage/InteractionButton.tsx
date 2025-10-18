@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import {
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
+import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import {
   getInstallationStatus,
   installReleaseForVariant,
@@ -20,6 +20,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useInstallationProgressStatus } from "./hooks";
 
 export default function InteractionButton({
   variant,
@@ -33,6 +34,9 @@ export default function InteractionButton({
   );
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
+
+  const installationProgressStatus =
+    useInstallationProgressStatus(selectedReleaseId);
 
   const {
     data: installationStatus,
@@ -103,15 +107,13 @@ export default function InteractionButton({
     },
   });
 
-  const actionButtonLabel = isThisVariantRunning ? (
-    "Running..."
-  ) : isInstalling || isInstallationStatusLoading ? (
-    <Loader2 className="animate-spin" />
-  ) : installationStatus === "ReadyToPlay" ? (
-    "Play"
-  ) : (
-    "Install"
-  );
+  const actionButtonLabel = getActionButtonLabel({
+    isThisVariantRunning,
+    isInstallationStatusLoading,
+    installationStatus,
+    isInstalling,
+    installationProgressStatus,
+  });
 
   const isActionButtonDisabled =
     !selectedReleaseId ||
@@ -159,4 +161,46 @@ export default function InteractionButton({
 interface InteractionButtonProps {
   variant: GameVariant;
   selectedReleaseId: string | undefined;
+}
+
+function getActionButtonLabel({
+  isThisVariantRunning,
+  isInstallationStatusLoading,
+  installationStatus,
+  isInstalling,
+  installationProgressStatus,
+}: GetActionButtonLabelParams) {
+  if (isThisVariantRunning) {
+    return "Running...";
+  }
+
+  if (isInstallationStatusLoading) {
+    return "Loading...";
+  }
+
+  if (installationStatus === "ReadyToPlay") {
+    return "Play";
+  }
+
+  if (!isInstalling) {
+    return "Install";
+  }
+
+  if (installationProgressStatus === "Downloading") {
+    return "Downloading...";
+  }
+
+  if (installationProgressStatus === "Installing") {
+    return "Installing...";
+  }
+
+  return "Play";
+}
+
+interface GetActionButtonLabelParams {
+  isThisVariantRunning: boolean;
+  isInstallationStatusLoading: boolean;
+  installationStatus?: GameReleaseStatus;
+  isInstalling: boolean;
+  installationProgressStatus?: InstallationProgressStatus | null;
 }
