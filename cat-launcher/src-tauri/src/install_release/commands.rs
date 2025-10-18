@@ -4,13 +4,14 @@ use serde::ser::SerializeStruct;
 
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::install_release::install_release::ReleaseInstallationError;
+use crate::install_release::installation_progress_payload::InstallationProgressPayload;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -19,7 +20,7 @@ pub enum InstallReleaseCommandError {
     SystemDir(#[from] tauri::Error),
 
     #[error("installation failed: {0}")]
-    Install(#[from] ReleaseInstallationError),
+    Install(#[from] ReleaseInstallationError<tauri::Error>),
 
     #[error("failed to obtain release: {0}")]
     Release(#[from] GetReleaseError),
@@ -54,6 +55,15 @@ pub async fn install_release(
         &resource_dir,
     )
     .await?;
+
+    let on_status_update = {
+        let app_handle = app_handle.clone();
+        move |payload: InstallationProgressPayload| {
+            let app_handle = app_handle.clone();
+            async move { app_handle.emit("installation-status-update", payload) }
+        }
+    };
+
     release
         .install_release(
             &HTTP_CLIENT,
@@ -62,6 +72,7 @@ pub async fn install_release(
             &cache_dir,
             &data_dir,
             &resource_dir,
+            on_status_update,
         )
         .await?;
 

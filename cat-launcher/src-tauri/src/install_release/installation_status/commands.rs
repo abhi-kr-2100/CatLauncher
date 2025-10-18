@@ -8,16 +8,12 @@ use tauri::{command, AppHandle, Manager};
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
-use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum InstallationStatusCommandError {
+pub enum GetInstallationStatusCommandError {
     #[error("system directory not found: {0}")]
     SystemDir(#[from] tauri::Error),
-
-    #[error("failed to get installation status: {0}")]
-    InstallationStatus(#[from] GetInstallationStatusError),
 
     #[error("failed to obtain release: {0}")]
     Release(#[from] GetReleaseError),
@@ -29,12 +25,12 @@ pub enum InstallationStatusCommandError {
     Arch(#[from] ArchNotSupportedError),
 }
 
-impl serde::Serialize for InstallationStatusCommandError {
+impl serde::Serialize for GetInstallationStatusCommandError {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let mut st = serializer.serialize_struct("InstallationStatusCommandError", 2)?;
+        let mut st = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
 
         let err_type: &'static str = self.into();
         st.serialize_field("type", &err_type)?;
@@ -51,9 +47,9 @@ pub async fn get_installation_status(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
-) -> Result<GameReleaseStatus, InstallationStatusCommandError> {
-    let data_dir = app_handle.path().app_local_data_dir()?;
+) -> Result<GameReleaseStatus, GetInstallationStatusCommandError> {
     let cache_dir = app_handle.path().app_cache_dir()?;
+    let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
 
     let os = get_os_enum(OS)?;
