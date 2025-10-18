@@ -1,5 +1,5 @@
 use std::cmp::Reverse;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io;
 use std::path::Path;
 
@@ -81,11 +81,31 @@ pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubReleas
 }
 
 pub fn merge_releases(r1: &[GitHubRelease], r2: &[GitHubRelease]) -> Vec<GitHubRelease> {
-    let map: HashMap<u64, GitHubRelease> = r2
-        .iter()
-        .chain(r1.iter())
-        .map(|r| (r.id, r.clone()))
-        .collect();
+    let mut map: HashMap<u64, GitHubRelease> = HashMap::with_capacity(r1.len() + r2.len());
+
+    for release in r1.iter().chain(r2.iter()) {
+        map.entry(release.id)
+            .and_modify(|existing_release| {
+                let assets_capacity = existing_release.assets.len() + release.assets.len();
+                let mut seen_asset_ids = HashSet::with_capacity(assets_capacity);
+                let mut new_assets = Vec::with_capacity(assets_capacity);
+
+                for asset in existing_release.assets.drain(..) {
+                    if seen_asset_ids.insert(asset.id) {
+                        new_assets.push(asset);
+                    }
+                }
+
+                for asset in release.assets.iter() {
+                    if seen_asset_ids.insert(asset.id) {
+                        new_assets.push(asset.clone());
+                    }
+                }
+
+                existing_release.assets = new_assets;
+            })
+            .or_insert_with(|| release.clone());
+    }
 
     map.into_values().collect()
 }
