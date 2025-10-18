@@ -74,9 +74,8 @@ pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubReleas
 
     non_prereleases
         .into_iter()
-        .take(100)
         .cloned()
-        .chain(prereleases.into_iter().take(100).cloned())
+        .chain(prereleases.into_iter().cloned())
         .collect()
 }
 
