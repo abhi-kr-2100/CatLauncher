@@ -2,7 +2,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -18,8 +17,8 @@ import {
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
-
 import { useReleaseEvents } from "./hooks";
+import ReleaseLabel from "./ReleaseLabel";
 
 export default function ReleaseSelector({
   variant,
@@ -79,22 +78,19 @@ export default function ReleaseSelector({
 
     return (
       releases?.map((r) => {
-        const shortReleaseName = get_short_release_name(variant, r.version);
         const isLastPlayed = r.version === lastPlayedVersion;
         const isLatest = r.version === latestVersionName;
 
         return {
           value: r.version,
-          label:
-            isLastPlayed || isLatest ? (
-              <div className="flex items-center gap-2 w-full">
-                <span>{shortReleaseName}</span>
-                {isLatest && <Badge>Latest</Badge>}
-                {isLastPlayed && <Badge>Last Played</Badge>}
-              </div>
-            ) : (
-              shortReleaseName
-            ),
+          label: (
+            <ReleaseLabel
+              variant={variant}
+              version={r.version}
+              isLatest={isLatest}
+              isLastPlayed={isLastPlayed}
+            />
+          ),
         };
       }) ?? []
     );
@@ -157,26 +153,6 @@ export default function ReleaseSelector({
       </Button>
     </div>
   );
-}
-
-function get_short_release_name(variant: GameVariant, version: string): string {
-  switch (variant) {
-    case "BrightNights": {
-      return version;
-    }
-    case "DarkDaysAhead": {
-      if (version.startsWith("cdda-experimental-")) {
-        return version.slice("cdda-experimental-".length);
-      }
-      return version;
-    }
-    case "TheLastGeneration": {
-      if (version.startsWith("cataclysm-tlg-")) {
-        return version.slice("cataclysm-tlg-".length);
-      }
-      return version;
-    }
-  }
 }
 
 interface ReleaseSelectorProps {
