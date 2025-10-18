@@ -1,8 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Check, Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Combobox, { ComboboxItem } from "@/components/ui/combobox";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -18,11 +17,8 @@ import {
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
-
-import {
-  useAllReleasesInstallationStatuses,
-  useReleaseEvents,
-} from "./hooks";
+import { useReleaseEvents } from "./hooks";
+import ReleaseLabel from "./ReleaseLabel";
 
 export default function ReleaseSelector({
   variant,
@@ -30,7 +26,6 @@ export default function ReleaseSelector({
   setSelectedReleaseId,
 }: ReleaseSelectorProps) {
   useReleaseEvents();
-  const installationStatuses = useAllReleasesInstallationStatuses(variant);
 
   const dispatch = useAppDispatch();
 
@@ -39,9 +34,6 @@ export default function ReleaseSelector({
   );
   const releasesFetchStatus = useAppSelector(
     (state) => state.releases.fetchStatusByVariant[variant],
-  );
-  const installationProgress = useAppSelector(
-    (state) => state.installationProgress.statusByVariant[variant],
   );
 
   const { mutate: triggerFetchReleases, isPending: isReleasesTriggerLoading } =
@@ -86,48 +78,23 @@ export default function ReleaseSelector({
 
     return (
       releases?.map((r) => {
-        const shortReleaseName = get_short_release_name(variant, r.version);
         const isLastPlayed = r.version === lastPlayedVersion;
         const isLatest = r.version === latestVersionName;
-
-        const installationStatus = installationStatuses[r.version];
-        const status = installationProgress?.[r.version];
-        let statusIcon = null;
-        if (status === "Downloading" || status === "Installing") {
-          statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-        } else if (
-          status === "Success" ||
-          installationStatus === "ReadyToPlay"
-        ) {
-          statusIcon = <Check className="h-4 w-4 text-green-500" />;
-        }
 
         return {
           value: r.version,
           label: (
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <span>{shortReleaseName}</span>
-                {statusIcon}
-              </div>
-              {(isLatest || isLastPlayed) && (
-                <div className="flex items-center gap-1">
-                  {isLatest && <Badge>Latest</Badge>}
-                  {isLastPlayed && <Badge>Last Played</Badge>}
-                </div>
-              )}
-            </div>
+            <ReleaseLabel
+              variant={variant}
+              version={r.version}
+              isLatest={isLatest}
+              isLastPlayed={isLastPlayed}
+            />
           ),
         };
       }) ?? []
     );
-  }, [
-    releases,
-    lastPlayedVersion,
-    variant,
-    installationProgress,
-    installationStatuses,
-  ]);
+  }, [releases, lastPlayedVersion, variant]);
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
@@ -186,26 +153,6 @@ export default function ReleaseSelector({
       </Button>
     </div>
   );
-}
-
-function get_short_release_name(variant: GameVariant, version: string): string {
-  switch (variant) {
-    case "BrightNights": {
-      return version;
-    }
-    case "DarkDaysAhead": {
-      if (version.startsWith("cdda-experimental-")) {
-        return version.slice("cdda-experimental-".length);
-      }
-      return version;
-    }
-    case "TheLastGeneration": {
-      if (version.startsWith("cataclysm-tlg-")) {
-        return version.slice("cataclysm-tlg-".length);
-      }
-      return version;
-    }
-  }
 }
 
 interface ReleaseSelectorProps {
