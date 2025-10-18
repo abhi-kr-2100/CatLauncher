@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -15,9 +15,13 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener, toastCL } from "@/lib/utils";
-import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  clearInstallationProgress,
+  setInstallationProgress,
+} from "@/store/installationProgressSlice";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
+import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 
 export function useReleaseEvents() {
   const dispatch = useAppDispatch();
@@ -37,15 +41,24 @@ export function useReleaseEvents() {
   }, [dispatch]);
 }
 
-export function useInstallationProgressStatus(
+export function useInstallAndMonitorRelease(
+  variant: GameVariant,
   selectedReleaseId: string | undefined,
 ) {
-  const [installStatus, setInstallStatus] =
-    useState<InstallationProgressStatus | null>(null);
+  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
+
+  const installationProgressStatus = useAppSelector((state) => {
+    if (!selectedReleaseId) {
+      return null;
+    }
+
+    return state.installationProgress.statusByVariant[variant][
+      selectedReleaseId
+    ];
+  });
 
   useEffect(() => {
-    setInstallStatus(null);
-
     if (!selectedReleaseId) {
       return;
     }
@@ -53,7 +66,13 @@ export function useInstallationProgressStatus(
     const installationProgressStatusUpdate = (
       status: InstallationProgressStatus,
     ) => {
-      setInstallStatus(status);
+      dispatch(
+        setInstallationProgress({
+          variant,
+          releaseId: selectedReleaseId,
+          status,
+        }),
+      );
     };
 
     const cleanup = setupEventListener(
@@ -64,26 +83,67 @@ export function useInstallationProgressStatus(
 
     return () => {
       cleanup();
-      setInstallStatus(null);
     };
-  }, [selectedReleaseId]);
+  }, [dispatch, variant, selectedReleaseId]);
 
-  return installStatus;
+  const { mutate, isPending, reset } = useMutation({
+    mutationFn: (releaseId: string | undefined) => {
+      if (!releaseId) {
+        throw new Error("No release selected");
+      }
+      return installReleaseForVariant(variant, releaseId);
+    },
+
+    onSuccess: (updatedRelease, releaseId) => {
+      queryClient.setQueryData(
+        queryKeys.releases(variant),
+        (old: GameRelease[] | undefined) =>
+          old?.map((o) => {
+            if (o.version !== releaseId) {
+              return o;
+            }
+            return updatedRelease;
+          }),
+      );
+
+      queryClient.setQueryData(
+        queryKeys.installationStatus(variant, releaseId),
+        (): GameReleaseStatus => "ReadyToPlay",
+      );
+
+      dispatch(clearInstallationProgress({ variant, releaseId }));
+    },
+
+    onError: (e, releaseId) => {
+      toastCL("error", "Failed to install release.", e);
+      if (releaseId) {
+        dispatch(clearInstallationProgress({ variant, releaseId }));
+      }
+    },
+  });
+
+  useEffect(() => {
+    reset();
+  }, [reset, selectedReleaseId]);
+
+  return {
+    install: mutate,
+    isInstalling: isPending,
+    installationProgressStatus,
+  };
 }
 
 export function useInstallationStatus(
   variant: GameVariant,
   selectedReleaseId: string | undefined,
 ) {
-  const {
-    data: installationStatus,
-    isLoading: isInstallationStatusLoading,
-    error: installationStatusError,
-  } = useQuery<GameReleaseStatus>({
-    queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
-    queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
-    enabled: Boolean(selectedReleaseId),
-  });
+  const { data: installationStatus, error: installationStatusError } =
+    useQuery<GameReleaseStatus>({
+      queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
+      queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
+      enabled: Boolean(selectedReleaseId),
+      initialData: "Unknown",
+    });
 
   useEffect(() => {
     if (!installationStatusError) {
@@ -97,51 +157,10 @@ export function useInstallationStatus(
     );
   }, [installationStatusError, variant, selectedReleaseId]);
 
-  return { installationStatus, isInstallationStatusLoading, installationStatusError };
-}
-
-export function useInstallRelease(
-  variant: GameVariant,
-  selectedReleaseId: string | undefined,
-) {
-  const queryClient = useQueryClient();
-  const {
-    mutate: install,
-    isPending: isInstalling,
-    reset: resetInstall,
-  } = useMutation({
-    mutationFn: (releaseId: string | undefined) => {
-      if (!releaseId) {
-        throw new Error("No release selected");
-      }
-      return installReleaseForVariant(variant, releaseId);
-    },
-    onSuccess: (updatedRelease, releaseId) => {
-      queryClient.setQueryData(
-        queryKeys.releases(variant),
-        (old: GameRelease[] | undefined) =>
-          old?.map((o) => {
-            if (o.version !== releaseId) {
-              return o;
-            }
-            return updatedRelease;
-          }),
-      );
-      queryClient.setQueryData(
-        queryKeys.installationStatus(variant, releaseId),
-        (): GameReleaseStatus => "ReadyToPlay",
-      );
-    },
-    onError: (e) => {
-      toastCL("error", "Failed to install release.", e);
-    },
-  });
-
-  useEffect(() => {
-    resetInstall();
-  }, [resetInstall, selectedReleaseId]);
-
-  return { install, isInstalling };
+  return {
+    installationStatus,
+    installationStatusError,
+  };
 }
 
 export function usePlayGame(variant: GameVariant) {
