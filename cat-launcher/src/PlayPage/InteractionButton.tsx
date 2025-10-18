@@ -9,9 +9,8 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import { useAppSelector } from "@/store/hooks";
 import {
-  useInstallationProgressStatus,
+  useInstallAndMonitorRelease,
   useInstallationStatus,
-  useInstallRelease,
   usePlayGame,
 } from "./hooks";
 
@@ -25,37 +24,31 @@ export default function InteractionButton({
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
-  const installationProgressStatus =
-    useInstallationProgressStatus(selectedReleaseId);
+  const { install, installationProgressStatus } = useInstallAndMonitorRelease(
+    variant,
+    selectedReleaseId,
+  );
 
-  const {
-    installationStatus,
-    isInstallationStatusLoading,
-    installationStatusError,
-  } = useInstallationStatus(variant, selectedReleaseId);
-
-  const { install, isInstalling } = useInstallRelease(
+  const { installationStatus, installationStatusError } = useInstallationStatus(
     variant,
     selectedReleaseId,
   );
 
   const { play } = usePlayGame(variant);
 
-  const actionButtonLabel = getActionButtonLabel({
+  const actionButtonLabel = getActionButtonLabel(
     isThisVariantRunning,
-    isInstallationStatusLoading,
     installationStatus,
-    isInstalling,
     installationProgressStatus,
-  });
+  );
 
   const isActionButtonDisabled =
     !selectedReleaseId ||
-    isInstalling ||
-    isInstallationStatusLoading ||
     Boolean(installationStatusError) ||
     installationStatus === "Unknown" ||
     installationStatus === "NotAvailable" ||
+    installationProgressStatus === "Downloading" ||
+    installationProgressStatus === "Installing" ||
     // Only one variant should be running at a time.
     // Disable button if any variant is already running.
     isAnyVariantRunning;
@@ -97,27 +90,13 @@ interface InteractionButtonProps {
   selectedReleaseId: string | undefined;
 }
 
-function getActionButtonLabel({
-  isThisVariantRunning,
-  isInstallationStatusLoading,
-  installationStatus,
-  isInstalling,
-  installationProgressStatus,
-}: GetActionButtonLabelParams) {
+function getActionButtonLabel(
+  isThisVariantRunning: boolean,
+  installationStatus: GameReleaseStatus,
+  installationProgressStatus: InstallationProgressStatus | null,
+) {
   if (isThisVariantRunning) {
     return "Running...";
-  }
-
-  if (isInstallationStatusLoading) {
-    return "Loading...";
-  }
-
-  if (installationStatus === "ReadyToPlay") {
-    return "Play";
-  }
-
-  if (!isInstalling) {
-    return "Install";
   }
 
   if (installationProgressStatus === "Downloading") {
@@ -128,13 +107,17 @@ function getActionButtonLabel({
     return "Installing...";
   }
 
-  return "Play";
-}
+  if (installationStatus === "Unknown") {
+    return "Loading...";
+  }
 
-interface GetActionButtonLabelParams {
-  isThisVariantRunning: boolean;
-  isInstallationStatusLoading: boolean;
-  installationStatus?: GameReleaseStatus;
-  isInstalling: boolean;
-  installationProgressStatus?: InstallationProgressStatus | null;
+  if (installationStatus === "ReadyToPlay") {
+    return "Play";
+  }
+
+  if (installationStatus === "NotAvailable") {
+    return "Not Available";
+  }
+
+  return "Install";
 }
