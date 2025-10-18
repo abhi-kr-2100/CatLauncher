@@ -111,7 +111,14 @@ export function useInstallAndMonitorRelease(
         (): GameReleaseStatus => "ReadyToPlay",
       );
 
-      dispatch(clearInstallationProgress({ variant, releaseId }));
+      if (!releaseId) {
+        console.error("😵 Release should not be undefined here. 😵");
+        return;
+      }
+
+      dispatch(
+        setInstallationProgress({ variant, releaseId, status: "Success" }),
+      );
     },
 
     onError: (e, releaseId) => {

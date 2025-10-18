@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { Check, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,9 @@ export default function ReleaseSelector({
   );
   const releasesFetchStatus = useAppSelector(
     (state) => state.releases.fetchStatusByVariant[variant],
+  );
+  const installationProgress = useAppSelector(
+    (state) => state.installationProgress.statusByVariant[variant],
   );
 
   const { mutate: triggerFetchReleases, isPending: isReleasesTriggerLoading } =
@@ -83,22 +86,34 @@ export default function ReleaseSelector({
         const isLastPlayed = r.version === lastPlayedVersion;
         const isLatest = r.version === latestVersionName;
 
+        const status = installationProgress[r.version];
+        let statusIcon = null;
+        if (status === "Downloading" || status === "Installing") {
+          statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
+        } else if (status === "Success") {
+          statusIcon = <Check className="h-4 w-4 text-green-500" />;
+        }
+
         return {
           value: r.version,
-          label:
-            isLastPlayed || isLatest ? (
-              <div className="flex items-center gap-2 w-full">
+          label: (
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
                 <span>{shortReleaseName}</span>
-                {isLatest && <Badge>Latest</Badge>}
-                {isLastPlayed && <Badge>Last Played</Badge>}
+                {statusIcon}
               </div>
-            ) : (
-              shortReleaseName
-            ),
+              {(isLatest || isLastPlayed) && (
+                <div className="flex items-center gap-1">
+                  {isLatest && <Badge>Latest</Badge>}
+                  {isLastPlayed && <Badge>Last Played</Badge>}
+                </div>
+              )}
+            </div>
+          ),
         };
       }) ?? []
     );
-  }, [releases, lastPlayedVersion, variant]);
+  }, [releases, lastPlayedVersion, variant, installationProgress]);
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
