@@ -1,5 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  useQueries,
+} from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -39,6 +44,36 @@ export function useReleaseEvents() {
 
     return cleanup;
   }, [dispatch]);
+}
+
+export function useAllReleasesInstallationStatuses(variant: GameVariant) {
+  const releases = useAppSelector(
+    (state) => state.releases.releasesByVariant[variant],
+  );
+
+  const results = useQueries({
+    queries:
+      releases?.map((r) => ({
+        queryKey: queryKeys.installationStatus(variant, r.version),
+        queryFn: () => getInstallationStatus(variant, r.version),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        initialData: "Unknown",
+      })) ?? [],
+  });
+
+  const statuses = useMemo(() => {
+    return results.reduce(
+      (acc, result, index) => {
+        if (releases && releases[index]) {
+          acc[releases[index].version] = result.data as GameReleaseStatus;
+        }
+        return acc;
+      },
+      {} as Record<string, GameReleaseStatus | undefined>,
+    );
+  }, [results, releases]);
+
+  return statuses;
 }
 
 export function useInstallAndMonitorRelease(

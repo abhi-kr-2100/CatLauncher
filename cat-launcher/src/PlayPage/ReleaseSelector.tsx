@@ -19,7 +19,10 @@ import {
   startFetchingReleases,
 } from "@/store/releasesSlice";
 
-import { useReleaseEvents } from "./hooks";
+import {
+  useAllReleasesInstallationStatuses,
+  useReleaseEvents,
+} from "./hooks";
 
 export default function ReleaseSelector({
   variant,
@@ -27,6 +30,7 @@ export default function ReleaseSelector({
   setSelectedReleaseId,
 }: ReleaseSelectorProps) {
   useReleaseEvents();
+  const installationStatuses = useAllReleasesInstallationStatuses(variant);
 
   const dispatch = useAppDispatch();
 
@@ -86,11 +90,15 @@ export default function ReleaseSelector({
         const isLastPlayed = r.version === lastPlayedVersion;
         const isLatest = r.version === latestVersionName;
 
-        const status = installationProgress[r.version];
+        const installationStatus = installationStatuses[r.version];
+        const status = installationProgress?.[r.version];
         let statusIcon = null;
         if (status === "Downloading" || status === "Installing") {
           statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-        } else if (status === "Success") {
+        } else if (
+          status === "Success" ||
+          installationStatus === "ReadyToPlay"
+        ) {
           statusIcon = <Check className="h-4 w-4 text-green-500" />;
         }
 
@@ -113,7 +121,13 @@ export default function ReleaseSelector({
         };
       }) ?? []
     );
-  }, [releases, lastPlayedVersion, variant, installationProgress]);
+  }, [
+    releases,
+    lastPlayedVersion,
+    variant,
+    installationProgress,
+    installationStatuses,
+  ]);
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
