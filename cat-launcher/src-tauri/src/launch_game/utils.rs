@@ -27,11 +27,12 @@ pub async fn backup_and_copy_save_files(
     os: &OS,
     timestamp: u64,
 ) -> Result<(), BackupAndCopyError> {
+    backup_save_files(variant, from_version, data_dir, os, timestamp).await?;
+
+    // Don't need to copy save files if the versions are the same
     if from_version == to_version {
         return Ok(());
     }
-
-    backup_save_files(variant, from_version, data_dir, os, timestamp).await?;
     copy_save_files(from_version, to_version, variant, data_dir, os).await?;
 
     Ok(())
