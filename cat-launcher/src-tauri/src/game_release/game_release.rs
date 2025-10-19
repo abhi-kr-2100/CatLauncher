@@ -10,8 +10,10 @@ use crate::infra::utils::{Arch, OS};
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
+#[ts(export)]
 pub enum ReleaseType {
     Stable,
+    ReleaseCandidate,
     Experimental,
 }
 

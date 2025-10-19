@@ -8,7 +8,6 @@ import { useInstallationStatus } from "./hooks";
 interface ReleaseLabelProps {
   variant: GameVariant;
   version: string;
-  isLatest: boolean;
   isLastPlayed: boolean;
 }
 
@@ -35,7 +34,6 @@ function get_short_release_name(variant: GameVariant, version: string): string {
 export default function ReleaseLabel({
   variant,
   version,
-  isLatest,
   isLastPlayed,
 }: ReleaseLabelProps) {
   const shortReleaseName = get_short_release_name(variant, version);
@@ -61,10 +59,9 @@ export default function ReleaseLabel({
         <span>{shortReleaseName}</span>
         {statusIcon}
       </div>
-      {(isLatest || isLastPlayed) && (
+      {isLastPlayed && (
         <div className="flex items-center gap-1">
-          {isLatest && <Badge>Latest</Badge>}
-          {isLastPlayed && <Badge>Last Played</Badge>}
+          <Badge>Last Played</Badge>
         </div>
       )}
     </div>
