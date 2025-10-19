@@ -8,7 +8,7 @@ use tokio::fs::create_dir_all;
 
 use crate::fetch_releases::fetch_releases::{ReleasesUpdatePayload, ReleasesUpdateStatus};
 use crate::filesystem::paths::{get_default_releases_file_path, get_releases_cache_filepath};
-use crate::game_release::game_release::{GameRelease, GameReleaseStatus, ReleaseType};
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{read_from_file, write_to_file, WriteToFileError};
@@ -135,11 +135,7 @@ pub fn get_releases_payload(
     let releases = gh_releases
         .iter()
         .map(|r| {
-            let release_type = if r.prerelease {
-                ReleaseType::Experimental
-            } else {
-                ReleaseType::Stable
-            };
+            let release_type = variant.determine_release_type(&r.tag_name, r.prerelease);
 
             GameRelease {
                 variant: *variant,
