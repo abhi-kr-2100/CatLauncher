@@ -100,10 +100,13 @@ export default function ReleaseSelector({
 
   useEffect(() => {
     // Selected release may become unavailable after filtering
-    if (!comboboxItems.find((item) => item.value === selectedReleaseId)) {
+    if (
+      selectedReleaseId &&
+      !comboboxItems.find((item) => item.value === selectedReleaseId)
+    ) {
       setSelectedReleaseId(undefined);
     }
-  }, [comboboxItems, selectedReleaseId]);
+  }, [comboboxItems, selectedReleaseId, setSelectedReleaseId]);
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
