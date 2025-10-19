@@ -34,11 +34,11 @@ export default function InteractionButton({
     selectedReleaseId,
   );
 
-  const { play } = usePlayGame(variant);
+  const { play, isStartingGame } = usePlayGame(variant);
 
   const actionButtonLabel = getActionButtonLabel(
     selectedReleaseId,
-    isThisVariantRunning,
+    isThisVariantRunning || isStartingGame,
     installationStatus,
     installationProgressStatus,
   );
@@ -52,7 +52,8 @@ export default function InteractionButton({
     installationProgressStatus === "Installing" ||
     // Only one variant should be running at a time.
     // Disable button if any variant is already running.
-    isAnyVariantRunning;
+    isAnyVariantRunning ||
+    isStartingGame;
 
   const button = (
     <Button
@@ -93,7 +94,7 @@ interface InteractionButtonProps {
 
 function getActionButtonLabel(
   selectedReleaseId: string | undefined,
-  isThisVariantRunning: boolean,
+  isRunning: boolean,
   installationStatus: GameReleaseStatus,
   installationProgressStatus: InstallationProgressStatus | null,
 ) {
@@ -101,7 +102,7 @@ function getActionButtonLabel(
     return "Select a Release to Play";
   }
 
-  if (isThisVariantRunning) {
+  if (isRunning) {
     return "Running...";
   }
 
