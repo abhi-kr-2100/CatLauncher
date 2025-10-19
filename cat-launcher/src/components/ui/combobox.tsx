@@ -12,9 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
-import { useEffect, useState, ReactNode } from "react";
+import { ChevronsUpDownIcon } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
 
 export interface ComboboxItem {
   value: string;
@@ -97,20 +96,17 @@ export function Combobox({
                     value={item.value}
                     onSelect={(currentValue: string) => {
                       const selectedValue = items.find(
-                        (i) => i.value === currentValue
+                        (i) => i.value === currentValue,
                       )?.value;
                       if (selectedValue === undefined) {
                         throw new Error(
-                          "Combobox: Selected value not found in items"
+                          "Combobox: Selected value not found in items",
                         );
                       }
                       onChange(selectedValue);
                       setOpen(false);
                     }}
                   >
-                    <CheckIcon
-                      className={cn({ hidden: value !== item.value })}
-                    />
                     {item.label}
                   </CommandItem>
                 ))}
