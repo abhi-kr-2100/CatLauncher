@@ -2,8 +2,8 @@ use strum::IntoEnumIterator;
 use tauri::command;
 use ts_rs::TS;
 
-use super::basic_info::Link;
 use crate::variants::GameVariant;
+use super::basic_info::Link;
 
 #[derive(serde::Serialize, TS)]
 #[ts(export)]
