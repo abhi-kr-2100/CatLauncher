@@ -37,6 +37,7 @@ export default function InteractionButton({
   const { play } = usePlayGame(variant);
 
   const actionButtonLabel = getActionButtonLabel(
+    selectedReleaseId,
     isThisVariantRunning,
     installationStatus,
     installationProgressStatus,
@@ -91,10 +92,15 @@ interface InteractionButtonProps {
 }
 
 function getActionButtonLabel(
+  selectedReleaseId: string | undefined,
   isThisVariantRunning: boolean,
   installationStatus: GameReleaseStatus,
   installationProgressStatus: InstallationProgressStatus | null,
 ) {
+  if (!selectedReleaseId) {
+    return "Select a Release to Play";
+  }
+
   if (isThisVariantRunning) {
     return "Running...";
   }
