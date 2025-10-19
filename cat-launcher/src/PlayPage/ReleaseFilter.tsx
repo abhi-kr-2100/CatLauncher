@@ -82,20 +82,24 @@ export default function ReleaseFilter({
 
   return (
     <div className="flex items-center space-x-4">
-      {filters.map((filter) => (
-        <div key={filter.id} className="flex items-center space-x-2">
-          <Checkbox
-            id={filter.id}
-            checked={selectedFilterIds.includes(filter.id)}
-            onCheckedChange={(checked: boolean) =>
-              handleCheckedChange(checked, filter.id)
-            }
-          />
-          <Label htmlFor={filter.id} className="text-sm font-medium">
-            {filter.label}
-          </Label>
-        </div>
-      ))}
+      {filters.map((filter) => {
+        const key = `${variant}-${filter.id}`;
+
+        return (
+          <div key={key} className="flex items-center space-x-2">
+            <Checkbox
+              id={key}
+              checked={selectedFilterIds.includes(filter.id)}
+              onCheckedChange={(checked: boolean) =>
+                handleCheckedChange(checked, filter.id)
+              }
+            />
+            <Label htmlFor={key} className="text-sm font-medium">
+              {filter.label}
+            </Label>
+          </div>
+        );
+      })}
     </div>
   );
 }
