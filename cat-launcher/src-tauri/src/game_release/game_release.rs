@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::fetch_releases::utils::get_assets;
-use crate::game_release::utils::get_platform_asset_substr;
+use crate::game_release::utils::get_platform_asset_substrs;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::utils::{Arch, OS};
 use crate::variants::GameVariant;
@@ -48,8 +48,11 @@ impl GameRelease {
         resources_dir: &Path,
     ) -> Option<GitHubAsset> {
         let assets = get_assets(self, cache_dir, resources_dir).await;
-        let substring = get_platform_asset_substr(&self.variant, os, arch);
+        let substrings = get_platform_asset_substrs(&self.variant, os, arch);
 
-        assets.into_iter().find(|a| a.name.contains(substring))
+        substrings
+            .iter()
+            .find_map(|substr| assets.iter().find(|a| a.name.contains(substr)))
+            .cloned()
     }
 }
