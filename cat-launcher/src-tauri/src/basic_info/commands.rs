@@ -2,6 +2,7 @@ use strum::IntoEnumIterator;
 use tauri::command;
 use ts_rs::TS;
 
+use super::basic_info::Link;
 use crate::variants::GameVariant;
 
 #[derive(serde::Serialize, TS)]
@@ -9,7 +10,7 @@ use crate::variants::GameVariant;
 pub struct GameVariantInfo {
     pub id: GameVariant,
     pub name: &'static str,
-    pub description: &'static str,
+    pub links: Vec<Link>,
 }
 
 impl From<GameVariant> for GameVariantInfo {
@@ -17,7 +18,7 @@ impl From<GameVariant> for GameVariantInfo {
         GameVariantInfo {
             id: variant,
             name: variant.name(),
-            description: variant.description(),
+            links: variant.links(),
         }
     }
 }

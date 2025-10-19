@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
+import { openLink } from "@/lib/utils";
 import { useState } from "react";
 import InteractionButton from "./InteractionButton";
 import ReleaseSelector from "./ReleaseSelector";
@@ -25,9 +27,18 @@ export default function GameVariantCard({ variantInfo }: GameVariantProps) {
       <CardHeader>
         <CardTitle>{variantInfo.name}</CardTitle>
         <CardDescription>
-          <p className="text-sm text-muted-foreground line-clamp-3">
-            {variantInfo.description}
-          </p>
+          <div className="flex space-x-2">
+            {variantInfo.links.map((link) => (
+              <Button
+                key={link.href}
+                variant="link"
+                onClick={() => openLink(link.href)}
+                className="p-0"
+              >
+                {link.label}
+              </Button>
+            ))}
+          </div>
         </CardDescription>
       </CardHeader>
       <CardContent>
