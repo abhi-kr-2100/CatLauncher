@@ -4,6 +4,7 @@ import { Check, Loader2 } from "lucide-react";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useAppSelector } from "@/store/hooks";
 import { useInstallationStatus } from "./hooks";
+import { useMemo } from "react";
 
 interface ReleaseLabelProps {
   variant: GameVariant;
@@ -11,7 +12,7 @@ interface ReleaseLabelProps {
   isLastPlayed: boolean;
 }
 
-function get_short_release_name(variant: GameVariant, version: string): string {
+function getShortReleaseName(variant: GameVariant, version: string): string {
   switch (variant) {
     case "BrightNights": {
       return version;
@@ -19,6 +20,9 @@ function get_short_release_name(variant: GameVariant, version: string): string {
     case "DarkDaysAhead": {
       if (version.startsWith("cdda-experimental-")) {
         return version.slice("cdda-experimental-".length);
+      }
+      if (version.startsWith("cdda-")) {
+        return version.slice("cdda-".length);
       }
       return version;
     }
@@ -36,7 +40,10 @@ export default function ReleaseLabel({
   version,
   isLastPlayed,
 }: ReleaseLabelProps) {
-  const shortReleaseName = get_short_release_name(variant, version);
+  const shortReleaseName = useMemo(
+    () => getShortReleaseName(variant, version),
+    [variant, version],
+  );
 
   const { installationStatus } = useInstallationStatus(variant, version);
   const progressStatus = useAppSelector(
