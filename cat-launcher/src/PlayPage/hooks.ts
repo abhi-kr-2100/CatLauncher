@@ -208,7 +208,7 @@ export function useInstallationStatus(
 export function usePlayGame(variant: GameVariant) {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const { mutate: play } = useMutation({
+  const { mutate: play, isPending: isStartingGame } = useMutation({
     mutationFn: (releaseId: string | undefined) => {
       if (!releaseId) {
         throw new Error("No release selected");
@@ -227,5 +227,5 @@ export function usePlayGame(variant: GameVariant) {
     },
   });
 
-  return { play };
+  return { play, isStartingGame };
 }
