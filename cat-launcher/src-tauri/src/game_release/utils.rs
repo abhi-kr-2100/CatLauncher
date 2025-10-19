@@ -7,18 +7,24 @@ use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
-pub fn get_platform_asset_substr(variant: &GameVariant, os: &OS, arch: &Arch) -> &'static str {
+pub fn get_platform_asset_substr(
+    variant: &GameVariant,
+    os: &OS,
+    arch: &Arch,
+) -> Vec<&'static str> {
     match (variant, os, arch) {
-        (GameVariant::DarkDaysAhead, OS::Windows, _) => "windows-with-graphics-and-sounds",
-        (GameVariant::DarkDaysAhead, OS::MacOS, _) => "osx-terminal-only",
-        (GameVariant::DarkDaysAhead, OS::Linux, _) => "linux-with-graphics-and-sounds",
-        (GameVariant::BrightNights, OS::Windows, _) => "windows-tiles",
-        (GameVariant::BrightNights, OS::MacOS, Arch::ARM64) => "osx-tiles-arm",
-        (GameVariant::BrightNights, OS::MacOS, Arch::X64) => "osx-tiles-x64",
-        (GameVariant::BrightNights, OS::Linux, _) => "linux-tiles",
-        (GameVariant::TheLastGeneration, OS::Windows, _) => "windows-tiles-sounds-x64-msvc",
-        (GameVariant::TheLastGeneration, OS::MacOS, _) => "osx-tiles-universal",
-        (GameVariant::TheLastGeneration, OS::Linux, _) => "linux-tiles-sounds",
+        (GameVariant::DarkDaysAhead, OS::Windows, _) => vec!["windows-with-graphics-and-sounds"],
+        (GameVariant::DarkDaysAhead, OS::MacOS, _) => vec!["osx-terminal-only"],
+        (GameVariant::DarkDaysAhead, OS::Linux, _) => vec!["linux-with-graphics-and-sounds"],
+        (GameVariant::BrightNights, OS::Windows, _) => vec!["windows-tiles"],
+        (GameVariant::BrightNights, OS::MacOS, Arch::ARM64) => vec!["osx-tiles-arm"],
+        (GameVariant::BrightNights, OS::MacOS, Arch::X64) => vec!["osx-tiles-x64"],
+        (GameVariant::BrightNights, OS::Linux, _) => vec!["linux-tiles"],
+        (GameVariant::TheLastGeneration, OS::Windows, _) => {
+            vec!["windows-tiles-sounds-x64-msvc"]
+        }
+        (GameVariant::TheLastGeneration, OS::MacOS, _) => vec!["osx-tiles-universal"],
+        (GameVariant::TheLastGeneration, OS::Linux, _) => vec!["linux-tiles-sounds"],
     }
 }
 
