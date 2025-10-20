@@ -195,6 +195,18 @@ pub async fn get_game_save_dirs(
     data_dir: &Path,
     os: &OS,
 ) -> Result<Vec<PathBuf>, GetGameExecutableDirError> {
+    let dirs = &["save"];
+
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
+    Ok(dirs.iter().map(|d| executable_dir.join(d)).collect())
+}
+
+pub async fn get_game_save_and_config_dirs(
+    variant: &GameVariant,
+    release_version: &str,
+    data_dir: &Path,
+    os: &OS,
+) -> Result<Vec<PathBuf>, GetGameExecutableDirError> {
     let dirs = &[
         "achievements",
         "config",

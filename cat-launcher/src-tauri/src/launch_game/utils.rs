@@ -2,8 +2,9 @@ use std::io;
 use std::path::Path;
 
 use crate::filesystem::paths::{
-    get_game_executable_dir, get_game_save_dirs, get_or_create_backup_archive_filepath,
-    GetBackupArchivePathError, GetGameExecutableDirError, GetVersionExecutableDirError,
+    get_game_executable_dir, get_game_save_and_config_dirs, get_game_save_dirs,
+    get_or_create_backup_archive_filepath, GetBackupArchivePathError, GetGameExecutableDirError,
+    GetVersionExecutableDirError,
 };
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
@@ -33,7 +34,7 @@ pub async fn backup_and_copy_save_files(
     if from_version == to_version {
         return Ok(());
     }
-    copy_save_files(from_version, to_version, variant, data_dir, os).await?;
+    copy_save_and_config_files(from_version, to_version, variant, data_dir, os).await?;
 
     Ok(())
 }
@@ -56,7 +57,7 @@ pub enum SaveCopyError {
     Copy(#[from] CopyDirError),
 }
 
-async fn copy_save_files(
+async fn copy_save_and_config_files(
     from_version: &str,
     to_version: &str,
     variant: &GameVariant,
@@ -65,7 +66,7 @@ async fn copy_save_files(
 ) -> Result<(), SaveCopyError> {
     let to_dir = get_game_executable_dir(variant, to_version, data_dir, os).await?;
 
-    let save_dirs = get_game_save_dirs(variant, from_version, data_dir, os).await?;
+    let save_dirs = get_game_save_and_config_dirs(variant, from_version, data_dir, os).await?;
 
     for save_dir in save_dirs {
         if let Ok(metadata) = tokio::fs::metadata(&save_dir).await {
