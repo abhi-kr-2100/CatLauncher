@@ -33,6 +33,8 @@ CatLauncher is 100% open-source and the .exe is built directly from the source c
 
 By default, macOS does not allow running applications from unidentified developers. To allow CatLauncher, open System Preferences > Security & Privacy > General and click on the lock icon to make changes. Then, click on the "Open Anyway" button next to CatLauncher. You should do this after trying to run the .dmg file and failing.
 
+Ensure that you download the correct .dmg file depending on your macOS architecture. You can check your macOS architecture by running the command `uname -m` in the terminal. If the output is `x86_64`, download the `x86_64.dmg` file. If the output is `arm64`, download the `arm64.dmg` file.
+
 Another way to accomplish this is by disabling Gatekeeper. See https://disable-gatekeeper.github.io/.
 
 CatLauncher is 100% open-source and the .dmg is built directly from the source code via GitHub Actions. This ensures there is no opportunity for malicious actors to tamper with the executable. CatLauncher is safe to use.
