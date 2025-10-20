@@ -3,7 +3,10 @@ import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import Combobox, { ComboboxItem } from "@/components/ui/combobox";
+import {
+  VirtualizedCombobox,
+  type ComboboxItem,
+} from "@/components/virtualized-combobox";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
@@ -147,7 +150,7 @@ export default function ReleaseSelector({
       />
       <div className="flex items-end gap-2">
         <div className="flex-grow">
-          <Combobox
+          <VirtualizedCombobox
             label="Version"
             items={comboboxItems}
             value={selectedReleaseId}
