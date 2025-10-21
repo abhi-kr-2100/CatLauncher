@@ -10,14 +10,14 @@ use tokio::task::JoinError;
 use ts_rs::TS;
 
 use crate::filesystem::paths::{
-    get_game_executable_filepath, AssetDownloadDirError, AssetExtractionDirError,
-    GetExecutablePathError,
+    get_game_executable_filepath, get_user_game_data_dir, AssetDownloadDirError,
+    AssetExtractionDirError, GetExecutablePathError,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{Arch, OS};
 use crate::last_played::last_played::LastPlayedError;
-use crate::launch_game::utils::{backup_and_copy_save_files, BackupAndCopyError};
+use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -41,7 +41,7 @@ pub enum LaunchGameError {
     LastPlayed(#[from] LastPlayedError),
 
     #[error("failed to backup and copy saves: {0}")]
-    BackupAndCopy(#[from] BackupAndCopyError),
+    Backup(#[from] BackupError),
 
     #[error("failed to get stdout from child process")]
     Stdout,
@@ -92,30 +92,19 @@ impl GameRelease {
             .ok_or(LaunchGameError::ExecutableDir)?
             .to_path_buf();
 
-        let last_played_version = self
-            .variant
-            .get_last_played_version(data_dir)
-            .await?
-            .unwrap_or(self.version.clone()); // If no version is found, use the current version
-
-        backup_and_copy_save_files(
-            &last_played_version,
-            &self.version,
-            &self.variant,
-            data_dir,
-            os,
-            timestamp,
-        )
-        .await?;
-
         self.variant
             .set_last_played_version(&self.version, data_dir)
             .await?;
 
+        backup_save_files(&self.variant, data_dir, timestamp).await?;
+
+        let user_data_dir = get_user_game_data_dir(&self.variant, data_dir);
         let mut command = Command::new(executable_path);
 
         command
             .current_dir(executable_dir)
+            .arg("--userdir")
+            .arg(user_data_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
 
