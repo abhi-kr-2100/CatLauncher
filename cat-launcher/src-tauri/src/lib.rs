@@ -3,6 +3,7 @@ pub mod filesystem;
 mod basic_info;
 mod fetch_releases;
 mod game_release;
+mod game_tips;
 mod infra;
 mod install_release;
 mod last_played;
@@ -13,6 +14,7 @@ use tauri::Listener;
 
 use crate::basic_info::commands::get_game_variants_info;
 use crate::fetch_releases::commands::fetch_releases_for_variant;
+use crate::game_tips::commands::get_tips;
 use crate::infra::autoupdate::update::run_updater;
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
@@ -42,6 +44,7 @@ pub fn run() {
             launch_game,
             get_last_played_version,
             get_installation_status,
+            get_tips,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
