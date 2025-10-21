@@ -7,6 +7,7 @@ use flate2::read::GzDecoder;
 use tar::Archive;
 use tokio::fs;
 use tokio::task::JoinError;
+use unrar::error::UnrarError;
 use zip::result::ZipError;
 use zip::write::FileOptions;
 use zip::CompressionMethod::Deflated;
@@ -25,6 +26,9 @@ pub enum ExtractionError {
 
     #[error("zip extraction failed: {0}")]
     Zip(#[from] ZipError),
+
+    #[error("rar extraction failed: {0}")]
+    Rar(#[from] UnrarError),
 
     #[error("failed to copy from DMG: {0}")]
     Copy(#[from] CopyDirError),
@@ -86,6 +90,18 @@ pub async fn extract_archive(
 
             copy_dir_all(&handle.mount_point, &target_dir, os).await?;
             return Ok(());
+        }
+
+        Some("rar") => {
+            tokio::task::spawn_blocking(move || {
+                let mut archive = unrar::Archive::new(&archive_path).open_for_processing()?;
+
+                while let Some(header) = archive.read_header()? {
+                    archive = header.extract_to(&target_dir)?;
+                }
+                Ok(())
+            })
+            .await?
         }
 
         _ => return Err(ExtractionError::UnsupportedArchive),
