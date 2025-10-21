@@ -54,3 +54,7 @@ export function setupEventListener<T>(
     unlisten?.();
   };
 }
+
+export function randomInt(n: number): number {
+  return Math.floor(Math.random() * n);
+}
