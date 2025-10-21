@@ -245,3 +245,33 @@ pub async fn get_or_create_backup_archive_filepath(
 
     Ok(backup_dir.join(format!("{}.zip", timestamp)))
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetTipFilePathsError {
+    #[error("failed to get game executable dir: {0}")]
+    GetGameExecutableDir(#[from] GetGameExecutableDirError),
+}
+
+pub async fn get_tip_file_paths(
+    variant: &GameVariant,
+    release_version: &str,
+    data_dir: &Path,
+    os: &OS,
+) -> Result<Vec<PathBuf>, GetTipFilePathsError> {
+    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
+
+    let hints_path = executable_dir
+        .join("data")
+        .join("json")
+        .join("npcs")
+        .join("hints.json");
+
+    let tips_path = match variant {
+        GameVariant::BrightNights => executable_dir.join("data").join("raw").join("tips.json"),
+        GameVariant::DarkDaysAhead | GameVariant::TheLastGeneration => {
+            executable_dir.join("data").join("core").join("tips.json")
+        }
+    };
+
+    Ok(vec![tips_path, hints_path])
+}
