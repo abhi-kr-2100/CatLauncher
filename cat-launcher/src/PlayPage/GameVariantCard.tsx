@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { ExternalLink } from "@/components/ui/ExternalLink";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
+import { TipOfTheDay } from "@/game-tips/TipOfTheDay";
 import InteractionButton from "./InteractionButton";
 import ReleaseSelector from "./ReleaseSelector";
 
@@ -36,7 +37,8 @@ export default function GameVariantCard({ variantInfo }: GameVariantProps) {
           </div>
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <TipOfTheDay variant={variantInfo.id} />
         <ReleaseSelector
           variant={variantInfo.id}
           selectedReleaseId={selectedReleaseId}
