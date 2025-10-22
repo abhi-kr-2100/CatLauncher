@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Lightbulb, Shuffle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { getTips } from "@/lib/commands";
-import { randomInt } from "@/lib/utils";
 import { queryKeys } from "@/lib/queryKeys";
+import { randomInt } from "@/lib/utils";
+import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
 interface TipOfTheDayContentProps {
   tip: string;
@@ -56,13 +57,25 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
     }
   }, [tips]);
 
-  const handleShuffle = () => {
+  const handleShuffle = useCallback(() => {
     if (tips.length === 0) {
       return;
     }
 
     setRandomIndex(randomInt(tips.length));
-  };
+  }, [tips]);
+
+  useEffect(() => {
+    // auto shuffle every 10 seconds
+
+    const cleanup = setInterval(() => {
+      handleShuffle();
+    }, TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS);
+
+    return () => {
+      clearInterval(cleanup);
+    };
+  }, [handleShuffle]);
 
   return (
     <TipOfTheDayContent
