@@ -1,29 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { Lightbulb, Shuffle } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { getTips } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { randomInt } from "@/lib/utils";
+import { randomInt, setImmediateInterval } from "@/lib/utils";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
 interface TipOfTheDayContentProps {
   tip: string;
-  onShuffle: () => void;
 }
 
-function TipOfTheDayContent({ tip, onShuffle }: TipOfTheDayContentProps) {
+function TipOfTheDayContent({ tip }: TipOfTheDayContentProps) {
   return (
     <Alert>
       <AlertTitle className="flex items-center gap-2">
         <Lightbulb />
         Tip of the Day
-        <Button variant="ghost" size="icon" onClick={onShuffle}>
-          <Shuffle />
-        </Button>
       </AlertTitle>
       <AlertDescription className="h-20 overflow-y-auto">
         {tip}
@@ -51,13 +46,7 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
     return data;
   }, [data, status]);
 
-  useEffect(() => {
-    if (tips.length > 0) {
-      setRandomIndex(randomInt(tips.length));
-    }
-  }, [tips]);
-
-  const handleShuffle = useCallback(() => {
+  const shuffleTips = useCallback(() => {
     if (tips.length === 0) {
       return;
     }
@@ -67,15 +56,14 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
 
   useEffect(() => {
     // auto shuffle every 10 seconds
-
-    const cleanup = setInterval(() => {
-      handleShuffle();
+    const timerId = setImmediateInterval(() => {
+      shuffleTips();
     }, TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS);
 
     return () => {
-      clearInterval(cleanup);
+      clearInterval(timerId);
     };
-  }, [handleShuffle]);
+  }, [shuffleTips]);
 
   return (
     <TipOfTheDayContent
@@ -84,7 +72,6 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
           ? "Install and play a game to start getting tips and hints."
           : tips[randomIndex]
       }
-      onShuffle={handleShuffle}
     />
   );
 }
