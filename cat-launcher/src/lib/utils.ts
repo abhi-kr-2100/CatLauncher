@@ -58,3 +58,9 @@ export function setupEventListener<T>(
 export function randomInt(n: number): number {
   return Math.floor(Math.random() * n);
 }
+
+export function setImmediateInterval(callback: () => void, timeout?: number) {
+  callback();
+
+  return setInterval(callback, timeout);
+}
