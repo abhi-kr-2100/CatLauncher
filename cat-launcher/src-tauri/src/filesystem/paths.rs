@@ -105,7 +105,10 @@ pub async fn get_game_executable_dir(
     }
 
     if os == &OS::MacOS {
-        return Ok(installation_dir.join("Cataclysm.app/Contents/MacOS"));
+        return Ok(installation_dir
+            .join("Cataclysm.app")
+            .join("Contents")
+            .join("MacOS"));
     }
 
     // On Linux, the game directory is located one directory under
@@ -124,6 +127,26 @@ pub async fn get_game_executable_dir(
     }
 
     Err(GetGameExecutableDirError::NoInstallation)
+}
+
+pub async fn get_game_resources_dir(
+    variant: &GameVariant,
+    release_version: &str,
+    data_dir: &Path,
+    os: &OS,
+) -> Result<PathBuf, GetGameExecutableDirError> {
+    match (variant, os) {
+        (_, OS::MacOS) => {
+            let installation_dir =
+                get_or_create_asset_installation_dir(variant, release_version, data_dir).await?;
+            let resources_dir = installation_dir
+                .join("Cataclysm.app")
+                .join("Contents")
+                .join("Resources");
+            Ok(resources_dir)
+        }
+        _ => get_game_executable_dir(variant, release_version, data_dir, os).await,
+    }
 }
 
 pub fn get_game_executable_filename(variant: &GameVariant, os: &OS) -> &'static str {
@@ -258,18 +281,18 @@ pub async fn get_tip_file_paths(
     data_dir: &Path,
     os: &OS,
 ) -> Result<Vec<PathBuf>, GetTipFilePathsError> {
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
+    let resources_dir = get_game_resources_dir(variant, release_version, data_dir, os).await?;
 
-    let hints_path = executable_dir
+    let hints_path = resources_dir
         .join("data")
         .join("json")
         .join("npcs")
         .join("hints.json");
 
     let tips_path = match variant {
-        GameVariant::BrightNights => executable_dir.join("data").join("raw").join("tips.json"),
+        GameVariant::BrightNights => resources_dir.join("data").join("raw").join("tips.json"),
         GameVariant::DarkDaysAhead | GameVariant::TheLastGeneration => {
-            executable_dir.join("data").join("core").join("tips.json")
+            resources_dir.join("data").join("core").join("tips.json")
         }
     };
 
