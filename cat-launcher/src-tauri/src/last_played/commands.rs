@@ -1,8 +1,10 @@
 use serde::{ser::SerializeStruct, Serializer};
 use strum_macros::IntoStaticStr;
-use tauri::{command, AppHandle, Manager};
+use tauri::{command, State};
 
-use crate::{last_played::last_played::LastPlayedError, variants::GameVariant};
+use crate::last_played::last_played::LastPlayedError;
+use crate::repository::file_last_played_repository::FileLastPlayedVersionRepository;
+use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
 pub enum LastPlayedCommandError {
@@ -15,12 +17,10 @@ pub enum LastPlayedCommandError {
 
 #[command]
 pub async fn get_last_played_version(
-    app_handle: AppHandle,
     variant: GameVariant,
+    repository: State<'_, FileLastPlayedVersionRepository>,
 ) -> Result<Option<String>, LastPlayedCommandError> {
-    let data_dir = app_handle.path().app_local_data_dir()?;
-
-    let last_played_version = variant.get_last_played_version(&data_dir).await?;
+    let last_played_version = variant.get_last_played_version(&*repository).await?;
 
     Ok(last_played_version)
 }

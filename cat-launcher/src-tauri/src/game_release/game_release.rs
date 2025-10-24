@@ -7,6 +7,7 @@ use crate::fetch_releases::utils::get_assets;
 use crate::game_release::utils::get_platform_asset_substrs;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::utils::{Arch, OS};
+use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
@@ -44,10 +45,10 @@ impl GameRelease {
         &self,
         os: &OS,
         arch: &Arch,
-        cache_dir: &Path,
         resources_dir: &Path,
+        releases_repository: &dyn ReleasesRepository,
     ) -> Option<GitHubAsset> {
-        let assets = get_assets(self, cache_dir, resources_dir).await;
+        let assets = get_assets(self, resources_dir, releases_repository).await;
         let substrings = get_platform_asset_substrs(&self.variant, os, arch);
 
         substrings
