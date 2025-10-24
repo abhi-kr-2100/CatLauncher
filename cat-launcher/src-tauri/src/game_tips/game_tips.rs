@@ -6,6 +6,7 @@ use thiserror::Error;
 use crate::filesystem::paths::{get_tip_file_paths, GetTipFilePathsError};
 use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
+use crate::repository::last_played_repository::LastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -32,8 +33,12 @@ pub async fn get_all_tips_for_variant(
     variant: &GameVariant,
     data_dir: &Path,
     os: &OS,
+    last_played_repository: &dyn LastPlayedVersionRepository,
 ) -> Result<Vec<String>, GetAllTipsForVariantError> {
-    let last_played_version = match variant.get_last_played_version(data_dir).await? {
+    let last_played_version = match variant
+        .get_last_played_version(last_played_repository)
+        .await?
+    {
         Some(version) => version,
         None => return Ok(vec![]),
     };
