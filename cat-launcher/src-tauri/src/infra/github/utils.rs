@@ -19,6 +19,7 @@ pub enum GitHubReleaseFetchError {
 }
 
 static NEXT_PAGE_URL_RE: LazyLock<Regex> =
+    // safe to unwrap as the regex is hardcoded and should always compile successfully
     LazyLock::new(|| Regex::new(r#"<([^>]+)>; rel="next""#).unwrap());
 
 pub async fn fetch_github_releases(
