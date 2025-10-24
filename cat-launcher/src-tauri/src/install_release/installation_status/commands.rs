@@ -8,7 +8,7 @@ use tauri::{command, AppHandle, Manager, State};
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
-use crate::repository::file_releases_repository::FileReleasesRepository;
+use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -48,7 +48,7 @@ pub async fn get_installation_status(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
-    releases_repository: State<'_, FileReleasesRepository>,
+    releases_repository: State<'_, SqliteReleasesRepository>,
 ) -> Result<GameReleaseStatus, GetInstallationStatusCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
