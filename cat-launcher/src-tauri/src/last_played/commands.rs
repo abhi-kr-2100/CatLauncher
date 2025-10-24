@@ -3,7 +3,7 @@ use strum_macros::IntoStaticStr;
 use tauri::{command, State};
 
 use crate::last_played::last_played::LastPlayedError;
-use crate::repository::file_last_played_repository::FileLastPlayedVersionRepository;
+use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -18,7 +18,7 @@ pub enum LastPlayedCommandError {
 #[command]
 pub async fn get_last_played_version(
     variant: GameVariant,
-    repository: State<'_, FileLastPlayedVersionRepository>,
+    repository: State<'_, SqliteLastPlayedVersionRepository>,
 ) -> Result<Option<String>, LastPlayedCommandError> {
     let last_played_version = variant.get_last_played_version(&*repository).await?;
 
