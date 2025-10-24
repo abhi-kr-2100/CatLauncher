@@ -1,8 +1,13 @@
+use std::time::Duration;
+
+use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Listener, Manager};
 
+use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::infra::autoupdate::update::run_updater;
-use crate::repository::file_last_played_repository::FileLastPlayedVersionRepository;
-use crate::repository::file_releases_repository::FileReleasesRepository;
+use crate::repository::db_schema;
+use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 
 pub fn autoupdate(app: &App) {
     let handle = app.handle();
@@ -19,14 +24,37 @@ pub fn autoupdate(app: &App) {
 pub enum RepositoryError {
     #[error("failed to get system directory: {0}")]
     SystemDir(#[from] tauri::Error),
+
+    #[error("failed to initialize database: {0}")]
+    Database(#[from] rusqlite::Error),
+
+    #[error("failed to initialize schema: {0}")]
+    Schema(#[from] db_schema::InitializeSchemaError),
+
+    #[error("failed to get schema file path: {0}")]
+    SchemaFilePath(#[from] crate::filesystem::paths::GetSchemaFilePathError),
+
+    #[error("failed to create connection pool: {0}")]
+    ConnectionPool(#[from] r2d2::Error),
 }
 
 pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
-    let cache_dir = app.path().app_cache_dir()?;
     let data_dir = app.path().app_local_data_dir()?;
+    let db_path = get_db_path(&data_dir);
 
-    app.manage(FileReleasesRepository::new(&cache_dir));
-    app.manage(FileLastPlayedVersionRepository::new(&data_dir));
+    let resources_dir = app.path().resource_dir()?;
+    let schema_path = get_schema_file_path(&resources_dir)?;
+
+    let manager = SqliteConnectionManager::file(&db_path);
+    let pool = r2d2::Pool::new(manager)?;
+
+    let conn = pool.get()?;
+    conn.pragma_update(None, "journal_mode", "WAL")?;
+    conn.busy_timeout(Duration::from_secs(5))?;
+    db_schema::initialize_schema(&conn, &[schema_path])?;
+
+    app.manage(SqliteReleasesRepository::new(pool.clone()));
+    app.manage(SqliteLastPlayedVersionRepository::new(pool));
 
     Ok(())
 }
