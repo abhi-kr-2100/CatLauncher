@@ -10,6 +10,7 @@ use crate::filesystem::paths::{
 };
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::utils::{Arch, OS};
+use crate::repository::releases_repository::ReleasesRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetInstallationStatusError {
@@ -31,11 +32,14 @@ impl GameRelease {
         &self,
         os: &OS,
         arch: &Arch,
-        cache_dir: &Path,
         data_dir: &Path,
         resources_dir: &Path,
+        releases_repository: &dyn ReleasesRepository,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
-        let asset = match self.get_asset(os, arch, cache_dir, resources_dir).await {
+        let asset = match self
+            .get_asset(os, arch, resources_dir, releases_repository)
+            .await
+        {
             Some(asset) => asset,
             None => return Ok(GameReleaseStatus::NotAvailable),
         };

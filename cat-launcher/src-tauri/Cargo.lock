@@ -428,6 +428,7 @@ dependencies = [
 name = "cat-launcher"
 version = "0.6.0"
 dependencies = [
+ "async-trait",
  "chrono",
  "dmg",
  "downloader",
