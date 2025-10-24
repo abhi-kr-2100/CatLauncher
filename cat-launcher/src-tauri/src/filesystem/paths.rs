@@ -7,6 +7,21 @@ use crate::filesystem::utils::get_safe_filename;
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
+pub fn get_db_path(data_dir: &Path) -> PathBuf {
+    data_dir.join("cat-launcher.db")
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetSchemaFilePathError {
+    #[error("failed to get resource directory: {0}")]
+    ResourceDir(#[from] tauri::Error),
+}
+
+pub fn get_schema_file_path(resources_dir: &Path) -> Result<PathBuf, GetSchemaFilePathError> {
+    let schema_dir = resources_dir.join("schemas");
+    Ok(schema_dir.join("schema.sql"))
+}
+
 pub fn get_default_releases_file_path(variant: &GameVariant, resources_dir: &Path) -> PathBuf {
     resources_dir
         .join("releases")
