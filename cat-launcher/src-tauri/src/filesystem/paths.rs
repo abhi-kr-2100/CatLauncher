@@ -314,14 +314,29 @@ pub async fn get_tip_file_paths(
     Ok(vec![tips_path, hints_path])
 }
 
-pub fn get_user_game_data_dir(variant: &GameVariant, data_dir: &Path) -> PathBuf {
-    data_dir.join("UserData").join(variant.id())
+#[derive(thiserror::Error, Debug)]
+pub enum GetUserGameDataDirError {
+    #[error("failed to create user data directory: {0}")]
+    DirFailed(#[from] io::Error),
+}
+
+pub async fn get_or_create_user_game_data_dir(
+    variant: &GameVariant,
+    data_dir: &Path,
+) -> Result<PathBuf, GetUserGameDataDirError> {
+    let dir = data_dir.join("UserData").join(variant.id());
+    create_dir_all(&dir).await?;
+
+    Ok(dir)
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetUserDataBackupArchivePathError {
     #[error("failed to create backup directory: {0}")]
     DirFailed(#[from] io::Error),
+
+    #[error("failed to create user game data directory: {0}")]
+    UserDataDirFailed(#[from] GetUserGameDataDirError),
 }
 
 pub async fn get_or_create_user_data_backup_archive_filepath(
@@ -329,7 +344,9 @@ pub async fn get_or_create_user_data_backup_archive_filepath(
     data_dir: &Path,
     timestamp: u64,
 ) -> Result<PathBuf, GetUserDataBackupArchivePathError> {
-    let backup_dir = get_user_game_data_dir(variant, data_dir).join("backups");
+    let backup_dir = get_or_create_user_game_data_dir(variant, data_dir)
+        .await?
+        .join("backups");
     tokio::fs::create_dir_all(&backup_dir).await?;
 
     Ok(backup_dir.join(format!("{}.zip", timestamp)))
