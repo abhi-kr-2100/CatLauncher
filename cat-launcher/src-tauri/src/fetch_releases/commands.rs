@@ -5,7 +5,7 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::infra::http_client::HTTP_CLIENT;
-use crate::repository::file_releases_repository::FileReleasesRepository;
+use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -21,7 +21,7 @@ pub enum FetchReleasesCommandError {
 pub async fn fetch_releases_for_variant(
     app_handle: AppHandle,
     variant: GameVariant,
-    releases_repository: State<'_, FileReleasesRepository>,
+    releases_repository: State<'_, SqliteReleasesRepository>,
 ) -> Result<(), FetchReleasesCommandError> {
     let resources_dir = app_handle.path().resource_dir()?;
 

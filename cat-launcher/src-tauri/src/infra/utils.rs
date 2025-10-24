@@ -29,24 +29,6 @@ pub async fn read_from_file<T: DeserializeOwned>(path: &Path) -> Result<T, ReadF
     Ok(v)
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum WriteToFileError {
-    #[error("failed to serialize data: {0}")]
-    Serialize(#[from] serde_json::Error),
-
-    #[error("failed to write to file: {0}")]
-    Write(#[from] std::io::Error),
-}
-
-pub async fn write_to_file<T: serde::Serialize>(
-    path: &Path,
-    data: &T,
-) -> Result<(), WriteToFileError> {
-    let contents = serde_json::to_string_pretty(data)?;
-    fs::write(path, contents).await?;
-    Ok(())
-}
-
 #[derive(Debug, PartialEq)]
 pub enum OS {
     Linux,

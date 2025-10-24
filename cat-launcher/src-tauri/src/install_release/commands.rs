@@ -11,7 +11,7 @@ use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::install_release::install_release::ReleaseInstallationError;
 use crate::install_release::installation_progress_payload::InstallationProgressPayload;
-use crate::repository::file_releases_repository::FileReleasesRepository;
+use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -37,7 +37,7 @@ pub async fn install_release(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
-    releases_repository: State<'_, FileReleasesRepository>,
+    releases_repository: State<'_, SqliteReleasesRepository>,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
