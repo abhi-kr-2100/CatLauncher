@@ -60,9 +60,7 @@ impl GameRelease {
         Fut: std::future::Future<Output = Result<(), E>> + Send,
     {
         if self.status == GameReleaseStatus::Unknown {
-            self.status = self
-                .get_installation_status(os, arch, data_dir, resources_dir, releases_repository)
-                .await?;
+            self.status = self.get_installation_status(os, data_dir).await?;
         }
 
         if self.status == GameReleaseStatus::ReadyToPlay {
