@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use crate::filesystem::paths::{
-    get_or_create_user_data_backup_archive_filepath, get_user_game_data_dir,
-    GetUserDataBackupArchivePathError,
+    get_or_create_user_data_backup_archive_filepath, get_or_create_user_game_data_dir,
+    GetUserDataBackupArchivePathError, GetUserGameDataDirError,
 };
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
 use crate::variants::GameVariant;
@@ -14,6 +14,9 @@ pub enum BackupError {
 
     #[error("failed to create archive: {0}")]
     ArchiveCreation(#[from] ArchiveCreationError),
+
+    #[error("failed to get user game data directory: {0}")]
+    UserGameDataDir(#[from] GetUserGameDataDirError),
 }
 
 pub async fn backup_save_files(
@@ -21,10 +24,7 @@ pub async fn backup_save_files(
     data_dir: &Path,
     timestamp: u64,
 ) -> Result<(), BackupError> {
-    let user_data_dir = get_user_game_data_dir(variant, data_dir);
-    if !user_data_dir.exists() {
-        return Ok(());
-    }
+    let user_data_dir = get_or_create_user_game_data_dir(variant, data_dir).await?;
 
     let dirs_to_backup = vec![user_data_dir.join("save")];
     let archive_path =
