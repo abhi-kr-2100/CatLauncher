@@ -7,7 +7,7 @@ use tauri::{command, AppHandle, Manager, State};
 
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
+use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
@@ -21,9 +21,6 @@ pub enum GetInstallationStatusCommandError {
 
     #[error("failed to get OS enum: {0}")]
     Os(#[from] OSNotSupportedError),
-
-    #[error("failed to get arch enum: {0}")]
-    Arch(#[from] ArchNotSupportedError),
 }
 
 impl serde::Serialize for GetInstallationStatusCommandError {
@@ -54,13 +51,11 @@ pub async fn get_installation_status(
     let resource_dir = app_handle.path().resource_dir()?;
 
     let os = get_os_enum(OS)?;
-    let arch = get_arch_enum(std::env::consts::ARCH)?;
 
     let release = get_release_by_id(
         &variant,
         release_id,
         &os,
-        &arch,
         &data_dir,
         &resource_dir,
         &*releases_repository,

@@ -46,7 +46,6 @@ pub async fn get_release_by_id(
     variant: &GameVariant,
     release_id: &str,
     os: &OS,
-    arch: &Arch,
     data_dir: &Path,
     resources_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
@@ -77,9 +76,7 @@ pub async fn get_release_by_id(
         status: GameReleaseStatus::Unknown,
         created_at: gh_release.created_at,
     };
-    release.status = release
-        .get_installation_status(os, arch, data_dir, resources_dir, releases_repository)
-        .await?;
+    release.status = release.get_installation_status(os, data_dir).await?;
 
     Ok(release)
 }

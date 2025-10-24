@@ -1,16 +1,13 @@
 use std::path::Path;
 
-use sha2::{Digest, Sha256};
-use tokio::fs::{self, File};
-use tokio::io::{self, AsyncReadExt};
+use tokio::fs;
 
 use crate::filesystem::paths::{
-    get_game_executable_filepath, get_or_create_asset_download_dir, AssetDownloadDirError,
-    AssetExtractionDirError, GetExecutablePathError,
+    get_game_executable_filepath, AssetDownloadDirError, AssetExtractionDirError,
+    GetExecutablePathError,
 };
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
-use crate::infra::utils::{Arch, OS};
-use crate::repository::releases_repository::ReleasesRepository;
+use crate::infra::utils::OS;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetInstallationStatusError {
@@ -22,46 +19,14 @@ pub enum GetInstallationStatusError {
 
     #[error("failed to get executable directory: {0}")]
     ExecutableDir(#[from] GetExecutablePathError),
-
-    #[error("failed to verify asset: {0}")]
-    Verify(#[from] DigestComputationError),
 }
 
 impl GameRelease {
     pub async fn get_installation_status(
         &self,
         os: &OS,
-        arch: &Arch,
         data_dir: &Path,
-        resources_dir: &Path,
-        releases_repository: &dyn ReleasesRepository,
     ) -> Result<GameReleaseStatus, GetInstallationStatusError> {
-        let asset = match self
-            .get_asset(os, arch, resources_dir, releases_repository)
-            .await
-        {
-            Some(asset) => asset,
-            None => return Ok(GameReleaseStatus::NotAvailable),
-        };
-
-        let download_dir = get_or_create_asset_download_dir(&self.variant, &data_dir).await?;
-
-        let asset_file = download_dir.join(&asset.name);
-        match fs::metadata(&asset_file).await {
-            Ok(metadata) if metadata.is_file() => {}
-            _ => return Ok(GameReleaseStatus::NotDownloaded),
-        };
-
-        // Checksum verification is very slow; skip it for now
-        // let is_uncorrupted = uncorrupted(&asset_file, &asset.digest).await?;
-        // if !is_uncorrupted {
-        //     return Ok(GameReleaseStatus::Corrupted);
-        // }
-        //
-        // Since we don't verify the integrity of the downloaded file, if downloaded asset is present
-        // but the installation dir or executable file is missing, we still consider the asset to not
-        // be downloaded.
-
         let executable_path =
             match get_game_executable_filepath(&self.variant, &self.version, data_dir, os).await {
                 Ok(path) => path,
@@ -78,37 +43,4 @@ impl GameRelease {
 
         Ok(GameReleaseStatus::ReadyToPlay)
     }
-}
-
-#[allow(dead_code)]
-pub async fn uncorrupted(path: &Path, digest: &str) -> Result<bool, DigestComputationError> {
-    let parts: Vec<&str> = digest.split(':').collect();
-    if parts.len() != 2 || parts[0] != "sha256" {
-        return Err(DigestComputationError::InvalidFormat(digest.to_string()));
-    }
-    let expected_hash = parts[1].to_ascii_lowercase();
-
-    let mut file = File::open(path).await?;
-    let mut hasher = Sha256::new();
-    let mut buffer = [0; 1024];
-
-    loop {
-        let n = file.read(&mut buffer).await?;
-        if n == 0 {
-            break;
-        }
-        hasher.update(&buffer[..n]);
-    }
-
-    let actual_hash = hasher.finalize();
-
-    Ok(format!("{:x}", actual_hash) == expected_hash)
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum DigestComputationError {
-    #[error("failed to compute digest: {0}")]
-    Compute(#[from] io::Error),
-    #[error("invalid digest format: {0}")]
-    InvalidFormat(String),
 }
