@@ -49,7 +49,6 @@ pub async fn install_release(
         &variant,
         release_id,
         &os,
-        &arch,
         &data_dir,
         &resource_dir,
         &*releases_repository,

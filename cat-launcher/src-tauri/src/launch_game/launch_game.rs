@@ -15,7 +15,7 @@ use crate::filesystem::paths::{
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::infra::utils::{Arch, OS};
+use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::repository::last_played_repository::LastPlayedVersionRepository;
@@ -174,7 +174,6 @@ pub async fn launch_and_monitor_game<F, Fut>(
     variant: &GameVariant,
     release_id: &str,
     os: &OS,
-    arch: &Arch,
     timestamp: u64,
     data_dir: &Path,
     resource_dir: &Path,
@@ -190,7 +189,6 @@ where
         variant,
         release_id,
         os,
-        arch,
         data_dir,
         resource_dir,
         releases_repository,
