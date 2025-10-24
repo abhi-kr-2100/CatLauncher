@@ -4,10 +4,13 @@ use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
+use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
+use crate::repository::file_last_played_repository::FileLastPlayedVersionRepository;
+use crate::repository::file_releases_repository::FileReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -33,9 +36,10 @@ pub async fn launch_game(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
+    releases_repository: State<'_, FileReleasesRepository>,
+    last_played_repository: State<'_, FileLastPlayedVersionRepository>,
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
-    let cache_dir = app_handle.path().app_cache_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
 
     let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
@@ -58,9 +62,10 @@ pub async fn launch_game(
         &os,
         &arch,
         time,
-        &cache_dir,
         &data_dir,
         &resource_dir,
+        &*releases_repository,
+        &*last_played_repository,
         on_game_event,
     )
     .await?;

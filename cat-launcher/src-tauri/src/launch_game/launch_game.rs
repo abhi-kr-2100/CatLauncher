@@ -18,6 +18,8 @@ use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{Arch, OS};
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_save_files, BackupError};
+use crate::repository::last_played_repository::LastPlayedVersionRepository;
+use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -83,6 +85,7 @@ impl GameRelease {
         os: &OS,
         timestamp: u64,
         data_dir: &Path,
+        last_played_repository: &dyn LastPlayedVersionRepository,
     ) -> Result<Command, LaunchGameError> {
         let executable_path =
             get_game_executable_filepath(&self.variant, &self.version, data_dir, os).await?;
@@ -93,7 +96,7 @@ impl GameRelease {
             .to_path_buf();
 
         self.variant
-            .set_last_played_version(&self.version, data_dir)
+            .set_last_played_version(&self.version, last_played_repository)
             .await?;
 
         backup_save_files(&self.variant, data_dir, timestamp).await?;
@@ -170,9 +173,10 @@ pub async fn launch_and_monitor_game<F, Fut>(
     os: &OS,
     arch: &Arch,
     timestamp: u64,
-    cache_dir: &Path,
     data_dir: &Path,
     resource_dir: &Path,
+    releases_repository: &dyn ReleasesRepository,
+    last_played_repository: &dyn LastPlayedVersionRepository,
     on_game_event: F,
 ) -> Result<(), LaunchGameError>
 where
@@ -184,13 +188,15 @@ where
         release_id,
         os,
         arch,
-        cache_dir,
         data_dir,
         resource_dir,
+        releases_repository,
     )
     .await?;
 
-    let command = release.prepare_launch(os, timestamp, data_dir).await?;
+    let command = release
+        .prepare_launch(os, timestamp, data_dir, last_played_repository)
+        .await?;
 
     let on_game_event_for_error = on_game_event.clone();
 
