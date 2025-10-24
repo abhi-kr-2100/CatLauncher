@@ -10,8 +10,8 @@ use tokio::task::JoinError;
 use ts_rs::TS;
 
 use crate::filesystem::paths::{
-    get_game_executable_filepath, get_user_game_data_dir, AssetDownloadDirError,
-    AssetExtractionDirError, GetExecutablePathError,
+    get_game_executable_filepath, get_or_create_user_game_data_dir, AssetDownloadDirError,
+    AssetExtractionDirError, GetExecutablePathError, GetUserGameDataDirError,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
@@ -44,6 +44,9 @@ pub enum LaunchGameError {
 
     #[error("failed to backup and copy saves: {0}")]
     Backup(#[from] BackupError),
+
+    #[error("failed to get user data directory: {0}")]
+    UserGameDataDir(#[from] GetUserGameDataDirError),
 
     #[error("failed to get stdout from child process")]
     Stdout,
@@ -101,7 +104,7 @@ impl GameRelease {
 
         backup_save_files(&self.variant, data_dir, timestamp).await?;
 
-        let user_data_dir = get_user_game_data_dir(&self.variant, data_dir);
+        let user_data_dir = get_or_create_user_game_data_dir(&self.variant, data_dir).await?;
         let mut command = Command::new(executable_path);
 
         command
