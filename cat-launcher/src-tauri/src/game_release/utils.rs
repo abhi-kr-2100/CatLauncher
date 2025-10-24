@@ -1,10 +1,11 @@
 use std::path::Path;
 
-use crate::fetch_releases::utils::{get_cached_releases, get_default_releases, merge_releases};
+use crate::fetch_releases::utils::{get_default_releases, merge_releases};
 use crate::game_release::game_release::{GameReleaseStatus, ReleaseType};
 use crate::game_release::GameRelease;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
+use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 pub fn get_platform_asset_substrs(
@@ -46,11 +47,17 @@ pub async fn get_release_by_id(
     release_id: &str,
     os: &OS,
     arch: &Arch,
-    cache_dir: &Path,
     data_dir: &Path,
     resources_dir: &Path,
+    releases_repository: &dyn ReleasesRepository,
 ) -> Result<GameRelease, GetReleaseError> {
-    let cached_releases = get_cached_releases(variant, cache_dir).await;
+    let cached_releases = releases_repository
+        .get_cached_releases(variant)
+        .await
+        .unwrap_or_default(); // It's okay if getting cached releases fails.
+                              // If the release is not found, this function
+                              // will return an error.
+
     let default_releases = get_default_releases(variant, resources_dir).await;
     let gh_releases = merge_releases(&cached_releases, &default_releases);
 
@@ -71,7 +78,7 @@ pub async fn get_release_by_id(
         created_at: gh_release.created_at,
     };
     release.status = release
-        .get_installation_status(os, arch, cache_dir, data_dir, resources_dir)
+        .get_installation_status(os, arch, data_dir, resources_dir, releases_repository)
         .await?;
 
     Ok(release)
