@@ -9,8 +9,8 @@ use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
-use crate::repository::file_last_played_repository::FileLastPlayedVersionRepository;
-use crate::repository::file_releases_repository::FileReleasesRepository;
+use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -36,8 +36,8 @@ pub async fn launch_game(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
-    releases_repository: State<'_, FileReleasesRepository>,
-    last_played_repository: State<'_, FileLastPlayedVersionRepository>,
+    releases_repository: State<'_, SqliteReleasesRepository>,
+    last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
