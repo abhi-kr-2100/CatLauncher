@@ -1,10 +1,11 @@
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum_macros::IntoStaticStr;
-use tauri::{command, AppHandle, Emitter, Manager};
+use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::infra::http_client::HTTP_CLIENT;
+use crate::repository::file_releases_repository::FileReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -20,8 +21,8 @@ pub enum FetchReleasesCommandError {
 pub async fn fetch_releases_for_variant(
     app_handle: AppHandle,
     variant: GameVariant,
+    releases_repository: State<'_, FileReleasesRepository>,
 ) -> Result<(), FetchReleasesCommandError> {
-    let cache_dir = app_handle.path().app_cache_dir()?;
     let resources_dir = app_handle.path().resource_dir()?;
 
     let on_releases = move |payload: ReleasesUpdatePayload| {
@@ -30,7 +31,12 @@ pub async fn fetch_releases_for_variant(
     };
 
     variant
-        .fetch_releases(&HTTP_CLIENT, &cache_dir, &resources_dir, on_releases)
+        .fetch_releases(
+            &HTTP_CLIENT,
+            &resources_dir,
+            &*releases_repository,
+            on_releases,
+        )
         .await?;
 
     Ok(())

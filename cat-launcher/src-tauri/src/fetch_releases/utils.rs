@@ -1,32 +1,14 @@
-use std::cmp::Reverse;
 use std::collections::{HashMap, HashSet};
-use std::io;
 use std::path::Path;
 
-use tokio::fs;
-use tokio::fs::create_dir_all;
-
 use crate::fetch_releases::fetch_releases::{ReleasesUpdatePayload, ReleasesUpdateStatus};
-use crate::filesystem::paths::{get_default_releases_file_path, get_releases_cache_filepath};
+use crate::filesystem::paths::get_default_releases_file_path;
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::{read_from_file, write_to_file, WriteToFileError};
+use crate::infra::utils::read_from_file;
+use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
-
-pub async fn get_cached_releases(variant: &GameVariant, cache_dir: &Path) -> Vec<GitHubRelease> {
-    let cache_file = get_releases_cache_filepath(variant, cache_dir);
-
-    match fs::metadata(&cache_file).await {
-        Ok(metadata) if metadata.is_file() => {}
-        _ => return Vec::new(),
-    };
-
-    match read_from_file::<Vec<GitHubRelease>>(&cache_file).await {
-        Ok(releases) => releases,
-        _ => Vec::new(),
-    }
-}
 
 pub async fn get_default_releases(
     variant: &GameVariant,
@@ -41,42 +23,6 @@ pub async fn get_default_releases(
         Ok(releases) => releases,
         _ => Vec::new(),
     }
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum WriteCacheError {
-    #[error("failed to create directory: {0}")]
-    CreateDirectory(#[from] io::Error),
-
-    #[error("failed to cache releases: {0}")]
-    Cache(#[from] WriteToFileError),
-}
-
-pub async fn write_cached_releases(
-    variant: &GameVariant,
-    releases: &[GitHubRelease],
-    cache_dir: &Path,
-) -> Result<(), WriteCacheError> {
-    let cache_path = get_releases_cache_filepath(variant, cache_dir);
-
-    if let Some(parent) = cache_path.parent() {
-        create_dir_all(parent).await?;
-    }
-
-    Ok(write_to_file(&cache_path, &releases).await?)
-}
-
-pub fn select_releases_for_cache(releases: &[GitHubRelease]) -> Vec<GitHubRelease> {
-    let (non_prereleases, mut prereleases): (Vec<&GitHubRelease>, Vec<&GitHubRelease>) =
-        releases.iter().partition(|r| !r.prerelease);
-
-    prereleases.sort_by_key(|r| Reverse(r.created_at));
-
-    non_prereleases
-        .into_iter()
-        .cloned()
-        .chain(prereleases.into_iter().cloned())
-        .collect()
 }
 
 pub fn merge_releases(r1: &[GitHubRelease], r2: &[GitHubRelease]) -> Vec<GitHubRelease> {
@@ -111,10 +57,13 @@ pub fn merge_releases(r1: &[GitHubRelease], r2: &[GitHubRelease]) -> Vec<GitHubR
 
 pub async fn get_assets(
     release: &GameRelease,
-    cache_dir: &Path,
     resources_dir: &Path,
+    releases_repository: &dyn ReleasesRepository,
 ) -> Vec<GitHubAsset> {
-    let cached_releases = get_cached_releases(&release.variant, cache_dir).await;
+    let cached_releases = releases_repository
+        .get_cached_releases(&release.variant)
+        .await
+        .unwrap_or_default(); // It's okay if cached releases couldn't be read.
     let default_releases = get_default_releases(&release.variant, resources_dir).await;
     let all_releases = merge_releases(&cached_releases, &default_releases);
 

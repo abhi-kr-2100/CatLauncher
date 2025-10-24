@@ -15,6 +15,7 @@ use crate::install_release::installation_progress_payload::{
     InstallationProgressPayload, InstallationProgressStatus,
 };
 use crate::install_release::installation_status::status::GetInstallationStatusError;
+use crate::repository::releases_repository::ReleasesRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> {
@@ -49,9 +50,9 @@ impl GameRelease {
         client: &Client,
         os: &OS,
         arch: &Arch,
-        cache_dir: &Path,
         data_dir: &Path,
         resources_dir: &Path,
+        releases_repository: &dyn ReleasesRepository,
         on_status_update: F,
     ) -> Result<(), ReleaseInstallationError<E>>
     where
@@ -60,7 +61,7 @@ impl GameRelease {
     {
         if self.status == GameReleaseStatus::Unknown {
             self.status = self
-                .get_installation_status(os, arch, cache_dir, data_dir, resources_dir)
+                .get_installation_status(os, arch, data_dir, resources_dir, releases_repository)
                 .await?;
         }
 
@@ -70,7 +71,7 @@ impl GameRelease {
 
         let download_dir = get_or_create_asset_download_dir(&self.variant, data_dir).await?;
         let asset = self
-            .get_asset(os, arch, cache_dir, resources_dir)
+            .get_asset(os, arch, resources_dir, releases_repository)
             .await
             .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 
