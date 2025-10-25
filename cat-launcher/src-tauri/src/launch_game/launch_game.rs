@@ -2,6 +2,7 @@ use std::future::Future;
 use std::io;
 use std::path::Path;
 use std::process::Stdio;
+use std::sync::Arc;
 
 use serde::Serialize;
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -18,6 +19,7 @@ use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_save_files, BackupError};
+use crate::play_time::repository::PlayTimeRepository;
 use crate::repository::last_played_repository::LastPlayedVersionRepository;
 use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
@@ -179,6 +181,7 @@ pub async fn launch_and_monitor_game<F, Fut>(
     resource_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     last_played_repository: &dyn LastPlayedVersionRepository,
+    play_time_repository: Arc<dyn PlayTimeRepository>,
     on_game_event: F,
 ) -> Result<(), LaunchGameError>
 where
@@ -201,10 +204,23 @@ where
 
     let on_game_event_for_error = on_game_event.clone();
 
+    let start_time = std::time::Instant::now();
+    let play_time_repository = Arc::clone(&play_time_repository);
+
     // It's important to not await the task here, as it be blocking.
     // run_game_and_monitor streams to the frontend.
     tokio::spawn(async move {
-        if let Err(e) = run_game_and_monitor(command, on_game_event).await {
+        let result = run_game_and_monitor(command, on_game_event).await;
+        let duration = start_time.elapsed();
+        let _ = play_time_repository
+            .log_play_time(
+                release.variant.to_string(),
+                release.version.clone(),
+                duration.as_secs() as i64,
+            )
+            .await;
+
+        if let Err(e) = result {
             let error_payload = GameErrorPayload {
                 message: e.to_string(),
             };
