@@ -22,13 +22,17 @@ pub enum BackupError {
 pub async fn backup_save_files(
     variant: &GameVariant,
     data_dir: &Path,
+    id: i64,
+    version: &str,
     timestamp: u64,
 ) -> Result<(), BackupError> {
     let user_data_dir = get_or_create_user_game_data_dir(variant, data_dir).await?;
 
     let dirs_to_backup = vec![user_data_dir.join("save")];
-    let archive_path =
-        get_or_create_user_data_backup_archive_filepath(variant, data_dir, timestamp).await?;
+    let archive_path = get_or_create_user_data_backup_archive_filepath(
+        variant, data_dir, id, version, timestamp,
+    )
+    .await?;
 
     create_zip_archive(&user_data_dir, &dirs_to_backup, &archive_path).await?;
 

@@ -1,6 +1,6 @@
 use crate::game_release::game_release::ReleaseType;
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumIter, IntoStaticStr};
+use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 use ts_rs::TS;
 
 #[derive(
@@ -16,7 +16,9 @@ use ts_rs::TS;
     Serialize,
     IntoStaticStr,
     TS,
+    EnumString,
 )]
+#[strum(serialize_all = "PascalCase")]
 #[non_exhaustive]
 pub enum GameVariant {
     DarkDaysAhead,

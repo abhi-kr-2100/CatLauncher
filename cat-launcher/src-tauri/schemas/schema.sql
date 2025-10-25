@@ -42,3 +42,13 @@ CREATE TABLE IF NOT EXISTS last_played_version (
     version TEXT NOT NULL,
     FOREIGN KEY (game_variant) REFERENCES variants (name)
 );
+
+CREATE TABLE IF NOT EXISTS backups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp INTEGER NOT NULL,
+    game_variant TEXT NOT NULL,
+    release_version TEXT NOT NULL,
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_backups_game_variant ON backups (game_variant);
