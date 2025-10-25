@@ -35,11 +35,11 @@ impl BackupRepository for SqliteBackupRepository {
 
         task::spawn_blocking(move || {
             let conn = pool.get().map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
-            conn.execute(
-                "INSERT INTO backups (game_variant, release_version, timestamp) VALUES (?1, ?2, ?3)",
+            let id = conn.query_row(
+                "INSERT INTO backups (game_variant, release_version, timestamp) VALUES (?1, ?2, ?3) RETURNING id",
                 rusqlite::params![game_variant, release_version, timestamp],
+                |row| row.get(0),
             ).map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
-            let id = conn.last_insert_rowid();
             Ok(id)
         })
         .await
