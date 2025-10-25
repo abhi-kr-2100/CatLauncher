@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use reqwest::Client;
+use tokio::fs;
 
 use crate::filesystem::paths::{
     get_or_create_asset_download_dir, get_or_create_asset_installation_dir, AssetDownloadDirError,
@@ -36,6 +37,9 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
 
     #[error("failed to extract asset: {0}")]
     Extract(#[from] ExtractionError),
+
+    #[error("failed to cleanup asset: {0}")]
+    Cleanup(std::io::Error),
 
     #[error("failed to get release status: {0}")]
     ReleaseStatus(#[from] GetInstallationStatusError),
@@ -103,6 +107,10 @@ impl GameRelease {
         extract_archive(&download_filepath, &installation_dir, os).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
+
+        fs::remove_file(&download_filepath)
+            .await
+            .map_err(ReleaseInstallationError::Cleanup)?;
 
         on_status_update(InstallationProgressPayload {
             status: InstallationProgressStatus::Success,
