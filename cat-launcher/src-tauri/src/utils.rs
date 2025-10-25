@@ -6,6 +6,7 @@ use tauri::{App, Listener, Manager};
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::infra::autoupdate::update::run_updater;
 use crate::repository::db_schema;
+use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 
@@ -54,7 +55,8 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     db_schema::initialize_schema(&conn, &[schema_path])?;
 
     app.manage(SqliteReleasesRepository::new(pool.clone()));
-    app.manage(SqliteLastPlayedVersionRepository::new(pool));
+    app.manage(SqliteLastPlayedVersionRepository::new(pool.clone()));
+    app.manage(SqlitePlayTimeRepository::new(pool));
 
     Ok(())
 }
