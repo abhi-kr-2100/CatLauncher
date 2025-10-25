@@ -49,5 +49,5 @@ CREATE TABLE IF NOT EXISTS play_time (
     game_variant TEXT NOT NULL,
     version TEXT NOT NULL,
     duration_in_seconds INTEGER NOT NULL,
-    FOREIGN KEY (game_variant) REFERENCES variants (name)
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
 );

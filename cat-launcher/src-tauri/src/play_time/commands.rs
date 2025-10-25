@@ -2,7 +2,6 @@ use super::repository::PlayTimeRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use serde::ser::SerializeStruct;
 use serde::Serializer;
-use std::sync::Arc;
 use strum_macros::IntoStaticStr;
 use tauri::{command, State};
 
@@ -34,7 +33,7 @@ impl serde::Serialize for PlayTimeCommandError {
 pub async fn get_play_time_for_version(
     game_variant: String,
     version: String,
-    play_time_repository: State<'_, Arc<SqlitePlayTimeRepository>>,
+    play_time_repository: State<'_, SqlitePlayTimeRepository>,
 ) -> Result<i64, PlayTimeCommandError> {
     play_time_repository
         .get_play_time_for_version(game_variant, version)
@@ -45,7 +44,7 @@ pub async fn get_play_time_for_version(
 #[command]
 pub async fn get_play_time_for_variant(
     game_variant: String,
-    play_time_repository: State<'_, Arc<SqlitePlayTimeRepository>>,
+    play_time_repository: State<'_, SqlitePlayTimeRepository>,
 ) -> Result<i64, PlayTimeCommandError> {
     play_time_repository
         .get_play_time_for_variant(game_variant)
@@ -55,7 +54,7 @@ pub async fn get_play_time_for_variant(
 
 #[command]
 pub async fn get_total_play_time(
-    play_time_repository: State<'_, Arc<SqlitePlayTimeRepository>>,
+    play_time_repository: State<'_, SqlitePlayTimeRepository>,
 ) -> Result<i64, PlayTimeCommandError> {
     play_time_repository
         .get_total_play_time()

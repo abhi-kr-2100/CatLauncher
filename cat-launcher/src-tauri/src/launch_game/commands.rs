@@ -37,7 +37,7 @@ pub async fn launch_game(
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
     last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
-    play_time_repository: State<'_, Arc<SqlitePlayTimeRepository>>,
+    play_time_repository: State<'_, SqlitePlayTimeRepository>,
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
@@ -64,7 +64,7 @@ pub async fn launch_game(
         &resource_dir,
         &*releases_repository,
         &*last_played_repository,
-        play_time_repository.inner().clone(),
+        Arc::new(play_time_repository.inner().clone()),
         on_game_event,
     )
     .await?;

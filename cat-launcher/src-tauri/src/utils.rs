@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::time::Duration;
 
 use r2d2_sqlite::SqliteConnectionManager;
@@ -57,7 +56,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
 
     app.manage(SqliteReleasesRepository::new(pool.clone()));
     app.manage(SqliteLastPlayedVersionRepository::new(pool.clone()));
-    app.manage(Arc::new(SqlitePlayTimeRepository::new(pool)));
+    app.manage(SqlitePlayTimeRepository::new(pool));
 
     Ok(())
 }
