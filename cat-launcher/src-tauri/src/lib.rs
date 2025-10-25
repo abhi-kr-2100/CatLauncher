@@ -9,6 +9,7 @@ mod infra;
 mod install_release;
 mod last_played;
 mod launch_game;
+mod play_time;
 mod utils;
 mod variants;
 
@@ -19,6 +20,9 @@ use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
 use crate::last_played::commands::get_last_played_version;
 use crate::launch_game::commands::launch_game;
+use crate::play_time::commands::{
+    get_play_time_for_variant, get_play_time_for_version, get_total_play_time,
+};
 use crate::utils::{autoupdate, manage_repositories};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -40,6 +44,9 @@ pub fn run() {
             get_last_played_version,
             get_installation_status,
             get_tips,
+            get_play_time_for_version,
+            get_play_time_for_variant,
+            get_total_play_time,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

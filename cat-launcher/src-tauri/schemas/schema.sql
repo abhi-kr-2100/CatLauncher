@@ -42,3 +42,12 @@ CREATE TABLE IF NOT EXISTS last_played_version (
     version TEXT NOT NULL,
     FOREIGN KEY (game_variant) REFERENCES variants (name)
 );
+
+-- This table stores the play time for each game variant and version.
+CREATE TABLE IF NOT EXISTS play_time (
+    id INTEGER PRIMARY KEY,
+    game_variant TEXT NOT NULL,
+    version TEXT NOT NULL,
+    duration_in_seconds INTEGER NOT NULL,
+    FOREIGN KEY (game_variant) REFERENCES variants (name)
+);

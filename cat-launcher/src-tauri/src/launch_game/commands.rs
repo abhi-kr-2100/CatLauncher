@@ -1,4 +1,5 @@
 use std::env::consts::OS;
+use std::sync::Arc;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use serde::ser::SerializeStruct;
@@ -9,6 +10,7 @@ use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
+use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
@@ -35,6 +37,7 @@ pub async fn launch_game(
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
     last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
+    play_time_repository: State<'_, Arc<SqlitePlayTimeRepository>>,
 ) -> Result<(), LaunchGameCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
@@ -61,6 +64,7 @@ pub async fn launch_game(
         &resource_dir,
         &*releases_repository,
         &*last_played_repository,
+        play_time_repository.inner().clone(),
         on_game_event,
     )
     .await?;
