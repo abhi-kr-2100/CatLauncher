@@ -38,9 +38,6 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
     #[error("failed to extract asset: {0}")]
     Extract(#[from] ExtractionError),
 
-    #[error("failed to cleanup asset: {0}")]
-    Cleanup(std::io::Error),
-
     #[error("failed to get release status: {0}")]
     ReleaseStatus(#[from] GetInstallationStatusError),
 
@@ -108,9 +105,7 @@ impl GameRelease {
 
         self.status = GameReleaseStatus::ReadyToPlay;
 
-        fs::remove_file(&download_filepath)
-            .await
-            .map_err(ReleaseInstallationError::Cleanup)?;
+        let _ = fs::remove_file(&download_filepath).await;
 
         on_status_update(InstallationProgressPayload {
             status: InstallationProgressStatus::Success,
