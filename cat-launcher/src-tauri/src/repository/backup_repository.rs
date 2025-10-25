@@ -1,0 +1,37 @@
+use crate::variants::GameVariant;
+use async_trait::async_trait;
+
+#[derive(Debug, Clone)]
+pub struct BackupEntry {
+    pub game_variant: GameVariant,
+    pub release_version: String,
+    pub timestamp: u64,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum BackupRepositoryError {
+    #[error("failed to add backup entry: {0}")]
+    Add(Box<dyn std::error::Error + Send + Sync>),
+    #[error("failed to get backup entries: {0}")]
+    Get(Box<dyn std::error::Error + Send + Sync>),
+    #[error("failed to delete backup entry: {0}")]
+    Delete(Box<dyn std::error::Error + Send + Sync>),
+}
+
+#[async_trait]
+pub trait BackupRepository: Send + Sync {
+    async fn add_backup_entry(
+        &self,
+        game_variant: &GameVariant,
+        release_version: &str,
+        timestamp: u64,
+    ) -> Result<(), BackupRepositoryError>;
+
+    async fn get_backup_entries_older_than(
+        &self,
+        game_variant: &GameVariant,
+        timestamp: u64,
+    ) -> Result<Vec<BackupEntry>, BackupRepositoryError>;
+
+    async fn delete_backup_entry(&self, timestamp: u64) -> Result<(), BackupRepositoryError>;
+}

@@ -11,13 +11,15 @@ use ts_rs::TS;
 
 use crate::filesystem::paths::{
     get_game_executable_filepath, get_or_create_user_game_data_dir, AssetDownloadDirError,
-    AssetExtractionDirError, GetExecutablePathError, GetUserGameDataDirError,
+    AssetExtractionDirError, GetExecutablePathError, GetUserDataBackupArchivePathError,
+    GetUserGameDataDirError,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
 use crate::launch_game::utils::{backup_save_files, BackupError};
+use crate::repository::backup_repository::{BackupRepository, BackupRepositoryError};
 use crate::repository::last_played_repository::LastPlayedVersionRepository;
 use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
@@ -45,6 +47,9 @@ pub enum LaunchGameError {
     #[error("failed to backup and copy saves: {0}")]
     Backup(#[from] BackupError),
 
+    #[error("failed to access backup repository: {0}")]
+    BackupRepository(#[from] BackupRepositoryError),
+
     #[error("failed to get user data directory: {0}")]
     UserGameDataDir(#[from] GetUserGameDataDirError),
 
@@ -59,6 +64,12 @@ pub enum LaunchGameError {
 
     #[error("failed to wait for subtasks: {0}")]
     Subtasks(#[from] JoinError),
+
+    #[error("failed to get backup archive path: {0}")]
+    BackupArchivePath(#[from] GetUserDataBackupArchivePathError),
+
+    #[error("failed to remove backup file: {0}")]
+    RemoveBackupFile(io::Error),
 }
 
 #[derive(Serialize, Clone, TS)]
@@ -89,6 +100,7 @@ impl GameRelease {
         timestamp: u64,
         data_dir: &Path,
         last_played_repository: &dyn LastPlayedVersionRepository,
+        backup_repository: &dyn BackupRepository,
     ) -> Result<Command, LaunchGameError> {
         let executable_path =
             get_game_executable_filepath(&self.variant, &self.version, data_dir, os).await?;
@@ -103,6 +115,10 @@ impl GameRelease {
             .await?;
 
         backup_save_files(&self.variant, data_dir, timestamp).await?;
+
+        backup_repository
+            .add_backup_entry(&self.variant, &self.version, timestamp)
+            .await?;
 
         let user_data_dir = get_or_create_user_game_data_dir(&self.variant, data_dir).await?;
         let mut command = Command::new(executable_path);
@@ -170,6 +186,38 @@ where
     Ok(())
 }
 
+async fn cleanup_old_backups(
+    backup_repository: &dyn BackupRepository,
+    variant: &GameVariant,
+    timestamp: u64,
+    data_dir: &Path,
+) -> Result<(), LaunchGameError> {
+    let backups = backup_repository
+        .get_backup_entries_older_than(variant, timestamp)
+        .await?;
+
+    if backups.len() >= 5 {
+        let backups_to_delete = backups.len() - 4;
+        for backup in backups.iter().take(backups_to_delete) {
+            let path = crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
+                variant,
+                data_dir,
+                backup.timestamp,
+            )
+            .await?;
+            tokio::fs::remove_file(path)
+                .await
+                .map_err(LaunchGameError::RemoveBackupFile)?;
+
+            backup_repository
+                .delete_backup_entry(backup.timestamp)
+                .await?;
+        }
+    }
+
+    Ok(())
+}
+
 pub async fn launch_and_monitor_game<F, Fut>(
     variant: &GameVariant,
     release_id: &str,
@@ -179,6 +227,7 @@ pub async fn launch_and_monitor_game<F, Fut>(
     resource_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     last_played_repository: &dyn LastPlayedVersionRepository,
+    backup_repository: &dyn BackupRepository,
     on_game_event: F,
 ) -> Result<(), LaunchGameError>
 where
@@ -196,8 +245,16 @@ where
     .await?;
 
     let command = release
-        .prepare_launch(os, timestamp, data_dir, last_played_repository)
+        .prepare_launch(
+            os,
+            timestamp,
+            data_dir,
+            last_played_repository,
+            backup_repository,
+        )
         .await?;
+
+    cleanup_old_backups(backup_repository, variant, timestamp, data_dir).await?;
 
     let on_game_event_for_error = on_game_event.clone();
 
