@@ -28,10 +28,9 @@ pub trait BackupRepository: Send + Sync {
         timestamp: u64,
     ) -> Result<i64, BackupRepositoryError>;
 
-    async fn get_backup_entries_older_than(
+    async fn get_backups(
         &self,
         game_variant: &GameVariant,
-        timestamp: u64,
     ) -> Result<Vec<BackupEntry>, BackupRepositoryError>;
 
     async fn delete_backup_entry(&self, id: i64) -> Result<(), BackupRepositoryError>;

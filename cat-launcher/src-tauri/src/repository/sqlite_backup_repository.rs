@@ -46,10 +46,9 @@ impl BackupRepository for SqliteBackupRepository {
         .map_err(|e| BackupRepositoryError::Add(Box::new(e)))?
     }
 
-    async fn get_backup_entries_older_than(
+    async fn get_backups(
         &self,
         game_variant: &GameVariant,
-        timestamp: u64,
     ) -> Result<Vec<BackupEntry>, BackupRepositoryError> {
         let pool = self.pool.clone();
         let game_variant = game_variant.to_string();
@@ -57,10 +56,10 @@ impl BackupRepository for SqliteBackupRepository {
         task::spawn_blocking(move || {
             let conn = pool.get().map_err(|e| BackupRepositoryError::Get(Box::new(e)))?;
             let mut stmt = conn.prepare(
-                "SELECT id, game_variant, release_version, timestamp FROM backups WHERE game_variant = ?1 AND timestamp < ?2 ORDER BY timestamp ASC",
+                "SELECT id, game_variant, release_version, timestamp FROM backups WHERE game_variant = ?1 ORDER BY timestamp ASC",
             ).map_err(|e| BackupRepositoryError::Get(Box::new(e)))?;
             let backups = stmt
-                .query_map(rusqlite::params![game_variant, timestamp], |row| {
+                .query_map(rusqlite::params![game_variant], |row| {
                     let id = row.get(0)?;
                     let game_variant_str: String = row.get(1)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)

@@ -199,15 +199,12 @@ where
 async fn cleanup_old_backups(
     backup_repository: Arc<dyn BackupRepository>,
     variant: &GameVariant,
-    timestamp: u64,
     data_dir: &Path,
 ) -> Result<(), LaunchGameError> {
-    let backups = backup_repository
-        .get_backup_entries_older_than(variant, timestamp)
-        .await?;
+    let backups = backup_repository.get_backups(variant).await?;
 
-    if backups.len() >= MAX_BACKUPS {
-        let backups_to_delete = backups.len() - (MAX_BACKUPS - 1);
+    if backups.len() > MAX_BACKUPS {
+        let backups_to_delete = backups.len() - MAX_BACKUPS;
         for backup in backups.iter().take(backups_to_delete) {
             let path = crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
                 variant,
@@ -276,13 +273,8 @@ where
     let data_dir_clone = data_dir.to_path_buf();
     let on_game_event_for_cleanup = on_game_event.clone();
     tokio::spawn(async move {
-        if let Err(e) = cleanup_old_backups(
-            backup_repository_clone,
-            &variant_clone,
-            timestamp,
-            &data_dir_clone,
-        )
-        .await
+        if let Err(e) =
+            cleanup_old_backups(backup_repository_clone, &variant_clone, &data_dir_clone).await
         {
             let error_payload = GameErrorPayload {
                 message: e.to_string(),
