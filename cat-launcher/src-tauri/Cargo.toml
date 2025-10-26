@@ -30,7 +30,7 @@ ts-rs = "11.0.1"
 chrono = { version = "0.4.42", features = ["serde"] }
 downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "e6227daac8dbb5ad14011c936031d0d41b8ac4e2" }
 zip = "6.0.0"
-tokio = { version = "1.47.1", features = ["rt-multi-thread", "process"] }
+tokio = { version = "1.47.1", features = ["rt-multi-thread", "process", "macros"] }
 tar = "0.4.44"
 flate2 = "1.1.4"
 sha2 = "0.10.9"
@@ -41,7 +41,6 @@ async-trait = "0.1.89"
 rusqlite = { version = "0.29.0", features = ["bundled"] }
 r2d2 = "0.8.10"
 r2d2_sqlite = "0.22.0"
-futures = "0.3.30"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2.9.0"
