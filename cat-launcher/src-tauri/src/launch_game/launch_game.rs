@@ -26,6 +26,7 @@ use crate::repository::backup_repository::{BackupRepository, BackupRepositoryErr
 use crate::repository::last_played_repository::LastPlayedVersionRepository;
 use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
+use std::sync::Arc;
 
 #[derive(thiserror::Error, Debug)]
 pub enum LaunchGameError {
@@ -197,7 +198,7 @@ where
 }
 
 async fn cleanup_old_backups(
-    backup_repository: &dyn BackupRepository,
+    backup_repository: Arc<dyn BackupRepository>,
     variant: &GameVariant,
     timestamp: u64,
     data_dir: &Path,
@@ -211,21 +212,24 @@ async fn cleanup_old_backups(
         let futures = backups
             .iter()
             .take(backups_to_delete)
-            .map(|backup| async move {
-                let path =
-                    crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
-                        variant,
-                        data_dir,
-                        backup.id,
-                        &backup.release_version,
-                        backup.timestamp,
-                    )
-                    .await?;
-                tokio::fs::remove_file(path)
-                    .await
-                    .map_err(LaunchGameError::RemoveBackupFile)?;
-                backup_repository.delete_backup_entry(backup.id).await?;
-                Ok::<(), LaunchGameError>(())
+            .map(|backup| {
+                let backup_repository = backup_repository.clone();
+                async move {
+                    let path =
+                        crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
+                            variant,
+                            data_dir,
+                            backup.id,
+                            &backup.release_version,
+                            backup.timestamp,
+                        )
+                        .await?;
+                    tokio::fs::remove_file(path)
+                        .await
+                        .map_err(LaunchGameError::RemoveBackupFile)?;
+                    backup_repository.delete_backup_entry(backup.id).await?;
+                    Ok::<(), LaunchGameError>(())
+                }
             });
         try_join_all(futures).await?;
     }
@@ -242,7 +246,7 @@ pub async fn launch_and_monitor_game<F, Fut>(
     resource_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     last_played_repository: &dyn LastPlayedVersionRepository,
-    backup_repository: &dyn BackupRepository,
+    backup_repository: Arc<dyn BackupRepository>,
     on_game_event: F,
 ) -> Result<(), LaunchGameError>
 where
@@ -265,11 +269,29 @@ where
             timestamp,
             data_dir,
             last_played_repository,
-            backup_repository,
+            backup_repository.as_ref(),
         )
         .await?;
 
-    cleanup_old_backups(backup_repository, variant, timestamp, data_dir).await?;
+    let backup_repository_clone = backup_repository.clone();
+    let variant_clone = variant.clone();
+    let data_dir_clone = data_dir.to_path_buf();
+    let on_game_event_for_cleanup = on_game_event.clone();
+    tokio::spawn(async move {
+        if let Err(e) = cleanup_old_backups(
+            backup_repository_clone,
+            &variant_clone,
+            timestamp,
+            &data_dir_clone,
+        )
+        .await
+        {
+            let error_payload = GameErrorPayload {
+                message: e.to_string(),
+            };
+            on_game_event_for_cleanup(GameEvent::Error(error_payload)).await;
+        }
+    });
 
     let on_game_event_for_error = on_game_event.clone();
 

@@ -1,4 +1,5 @@
 use std::env::consts::OS;
+use std::sync::Arc;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use serde::ser::SerializeStruct;
@@ -63,7 +64,7 @@ pub async fn launch_game(
         &resource_dir,
         &*releases_repository,
         &*last_played_repository,
-        &*backup_repository,
+        Arc::new(backup_repository.inner().clone()),
         on_game_event,
     )
     .await?;
