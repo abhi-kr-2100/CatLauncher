@@ -10,6 +10,7 @@ mod infra;
 mod install_release;
 mod last_played;
 mod launch_game;
+mod play_time;
 mod utils;
 mod variants;
 
