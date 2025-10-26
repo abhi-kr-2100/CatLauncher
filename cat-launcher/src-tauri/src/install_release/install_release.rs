@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use reqwest::Client;
+use tokio::fs;
 
 use crate::filesystem::paths::{
     get_or_create_asset_download_dir, get_or_create_asset_installation_dir, AssetDownloadDirError,
@@ -103,6 +104,9 @@ impl GameRelease {
         extract_archive(&download_filepath, &installation_dir, os).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
+
+        // Failure to remove file does not mean failure to install
+        let _ = fs::remove_file(&download_filepath).await;
 
         on_status_update(InstallationProgressPayload {
             status: InstallationProgressStatus::Success,
