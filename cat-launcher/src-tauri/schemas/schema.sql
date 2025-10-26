@@ -54,3 +54,16 @@ CREATE TABLE IF NOT EXISTS backups (
 
 -- This composite index speeds up queries that filter by game_variant and order by timestamp.
 CREATE INDEX IF NOT EXISTS idx_backups_game_variant_timestamp ON backups (game_variant, timestamp);
+
+-- This table stores the play time for each game variant and version.
+CREATE TABLE IF NOT EXISTS play_time (
+    id INTEGER PRIMARY KEY,
+    game_variant TEXT NOT NULL,
+    version TEXT NOT NULL,
+    duration_in_seconds INTEGER NOT NULL CHECK (duration_in_seconds >= 0),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This unique index prevents duplicate entries for the same game_variant and version,
+-- and speeds up filtering play time by game_variant and version.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_play_time_game_variant_version ON play_time (game_variant, version);
