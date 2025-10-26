@@ -1,7 +1,8 @@
-use crate::game_release::game_release::ReleaseType;
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumIter, IntoStaticStr};
+use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 use ts_rs::TS;
+
+use crate::game_release::game_release::ReleaseType;
 
 #[derive(
     Debug,
@@ -16,6 +17,7 @@ use ts_rs::TS;
     Serialize,
     IntoStaticStr,
     TS,
+    EnumString,
 )]
 #[non_exhaustive]
 pub enum GameVariant {

@@ -341,13 +341,21 @@ pub enum GetUserDataBackupArchivePathError {
 
 pub async fn get_or_create_user_data_backup_archive_filepath(
     variant: &GameVariant,
-    data_dir: &Path,
+    id: i64,
+    version: &str,
     timestamp: u64,
+    data_dir: &Path,
 ) -> Result<PathBuf, GetUserDataBackupArchivePathError> {
     let backup_dir = get_or_create_user_game_data_dir(variant, data_dir)
         .await?
         .join("backups");
     tokio::fs::create_dir_all(&backup_dir).await?;
 
-    Ok(backup_dir.join(format!("{}.zip", timestamp)))
+    Ok(backup_dir.join(format!(
+        "{}_{}_{}_{}.zip",
+        id,
+        variant.id(),
+        get_safe_filename(version),
+        timestamp
+    )))
 }
