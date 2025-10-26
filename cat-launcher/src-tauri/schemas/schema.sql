@@ -42,3 +42,15 @@ CREATE TABLE IF NOT EXISTS last_played_version (
     version TEXT NOT NULL,
     FOREIGN KEY (game_variant) REFERENCES variants (name)
 );
+
+-- This table stores metadata for each backup created for a game variant.
+CREATE TABLE IF NOT EXISTS backups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp INTEGER NOT NULL,
+    game_variant TEXT NOT NULL,
+    release_version TEXT NOT NULL,
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This composite index speeds up queries that filter by game_variant and order by timestamp.
+CREATE INDEX IF NOT EXISTS idx_backups_game_variant_timestamp ON backups (game_variant, timestamp);
