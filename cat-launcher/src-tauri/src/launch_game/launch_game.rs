@@ -3,6 +3,7 @@ use std::io;
 use std::path::Path;
 use std::process::Stdio;
 
+use futures::future::try_join_all;
 use serde::Serialize;
 
 const MAX_BACKUPS: usize = 5;
@@ -207,21 +208,26 @@ async fn cleanup_old_backups(
 
     if backups.len() >= MAX_BACKUPS {
         let backups_to_delete = backups.len() - (MAX_BACKUPS - 1);
-        for backup in backups.iter().take(backups_to_delete) {
-            let path = crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
-                variant,
-                data_dir,
-                backup.id,
-                &backup.release_version,
-                backup.timestamp,
-            )
-            .await?;
-            tokio::fs::remove_file(path)
-                .await
-                .map_err(LaunchGameError::RemoveBackupFile)?;
-
-            backup_repository.delete_backup_entry(backup.id).await?;
-        }
+        let futures = backups
+            .iter()
+            .take(backups_to_delete)
+            .map(|backup| async move {
+                let path =
+                    crate::filesystem::paths::get_or_create_user_data_backup_archive_filepath(
+                        variant,
+                        data_dir,
+                        backup.id,
+                        &backup.release_version,
+                        backup.timestamp,
+                    )
+                    .await?;
+                tokio::fs::remove_file(path)
+                    .await
+                    .map_err(LaunchGameError::RemoveBackupFile)?;
+                backup_repository.delete_backup_entry(backup.id).await?;
+                Ok::<(), LaunchGameError>(())
+            });
+        try_join_all(futures).await?;
     }
 
     Ok(())
