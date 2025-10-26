@@ -45,12 +45,14 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     let resources_dir = app.path().resource_dir()?;
     let schema_path = get_schema_file_path(&resources_dir)?;
 
-    let manager = SqliteConnectionManager::file(&db_path);
+    let manager = SqliteConnectionManager::file(&db_path).with_init(|conn| {
+        conn.pragma_update(None, "journal_mode", "WAL")?;
+        conn.pragma_update(None, "foreign_keys", "ON")?;
+        conn.busy_timeout(Duration::from_secs(5))
+    });
     let pool = r2d2::Pool::new(manager)?;
 
     let conn = pool.get()?;
-    conn.pragma_update(None, "journal_mode", "WAL")?;
-    conn.busy_timeout(Duration::from_secs(5))?;
     db_schema::initialize_schema(&conn, &[schema_path])?;
 
     app.manage(SqliteReleasesRepository::new(pool.clone()));
