@@ -1,4 +1,4 @@
-use crate::repository::last_played_repository::{
+use crate::last_played::repository::{
     LastPlayedVersionRepository, LastPlayedVersionRepositoryError,
 };
 use crate::variants::GameVariant;

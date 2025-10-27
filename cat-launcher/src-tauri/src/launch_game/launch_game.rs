@@ -11,6 +11,7 @@ use tokio::task::JoinSet;
 use ts_rs::TS;
 
 use crate::constants::MAX_BACKUPS;
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
     get_game_executable_filepath, get_or_create_user_data_backup_archive_filepath,
     get_or_create_user_game_data_dir, AssetDownloadDirError, AssetExtractionDirError,
@@ -20,11 +21,10 @@ use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
+use crate::last_played::repository::LastPlayedVersionRepository;
+use crate::launch_game::repository::{BackupRepository, BackupRepositoryError};
 use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::play_time::repository::PlayTimeRepository;
-use crate::repository::backup_repository::{BackupRepository, BackupRepositoryError};
-use crate::repository::last_played_repository::LastPlayedVersionRepository;
-use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]

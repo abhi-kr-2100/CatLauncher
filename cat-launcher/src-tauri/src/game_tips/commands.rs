@@ -3,7 +3,7 @@ use tauri::{command, AppHandle, Manager, State};
 use crate::game_tips::error::CommandError;
 use crate::game_tips::game_tips::get_all_tips_for_variant;
 use crate::infra::utils::get_os_enum;
-use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[command]

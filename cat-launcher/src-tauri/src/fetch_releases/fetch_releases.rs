@@ -9,7 +9,7 @@ use crate::fetch_releases::utils::{get_default_releases, get_releases_payload, m
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{fetch_github_releases, GitHubReleaseFetchError};
 use crate::infra::utils::get_github_repo_for_variant;
-use crate::repository::releases_repository::{ReleasesRepository, ReleasesRepositoryError};
+use crate::fetch_releases::repository::{ReleasesRepository, ReleasesRepositoryError};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]

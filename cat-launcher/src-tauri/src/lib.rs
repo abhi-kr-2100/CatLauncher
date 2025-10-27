@@ -1,6 +1,5 @@
 pub mod constants;
 pub mod filesystem;
-pub mod repository;
 
 mod basic_info;
 mod fetch_releases;
