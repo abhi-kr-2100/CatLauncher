@@ -2,7 +2,7 @@ use std::env::consts::OS;
 
 use serde::ser::SerializeStruct;
 use serde::Serializer;
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 use tauri::{command, AppHandle, Manager, State};
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;

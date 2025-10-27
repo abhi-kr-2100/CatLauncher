@@ -3,7 +3,7 @@ use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use serde::ser::SerializeStruct;
 use serde::Serializer;
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
 
