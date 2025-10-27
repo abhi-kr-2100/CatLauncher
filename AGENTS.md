@@ -12,7 +12,7 @@ The backend follows a **Vertical Slice Architecture**. Each feature (e.g., `fetc
 
 Within each slice, the principles of **Clean Architecture** are applied:
 - **Framework Agnostic Core:** The core business logic (e.g., in `fetch_releases.rs`) is decoupled from the Tauri framework. It receives dependencies like paths and HTTP clients via arguments (dependency injection), making it easy to test in isolation.
-- **Framework Bridge:** The `commands.rs` file in each module is the only part that interacts directly with Tauri. It acts as a bridge, exposing the core logic to the frontend as Tauri commands.
+- **Framework Bridge:** The `commands.rs` file in each module is the only part that interacts directly with Tauri. It acts as a bridge, exposing the core logic to the frontend as Tauri commands. The command function itself should not contain any business logic. Instead, it should call a function in the feature file (e.g., `fetch_releases.rs`) that contains the actual logic.
 
 #### Directory and Path Handling
 

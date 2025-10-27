@@ -12,6 +12,7 @@ import { ExternalLink } from "@/components/ui/ExternalLink";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { TipOfTheDay } from "@/game-tips/TipOfTheDay";
 import InteractionButton from "./InteractionButton";
+import { PlayTime } from "./PlayTime";
 import ReleaseSelector from "./ReleaseSelector";
 
 export interface GameVariantProps {
@@ -44,6 +45,7 @@ export default function GameVariantCard({ variantInfo }: GameVariantProps) {
           selectedReleaseId={selectedReleaseId}
           setSelectedReleaseId={setSelectedReleaseId}
         />
+        <PlayTime variant={variantInfo.id} releaseId={selectedReleaseId} />
       </CardContent>
       <CardFooter>
         <InteractionButton

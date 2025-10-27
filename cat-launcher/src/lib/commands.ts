@@ -72,6 +72,26 @@ export async function getTips(variant: GameVariant): Promise<string[]> {
   return response;
 }
 
+export async function getPlayTimeForVariant(
+  gameVariantId: GameVariant,
+): Promise<number> {
+  const response = await invoke<number>("get_play_time_for_variant", {
+    gameVariantId,
+  });
+  return response;
+}
+
+export async function getPlayTimeForVersion(
+  gameVariantId: GameVariant,
+  version: string,
+): Promise<number> {
+  const response = await invoke<number>("get_play_time_for_version", {
+    gameVariantId,
+    version,
+  });
+  return response;
+}
+
 export async function getLastPlayedVersion(
   variant: GameVariant,
 ): Promise<string> {
