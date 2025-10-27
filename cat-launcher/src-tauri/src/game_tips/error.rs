@@ -1,6 +1,6 @@
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 use thiserror::Error;
 
 use crate::game_tips::game_tips::GetAllTipsForVariantError;

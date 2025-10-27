@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -13,20 +14,23 @@ import type { InstallationProgressStatus } from "@/generated-types/InstallationP
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import {
   getInstallationStatus,
+  getPlayTimeForVariant,
+  getPlayTimeForVersion,
   installReleaseForVariant,
   launchGame,
+  listenToGameEvent,
   listenToInstallationStatusUpdate,
   listenToReleasesUpdate,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener, toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 import {
   clearInstallationProgress,
   setInstallationProgress,
 } from "@/store/installationProgressSlice";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
-import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 
 export function useReleaseEvents() {
   const dispatch = useAppDispatch();
@@ -228,4 +232,70 @@ export function usePlayGame(variant: GameVariant) {
   });
 
   return { play, isStartingGame };
+}
+
+export function usePlayTime(variant: GameVariant, releaseId?: string) {
+  const queryClient = useQueryClient();
+  const { data: totalPlayTime, error: totalPlayTimeError } = useQuery({
+    queryKey: queryKeys.playTimeForVariant(variant),
+    queryFn: () => getPlayTimeForVariant(variant),
+    initialData: 0,
+  });
+
+  const { data: versionPlayTime, error: versionPlayTimeError } = useQuery({
+    queryKey: queryKeys.playTimeForVersion(variant, releaseId),
+    queryFn: () => {
+      if (!releaseId) {
+        return Promise.resolve(0);
+      }
+      return getPlayTimeForVersion(variant, releaseId);
+    },
+    enabled: !!releaseId,
+    initialData: 0,
+  });
+
+  useEffect(() => {
+    if (totalPlayTimeError) {
+      toastCL(
+        "error",
+        `Failed to get total play time for ${variant}.`,
+        totalPlayTimeError,
+      );
+    }
+  }, [totalPlayTimeError, variant]);
+
+  useEffect(() => {
+    if (versionPlayTimeError) {
+      toastCL(
+        "error",
+        `Failed to get version play time for ${variant}.`,
+        versionPlayTimeError,
+      );
+    }
+  }, [versionPlayTimeError, variant]);
+
+  useEffect(() => {
+    const gameEventHandler = (event: GameEvent) => {
+      if (event.type === "Exit") {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.playTimeForVariant(variant),
+        });
+        if (releaseId) {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.playTimeForVersion(variant, releaseId),
+          });
+        }
+      }
+    };
+
+    const cleanup = setupEventListener(
+      listenToGameEvent,
+      gameEventHandler,
+      "Error listening to game events in PlayTime.",
+    );
+
+    return cleanup;
+  }, [queryClient, variant, releaseId]);
+
+  return { totalPlayTime, versionPlayTime };
 }
