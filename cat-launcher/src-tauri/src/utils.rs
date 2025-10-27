@@ -3,13 +3,15 @@ use std::time::Duration;
 use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Listener, Manager};
 
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::infra::autoupdate::update::run_updater;
+use crate::infra::repository::db_schema::initialize_schema;
+use crate::infra::repository::db_schema::InitializeSchemaError;
+use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::repository::db_schema;
-use crate::repository::sqlite_backup_repository::SqliteBackupRepository;
-use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
-use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::filesystem::paths::GetSchemaFilePathError;
 
 pub fn autoupdate(app: &App) {
     let handle = app.handle();
@@ -31,10 +33,10 @@ pub enum RepositoryError {
     Database(#[from] rusqlite::Error),
 
     #[error("failed to initialize schema: {0}")]
-    Schema(#[from] db_schema::InitializeSchemaError),
+    Schema(#[from] InitializeSchemaError),
 
     #[error("failed to get schema file path: {0}")]
-    SchemaFilePath(#[from] crate::filesystem::paths::GetSchemaFilePathError),
+    SchemaFilePath(#[from] GetSchemaFilePathError),
 
     #[error("failed to create connection pool: {0}")]
     ConnectionPool(#[from] r2d2::Error),
@@ -55,7 +57,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     let pool = r2d2::Pool::new(manager)?;
 
     let conn = pool.get()?;
-    db_schema::initialize_schema(&conn, &[schema_path])?;
+    initialize_schema(&conn, &[schema_path])?;
 
     app.manage(SqliteReleasesRepository::new(pool.clone()));
     app.manage(SqliteBackupRepository::new(pool.clone()));

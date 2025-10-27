@@ -6,7 +6,7 @@ use thiserror::Error;
 use crate::filesystem::paths::{get_tip_file_paths, GetTipFilePathsError};
 use crate::infra::utils::OS;
 use crate::last_played::last_played::LastPlayedError;
-use crate::repository::last_played_repository::LastPlayedVersionRepository;
+use crate::last_played::repository::LastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Deserialize, Clone)]

@@ -3,6 +3,7 @@ use std::path::Path;
 use reqwest::Client;
 use tokio::fs;
 
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
     get_or_create_asset_download_dir, get_or_create_asset_installation_dir, AssetDownloadDirError,
     AssetExtractionDirError,
@@ -16,7 +17,6 @@ use crate::install_release::installation_progress_payload::{
     InstallationProgressPayload, InstallationProgressStatus,
 };
 use crate::install_release::installation_status::status::GetInstallationStatusError;
-use crate::repository::releases_repository::ReleasesRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> {

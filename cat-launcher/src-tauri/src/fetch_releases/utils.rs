@@ -7,7 +7,7 @@ use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::read_from_file;
-use crate::repository::releases_repository::ReleasesRepository;
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 pub async fn get_default_releases(
