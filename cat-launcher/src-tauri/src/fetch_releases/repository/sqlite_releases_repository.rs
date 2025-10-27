@@ -6,7 +6,7 @@ use tokio::task;
 
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::repository::releases_repository::{ReleasesRepository, ReleasesRepositoryError};
+use crate::fetch_releases::repository::{ReleasesRepository, ReleasesRepositoryError};
 use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;

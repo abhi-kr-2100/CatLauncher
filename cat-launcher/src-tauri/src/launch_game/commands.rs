@@ -7,12 +7,12 @@ use strum_macros::IntoStaticStr;
 use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
 
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
+use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::repository::sqlite_backup_repository::SqliteBackupRepository;
-use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
-use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]

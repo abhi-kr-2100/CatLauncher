@@ -5,7 +5,7 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::infra::http_client::HTTP_CLIENT;
-use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]

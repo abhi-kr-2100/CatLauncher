@@ -216,6 +216,10 @@ The project has its own way of handling errors using `thiserror`. Do not use `an
 
 When using `useMutation`, pass arguments to the mutation function, instead of referencing variables that may change and cause a race condition.
 
+### `mod.rs` files
+
+`mod.rs` files should only contain module declarations. They should not contain any code. Code should be in other files.
+
 ## Agent Workflow
 
 When working on this project, please follow these guidelines:

@@ -1,11 +1,11 @@
 use std::path::Path;
 
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::{get_default_releases, merge_releases};
 use crate::game_release::game_release::{GameReleaseStatus, ReleaseType};
 use crate::game_release::GameRelease;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
-use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 pub fn get_platform_asset_substrs(

@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
-use crate::repository::backup_repository::{BackupEntry, BackupRepository, BackupRepositoryError};
+use crate::launch_game::repository::{BackupEntry, BackupRepository, BackupRepositoryError};
 use crate::variants::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
