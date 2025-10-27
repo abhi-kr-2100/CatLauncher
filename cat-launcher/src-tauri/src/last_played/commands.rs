@@ -3,7 +3,7 @@ use strum_macros::IntoStaticStr;
 use tauri::{command, State};
 
 use crate::last_played::last_played::LastPlayedError;
-use crate::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
