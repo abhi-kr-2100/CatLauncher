@@ -1,33 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-
-import GameVariantCard from "@/PlayPage/GameVariantCard";
-import { fetchGameVariantsInfo } from "@/lib/commands";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
 
 function App() {
-  const {
-    data: gameVariantsInfo = [],
-    isLoading: gameVariantsLoading,
-    isError: gameVariantsError,
-    error: gameVariantsErrorObj,
-  } = useQuery({
-    queryKey: ["gameVariantsInfo"],
-    queryFn: fetchGameVariantsInfo,
-  });
-
-  if (gameVariantsLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (gameVariantsError) {
-    return <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>;
-  }
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
-      {gameVariantsInfo.map((variantInfo) => (
-        <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
-      ))}
-    </main>
+    <div className="flex h-screen bg-gray-900 text-white">
+      <Sidebar
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
+      <div
+        className={`flex-grow p-4 transition-all duration-300 ${
+          isSidebarCollapsed ? "ml-20" : "ml-64"
+        }`}
+      >
+        <Outlet />
+      </div>
+    </div>
   );
 }
 

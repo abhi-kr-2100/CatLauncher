@@ -6,14 +6,14 @@ scan({
 });
 
 import ReactDOM from "react-dom/client";
-import App from "@/App";
+import Router from "@/Router";
 import "@/styles/global.css";
 import Providers from "@/providers";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Providers>
-      <App />
+      <Router />
     </Providers>
   </React.StrictMode>,
 );
