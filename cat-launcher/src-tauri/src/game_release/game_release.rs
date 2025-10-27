@@ -3,11 +3,11 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::get_assets;
 use crate::game_release::utils::get_platform_asset_substrs;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::utils::{Arch, OS};
-use crate::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, TS)]
