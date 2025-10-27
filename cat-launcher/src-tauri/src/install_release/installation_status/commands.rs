@@ -5,10 +5,10 @@ use serde::Serializer;
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Manager, State};
 
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]

@@ -5,13 +5,13 @@ use serde::Serializer;
 use strum_macros::IntoStaticStr;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::install_release::install_release::ReleaseInstallationError;
 use crate::install_release::installation_progress_payload::InstallationProgressPayload;
-use crate::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]

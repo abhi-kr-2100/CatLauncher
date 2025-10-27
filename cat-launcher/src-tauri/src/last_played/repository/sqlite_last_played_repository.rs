@@ -2,9 +2,7 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
-use crate::repository::last_played_repository::{
-    LastPlayedVersionRepository, LastPlayedVersionRepositoryError,
-};
+use crate::last_played::repository::{LastPlayedVersionRepository, LastPlayedVersionRepositoryError};
 use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
