@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
+use strum::{Display, EnumIter, EnumString, IntoStaticStr};
 use ts_rs::TS;
 
 use crate::game_release::game_release::ReleaseType;

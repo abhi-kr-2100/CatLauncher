@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
+use rusqlite::OptionalExtension;
 use tokio::task;
 
 use crate::play_time::repository::{PlayTimeRepository, PlayTimeRepositoryError};
@@ -34,7 +35,7 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
         let pool = self.pool.clone();
         let game_variant_id = game_variant.id();
         let version = version.to_owned();
-        task::spawn_blocking(move || {
+        task::block_in_place(move || {
             let conn = pool.get().map_err(|e| PlayTimeRepositoryError::LogPlayTime(Box::new(e)))?;
             conn.execute(
                 "INSERT INTO play_time (game_variant, version, duration_in_seconds)
@@ -46,8 +47,6 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
             .map_err(|e| PlayTimeRepositoryError::LogPlayTime(Box::new(e)))?;
             Ok(())
         })
-        .await
-        .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
     }
 
     async fn get_play_time_for_version(
@@ -59,15 +58,18 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
         let game_variant_id = game_variant.id();
         let version = version.to_owned();
         task::spawn_blocking(move || {
-            let conn = pool.get().map_err(|e| PlayTimeRepositoryError::GetPlayTimeForVersion(Box::new(e)))?;
-            let sum: Option<i64> = conn
+            let conn = pool
+                .get()
+                .map_err(|e| PlayTimeRepositoryError::GetPlayTimeForVersion(Box::new(e)))?;
+            let duration: Option<i64> = conn
                 .query_row(
                     "SELECT duration_in_seconds FROM play_time WHERE game_variant = ?1 AND version = ?2",
                     rusqlite::params![game_variant_id, version],
                     |row| row.get(0),
                 )
+                .optional()
                 .map_err(|e| PlayTimeRepositoryError::GetPlayTimeForVersion(Box::new(e)))?;
-            Ok(sum.unwrap_or(0))
+            Ok(duration.unwrap_or(0))
         })
         .await
         .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
@@ -83,14 +85,14 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
             let conn = pool
                 .get()
                 .map_err(|e| PlayTimeRepositoryError::GetPlayTimeForVariant(Box::new(e)))?;
-            let sum: Option<i64> = conn
+            let sum: i64 = conn
                 .query_row(
-                    "SELECT SUM(duration_in_seconds) FROM play_time WHERE game_variant = ?1",
+                    "SELECT COALESCE(SUM(duration_in_seconds), 0) FROM play_time WHERE game_variant = ?1",
                     rusqlite::params![game_variant_id],
                     |row| row.get(0),
                 )
                 .map_err(|e| PlayTimeRepositoryError::GetPlayTimeForVariant(Box::new(e)))?;
-            Ok(sum.unwrap_or(0))
+            Ok(sum)
         })
         .await
         .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
@@ -102,14 +104,14 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
             let conn = pool
                 .get()
                 .map_err(|e| PlayTimeRepositoryError::GetTotalPlayTime(Box::new(e)))?;
-            let sum: Option<i64> = conn
+            let sum: i64 = conn
                 .query_row(
-                    "SELECT SUM(duration_in_seconds) FROM play_time",
+                    "SELECT COALESCE(SUM(duration_in_seconds), 0) FROM play_time",
                     rusqlite::params![],
                     |row| row.get(0),
                 )
                 .map_err(|e| PlayTimeRepositoryError::GetTotalPlayTime(Box::new(e)))?;
-            Ok(sum.unwrap_or(0))
+            Ok(sum)
         })
         .await
         .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
