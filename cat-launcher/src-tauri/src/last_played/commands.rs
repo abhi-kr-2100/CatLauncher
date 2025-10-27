@@ -1,5 +1,5 @@
 use serde::{ser::SerializeStruct, Serializer};
-use strum_macros::IntoStaticStr;
+use strum::IntoStaticStr;
 use tauri::{command, State};
 
 use crate::last_played::last_played::LastPlayedError;
