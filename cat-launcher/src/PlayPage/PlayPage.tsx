@@ -5,7 +5,7 @@ import GameVariantCard from "@/PlayPage/GameVariantCard";
 import { fetchGameVariantsInfo } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
-import Spinner from "@/components/ui/Spinner";
+import Spinner from "@/components/ui/spinner";
 
 function PlayPage() {
   const {
