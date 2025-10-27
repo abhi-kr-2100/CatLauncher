@@ -1,6 +1,8 @@
 import type { GameVariant } from "@/generated-types/GameVariant";
 
 export const queryKeys = {
+  gameVariantsInfo: ["gameVariantsInfo"] as const,
+
   lastPlayedVersion: (variant: GameVariant) =>
     ["last_played_version", variant] as const,
 

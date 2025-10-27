@@ -35,7 +35,7 @@ The frontend is a standard React application and follows a similar vertical slic
 The frontend communicates with the backend by invoking the commands defined in the Rust `commands.rs` files. To keep the UI components decoupled from the backend implementation:
 - All Tauri `invoke` calls are wrapped in async functions inside `src/lib/commands.ts`.
 - UI components call these wrapper functions, remaining unaware of the underlying Tauri API. This makes the components more reusable and easier to test.
-- TanStack Query keys are collected into constants in `src/lib/queryKeys.ts`.
+- TanStack Query keys are collected into constants in `src/lib/queryKeys.ts`. Always use these constants instead of string literals to ensure consistency.
 
 ## Technology Stack
 
