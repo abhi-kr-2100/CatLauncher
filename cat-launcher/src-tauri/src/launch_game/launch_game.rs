@@ -10,7 +10,6 @@ use tokio::task::JoinError;
 use tokio::task::JoinSet;
 use ts_rs::TS;
 
-use crate::constants::MAX_BACKUPS;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
     get_game_executable_filepath, get_or_create_user_data_backup_archive_filepath,
@@ -25,6 +24,7 @@ use crate::last_played::repository::LastPlayedVersionRepository;
 use crate::launch_game::repository::{BackupRepository, BackupRepositoryError};
 use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::play_time::repository::PlayTimeRepository;
+use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -198,16 +198,17 @@ async fn cleanup_old_backups(
     backup_repository: impl BackupRepository + Clone + Send + 'static,
     variant: &GameVariant,
     data_dir: &Path,
+    settings: &Settings,
 ) -> Result<(), LaunchGameError> {
     let backups = backup_repository
         .get_backups_sorted_by_timestamp(variant)
         .await?;
 
-    if backups.len() <= MAX_BACKUPS {
+    if backups.len() <= settings.max_backups.get() {
         return Ok(());
     }
 
-    let num_to_delete = backups.len() - MAX_BACKUPS;
+    let num_to_delete = backups.len() - settings.max_backups.get();
     let backups_to_delete = backups.into_iter().take(num_to_delete);
 
     let mut set = JoinSet::new();
@@ -256,6 +257,7 @@ pub async fn launch_and_monitor_game<F, Fut>(
     backup_repository: impl BackupRepository + Clone + Send + Sync + 'static,
     play_time_repository: impl PlayTimeRepository + Send + Sync + 'static,
     on_game_event: F,
+    settings: &Settings,
 ) -> Result<(), LaunchGameError>
 where
     F: Fn(GameEvent) -> Fut + Send + Sync + 'static + Clone,
@@ -285,9 +287,15 @@ where
     let variant_clone = variant.clone();
     let data_dir_clone = data_dir.to_path_buf();
     let on_game_event_for_cleanup = on_game_event.clone();
+    let settings_clone = settings.clone();
     tokio::spawn(async move {
-        if let Err(e) =
-            cleanup_old_backups(backup_repository_clone, &variant_clone, &data_dir_clone).await
+        if let Err(e) = cleanup_old_backups(
+            backup_repository_clone,
+            &variant_clone,
+            &data_dir_clone,
+            &settings_clone,
+        )
+        .await
         {
             let error_payload = GameErrorPayload {
                 message: e.to_string(),
