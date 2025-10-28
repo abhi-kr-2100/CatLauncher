@@ -13,6 +13,7 @@ use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPla
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
+use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
@@ -35,6 +36,7 @@ pub async fn launch_game(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
+    settings: State<'_, Settings>,
     releases_repository: State<'_, SqliteReleasesRepository>,
     last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
     backup_repository: State<'_, SqliteBackupRepository>,
@@ -68,6 +70,7 @@ pub async fn launch_game(
         backup_repository.inner().clone(),
         play_time_repository.inner().clone(),
         on_game_event,
+        &settings,
     )
     .await?;
 
