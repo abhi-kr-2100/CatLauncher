@@ -1,5 +1,5 @@
-pub mod constants;
 pub mod filesystem;
+pub mod settings;
 
 mod basic_info;
 mod fetch_releases;
@@ -21,7 +21,7 @@ use crate::install_release::installation_status::commands::get_installation_stat
 use crate::last_played::commands::get_last_played_version;
 use crate::launch_game::commands::launch_game;
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
-use crate::utils::{autoupdate, manage_repositories};
+use crate::utils::{autoupdate, manage_repositories, manage_settings};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -29,6 +29,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
+            manage_settings(app)?;
             manage_repositories(app)?;
             autoupdate(app);
 
