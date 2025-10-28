@@ -150,6 +150,10 @@ export function useInstallAndMonitorRelease(
         (): GameReleaseStatus => "ReadyToPlay",
       );
 
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tips(variant),
+      });
+
       if (!releaseId) {
         console.error("😵 Release should not be undefined here. 😵");
         return;

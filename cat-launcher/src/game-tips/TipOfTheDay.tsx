@@ -69,7 +69,7 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
     <TipOfTheDayContent
       tip={
         tips.length === 0
-          ? "Install and play a game to start getting tips and hints."
+          ? "Install a game to start getting tips and hints."
           : tips[randomIndex]
       }
     />
