@@ -35,8 +35,8 @@ const GameSessionMonitor = () => {
       ].includes(gameStatus)}
       onOpenChange={resetGameSessionMonitor}
     >
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="flex flex-col gap-4 max-h-[90vh]">
+        <DialogHeader className="flex flex-col gap-2">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             The following information may help you diagnose the issue.
@@ -53,13 +53,13 @@ const GameSessionMonitor = () => {
         {logsText && (
           <div className="flex flex-col gap-2">
             <h3 className="font-semibold">Logs</h3>
-            <pre className="text-sm bg-muted p-4 rounded-md whitespace-pre-wrap max-h-[200px] overflow-auto">
+            <pre className="text-sm bg-muted p-4 rounded-md whitespace-pre-wrap h-[30vh] overflow-auto">
               {logsText}
             </pre>
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className="mt-auto">
           {logsText && (
             <Button
               onClick={() => {
