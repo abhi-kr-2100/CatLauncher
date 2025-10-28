@@ -31,7 +31,11 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["releases/*.json", "schemas/schema.sql"],
+    "resources": [
+      "releases/*.json",
+      "schemas/schema.sql",
+      "resources/settings.json"
+    ],
     "createUpdaterArtifacts": true
   },
   "plugins": {
