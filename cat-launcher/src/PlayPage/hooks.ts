@@ -28,6 +28,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 import {
   clearInstallationProgress,
+  setDownloadProgress,
   setInstallationProgress,
 } from "@/store/installationProgressSlice";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
@@ -97,6 +98,16 @@ export function useInstallAndMonitorRelease(
     ];
   });
 
+  const downloadProgress = useAppSelector((state) => {
+    if (!selectedReleaseId) {
+      return null;
+    }
+
+    return state.installationProgress.progressByVariant[variant][
+      selectedReleaseId
+    ];
+  });
+
   useEffect(() => {
     if (!selectedReleaseId) {
       return;
@@ -130,7 +141,15 @@ export function useInstallAndMonitorRelease(
       if (!releaseId) {
         throw new Error("No release selected");
       }
-      return installReleaseForVariant(variant, releaseId);
+      return installReleaseForVariant(variant, releaseId, (progress) => {
+        dispatch(
+          setDownloadProgress({
+            variant,
+            releaseId,
+            progress,
+          }),
+        );
+      });
     },
 
     onSuccess: (updatedRelease, releaseId) => {
@@ -180,6 +199,7 @@ export function useInstallAndMonitorRelease(
     install: mutate,
     isInstalling: isPending,
     installationProgressStatus,
+    downloadProgress,
   };
 }
 

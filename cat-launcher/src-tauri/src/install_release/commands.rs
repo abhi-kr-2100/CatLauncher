@@ -1,8 +1,10 @@
 use std::env::consts::OS;
+use std::sync::Arc;
 
 use serde::ser::SerializeStruct;
 use serde::Serializer;
 use strum::IntoStaticStr;
+use tauri::ipc::Channel;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
@@ -10,6 +12,7 @@ use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
+use crate::install_release::channel_reporter::ChannelReporter;
 use crate::install_release::install_release::ReleaseInstallationError;
 use crate::install_release::installation_progress_payload::InstallationProgressPayload;
 use crate::settings::Settings;
@@ -40,6 +43,7 @@ pub async fn install_release(
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
     settings: State<'_, Settings>,
+    on_download_progress: Channel,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
@@ -65,6 +69,8 @@ pub async fn install_release(
         }
     };
 
+    let progress = Arc::new(ChannelReporter::new(on_download_progress));
+
     release
         .install_release(
             &HTTP_CLIENT,
@@ -75,6 +81,7 @@ pub async fn install_release(
             &*releases_repository,
             &settings,
             on_status_update,
+            progress,
         )
         .await?;
 
