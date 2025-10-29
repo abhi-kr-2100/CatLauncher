@@ -4,4 +4,6 @@
 cat-launcher/src/generated-types/*
 
 # Rust Analyzer files
+target/rust-analyzer/flycheck0/stderr
+target/rust-analyzer/flycheck0/stdout
 target/rust-analyzer/**
