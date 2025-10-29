@@ -1,3 +1,2 @@
+pub mod basic_info;
 pub mod commands;
-
-mod basic_info;
