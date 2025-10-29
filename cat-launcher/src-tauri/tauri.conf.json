@@ -13,8 +13,7 @@
     "windows": [
       {
         "title": "cat-launcher",
-        "width": 850,
-        "height": 650
+        "maximized": true
       }
     ],
     "security": {
