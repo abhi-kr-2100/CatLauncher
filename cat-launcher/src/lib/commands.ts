@@ -1,6 +1,7 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, Channel } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
+import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -108,10 +109,17 @@ export async function getLastPlayedVersion(
 export async function installReleaseForVariant(
   variant: GameVariant,
   releaseId: string,
+  onDownloadProgress: (progress: DownloadProgress) => void,
 ): Promise<GameRelease> {
+  const channel = new Channel();
+  channel.onmessage = (progress) => {
+    onDownloadProgress(progress as DownloadProgress);
+  };
+
   const response = await invoke<GameRelease>("install_release", {
     variant,
     releaseId,
+    onDownloadProgress: channel,
   });
 
   return response;
