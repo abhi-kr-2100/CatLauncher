@@ -1,29 +1,32 @@
 use strum::IntoEnumIterator;
-use tauri::command;
+use tauri::{command, State};
 use ts_rs::TS;
 
+use crate::basic_info::basic_info::Link;
+use crate::settings::Settings;
 use crate::variants::GameVariant;
-use super::basic_info::Link;
 
 #[derive(serde::Serialize, TS)]
 #[ts(export)]
 pub struct GameVariantInfo {
     pub id: GameVariant,
-    pub name: &'static str,
+    pub name: String,
     pub links: Vec<Link>,
 }
 
-impl From<GameVariant> for GameVariantInfo {
-    fn from(variant: GameVariant) -> Self {
+impl GameVariantInfo {
+    fn from_variant(variant: GameVariant, settings: &Settings) -> Self {
         GameVariantInfo {
             id: variant,
-            name: variant.name(),
-            links: variant.links(),
+            name: variant.name(settings).to_string(),
+            links: variant.links(settings).to_vec(),
         }
     }
 }
 
 #[command]
-pub fn get_game_variants_info() -> Vec<GameVariantInfo> {
-    GameVariant::iter().map(GameVariantInfo::from).collect()
+pub fn get_game_variants_info(settings: State<'_, Settings>) -> Vec<GameVariantInfo> {
+    GameVariant::iter()
+        .map(|variant| GameVariantInfo::from_variant(variant, &*settings))
+        .collect()
 }
