@@ -1,0 +1,52 @@
+{
+  "max_backups": 5,
+  "games": {
+    "DarkDaysAhead": {
+      "name": "Dark Days Ahead",
+      "links": [
+        {
+          "label": "Guide",
+          "href": "https://cdda-guide.nornagon.net/"
+        },
+        {
+          "label": "Discord",
+          "href": "https://discord.gg/jFEc7Yp"
+        },
+        {
+          "label": "Reddit",
+          "href": "https://www.reddit.com/r/cataclysmdda/"
+        }
+      ]
+    },
+    "BrightNights": {
+      "name": "Bright Nights",
+      "links": [
+        {
+          "label": "Guide",
+          "href": "https://next.cbn-guide.pages.dev/"
+        },
+        {
+          "label": "Discord",
+          "href": "https://discord.gg/XW7XhXuZ89"
+        },
+        {
+          "label": "Reddit",
+          "href": "https://www.reddit.com/r/cataclysmbn/"
+        }
+      ]
+    },
+    "TheLastGeneration": {
+      "name": "The Last Generation",
+      "links": [
+        {
+          "label": "Discord",
+          "href": "https://discord.com/invite/zT9sXmZNCK"
+        },
+        {
+          "label": "Wiki",
+          "href": "https://cataclysmtlg.miraheze.org/wiki/Main_Page"
+        }
+      ]
+    }
+  }
+}

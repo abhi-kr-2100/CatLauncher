@@ -1,7 +1,7 @@
+pub mod basic_info;
 pub mod filesystem;
 pub mod settings;
 
-mod basic_info;
 mod fetch_releases;
 mod game_release;
 mod game_tips;
