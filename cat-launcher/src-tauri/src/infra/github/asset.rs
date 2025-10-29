@@ -1,5 +1,7 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
+use downloader::progress::Reporter;
 use downloader::{Download, Downloader};
 use serde::{Deserialize, Serialize};
 
@@ -24,8 +26,9 @@ impl GitHubAsset {
     pub async fn download(
         &self,
         downloader: &mut Downloader,
+        progress: Arc<dyn Reporter + Send + Sync>,
     ) -> Result<PathBuf, AssetDownloadError> {
-        let dl = Download::new(&self.browser_download_url);
+        let dl = Download::new(&self.browser_download_url).progress(progress);
         let results = downloader.async_download(&[dl]).await?;
 
         if let Some(res) = results.into_iter().next() {

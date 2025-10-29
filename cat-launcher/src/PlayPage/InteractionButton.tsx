@@ -8,6 +8,7 @@ import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import { useAppSelector } from "@/store/hooks";
+import { DownloadProgress } from "./DownloadProgress";
 import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
@@ -24,10 +25,8 @@ export default function InteractionButton({
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
-  const { install, installationProgressStatus } = useInstallAndMonitorRelease(
-    variant,
-    selectedReleaseId,
-  );
+  const { install, installationProgressStatus, downloadProgress } =
+    useInstallAndMonitorRelease(variant, selectedReleaseId);
 
   const { installationStatus, installationStatusError } = useInstallationStatus(
     variant,
@@ -54,6 +53,15 @@ export default function InteractionButton({
     // Disable button if any variant is already running.
     isAnyVariantRunning ||
     isStartingGame;
+
+  if (installationProgressStatus === "Downloading") {
+    return (
+      <DownloadProgress
+        downloaded={Number(downloadProgress?.bytes_downloaded ?? 0)}
+        total={Number(downloadProgress?.total_bytes ?? 0)}
+      />
+    );
+  }
 
   const button = (
     <Button

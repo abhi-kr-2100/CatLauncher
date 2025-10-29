@@ -1,5 +1,7 @@
 use std::path::Path;
+use std::sync::Arc;
 
+use downloader::progress::Reporter;
 use reqwest::Client;
 use tokio::fs;
 
@@ -57,6 +59,7 @@ impl GameRelease {
         releases_repository: &dyn ReleasesRepository,
         settings: &Settings,
         on_status_update: F,
+        progress: Arc<dyn Reporter + Send + Sync>,
     ) -> Result<(), ReleaseInstallationError<E>>
     where
         F: Fn(InstallationProgressPayload) -> Fut,
@@ -89,7 +92,7 @@ impl GameRelease {
 
             let mut downloader =
                 create_downloader(client.clone(), &download_dir, settings.parallel_requests)?;
-            asset.download(&mut downloader).await?;
+            asset.download(&mut downloader, progress).await?;
             self.status = GameReleaseStatus::NotInstalled;
         }
 
