@@ -2,3 +2,6 @@
 
 # Generated types
 cat-launcher/src/generated-types/*
+
+# Rust Analyzer files
+target/rust-analyzer/**
