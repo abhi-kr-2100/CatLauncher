@@ -17,6 +17,7 @@ use crate::install_release::installation_progress_payload::{
     InstallationProgressPayload, InstallationProgressStatus,
 };
 use crate::install_release::installation_status::status::GetInstallationStatusError;
+use crate::settings::Settings;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> {
@@ -54,6 +55,7 @@ impl GameRelease {
         data_dir: &Path,
         resources_dir: &Path,
         releases_repository: &dyn ReleasesRepository,
+        settings: &Settings,
         on_status_update: F,
     ) -> Result<(), ReleaseInstallationError<E>>
     where
@@ -85,7 +87,8 @@ impl GameRelease {
             .await
             .map_err(ReleaseInstallationError::Callback)?;
 
-            let mut downloader = create_downloader(client.clone(), &download_dir)?;
+            let mut downloader =
+                create_downloader(client.clone(), &download_dir, settings.parallel_requests)?;
             asset.download(&mut downloader).await?;
             self.status = GameReleaseStatus::NotInstalled;
         }

@@ -1,5 +1,6 @@
 {
   "max_backups": 5,
+  "parallel_requests": 8,
   "games": {
     "DarkDaysAhead": {
       "name": "Dark Days Ahead",
