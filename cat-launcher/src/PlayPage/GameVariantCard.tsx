@@ -38,20 +38,20 @@ export default function GameVariantCard({ variantInfo }: GameVariantProps) {
           </div>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         <TipOfTheDay variant={variantInfo.id} />
         <ReleaseSelector
           variant={variantInfo.id}
           selectedReleaseId={selectedReleaseId}
           setSelectedReleaseId={setSelectedReleaseId}
         />
-        <PlayTime variant={variantInfo.id} releaseId={selectedReleaseId} />
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col gap-4 items-stretch">
         <InteractionButton
           variant={variantInfo.id}
           selectedReleaseId={selectedReleaseId}
         />
+        <PlayTime variant={variantInfo.id} releaseId={selectedReleaseId} />
       </CardFooter>
     </Card>
   );
