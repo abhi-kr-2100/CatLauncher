@@ -83,9 +83,12 @@ importers:
       react-redux:
         specifier: ^9.2.0
         version: 9.2.0(@types/react@19.2.2)(react@19.2.0)(redux@5.0.1)
+      react-router-dom:
+        specifier: ^7.9.6
+        version: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-scan:
         specifier: ^0.4.3
-        version: 0.4.3(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rollup@4.52.5)
+        version: 0.4.3(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react-router-dom@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(rollup@4.52.5)
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1211,6 +1214,10 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
+  cookie@1.1.0:
+    resolution: {integrity: sha512-vXiThu1/rlos7EGu8TuNZQEg2e9TvhH9dmS4T4ZVzB7Ao1agEZ6EG3sn5n+hZRYUgduISd1HpngFzAZiDGm5vQ==}
+    engines: {node: '>=18'}
+
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
@@ -1484,6 +1491,23 @@ packages:
       '@types/react':
         optional: true
 
+  react-router-dom@7.9.6:
+    resolution: {integrity: sha512-2MkC2XSXq6HjGcihnx1s0DBWQETI4mlis4Ux7YTLvP67xnGxCvq+BcCQSO81qQHVUTM1V53tl4iVVaY5sReCOA==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
+  react-router@7.9.6:
+    resolution: {integrity: sha512-Y1tUp8clYRXpfPITyuifmSoE2vncSME18uVLgaqyxh9H35JWpIfzHo+9y3Fzh5odk/jxPW29IgLgzcdwxGqyNA==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react-scan@0.4.3:
     resolution: {integrity: sha512-jhAQuQ1nja6HUYrSpbmNFHqZPsRCXk8Yqu0lHoRIw9eb8N96uTfXCpVyQhTTnJ/nWqnwuvxbpKVG/oWZT8+iTQ==}
     hasBin: true
@@ -1553,6 +1577,9 @@ packages:
   seroval@1.3.2:
     resolution: {integrity: sha512-RbcPH1n5cfwKrru7v7+zrZvjLurgHhGyso3HTyGtRivGWgYjbOmGuivCQaORNELjNONoK35nj28EoWul9sb1zQ==}
     engines: {node: '>=10'}
+
+  set-cookie-parser@2.7.2:
+    resolution: {integrity: sha512-oeM1lpU/UvhTxw+g3cIfxXHyJRc/uidd3yK1P242gzHds0udQBYzs3y8j4gCCW+ZJ7ad0yctld8RYO+bdurlvw==}
 
   shell-quote@1.8.3:
     resolution: {integrity: sha512-ObmnIF4hXNg1BqhnHmgbDETF8dLPCggZWBjkQfhZpbszZnYur5DUljTcCHii5LC3J5E0yeO/1LIMyH+UvHQgyw==}
@@ -2677,6 +2704,8 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
+  cookie@1.1.0: {}
+
   csstype@3.1.3: {}
 
   debug@4.4.3:
@@ -2901,7 +2930,21 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.2
 
-  react-scan@0.4.3(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rollup@4.52.5):
+  react-router-dom@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      react-router: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+
+  react-router@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      cookie: 1.1.0
+      react: 19.2.0
+      set-cookie-parser: 2.7.2
+    optionalDependencies:
+      react-dom: 19.2.0(react@19.2.0)
+
+  react-scan@0.4.3(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react-router-dom@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(rollup@4.52.5):
     dependencies:
       '@babel/core': 7.28.4
       '@babel/generator': 7.28.3
@@ -2923,6 +2966,8 @@ snapshots:
       react-dom: 19.2.0(react@19.2.0)
       tsx: 4.20.6
     optionalDependencies:
+      react-router: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react-router-dom: 7.9.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       unplugin: 2.1.0
     transitivePeerDependencies:
       - '@types/react'
@@ -2986,6 +3031,8 @@ snapshots:
       seroval: 1.3.2
 
   seroval@1.3.2: {}
+
+  set-cookie-parser@2.7.2: {}
 
   shell-quote@1.8.3: {}
 

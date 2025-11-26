@@ -1,34 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import RootLayout from "./layouts/RootLayout";
+import PlayPage from "./pages/PlayPage";
+import AboutPage from "./pages/AboutPage";
 
-import GameVariantCard from "@/PlayPage/GameVariantCard";
-import { fetchGameVariantsInfo } from "@/lib/commands";
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <PlayPage />,
+      },
+      {
+        path: "about",
+        element: <AboutPage />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  const {
-    data: gameVariantsInfo = [],
-    isLoading: gameVariantsLoading,
-    isError: gameVariantsError,
-    error: gameVariantsErrorObj,
-  } = useQuery({
-    queryKey: ["gameVariantsInfo"],
-    queryFn: fetchGameVariantsInfo,
-  });
-
-  if (gameVariantsLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (gameVariantsError) {
-    return <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>;
-  }
-
-  return (
-    <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
-      {gameVariantsInfo.map((variantInfo) => (
-        <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
-      ))}
-    </main>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
