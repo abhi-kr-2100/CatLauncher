@@ -1,11 +1,17 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import PlayPage from "@/pages/PlayPage";
+import NavBar from "@/components/NavBar";
+import { routes } from "@/routes";
+
+
 
 function App() {
   return (
     <BrowserRouter>
+      <NavBar />
       <Routes>
-        <Route path="/" element={<PlayPage />} />
+        {routes.map((route) => (
+          <Route key={route.path} path={route.path} element={route.element} />
+        ))}
       </Routes>
     </BrowserRouter>
   );
