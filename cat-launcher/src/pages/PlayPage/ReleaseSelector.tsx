@@ -54,8 +54,15 @@ export default function ReleaseSelector({
     });
 
   useEffect(() => {
-    triggerFetchReleases(variant);
-  }, [variant, triggerFetchReleases]);
+    // Fetch only if we don't have releases yet. Don't trigger fetch even if
+    // the fetch failed previously as long as we have releases.
+    // Fetching on failed previous fetches can lead to an infinite fetching cycle.
+    const shouldFetch = releases.length === 0;
+
+    if (shouldFetch) {
+      triggerFetchReleases(variant);
+    }
+  }, [variant, triggerFetchReleases, releases.length]);
 
   const {
     data: lastPlayedVersion,
