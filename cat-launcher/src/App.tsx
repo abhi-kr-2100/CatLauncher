@@ -1,33 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-
-import GameVariantCard from "@/PlayPage/GameVariantCard";
-import { fetchGameVariantsInfo } from "@/lib/commands";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import PlayPage from "@/pages/PlayPage";
 
 function App() {
-  const {
-    data: gameVariantsInfo = [],
-    isLoading: gameVariantsLoading,
-    isError: gameVariantsError,
-    error: gameVariantsErrorObj,
-  } = useQuery({
-    queryKey: ["gameVariantsInfo"],
-    queryFn: fetchGameVariantsInfo,
-  });
-
-  if (gameVariantsLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (gameVariantsError) {
-    return <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>;
-  }
-
   return (
-    <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
-      {gameVariantsInfo.map((variantInfo) => (
-        <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
-      ))}
-    </main>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<PlayPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
