@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "cat-launcher",
+        "title": "CatLauncher",
         "maximized": true
       }
     ],
