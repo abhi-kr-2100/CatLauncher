@@ -73,6 +73,14 @@ export async function getTips(variant: GameVariant): Promise<string[]> {
   return response;
 }
 
+export async function updateGameVariantOrder(
+  variants: GameVariant[],
+): Promise<void> {
+  await invoke("update_game_variant_order", {
+    variants,
+  });
+}
+
 export async function getPlayTimeForVariant(
   variant: GameVariant,
 ): Promise<number> {

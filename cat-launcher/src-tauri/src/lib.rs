@@ -23,6 +23,7 @@ use crate::last_played::commands::get_last_played_version;
 use crate::launch_game::commands::launch_game;
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::utils::{autoupdate, manage_repositories, manage_settings};
+use crate::variants::commands::update_game_variant_order;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -45,7 +46,8 @@ pub fn run() {
             get_installation_status,
             get_tips,
             get_play_time_for_variant,
-            get_play_time_for_version
+            get_play_time_for_version,
+            update_game_variant_order
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

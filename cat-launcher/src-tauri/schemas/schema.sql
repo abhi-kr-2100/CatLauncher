@@ -67,3 +67,13 @@ CREATE TABLE IF NOT EXISTS play_time (
 -- This unique index prevents duplicate entries for the same game_variant and version,
 -- and speeds up filtering play time by game_variant and version.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_play_time_game_variant_version ON play_time (game_variant, version);
+
+-- This table stores the order of the game variants in the launcher.
+CREATE TABLE IF NOT EXISTS game_variant_order (
+    game_variant TEXT PRIMARY KEY,
+    sort_order INTEGER NOT NULL,
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This unique index ensures that each game variant has only one sort order.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_game_variant_order_game_variant ON game_variant_order (game_variant);
