@@ -1,66 +1,50 @@
-use std::env::consts::OS;
+use tauri::{AppHandle, Manager};
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
-use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Manager, State};
-
-use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::game_release::game_release::GameReleaseStatus;
-use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
+use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
+use crate::infra::utils::get_os_enum;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
+#[derive(thiserror::Error, Debug, strum::IntoStaticStr)]
 pub enum GetInstallationStatusCommandError {
-    #[error("system directory not found: {0}")]
-    SystemDir(#[from] tauri::Error),
-
-    #[error("failed to obtain release: {0}")]
-    Release(#[from] GetReleaseError),
-
-    #[error("failed to get OS enum: {0}")]
-    Os(#[from] OSNotSupportedError),
+    #[error("failed to get installation status: {0}")]
+    GetStatus(#[from] GetInstallationStatusError),
+    #[error("failed to get app data directory: {0}")]
+    AppDataDir(#[from] tauri::Error),
 }
 
+// Manual implementation of Serialize
 impl serde::Serialize for GetInstallationStatusCommandError {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer,
+        S: serde::Serializer,
     {
-        let mut st = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
+        use serde::ser::SerializeStruct;
+        let mut state = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
+        state.serialize_field("type", Into::<&'static str>::into(self))?;
+        state.serialize_field("message", &self.to_string())?;
+        state.end()
     }
 }
 
-#[command]
+#[tauri::command]
 pub async fn get_installation_status(
     app_handle: AppHandle,
     variant: GameVariant,
-    release_id: &str,
-    releases_repository: State<'_, SqliteReleasesRepository>,
+    version: String,
 ) -> Result<GameReleaseStatus, GetInstallationStatusCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
-    let resource_dir = app_handle.path().resource_dir()?;
-
-    let os = get_os_enum(OS)?;
-
-    let release = get_release_by_id(
-        &variant,
-        release_id,
-        &os,
-        &data_dir,
-        &resource_dir,
-        &*releases_repository,
-    )
-    .await?;
-
-    Ok(release.status)
+    let os = get_os_enum(std::env::consts::OS).unwrap();
+    let release = GameRelease {
+        version,
+        variant,
+        // These fields are not used by get_installation_status, so we can use dummy values.
+        release_type: crate::game_release::game_release::ReleaseType::Experimental,
+        status: GameReleaseStatus::Unknown,
+        created_at: chrono::Utc::now(),
+    };
+    release
+        .get_installation_status(&os, &data_dir)
+        .await
+        .map_err(GetInstallationStatusCommandError::GetStatus)
 }

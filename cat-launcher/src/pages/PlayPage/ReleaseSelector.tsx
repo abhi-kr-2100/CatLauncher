@@ -10,6 +10,7 @@ import {
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
+  getInstallationStatus,
   getLastPlayedVersion,
   triggerFetchReleasesForVariant,
 } from "@/lib/commands";
@@ -19,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   FetchStatus,
   onFetchingReleasesFailed,
+  setReleaseStatus,
   startFetchingReleases,
 } from "@/store/releasesSlice";
 import { useReleaseEvents } from "./hooks";
@@ -71,6 +73,29 @@ export default function ReleaseSelector({
   } = useQuery<string | undefined>({
     queryKey: queryKeys.lastPlayedVersion(variant),
     queryFn: () => getLastPlayedVersion(variant),
+  });
+
+  useQuery({
+    queryKey: ["installationStatus", variant, selectedReleaseId],
+    queryFn: () => {
+      if (!selectedReleaseId) {
+        return;
+      }
+
+      return getInstallationStatus(variant, selectedReleaseId);
+    },
+    enabled: !!selectedReleaseId,
+    onSuccess: (status) => {
+      if (status && selectedReleaseId) {
+        dispatch(
+          setReleaseStatus({
+            variant,
+            version: selectedReleaseId,
+            status,
+          }),
+        );
+      }
+    },
   });
 
   useEffect(() => {

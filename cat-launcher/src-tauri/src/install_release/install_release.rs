@@ -46,6 +46,15 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
 
     #[error("status update callback failed: {0}")]
     Callback(E),
+
+    #[error("unreachable code")]
+    Unreachable,
+
+    #[error("failed to read directory: {0}")]
+    ReadDir(std::io::Error),
+
+    #[error("failed to remove directory: {0}")]
+    RemoveDir(std::io::Error),
 }
 
 impl GameRelease {
@@ -120,6 +129,25 @@ impl GameRelease {
         })
         .await
         .map_err(ReleaseInstallationError::Callback)?;
+
+        let installations_dir = installation_dir
+            .parent()
+            .ok_or(ReleaseInstallationError::Unreachable)?;
+        let mut entries = fs::read_dir(installations_dir)
+            .await
+            .map_err(ReleaseInstallationError::ReadDir)?;
+        while let Some(entry) = entries
+            .next_entry()
+            .await
+            .map_err(ReleaseInstallationError::ReadDir)?
+        {
+            let path = entry.path();
+            if path.is_dir() && path != installation_dir {
+                fs::remove_dir_all(&path)
+                    .await
+                    .map_err(ReleaseInstallationError::RemoveDir)?;
+            }
+        }
 
         Ok(())
     }

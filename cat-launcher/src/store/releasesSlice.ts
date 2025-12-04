@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import type { GameRelease } from "@/generated-types/GameRelease";
+import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 
@@ -32,6 +33,22 @@ export const releasesSlice = createSlice({
   name: "releases",
   initialState,
   reducers: {
+    setReleaseStatus: (
+      state,
+      action: PayloadAction<{
+        variant: GameVariant;
+        version: string;
+        status: GameReleaseStatus;
+      }>,
+    ) => {
+      const { variant, version, status } = action.payload;
+      const release = state.releasesByVariant[variant].find(
+        (r) => r.version === version,
+      );
+      if (release) {
+        release.status = status;
+      }
+    },
     onFetchingReleasesFailed: (
       state,
       action: PayloadAction<{ variant: GameVariant }>,
@@ -70,6 +87,7 @@ export const releasesSlice = createSlice({
 });
 
 export const {
+  setReleaseStatus,
   onFetchingReleasesFailed,
   startFetchingReleases,
   updateReleasesForVariant,

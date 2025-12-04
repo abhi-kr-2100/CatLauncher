@@ -3,7 +3,6 @@ import { Check, Loader2 } from "lucide-react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useAppSelector } from "@/store/hooks";
-import { useInstallationStatus } from "./hooks";
 import { useMemo } from "react";
 
 interface ReleaseLabelProps {
@@ -45,7 +44,11 @@ export default function ReleaseLabel({
     [variant, version],
   );
 
-  const { installationStatus } = useInstallationStatus(variant, version);
+  const release = useAppSelector((state) =>
+    state.releases.releasesByVariant[variant].find(
+      (r) => r.version === version,
+    ),
+  );
   const progressStatus = useAppSelector(
     (state) => state.installationProgress.statusByVariant[variant]?.[version],
   );
@@ -55,7 +58,7 @@ export default function ReleaseLabel({
     statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
   } else if (
     progressStatus === "Success" ||
-    installationStatus === "ReadyToPlay"
+    release?.status === "ReadyToPlay"
   ) {
     statusIcon = <Check className="h-4 w-4 text-green-500" />;
   }
