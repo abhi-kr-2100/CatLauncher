@@ -4,7 +4,7 @@ use std::num::{NonZeroU16, NonZeroUsize};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::basic_info::basic_info::Link;
+use crate::variants::links::Link;
 use crate::constants::{DEFAULT_MAX_BACKUPS, DEFAULT_PARALLEL_REQUESTS};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
