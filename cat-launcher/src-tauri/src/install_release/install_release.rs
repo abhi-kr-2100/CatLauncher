@@ -47,8 +47,8 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
     #[error("status update callback failed: {0}")]
     Callback(E),
 
-    #[error("unreachable code")]
-    Unreachable,
+    #[error("failed to get parent directory of installation directory")]
+    ParentDirectoryNotFound,
 
     #[error("failed to read directory: {0}")]
     ReadDir(std::io::Error),
@@ -132,7 +132,7 @@ impl GameRelease {
 
         let installations_dir = installation_dir
             .parent()
-            .ok_or(ReleaseInstallationError::Unreachable)?;
+            .ok_or(ReleaseInstallationError::ParentDirectoryNotFound)?;
         let mut entries = fs::read_dir(installations_dir)
             .await
             .map_err(ReleaseInstallationError::ReadDir)?;

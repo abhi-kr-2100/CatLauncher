@@ -76,7 +76,7 @@ export default function ReleaseSelector({
   });
 
   useQuery({
-    queryKey: ["installationStatus", variant, selectedReleaseId],
+    queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
     queryFn: () => {
       if (!selectedReleaseId) {
         return;

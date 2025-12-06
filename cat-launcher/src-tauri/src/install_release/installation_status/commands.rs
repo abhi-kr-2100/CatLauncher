@@ -4,6 +4,7 @@ use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 use crate::infra::utils::get_os_enum;
+use serde::ser::SerializeStruct;
 
 #[derive(thiserror::Error, Debug, strum::IntoStaticStr)]
 pub enum GetInstallationStatusCommandError {
@@ -13,13 +14,11 @@ pub enum GetInstallationStatusCommandError {
     AppDataDir(#[from] tauri::Error),
 }
 
-// Manual implementation of Serialize
 impl serde::Serialize for GetInstallationStatusCommandError {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        use serde::ser::SerializeStruct;
         let mut state = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
         state.serialize_field("type", Into::<&'static str>::into(self))?;
         state.serialize_field("message", &self.to_string())?;
