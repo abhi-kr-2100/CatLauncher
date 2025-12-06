@@ -143,6 +143,13 @@ export default function ReleaseSelector({
   const isReleaseFetchingLoading =
     isReleasesTriggerLoading && comboboxItems.length === 0;
 
+  const installationStatusByVersion = useAppSelector(
+    (state) => state.installationProgress.statusByVariant[variant],
+  );
+  const isInstalling = Object.values(installationStatusByVersion ?? {}).some(
+    (status) => status === "Downloading" || status === "Installing",
+  );
+
   const placeholderText = isReleaseFetchingLoading
     ? "Loading..."
     : comboboxItems.length === 0
@@ -164,14 +171,14 @@ export default function ReleaseSelector({
             onChange={setSelectedReleaseId}
             autoselect={autoselect}
             placeholder={placeholderText}
-            disabled={isReleaseFetchingLoading}
+            disabled={isReleaseFetchingLoading || isInstalling}
           />
         </div>
         <Button
           variant="outline"
           size="icon"
           onClick={() => triggerFetchReleases(variant)}
-          disabled={!isReleaseFetchingComplete}
+          disabled={!isReleaseFetchingComplete || isInstalling}
         >
           <RefreshCw
             className={cn(!isReleaseFetchingComplete && "animate-spin")}
