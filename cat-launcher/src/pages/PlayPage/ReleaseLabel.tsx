@@ -1,9 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2 } from "lucide-react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { useAppSelector } from "@/store/hooks";
-import { useInstallationStatus } from "./hooks";
 import { useMemo } from "react";
 
 interface ReleaseLabelProps {
@@ -45,26 +42,10 @@ export default function ReleaseLabel({
     [variant, version],
   );
 
-  const { installationStatus } = useInstallationStatus(variant, version);
-  const progressStatus = useAppSelector(
-    (state) => state.installationProgress.statusByVariant[variant]?.[version],
-  );
-
-  let statusIcon = null;
-  if (progressStatus === "Downloading" || progressStatus === "Installing") {
-    statusIcon = <Loader2 className="h-4 w-4 animate-spin" />;
-  } else if (
-    progressStatus === "Success" ||
-    installationStatus === "ReadyToPlay"
-  ) {
-    statusIcon = <Check className="h-4 w-4 text-green-500" />;
-  }
-
   return (
     <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-2">
-        <span>{shortReleaseName}</span>
-        {statusIcon}
+        {shortReleaseName}
       </div>
       {isLastPlayed && (
         <div className="flex items-center gap-1">
