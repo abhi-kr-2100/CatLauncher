@@ -17,7 +17,13 @@ pub async fn get_tips(
     let data_dir = app_handle.path().app_local_data_dir()?;
     let os = get_os_enum(std::env::consts::OS)?;
 
-    let tips =
-        get_all_tips_for_variant(&variant, &data_dir, &os, &*last_played_repository, &*releases_repository).await?;
+    let tips = get_all_tips_for_variant(
+        &variant,
+        &data_dir,
+        &os,
+        &*last_played_repository,
+        &*releases_repository,
+    )
+    .await?;
     Ok(tips)
 }
