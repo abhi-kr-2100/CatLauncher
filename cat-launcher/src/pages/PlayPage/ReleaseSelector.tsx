@@ -75,7 +75,7 @@ export default function ReleaseSelector({
     queryFn: () => getLastPlayedVersion(variant),
   });
 
-  useQuery({
+  const { data: installationStatus } = useQuery({
     queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
     queryFn: () => {
       if (!selectedReleaseId) {
@@ -85,18 +85,19 @@ export default function ReleaseSelector({
       return getInstallationStatus(variant, selectedReleaseId);
     },
     enabled: !!selectedReleaseId,
-    onSuccess: (status) => {
-      if (status && selectedReleaseId) {
-        dispatch(
-          setReleaseStatus({
-            variant,
-            version: selectedReleaseId,
-            status,
-          }),
-        );
-      }
-    },
   });
+
+  useEffect(() => {
+    if (installationStatus && selectedReleaseId) {
+      dispatch(
+        setReleaseStatus({
+          variant,
+          version: selectedReleaseId,
+          status: installationStatus,
+        }),
+      );
+    }
+  }, [installationStatus, selectedReleaseId, variant, dispatch]);
 
   useEffect(() => {
     if (!lastPlayedVersionError) {

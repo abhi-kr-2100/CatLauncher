@@ -1,10 +1,12 @@
 use tauri::{AppHandle, Manager};
 
+use serde::ser::SerializeStruct;
+use tauri::{AppHandle, Manager};
+
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
+use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
-use crate::infra::utils::get_os_enum;
-use serde::ser::SerializeStruct;
 
 #[derive(thiserror::Error, Debug, strum::IntoStaticStr)]
 pub enum GetInstallationStatusCommandError {
@@ -12,6 +14,8 @@ pub enum GetInstallationStatusCommandError {
     GetStatus(#[from] GetInstallationStatusError),
     #[error("failed to get app data directory: {0}")]
     AppDataDir(#[from] tauri::Error),
+    #[error("failed to get OS: {0}")]
+    GetOS(#[from] OSNotSupportedError),
 }
 
 impl serde::Serialize for GetInstallationStatusCommandError {
@@ -33,7 +37,7 @@ pub async fn get_installation_status(
     version: String,
 ) -> Result<GameReleaseStatus, GetInstallationStatusCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
-    let os = get_os_enum(std::env::consts::OS).unwrap();
+    let os = get_os_enum(std::env::consts::OS)?;
     let release = GameRelease {
         version,
         variant,
