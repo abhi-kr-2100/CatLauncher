@@ -114,6 +114,8 @@ impl GameRelease {
         // Failure to remove file does not mean failure to install
         let _ = fs::remove_file(&download_filepath).await;
 
+        delete_other_installations(&installation_dir).await;
+
         on_status_update(InstallationProgressPayload {
             status: InstallationProgressStatus::Success,
             release_id: self.version.clone(),
@@ -122,5 +124,39 @@ impl GameRelease {
         .map_err(ReleaseInstallationError::Callback)?;
 
         Ok(())
+    }
+}
+
+async fn delete_other_installations(installation_dir: &Path) {
+    let Some(parent) = installation_dir.parent() else {
+        return;
+    };
+
+    let Ok(mut entries) = fs::read_dir(parent).await else {
+        return;
+    };
+
+    let Ok(kept_path) = fs::canonicalize(installation_dir).await else {
+        return;
+    };
+
+    while let Ok(Some(entry)) = entries.next_entry().await {
+        let path = entry.path();
+        
+        let Ok(metadata) = fs::metadata(&path).await else {
+            continue;
+        };
+
+        if !metadata.is_dir() {
+            continue;
+        }
+
+        let Ok(canonical_path) = fs::canonicalize(&path).await else {
+            continue;
+        };
+
+        if canonical_path != kept_path {
+            let _ = fs::remove_dir_all(&path).await;
+        }
     }
 }
