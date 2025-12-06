@@ -15,6 +15,7 @@ use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPla
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
+use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum SettingsError {
@@ -94,7 +95,8 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     app.manage(SqliteReleasesRepository::new(pool.clone()));
     app.manage(SqliteBackupRepository::new(pool.clone()));
     app.manage(SqliteLastPlayedVersionRepository::new(pool.clone()));
-    app.manage(SqlitePlayTimeRepository::new(pool));
+    app.manage(SqlitePlayTimeRepository::new(pool.clone()));
+    app.manage(SqliteGameVariantOrderRepository::new(pool));
 
     Ok(())
 }
