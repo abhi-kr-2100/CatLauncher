@@ -15,12 +15,12 @@ interface TipOfTheDayContentProps {
 
 function TipOfTheDayContent({ tip }: TipOfTheDayContentProps) {
   return (
-    <Alert className="flex flex-col">
+    <Alert className="flex flex-col bg-secondary text-secondary-foreground">
       <AlertTitle className="flex items-center gap-2">
         <Lightbulb />
         Tip of the Day
       </AlertTitle>
-      <AlertDescription className="h-20 overflow-y-auto flex-grow items-center">
+      <AlertDescription className="h-20 overflow-y-auto flex-grow items-center text-secondary-foreground">
         {tip}
       </AlertDescription>
     </Alert>
