@@ -5,6 +5,7 @@ use std::time::Duration;
 use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Listener, Manager};
 
+use crate::backups::migration::migrate_older_automatic_backups;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
@@ -99,4 +100,15 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     app.manage(SqliteGameVariantOrderRepository::new(pool));
 
     Ok(())
+}
+
+pub fn migrate_backups(app: &App) {
+    let handle = app.handle().clone();
+    tauri::async_runtime::spawn(async move {
+        let state: tauri::State<SqliteBackupRepository> = handle.state();
+        let data_dir = handle.path().app_local_data_dir().unwrap();
+        if let Err(e) = migrate_older_automatic_backups(&data_dir, state.inner()).await {
+            eprintln!("Failed to migrate backups: {}", e);
+        }
+    });
 }

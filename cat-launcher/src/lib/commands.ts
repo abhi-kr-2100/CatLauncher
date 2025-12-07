@@ -1,6 +1,7 @@
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
+import type { BackupEntry } from "@/generated-types/BackupEntry";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -65,8 +66,30 @@ export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
   return response;
 }
 
+export async function deleteBackupById(id: number): Promise<void> {
+  await invoke("delete_backup_by_id", {
+    id,
+  });
+}
+
+export async function restoreBackupById(id: number): Promise<void> {
+  await invoke("restore_backup_by_id", {
+    id,
+  });
+}
+
 export async function getTips(variant: GameVariant): Promise<string[]> {
   const response = await invoke<string[]>("get_tips", {
+    variant,
+  });
+
+  return response;
+}
+
+export async function listBackupsForVariant(
+  variant: GameVariant
+): Promise<BackupEntry[]> {
+  const response = await invoke<BackupEntry[]>("list_backups_for_variant", {
     variant,
   });
 

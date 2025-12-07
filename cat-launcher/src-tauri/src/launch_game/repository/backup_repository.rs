@@ -1,8 +1,11 @@
 use async_trait::async_trait;
+use serde::Serialize;
+use ts_rs::TS;
 
 use crate::variants::GameVariant;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
 pub struct BackupEntry {
     pub id: i64,
     pub game_variant: GameVariant,
@@ -20,6 +23,9 @@ pub enum BackupRepositoryError {
 
     #[error("failed to delete backup entry: {0}")]
     Delete(Box<dyn std::error::Error + Send + Sync>),
+
+    #[error("backup entry with id {0} not found")]
+    NotFound(i64),
 }
 
 #[async_trait]
@@ -35,6 +41,8 @@ pub trait BackupRepository: Send + Sync {
         &self,
         game_variant: &GameVariant,
     ) -> Result<Vec<BackupEntry>, BackupRepositoryError>;
+
+    async fn get_backup_entry(&self, id: i64) -> Result<BackupEntry, BackupRepositoryError>;
 
     async fn delete_backup_entry(&self, id: i64) -> Result<(), BackupRepositoryError>;
 }

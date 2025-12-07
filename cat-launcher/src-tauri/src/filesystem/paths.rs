@@ -56,6 +56,21 @@ pub async fn get_or_create_asset_download_dir(
 }
 
 #[derive(thiserror::Error, Debug)]
+pub enum GetAutomaticBackupsDirError {
+    #[error("failed to create backup directory: {0}")]
+    DirFailed(#[from] io::Error),
+}
+
+pub async fn get_or_create_automatic_backups_dir(
+    data_dir: &Path,
+) -> Result<PathBuf, GetAutomaticBackupsDirError> {
+    let dir = data_dir.join("Backups").join("Automatic");
+    create_dir_all(&dir).await?;
+
+    Ok(dir)
+}
+
+#[derive(thiserror::Error, Debug)]
 pub enum AssetExtractionDirError {
     #[error("failed to create directory: {0}")]
     CreateDirectory(#[from] io::Error),
@@ -335,25 +350,19 @@ pub async fn get_or_create_user_game_data_dir(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum GetUserDataBackupArchivePathError {
+pub enum GetAutomaticBackupArchivePathError {
     #[error("failed to create backup directory: {0}")]
-    DirFailed(#[from] io::Error),
-
-    #[error("failed to create user game data directory: {0}")]
-    UserDataDirFailed(#[from] GetUserGameDataDirError),
+    DirFailed(#[from] GetAutomaticBackupsDirError),
 }
 
-pub async fn get_or_create_user_data_backup_archive_filepath(
+pub async fn get_or_create_automatic_backup_archive_filepath(
     variant: &GameVariant,
     id: i64,
     version: &str,
     timestamp: u64,
     data_dir: &Path,
-) -> Result<PathBuf, GetUserDataBackupArchivePathError> {
-    let backup_dir = get_or_create_user_game_data_dir(variant, data_dir)
-        .await?
-        .join("backups");
-    tokio::fs::create_dir_all(&backup_dir).await?;
+) -> Result<PathBuf, GetAutomaticBackupArchivePathError> {
+    let backup_dir = get_or_create_automatic_backups_dir(data_dir).await?;
 
     Ok(backup_dir.join(format!(
         "{}_{}_{}_{}.zip",
