@@ -1,10 +1,9 @@
-use serde::ser::SerializeStruct;
-use serde::Serializer;
 use strum::IntoStaticStr;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::infra::command_error::SerializableError;
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::variants::GameVariant;
 
@@ -19,6 +18,15 @@ pub enum FetchReleasesCommandError {
 
 #[command]
 pub async fn fetch_releases_for_variant(
+    app_handle: AppHandle,
+    variant: GameVariant,
+    releases_repository: State<'_, SqliteReleasesRepository>,
+) -> Result<(), SerializableError> {
+    let result = fetch_releases_for_variant_inner(app_handle, variant, releases_repository).await;
+    result.map_err(SerializableError::from)
+}
+
+pub async fn fetch_releases_for_variant_inner(
     app_handle: AppHandle,
     variant: GameVariant,
     releases_repository: State<'_, SqliteReleasesRepository>,
@@ -42,19 +50,8 @@ pub async fn fetch_releases_for_variant(
     Ok(())
 }
 
-impl serde::Serialize for FetchReleasesCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("FetchReleasesCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
+impl From<FetchReleasesCommandError> for SerializableError {
+    fn from(error: FetchReleasesCommandError) -> Self {
+        SerializableError::new(error)
     }
 }

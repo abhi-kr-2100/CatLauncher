@@ -1,13 +1,12 @@
 use std::env::consts::OS;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
 use strum::IntoStaticStr;
 use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::infra::command_error::SerializableError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
@@ -33,6 +32,30 @@ pub enum LaunchGameCommandError {
 
 #[command]
 pub async fn launch_game(
+    app_handle: AppHandle,
+    variant: GameVariant,
+    release_id: &str,
+    settings: State<'_, Settings>,
+    releases_repository: State<'_, SqliteReleasesRepository>,
+    last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
+    backup_repository: State<'_, SqliteBackupRepository>,
+    play_time_repository: State<'_, SqlitePlayTimeRepository>,
+) -> Result<(), SerializableError> {
+    let result = launch_game_inner(
+        app_handle,
+        variant,
+        release_id,
+        settings,
+        releases_repository,
+        last_played_repository,
+        backup_repository,
+        play_time_repository,
+    )
+    .await;
+    result.map_err(SerializableError::from)
+}
+
+pub async fn launch_game_inner(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
@@ -77,19 +100,8 @@ pub async fn launch_game(
     Ok(())
 }
 
-impl serde::Serialize for LaunchGameCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("LaunchGameCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
+impl From<LaunchGameCommandError> for SerializableError {
+    fn from(error: LaunchGameCommandError) -> Self {
+        SerializableError::new(error)
     }
 }

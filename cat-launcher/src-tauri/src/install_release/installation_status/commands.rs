@@ -1,13 +1,12 @@
 use std::env::consts::OS;
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
 use strum::IntoStaticStr;
 use tauri::{command, AppHandle, Manager, State};
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
+use crate::infra::command_error::SerializableError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::variants::GameVariant;
 
@@ -23,25 +22,19 @@ pub enum GetInstallationStatusCommandError {
     Os(#[from] OSNotSupportedError),
 }
 
-impl serde::Serialize for GetInstallationStatusCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
-    }
-}
-
 #[command]
 pub async fn get_installation_status(
+    app_handle: AppHandle,
+    variant: GameVariant,
+    release_id: &str,
+    releases_repository: State<'_, SqliteReleasesRepository>,
+) -> Result<GameReleaseStatus, SerializableError> {
+    let result =
+        get_installation_status_inner(app_handle, variant, release_id, releases_repository).await;
+    result.map_err(SerializableError::from)
+}
+
+pub async fn get_installation_status_inner(
     app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
@@ -63,4 +56,10 @@ pub async fn get_installation_status(
     .await?;
 
     Ok(release.status)
+}
+
+impl From<GetInstallationStatusCommandError> for SerializableError {
+    fn from(error: GetInstallationStatusCommandError) -> Self {
+        SerializableError::new(error)
+    }
 }
