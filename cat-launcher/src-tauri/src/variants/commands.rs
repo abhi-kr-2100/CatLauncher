@@ -14,19 +14,26 @@ pub enum UpdateGameVariantOrderCommandError {
     Update(#[from] UpdateGameVariantOrderError),
 }
 
-#[command(rename = "update_game_variant_order")]
-pub async fn update_game_variant_order_cmd(
+#[command]
+pub async fn update_game_variant_order(
     variants: Vec<GameVariant>,
     game_variant_order_repository: State<'_, SqliteGameVariantOrderRepository>,
 ) -> Result<(), SerializableError> {
-    let result = update_game_variant_order::update_game_variant_order(
+    let result =
+        update_game_variant_order_inner(variants, game_variant_order_repository).await;
+    result.map_err(SerializableError::from)
+}
+
+pub async fn update_game_variant_order_inner(
+    variants: Vec<GameVariant>,
+    game_variant_order_repository: State<'_, SqliteGameVariantOrderRepository>,
+) -> Result<(), UpdateGameVariantOrderCommandError> {
+    update_game_variant_order::update_game_variant_order(
         &variants,
         &*game_variant_order_repository,
     )
-    .await;
-    result
-        .map_err(UpdateGameVariantOrderCommandError::from)
-        .map_err(SerializableError::from)
+    .await?;
+    Ok(())
 }
 
 impl From<UpdateGameVariantOrderCommandError> for SerializableError {
@@ -46,12 +53,18 @@ pub async fn get_game_variants_info(
     settings: State<'_, Settings>,
     game_variant_order_repository: State<'_, SqliteGameVariantOrderRepository>,
 ) -> Result<Vec<GameVariantInfo>, SerializableError> {
-    let result =
+    let result = get_game_variants_info_inner(settings, game_variant_order_repository).await;
+    result.map_err(SerializableError::from)
+}
+
+pub async fn get_game_variants_info_inner(
+    settings: State<'_, Settings>,
+    game_variant_order_repository: State<'_, SqliteGameVariantOrderRepository>,
+) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoCommandError> {
+    let res =
         get_game_variants_info::get_game_variants_info(&settings, &*game_variant_order_repository)
-            .await;
-    result
-        .map_err(GetGameVariantsInfoCommandError::from)
-        .map_err(SerializableError::from)
+            .await?;
+    Ok(res)
 }
 
 impl From<GetGameVariantsInfoCommandError> for SerializableError {
