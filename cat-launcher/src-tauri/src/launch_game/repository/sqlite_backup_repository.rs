@@ -79,6 +79,38 @@ impl BackupRepository for SqliteBackupRepository {
         .map_err(|e| BackupRepositoryError::Get(Box::new(e)))?
     }
 
+    async fn get_backup_entry(&self, id: i64) -> Result<BackupEntry, BackupRepositoryError> {
+        let pool = self.pool.clone();
+
+        task::spawn_blocking(move || {
+            let conn = pool.get().map_err(|e| BackupRepositoryError::Get(Box::new(e)))?;
+            let mut stmt = conn.prepare(
+                "SELECT id, game_variant, release_version, timestamp FROM backups WHERE id = ?1",
+            ).map_err(|e| BackupRepositoryError::Get(Box::new(e)))?;
+            let backup = stmt
+                .query_row(rusqlite::params![id], |row| {
+                    let id = row.get(0)?;
+                    let game_variant_str: String = row.get(1)?;
+                    let game_variant = GameVariant::from_str(&game_variant_str)
+                        .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    Ok(BackupEntry {
+                        id,
+                        game_variant,
+                        release_version: row.get(2)?,
+                        timestamp: row.get(3)?,
+                    })
+                });
+
+            match backup {
+                Ok(backup) => Ok(backup),
+                Err(rusqlite::Error::QueryReturnedNoRows) => Err(BackupRepositoryError::NotFound(id)),
+                Err(e) => Err(BackupRepositoryError::Get(Box::new(e))),
+            }
+        })
+        .await
+        .map_err(|e| BackupRepositoryError::Get(Box::new(e)))?
+    }
+
     async fn delete_backup_entry(&self, id: i64) -> Result<(), BackupRepositoryError> {
         let pool = self.pool.clone();
 

@@ -12,9 +12,9 @@ use ts_rs::TS;
 
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
-    get_game_executable_filepath, get_or_create_user_data_backup_archive_filepath,
+    get_game_executable_filepath, get_or_create_automatic_backup_archive_filepath,
     get_or_create_user_game_data_dir, AssetDownloadDirError, AssetExtractionDirError,
-    GetExecutablePathError, GetUserDataBackupArchivePathError, GetUserGameDataDirError,
+    GetAutomaticBackupArchivePathError, GetExecutablePathError, GetUserGameDataDirError,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
@@ -69,7 +69,7 @@ pub enum LaunchGameError {
     Subtasks(#[from] JoinError),
 
     #[error("failed to get backup archive path: {0}")]
-    BackupArchivePath(#[from] GetUserDataBackupArchivePathError),
+    BackupArchivePath(#[from] GetAutomaticBackupArchivePathError),
 
     #[error("failed to remove backup file: {0}")]
     RemoveBackupFile(io::Error),
@@ -218,7 +218,7 @@ async fn cleanup_old_backups(
         let variant_clone = variant.clone();
         let backup_repo_clone = backup_repository.clone();
         set.spawn(async move {
-            let path_res = get_or_create_user_data_backup_archive_filepath(
+            let path_res = get_or_create_automatic_backup_archive_filepath(
                 &variant_clone,
                 backup.id,
                 &backup.release_version,
