@@ -18,4 +18,6 @@ export const queryKeys = {
     ["play_time_for_version", variant, releaseId] as const,
 
   gameVariantsInfo: () => ["gameVariantsInfo"] as const,
+
+  backups: (variant: GameVariant) => ["backups", variant] as const,
 };
