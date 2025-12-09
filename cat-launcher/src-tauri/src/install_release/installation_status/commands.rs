@@ -1,9 +1,9 @@
 use std::env::consts::OS;
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
 use strum::IntoStaticStr;
 use tauri::{command, AppHandle, Manager, State};
+
+use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameReleaseStatus;
@@ -11,7 +11,7 @@ use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
+#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
 pub enum GetInstallationStatusCommandError {
     #[error("system directory not found: {0}")]
     SystemDir(#[from] tauri::Error),
@@ -21,23 +21,6 @@ pub enum GetInstallationStatusCommandError {
 
     #[error("failed to get OS enum: {0}")]
     Os(#[from] OSNotSupportedError),
-}
-
-impl serde::Serialize for GetInstallationStatusCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("GetInstallationStatusCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
-    }
 }
 
 #[command]
