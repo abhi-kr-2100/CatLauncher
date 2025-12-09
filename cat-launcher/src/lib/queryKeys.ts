@@ -22,4 +22,6 @@ export const queryKeys = {
   userId: () => ["userId"] as const,
 
   backups: (variant: GameVariant) => ["backups", variant] as const,
+
+  manualBackups: (variant: GameVariant) => ["manual-backups", variant] as const,
 };

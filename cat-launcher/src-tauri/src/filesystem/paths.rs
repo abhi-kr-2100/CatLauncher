@@ -278,32 +278,6 @@ pub async fn get_game_save_and_config_dirs(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum GetBackupArchivePathError {
-    #[error("failed to create backup directory: {0}")]
-    DirFailed(#[from] io::Error),
-
-    #[error("failed to get asset extraction dir: {0}")]
-    AssetExtractionDir(#[from] AssetExtractionDirError),
-
-    #[error("failed to get game executable dir: {0}")]
-    GameExecutableDir(#[from] GetGameExecutableDirError),
-}
-
-pub async fn get_or_create_backup_archive_filepath(
-    variant: &GameVariant,
-    release_version: &str,
-    data_dir: &Path,
-    timestamp: u64,
-    os: &OS,
-) -> Result<PathBuf, GetBackupArchivePathError> {
-    let executable_dir = get_game_executable_dir(variant, release_version, data_dir, os).await?;
-    let backup_dir = executable_dir.join("backups");
-    tokio::fs::create_dir_all(&backup_dir).await?;
-
-    Ok(backup_dir.join(format!("{}.zip", timestamp)))
-}
-
-#[derive(thiserror::Error, Debug)]
 pub enum GetTipFilePathsError {
     #[error("failed to get game executable dir: {0}")]
     GetGameExecutableDir(#[from] GetGameExecutableDirError),
@@ -350,6 +324,21 @@ pub async fn get_or_create_user_game_data_dir(
 }
 
 #[derive(thiserror::Error, Debug)]
+pub enum GetManualBackupsDirError {
+    #[error("failed to create backup directory: {0}")]
+    DirFailed(#[from] io::Error),
+}
+
+pub async fn get_or_create_manual_backups_dir(
+    data_dir: &Path,
+) -> Result<PathBuf, GetManualBackupsDirError> {
+    let dir = data_dir.join("Backups").join("Manual");
+    create_dir_all(&dir).await?;
+
+    Ok(dir)
+}
+
+#[derive(thiserror::Error, Debug)]
 pub enum GetAutomaticBackupArchivePathError {
     #[error("failed to create backup directory: {0}")]
     DirFailed(#[from] GetAutomaticBackupsDirError),
@@ -370,5 +359,25 @@ pub async fn get_or_create_automatic_backup_archive_filepath(
         variant.id(),
         get_safe_filename(version),
         timestamp
+    )))
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetManualBackupArchivePathError {
+    #[error("failed to create backup directory: {0}")]
+    DirFailed(#[from] GetManualBackupsDirError),
+}
+
+pub async fn get_or_create_manual_backup_archive_filepath(
+    id: i64,
+    name: &str,
+    data_dir: &Path,
+) -> Result<PathBuf, GetManualBackupArchivePathError> {
+    let backup_dir = get_or_create_manual_backups_dir(data_dir).await?;
+
+    Ok(backup_dir.join(format!(
+        "{}_{}.zip",
+        id,
+        get_safe_filename(name)
     )))
 }

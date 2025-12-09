@@ -2,6 +2,7 @@ import { invoke, Channel } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
+import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -84,6 +85,40 @@ export async function getTips(variant: GameVariant): Promise<string[]> {
   });
 
   return response;
+}
+
+export async function listManualBackupsForVariant(
+  variant: GameVariant
+): Promise<ManualBackupEntry[]> {
+  const response = await invoke<ManualBackupEntry[]>("list_manual_backups_for_variant", {
+    variant,
+  });
+
+  return response;
+}
+
+export async function createManualBackupForVariant(
+  variant: GameVariant,
+  name: string,
+  notes?: string
+): Promise<void> {
+  await invoke("create_manual_backup_for_variant", {
+    variant,
+    name,
+    notes,
+  });
+}
+
+export async function deleteManualBackupById(id: number): Promise<void> {
+  await invoke("delete_manual_backup_by_id", {
+    id,
+  });
+}
+
+export async function restoreManualBackupById(id: number): Promise<void> {
+  await invoke("restore_manual_backup_by_id", {
+    id,
+  });
 }
 
 export async function listBackupsForVariant(
