@@ -87,7 +87,7 @@ export async function getTips(variant: GameVariant): Promise<string[]> {
 }
 
 export async function listBackupsForVariant(
-  variant: GameVariant
+  variant: GameVariant,
 ): Promise<BackupEntry[]> {
   const response = await invoke<BackupEntry[]>("list_backups_for_variant", {
     variant,
@@ -175,5 +175,10 @@ export async function getInstallationStatus(
     releaseId,
   });
 
+  return response;
+}
+
+export async function getUserId(): Promise<string> {
+  const response = await invoke<string>("get_user_id");
   return response;
 }
