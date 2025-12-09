@@ -81,3 +81,16 @@ CREATE TABLE IF NOT EXISTS users (
     _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
     id TEXT NOT NULL UNIQUE
 );
+
+-- This table stores metadata for each manual backup created for a game variant.
+CREATE TABLE IF NOT EXISTS manual_backups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    game_variant TEXT NOT NULL,
+    notes TEXT,
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This composite index speeds up queries that filter by game_variant and order by timestamp.
+CREATE INDEX IF NOT EXISTS idx_manual_backups_game_variant_timestamp ON manual_backups (game_variant, timestamp);
