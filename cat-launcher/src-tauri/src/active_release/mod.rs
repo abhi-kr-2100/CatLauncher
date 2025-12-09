@@ -1,3 +1,3 @@
 pub mod commands;
-pub mod last_played;
+pub mod active_release;
 pub mod repository;

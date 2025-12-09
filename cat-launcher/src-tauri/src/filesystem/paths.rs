@@ -93,24 +93,6 @@ pub async fn get_or_create_asset_installation_dir(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum LastPlayedFileError {
-    #[error("failed to create directory: {0}")]
-    CreateDir(#[from] std::io::Error),
-}
-
-pub async fn get_last_played_filepath(
-    variant: &GameVariant,
-    data_dir: &Path,
-) -> Result<PathBuf, LastPlayedFileError> {
-    let directory = data_dir.join("LastPlayed").join(variant.id());
-    create_dir_all(&directory).await?;
-
-    let file_path = directory.join("last_played_versions.json");
-
-    Ok(file_path)
-}
-
-#[derive(thiserror::Error, Debug)]
 pub enum GetGameExecutableDirError {
     #[error("game directory not found")]
     GameDirectory,
@@ -375,9 +357,5 @@ pub async fn get_or_create_manual_backup_archive_filepath(
 ) -> Result<PathBuf, GetManualBackupArchivePathError> {
     let backup_dir = get_or_create_manual_backups_dir(data_dir).await?;
 
-    Ok(backup_dir.join(format!(
-        "{}_{}.zip",
-        id,
-        get_safe_filename(name)
-    )))
+    Ok(backup_dir.join(format!("{}_{}.zip", id, get_safe_filename(name))))
 }

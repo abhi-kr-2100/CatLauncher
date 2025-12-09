@@ -3,13 +3,14 @@ use std::path::Path;
 use serde::Deserialize;
 use thiserror::Error;
 
+use crate::active_release::active_release::ActiveReleaseError;
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::{ReleasesRepository, ReleasesRepositoryError};
 use crate::filesystem::paths::{get_tip_file_paths, GetTipFilePathsError};
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
+use crate::game_release::utils::gh_release_to_game_release;
 use crate::infra::utils::OS;
 use crate::install_release::installation_status::status::GetInstallationStatusError;
-use crate::last_played::last_played::LastPlayedError;
-use crate::last_played::repository::LastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -19,8 +20,8 @@ pub struct Tip {
 
 #[derive(Debug, Error)]
 pub enum GetAllTipsForVariantError {
-    #[error("Failed to get last played version: {0}")]
-    LastPlayed(#[from] LastPlayedError),
+    #[error("Failed to get active release: {0}")]
+    ActiveRelease(#[from] ActiveReleaseError),
 
     #[error("Failed to get tip file paths: {0}")]
     GetTipFilePaths(#[from] GetTipFilePathsError),
@@ -64,30 +65,23 @@ pub async fn get_all_tips_for_variant(
     variant: &GameVariant,
     data_dir: &Path,
     os: &OS,
-    last_played_repository: &dyn LastPlayedVersionRepository,
+    active_release_repository: &dyn ActiveReleaseRepository,
     releases_repository: &dyn ReleasesRepository,
 ) -> Result<Vec<String>, GetAllTipsForVariantError> {
-    if let Some(last_played_version) = variant
-        .get_last_played_version(last_played_repository)
+    if let Some(active_release) = variant
+        .get_active_release(active_release_repository)
         .await?
     {
-        let tips = get_tips_from_version(variant, &last_played_version, data_dir, os).await?;
+        let tips = get_tips_from_version(variant, &active_release, data_dir, os).await?;
         return Ok(tips);
     };
 
     let gh_releases = releases_repository.get_cached_releases(variant).await?;
 
-    let releases = gh_releases.iter().map(|r| {
-        let release_type = variant.determine_release_type(&r.tag_name, r.prerelease);
-
-        GameRelease {
-            variant: *variant,
-            release_type,
-            version: r.tag_name.clone(),
-            created_at: r.created_at,
-            status: GameReleaseStatus::Unknown,
-        }
-    });
+    let releases: Vec<GameRelease> = gh_releases
+        .iter()
+        .map(|r| gh_release_to_game_release(r, variant))
+        .collect();
 
     for release in releases {
         if release.get_installation_status(os, data_dir).await? == GameReleaseStatus::ReadyToPlay {

@@ -161,10 +161,10 @@ export async function getPlayTimeForVersion(
   return response;
 }
 
-export async function getLastPlayedVersion(
+export async function getActiveRelease(
   variant: GameVariant,
 ): Promise<string> {
-  const response = await invoke<string | null>("get_last_played_version", {
+  const response = await invoke<string | null>("get_active_release", {
     variant,
   });
 

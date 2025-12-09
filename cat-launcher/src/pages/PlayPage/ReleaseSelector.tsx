@@ -10,7 +10,7 @@ import {
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
-  getLastPlayedVersion,
+  getActiveRelease,
   triggerFetchReleasesForVariant,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
@@ -65,25 +65,25 @@ export default function ReleaseSelector({
   }, [variant, triggerFetchReleases, releases.length]);
 
   const {
-    data: lastPlayedVersion,
-    isLoading: isLastPlayedVersionLoading,
-    error: lastPlayedVersionError,
+    data: activeRelease,
+    isLoading: isActiveReleaseLoading,
+    error: activeReleaseError,
   } = useQuery<string | undefined>({
-    queryKey: queryKeys.lastPlayedVersion(variant),
-    queryFn: () => getLastPlayedVersion(variant),
+    queryKey: queryKeys.activeRelease(variant),
+    queryFn: () => getActiveRelease(variant),
   });
 
   useEffect(() => {
-    if (!lastPlayedVersionError) {
+    if (!activeReleaseError) {
       return;
     }
 
     toastCL(
       "warning",
-      `Failed to get last played version of ${variant}.`,
-      lastPlayedVersionError,
+      `Failed to get active release of ${variant}.`,
+      activeReleaseError,
     );
-  }, [lastPlayedVersionError, variant]);
+  }, [activeReleaseError, variant]);
 
   const [appliedFilter, setAppliedFilter] = useState<FilterFn>(
     () => (_r: GameRelease) => true,
@@ -92,7 +92,7 @@ export default function ReleaseSelector({
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
     return (
       releases.filter(appliedFilter).map((r) => {
-        const isLastPlayed = r.version === lastPlayedVersion;
+        const isActive = r.version === activeRelease;
 
         return {
           value: r.version,
@@ -100,13 +100,13 @@ export default function ReleaseSelector({
             <ReleaseLabel
               variant={variant}
               version={r.version}
-              isLastPlayed={isLastPlayed}
+              isActive={isActive}
             />
           ),
         };
       }) ?? []
     );
-  }, [releases, lastPlayedVersion, variant, appliedFilter]);
+  }, [releases, activeRelease, variant, appliedFilter]);
 
   useEffect(() => {
     // Selected release may become unavailable after filtering
@@ -120,17 +120,17 @@ export default function ReleaseSelector({
 
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
-      if (isLastPlayedVersionLoading) {
+      if (isActiveReleaseLoading) {
         return;
       }
 
-      if (lastPlayedVersionError || lastPlayedVersion === "") {
+      if (activeReleaseError || activeRelease === "") {
         return items[0];
       }
 
-      return items.find((i) => i.value === lastPlayedVersion) ?? items[0];
+      return items.find((i) => i.value === activeRelease) ?? items[0];
     },
-    [lastPlayedVersion, isLastPlayedVersionLoading, lastPlayedVersionError],
+    [activeRelease, isActiveReleaseLoading, activeReleaseError],
   );
 
   // Consider isReleaseFetchingComplete even if it completes due to an error
