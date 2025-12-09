@@ -447,6 +447,7 @@ name = "cat-launcher"
 version = "0.7.0"
 dependencies = [
  "async-trait",
+ "cat-macros",
  "chrono",
  "dmg",
  "downloader",
@@ -472,6 +473,15 @@ dependencies = [
  "unrar",
  "uuid",
  "zip 6.0.0",
+]
+
+[[package]]
+name = "cat-macros"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serde",
+ "syn 2.0.108",
 ]
 
 [[package]]

@@ -1,12 +1,13 @@
-use serde::{ser::SerializeStruct, Serializer};
 use strum::IntoStaticStr;
 use tauri::{command, State};
+
+use cat_macros::CommandErrorSerialize;
 
 use crate::last_played::last_played::LastPlayedError;
 use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
+#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
 pub enum LastPlayedCommandError {
     #[error("failed to get last played version: {0}")]
     GetLastPlayedVersion(#[from] LastPlayedError),
@@ -23,21 +24,4 @@ pub async fn get_last_played_version(
     let last_played_version = variant.get_last_played_version(&*repository).await?;
 
     Ok(last_played_version)
-}
-
-impl serde::Serialize for LastPlayedCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("LastPlayedCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
-    }
 }

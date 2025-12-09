@@ -23,3 +23,17 @@ When using `useMutation`, pass arguments to the mutation function, instead of re
 ### `mod.rs` files
 
 `mod.rs` files should only contain module declarations. They should not contain any code. Code should be in other files.
+
+### Import Order Guidelines
+
+**Rust:**
+1. Standard library imports (`std::...`).
+2. Third‑party crates.
+3. Project‑specific crates outside the core (e.g., `cat-macros`).
+4. Internal modules of `cat-launcher`.
+
+**JavaScript/TypeScript:**
+1. Third‑party libraries.
+2. Project source files.
+
+These conventions help keep imports tidy and consistent across the codebase.
