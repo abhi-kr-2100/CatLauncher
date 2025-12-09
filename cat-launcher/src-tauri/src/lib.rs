@@ -10,6 +10,7 @@ mod infra;
 mod install_release;
 mod last_played;
 mod launch_game;
+mod manual_backups;
 mod play_time;
 mod users;
 mod utils;
@@ -24,6 +25,10 @@ use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
 use crate::last_played::commands::get_last_played_version;
 use crate::launch_game::commands::launch_game;
+use crate::manual_backups::commands::{
+    create_manual_backup_for_variant, delete_manual_backup_by_id, list_manual_backups_for_variant,
+    restore_manual_backup_by_id,
+};
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::users::commands::get_user_id;
 use crate::utils::{
@@ -62,7 +67,11 @@ pub fn run() {
             list_backups_for_variant,
             delete_backup_by_id,
             restore_backup_by_id,
-            get_user_id
+            list_manual_backups_for_variant,
+            create_manual_backup_for_variant,
+            delete_manual_backup_by_id,
+            restore_manual_backup_by_id,
+            get_user_id,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
