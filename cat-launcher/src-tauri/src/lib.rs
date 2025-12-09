@@ -11,6 +11,7 @@ mod install_release;
 mod last_played;
 mod launch_game;
 mod play_time;
+mod users;
 mod utils;
 mod variants;
 
@@ -24,7 +25,10 @@ use crate::install_release::installation_status::commands::get_installation_stat
 use crate::last_played::commands::get_last_played_version;
 use crate::launch_game::commands::launch_game;
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
-use crate::utils::{autoupdate, manage_repositories, manage_settings, migrate_backups};
+use crate::users::commands::get_user_id;
+use crate::utils::{
+    autoupdate, manage_posthog, manage_repositories, manage_settings, migrate_backups,
+};
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
 
@@ -36,7 +40,8 @@ pub fn run() {
         .setup(|app| {
             manage_settings(app)?;
             manage_repositories(app)?;
-            
+            manage_posthog(app);
+
             migrate_backups(app);
 
             autoupdate(app);
@@ -56,7 +61,8 @@ pub fn run() {
             update_game_variant_order,
             list_backups_for_variant,
             delete_backup_by_id,
-            restore_backup_by_id
+            restore_backup_by_id,
+            get_user_id
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
