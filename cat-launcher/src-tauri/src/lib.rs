@@ -8,7 +8,7 @@ mod game_release;
 mod game_tips;
 mod infra;
 mod install_release;
-mod last_played;
+pub mod active_release;
 mod launch_game;
 mod manual_backups;
 mod play_time;
@@ -23,7 +23,7 @@ use crate::fetch_releases::commands::fetch_releases_for_variant;
 use crate::game_tips::commands::get_tips;
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
-use crate::last_played::commands::get_last_played_version;
+use crate::active_release::commands::get_active_release;
 use crate::launch_game::commands::launch_game;
 use crate::manual_backups::commands::{
     create_manual_backup_for_variant, delete_manual_backup_by_id, list_manual_backups_for_variant,
@@ -58,7 +58,7 @@ pub fn run() {
             fetch_releases_for_variant,
             install_release,
             launch_game,
-            get_last_played_version,
+            get_active_release,
             get_installation_status,
             get_tips,
             get_play_time_for_variant,

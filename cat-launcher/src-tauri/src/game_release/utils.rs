@@ -4,6 +4,7 @@ use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::{get_default_releases, merge_releases};
 use crate::game_release::game_release::{GameReleaseStatus, ReleaseType};
 use crate::game_release::GameRelease;
+use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
@@ -42,6 +43,23 @@ pub enum GetReleaseError {
     NotFound(String),
 }
 
+pub fn gh_release_to_game_release(
+    gh_release: &GitHubRelease,
+    variant: &GameVariant,
+) -> GameRelease {
+    GameRelease {
+        variant: variant.clone(),
+        version: gh_release.tag_name.clone(),
+        release_type: if gh_release.prerelease {
+            ReleaseType::Experimental
+        } else {
+            ReleaseType::Stable
+        },
+        status: GameReleaseStatus::Unknown,
+        created_at: gh_release.created_at,
+    }
+}
+
 pub async fn get_release_by_id(
     variant: &GameVariant,
     release_id: &str,
@@ -60,22 +78,12 @@ pub async fn get_release_by_id(
     let default_releases = get_default_releases(variant, resources_dir).await;
     let gh_releases = merge_releases(&cached_releases, &default_releases);
 
-    let gh_release = match gh_releases.into_iter().find(|r| r.tag_name == release_id) {
+    let gh_release = match gh_releases.iter().find(|r| r.tag_name == release_id) {
         Some(r) => r,
         None => return Err(GetReleaseError::NotFound(release_id.into())),
     };
 
-    let mut release = GameRelease {
-        variant: variant.clone(),
-        version: gh_release.tag_name,
-        release_type: if gh_release.prerelease {
-            ReleaseType::Experimental
-        } else {
-            ReleaseType::Stable
-        },
-        status: GameReleaseStatus::Unknown,
-        created_at: gh_release.created_at,
-    };
+    let mut release = gh_release_to_game_release(gh_release, variant);
     release.status = release.get_installation_status(os, data_dir).await?;
 
     Ok(release)
