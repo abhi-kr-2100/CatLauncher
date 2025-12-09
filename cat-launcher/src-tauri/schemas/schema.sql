@@ -74,3 +74,10 @@ CREATE TABLE IF NOT EXISTS game_variant_order (
     sort_order INTEGER NOT NULL,
     FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
 );
+
+-- This table stores unique user identity.
+-- The _id column with CHECK(_id = 1) ensures only one row can exist.
+CREATE TABLE IF NOT EXISTS users (
+    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
+    id TEXT NOT NULL UNIQUE
+);
