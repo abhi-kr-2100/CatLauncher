@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS assets (
 -- tables in the get_cached_releases function.
 CREATE INDEX IF NOT EXISTS idx_assets_release_id ON assets (release_id);
 
--- This table stores the last played version for each game variant.
-CREATE TABLE IF NOT EXISTS last_played_version (
+-- This table stores the active release for each game variant.
+CREATE TABLE IF NOT EXISTS active_release (
     game_variant TEXT PRIMARY KEY,
     version TEXT NOT NULL,
     FOREIGN KEY (game_variant) REFERENCES variants (name)

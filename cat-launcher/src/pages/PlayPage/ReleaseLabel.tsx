@@ -6,7 +6,7 @@ import { useMemo } from "react";
 interface ReleaseLabelProps {
   variant: GameVariant;
   version: string;
-  isLastPlayed: boolean;
+  isActive: boolean;
 }
 
 function getShortReleaseName(variant: GameVariant, version: string): string {
@@ -35,7 +35,7 @@ function getShortReleaseName(variant: GameVariant, version: string): string {
 export default function ReleaseLabel({
   variant,
   version,
-  isLastPlayed,
+  isActive,
 }: ReleaseLabelProps) {
   const shortReleaseName = useMemo(
     () => getShortReleaseName(variant, version),
@@ -44,14 +44,10 @@ export default function ReleaseLabel({
 
   return (
     <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-2">
-        {shortReleaseName}
+      <div className="flex items-center gap-2">{shortReleaseName}</div>
+      <div className="flex items-center gap-1">
+        {isActive && <Badge>Active</Badge>}
       </div>
-      {isLastPlayed && (
-        <div className="flex items-center gap-1">
-          <Badge>Last Played</Badge>
-        </div>
-      )}
     </div>
   );
 }

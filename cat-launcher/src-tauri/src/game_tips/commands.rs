@@ -7,7 +7,7 @@ use crate::fetch_releases::repository::sqlite_releases_repository::SqliteRelease
 use crate::game_tips::game_tips::get_all_tips_for_variant;
 use crate::game_tips::game_tips::GetAllTipsForVariantError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
@@ -26,7 +26,7 @@ pub enum GetTipsCommandError {
 pub async fn get_tips(
     app_handle: AppHandle,
     variant: GameVariant,
-    last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
+    active_release_repository: State<'_, SqliteActiveReleaseRepository>,
     releases_repository: State<'_, SqliteReleasesRepository>,
 ) -> Result<Vec<String>, GetTipsCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
@@ -36,7 +36,7 @@ pub async fn get_tips(
         &variant,
         &data_dir,
         &os,
-        &*last_played_repository,
+        &*active_release_repository,
         &*releases_repository,
     )
     .await?;

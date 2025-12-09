@@ -12,7 +12,7 @@ use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::repository::db_schema::initialize_schema;
 use crate::infra::repository::db_schema::InitializeSchemaError;
-use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
+use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
@@ -99,7 +99,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     app.manage(SqliteReleasesRepository::new(pool.clone()));
     app.manage(SqliteBackupRepository::new(pool.clone()));
     app.manage(SqliteManualBackupRepository::new(pool.clone()));
-    app.manage(SqliteLastPlayedVersionRepository::new(pool.clone()));
+    app.manage(SqliteActiveReleaseRepository::new(pool.clone()));
     app.manage(SqlitePlayTimeRepository::new(pool.clone()));
     app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
     app.manage(SqliteUsersRepository::new(pool));
