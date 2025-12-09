@@ -7,6 +7,7 @@ interface ReleaseLabelProps {
   variant: GameVariant;
   version: string;
   isActive: boolean;
+  isLatest: boolean;
 }
 
 function getShortReleaseName(variant: GameVariant, version: string): string {
@@ -36,6 +37,7 @@ export default function ReleaseLabel({
   variant,
   version,
   isActive,
+  isLatest,
 }: ReleaseLabelProps) {
   const shortReleaseName = useMemo(
     () => getShortReleaseName(variant, version),
@@ -46,6 +48,7 @@ export default function ReleaseLabel({
     <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-2">{shortReleaseName}</div>
       <div className="flex items-center gap-1">
+        {isLatest && <Badge>Latest</Badge>}
         {isActive && <Badge>Active</Badge>}
       </div>
     </div>
