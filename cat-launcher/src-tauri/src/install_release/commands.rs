@@ -7,6 +7,7 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
+use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
@@ -42,6 +43,7 @@ pub async fn install_release(
     variant: GameVariant,
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
+    active_release_repository: State<'_, SqliteActiveReleaseRepository>,
     settings: State<'_, Settings>,
     on_download_progress: Channel,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
@@ -79,6 +81,7 @@ pub async fn install_release(
             &data_dir,
             &resource_dir,
             &*releases_repository,
+            &*active_release_repository,
             &settings,
             on_status_update,
             progress,

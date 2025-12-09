@@ -10,6 +10,7 @@ use tokio::task::JoinError;
 use tokio::task::JoinSet;
 use ts_rs::TS;
 
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
     get_game_executable_filepath, get_or_create_automatic_backup_archive_filepath,
@@ -19,8 +20,6 @@ use crate::filesystem::paths::{
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::utils::OS;
-use crate::last_played::last_played::LastPlayedError;
-use crate::last_played::repository::LastPlayedVersionRepository;
 use crate::launch_game::repository::{BackupRepository, BackupRepositoryError};
 use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::play_time::repository::PlayTimeRepository;
@@ -43,9 +42,6 @@ pub enum LaunchGameError {
 
     #[error("failed to launch game: {0}")]
     Launch(#[from] io::Error),
-
-    #[error("failed to get last played version: {0}")]
-    LastPlayed(#[from] LastPlayedError),
 
     #[error("failed to backup and copy saves: {0}")]
     Backup(#[from] BackupError),
@@ -102,7 +98,6 @@ impl GameRelease {
         os: &OS,
         timestamp: u64,
         data_dir: &Path,
-        last_played_repository: &dyn LastPlayedVersionRepository,
         backup_repository: &dyn BackupRepository,
     ) -> Result<Command, LaunchGameError> {
         let executable_path =
@@ -112,10 +107,6 @@ impl GameRelease {
             .parent()
             .ok_or(LaunchGameError::ExecutableDir)?
             .to_path_buf();
-
-        self.variant
-            .set_last_played_version(&self.version, last_played_repository)
-            .await?;
 
         let backup_id = backup_repository
             .add_backup_entry(&self.variant, &self.version, timestamp)
@@ -253,9 +244,9 @@ pub async fn launch_and_monitor_game<F, Fut>(
     data_dir: &Path,
     resource_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
-    last_played_repository: &dyn LastPlayedVersionRepository,
     backup_repository: impl BackupRepository + Clone + Send + Sync + 'static,
     play_time_repository: impl PlayTimeRepository + Send + Sync + 'static,
+    active_release_repository: &dyn ActiveReleaseRepository,
     on_game_event: F,
     settings: &Settings,
 ) -> Result<(), LaunchGameError>
@@ -273,14 +264,13 @@ where
     )
     .await?;
 
+    // Ignore non-critical error where active release could not be set
+    let _ = variant
+        .set_active_release(release_id, active_release_repository)
+        .await;
+
     let command = release
-        .prepare_launch(
-            os,
-            timestamp,
-            data_dir,
-            last_played_repository,
-            &backup_repository,
-        )
+        .prepare_launch(os, timestamp, data_dir, &backup_repository)
         .await?;
 
     let backup_repository_clone = backup_repository.clone();
@@ -297,6 +287,7 @@ where
         )
         .await
         {
+            eprintln!("Error cleaning up old backups: {}", e);
             let error_payload = GameErrorPayload {
                 message: e.to_string(),
             };
@@ -322,6 +313,8 @@ where
             .await;
 
         if let Err(e) = result {
+            eprintln!("Error running game: {}", e);
+
             let error_payload = GameErrorPayload {
                 message: e.to_string(),
             };

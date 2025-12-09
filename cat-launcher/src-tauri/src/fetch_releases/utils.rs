@@ -2,12 +2,13 @@ use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use crate::fetch_releases::fetch_releases::{ReleasesUpdatePayload, ReleasesUpdateStatus};
+use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::get_default_releases_file_path;
-use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
+use crate::game_release::game_release::GameRelease;
+use crate::game_release::utils::gh_release_to_game_release;
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::read_from_file;
-use crate::fetch_releases::repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 pub async fn get_default_releases(
@@ -83,17 +84,7 @@ pub fn get_releases_payload(
 ) -> ReleasesUpdatePayload {
     let releases = gh_releases
         .iter()
-        .map(|r| {
-            let release_type = variant.determine_release_type(&r.tag_name, r.prerelease);
-
-            GameRelease {
-                variant: *variant,
-                release_type,
-                version: r.tag_name.clone(),
-                created_at: r.created_at,
-                status: GameReleaseStatus::Unknown,
-            }
-        })
+        .map(|r| gh_release_to_game_release(r, variant))
         .collect();
 
     ReleasesUpdatePayload {

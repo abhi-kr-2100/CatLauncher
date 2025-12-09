@@ -5,6 +5,8 @@ use downloader::progress::Reporter;
 use reqwest::Client;
 use tokio::fs;
 
+use crate::active_release::active_release::ActiveReleaseError;
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
     get_or_create_asset_download_dir, get_or_create_asset_installation_dir, AssetDownloadDirError,
@@ -46,6 +48,9 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
 
     #[error("status update callback failed: {0}")]
     Callback(E),
+
+    #[error("failed to set active release: {0}")]
+    ActiveRelease(#[from] ActiveReleaseError),
 }
 
 impl GameRelease {
@@ -57,6 +62,7 @@ impl GameRelease {
         data_dir: &Path,
         resources_dir: &Path,
         releases_repository: &dyn ReleasesRepository,
+        active_release_repository: &dyn ActiveReleaseRepository,
         settings: &Settings,
         on_status_update: F,
         progress: Arc<dyn Reporter + Send + Sync>,
@@ -70,6 +76,9 @@ impl GameRelease {
         }
 
         if self.status == GameReleaseStatus::ReadyToPlay {
+            self.variant
+                .set_active_release(&self.version, active_release_repository)
+                .await?;
             return Ok(());
         }
 
@@ -110,6 +119,10 @@ impl GameRelease {
         extract_archive(&download_filepath, &installation_dir, os).await?;
 
         self.status = GameReleaseStatus::ReadyToPlay;
+
+        self.variant
+            .set_active_release(&self.version, active_release_repository)
+            .await?;
 
         // Failure to remove file does not mean failure to install
         let _ = fs::remove_file(&download_filepath).await;

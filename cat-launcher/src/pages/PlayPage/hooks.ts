@@ -154,6 +154,10 @@ export function useInstallAndMonitorRelease(
 
     onSuccess: (updatedRelease, releaseId) => {
       queryClient.setQueryData(
+        queryKeys.activeRelease(variant),
+        () => releaseId!,
+      );
+      queryClient.setQueryData(
         queryKeys.releases(variant),
         (old: GameRelease[] | undefined) =>
           old?.map((o) => {
@@ -246,7 +250,7 @@ export function usePlayGame(variant: GameVariant) {
     onSuccess: (_, releaseId) => {
       dispatch(setCurrentlyPlaying({ variant }));
       queryClient.setQueryData(
-        queryKeys.lastPlayedVersion(variant),
+        queryKeys.activeRelease(variant),
         () => releaseId!,
       );
     },
