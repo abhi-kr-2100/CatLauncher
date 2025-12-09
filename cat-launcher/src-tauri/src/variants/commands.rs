@@ -1,5 +1,6 @@
-use serde::{ser::SerializeStruct, Serializer};
+use coded_error::CodedError;
 use tauri::{command, State};
+use thiserror::Error;
 
 use crate::settings::Settings;
 use crate::variants::get_game_variants_info::{self, GameVariantInfo, GetGameVariantsInfoError};
@@ -7,24 +8,10 @@ use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGam
 use crate::variants::update_game_variant_order::{self, UpdateGameVariantOrderError};
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, strum::IntoStaticStr)]
+#[derive(Error, Debug, strum::IntoStaticStr, CodedError)]
 pub enum UpdateGameVariantOrderCommandError {
     #[error("failed to update game variant order: {0}")]
     Update(#[from] UpdateGameVariantOrderError),
-}
-
-impl serde::Serialize for UpdateGameVariantOrderCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("UpdateGameVariantOrderCommandError", 2)?;
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-        st.end()
-    }
 }
 
 #[command]
@@ -41,24 +28,10 @@ pub async fn update_game_variant_order(
     Ok(())
 }
 
-#[derive(thiserror::Error, Debug, strum::IntoStaticStr)]
+#[derive(Error, Debug, strum::IntoStaticStr, CodedError)]
 pub enum GetGameVariantsInfoCommandError {
     #[error("failed to get game variant order: {0}")]
     Get(#[from] GetGameVariantsInfoError),
-}
-
-impl serde::Serialize for GetGameVariantsInfoCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("GetGameVariantsInfoCommandError", 2)?;
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-        st.end()
-    }
 }
 
 #[command]

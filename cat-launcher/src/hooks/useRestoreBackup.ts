@@ -16,7 +16,7 @@ export function useRestoreBackup(
   const queryClient = useQueryClient();
 
   const { mutate: restoreBackup } = useMutation({
-    mutationFn: (id: number) => restoreBackupById(id),
+    mutationFn: (id: bigint) => restoreBackupById(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backups(variant) });
       onSuccess?.();

@@ -39,13 +39,13 @@ export function BackupsTable({ variant }: BackupsTableProps) {
 
   const handleDelete = () => {
     if (selectedBackup) {
-      deleteBackup(Number(selectedBackup.id));
+      deleteBackup(selectedBackup.id);
     }
   };
 
   const handleRestore = () => {
     if (selectedBackup) {
-      restoreBackup(Number(selectedBackup.id));
+      restoreBackup(selectedBackup.id);
     }
   };
 

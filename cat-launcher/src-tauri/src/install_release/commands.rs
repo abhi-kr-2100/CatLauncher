@@ -1,11 +1,11 @@
 use std::env::consts::OS;
 use std::sync::Arc;
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
+use coded_error::CodedError;
 use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{command, AppHandle, Emitter, Manager, State};
+use thiserror::Error;
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
@@ -18,7 +18,7 @@ use crate::install_release::installation_progress_payload::InstallationProgressP
 use crate::settings::Settings;
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
+#[derive(Error, Debug, IntoStaticStr, CodedError)]
 pub enum InstallReleaseCommandError {
     #[error("system directory not found: {0}")]
     SystemDir(#[from] tauri::Error),
@@ -86,21 +86,4 @@ pub async fn install_release(
         .await?;
 
     Ok(release)
-}
-
-impl serde::Serialize for InstallReleaseCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("InstallReleaseCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
-    }
 }

@@ -1,11 +1,11 @@
 use std::env::consts::OS;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
-use serde::ser::SerializeStruct;
-use serde::Serializer;
+use coded_error::CodedError;
 use strum::IntoStaticStr;
 use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
+use thiserror::Error;
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
@@ -16,7 +16,7 @@ use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
+#[derive(Error, Debug, IntoStaticStr, CodedError)]
 pub enum LaunchGameCommandError {
     #[error("failed to launch game: {0}")]
     LaunchGame(#[from] LaunchGameError),
@@ -75,21 +75,4 @@ pub async fn launch_game(
     .await?;
 
     Ok(())
-}
-
-impl serde::Serialize for LaunchGameCommandError {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut st = serializer.serialize_struct("LaunchGameCommandError", 2)?;
-
-        let err_type: &'static str = self.into();
-        st.serialize_field("type", &err_type)?;
-
-        let msg = self.to_string();
-        st.serialize_field("message", &msg)?;
-
-        st.end()
-    }
 }

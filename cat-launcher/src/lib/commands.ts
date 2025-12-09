@@ -66,13 +66,13 @@ export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
   return response;
 }
 
-export async function deleteBackupById(id: number): Promise<void> {
+export async function deleteBackupById(id: bigint): Promise<void> {
   await invoke("delete_backup_by_id", {
     id,
   });
 }
 
-export async function restoreBackupById(id: number): Promise<void> {
+export async function restoreBackupById(id: bigint): Promise<void> {
   await invoke("restore_backup_by_id", {
     id,
   });
