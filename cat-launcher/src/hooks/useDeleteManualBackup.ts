@@ -29,12 +29,12 @@ export function useDeleteManualBackup(
 
       queryClient.setQueryData<ManualBackupEntry[]>(
         queryKeys.manualBackups(variant),
-        (old) => (old ?? []).filter((backup) => backup.id !== id),
+        (old) => (old ?? []).filter((backup) => Number(backup.id) !== id),
       );
 
       return { previousBackups };
     },
-    onError: (err, id, context) => {
+    onError: (err, _id, context) => {
       queryClient.setQueryData(
         queryKeys.manualBackups(variant),
         context?.previousBackups,
