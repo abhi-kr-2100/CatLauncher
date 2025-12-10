@@ -26,7 +26,9 @@ impl Analytics for PosthogAnalytics {
     ) -> Result<(), AnalyticsError<Self::Error>> {
         let mut event = posthog_rs::Event::new(event_name, distinct_id);
         for (key, value) in properties {
-            let _ = event.insert_prop(key, value);
+            if let Err(e) = event.insert_prop(key, value) {
+                eprintln!("Failed to insert prop into event: {}", e);
+            }
         }
 
         self.client

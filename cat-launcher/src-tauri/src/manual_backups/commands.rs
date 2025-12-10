@@ -79,9 +79,8 @@ pub async fn create_manual_backup_for_variant(
     users_repository: State<'_, crate::users::repository::sqlite_users_repository::SqliteUsersRepository>,
     analytics: State<'_, Box<dyn Analytics<Error = posthog_rs::Error>>>,
 ) -> Result<i64, CreateManualBackupCommandError> {
-    let variant_clone = variant.clone();
     let mut props = std::collections::HashMap::new();
-    props.insert("variant".to_string(), serde_json::json!(variant_clone));
+    props.insert("variant".to_string(), serde_json::json!(variant));
     track_event!(
         analytics,
         users_repository,
