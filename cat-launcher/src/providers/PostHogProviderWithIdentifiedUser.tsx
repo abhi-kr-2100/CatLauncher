@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { PostHogProvider } from "posthog-js/react";
-import { ReactNode } from "react";
+import { PostHogProvider } from "@posthog/react";
+import posthog from "posthog-js";
+import { ReactNode, useEffect } from "react";
 
 import { queryKeys } from "@/lib/queryKeys";
 import { getUserId } from "@/lib/commands";
 
-const posthogOptions = {
-  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-  defaults: "2025-11-30",
-} as const;
+if (import.meta.env.VITE_PUBLIC_POSTHOG_KEY) {
+  posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
+    api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+    defaults: "2025-11-30",
+  });
+}
 
 export interface PostHogProviderWithIdentifiedUserProps {
   children: ReactNode;
@@ -22,22 +25,11 @@ export default function PostHogProviderWithIdentifiedUser({
     queryFn: getUserId,
   });
 
-  if (!userId) {
-    return null;
-  }
+  useEffect(() => {
+    if (userId) {
+      posthog.identify(userId);
+    }
+  }, [userId]);
 
-  return (
-    <PostHogProvider
-      apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
-      options={{
-        ...posthogOptions,
-        bootstrap: {
-          distinctID: userId,
-          isIdentifiedID: true,
-        },
-      }}
-    >
-      {children}
-    </PostHogProvider>
-  );
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }

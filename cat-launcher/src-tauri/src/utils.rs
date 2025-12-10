@@ -18,6 +18,7 @@ use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteMa
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
+use crate::analytics::service::{Analytics, PosthogAnalytics};
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 
@@ -136,12 +137,14 @@ pub fn manage_posthog(app: &App) {
 
     match options {
         Ok(options) => {
-            let client = posthog_rs::client(options);
             let handle = app.handle().clone();
-
-            app.manage(client);
-
             tauri::async_runtime::spawn(async move {
+                let client = posthog_rs::client(options).await;
+                let analytics = PosthogAnalytics::new(client);
+                let app_handle = handle.clone();
+
+                app_handle.manage(Box::new(analytics) as Box<dyn Analytics>);
+
                 let user_repo: tauri::State<SqliteUsersRepository> = handle.state();
                 let user_id = match get_or_create_user_id(user_repo.inner()).await {
                     Ok(id) => id,
@@ -154,15 +157,18 @@ pub fn manage_posthog(app: &App) {
                     }
                 };
 
-                if let Some(posthog) = handle.try_state::<posthog_rs::Client>() {
-                    let mut event = posthog_rs::Event::new("$identify", &user_id);
-                    let _ = event.insert_prop(
-                        "$set",
-                        std::collections::HashMap::from([("is_user_identified", true)]),
-                    );
-                    if let Err(e) = posthog.capture(event).await {
-                        eprintln!("Failed to capture identify event: {}", e);
-                    }
+                let analytics: tauri::State<Box<dyn Analytics>> = handle.state();
+                let mut props = std::collections::HashMap::new();
+                props.insert(
+                    "$set".to_string(),
+                    serde_json::json!({ "is_user_identified": true }),
+                );
+
+                if let Err(e) = analytics
+                    .track_event(&user_id, "$identify", props)
+                    .await
+                {
+                    eprintln!("Failed to capture identify event: {}", e);
                 }
             });
         }

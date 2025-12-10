@@ -1,9 +1,10 @@
 use serde::ser::SerializeStruct;
 use serde::Serialize;
+use std::time::SystemTimeError;
 use strum::IntoStaticStr;
 use tauri::{Manager, State};
-use std::time::SystemTimeError;
 
+use crate::analytics::helpers::track_event;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::manual_backups::manual_backups::{
     create_manual_backup, delete_manual_backup, list_manual_backups, restore_manual_backup,
@@ -75,6 +76,14 @@ pub async fn create_manual_backup_for_variant(
     app_handle: tauri::AppHandle,
     backup_repository: State<'_, SqliteManualBackupRepository>,
 ) -> Result<i64, CreateManualBackupCommandError> {
+    let handle = app_handle.clone();
+    let variant_clone = variant.clone();
+    tauri::async_runtime::spawn(async move {
+        let mut props = std::collections::HashMap::new();
+        props.insert("variant".to_string(), serde_json::json!(variant_clone));
+        track_event(&handle, "backup:create_manual_backup_click", props).await;
+    });
+
     let data_dir = app_handle.path().app_data_dir()?;
     let timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)?

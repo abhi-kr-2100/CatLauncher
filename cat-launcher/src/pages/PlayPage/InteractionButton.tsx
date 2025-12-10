@@ -8,6 +8,8 @@ import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import { useAppSelector } from "@/store/hooks";
+import { trackButtonClick } from "@/lib/analytics";
+import { usePostHog } from "@posthog/react";
 import { DownloadProgress } from "./DownloadProgress";
 import {
   useInstallAndMonitorRelease,
@@ -19,6 +21,7 @@ export default function InteractionButton({
   variant,
   selectedReleaseId,
 }: InteractionButtonProps) {
+  const posthog = usePostHog();
   const currentlyPlaying = useAppSelector(
     (state) => state.gameSession.currentlyPlaying,
   );
@@ -66,11 +69,25 @@ export default function InteractionButton({
   const button = (
     <Button
       className="w-full"
-      onClick={() =>
-        installationStatus === "ReadyToPlay"
-          ? play(selectedReleaseId)
-          : install(selectedReleaseId)
-      }
+      onClick={() => {
+        if (installationStatus === "ReadyToPlay") {
+          if (posthog) {
+            trackButtonClick(posthog, "play-game", {
+              release_id: selectedReleaseId,
+              variant,
+            });
+          }
+          play(selectedReleaseId);
+        } else {
+          if (posthog) {
+            trackButtonClick(posthog, "install-release", {
+              release_id: selectedReleaseId,
+              variant,
+            });
+          }
+          install(selectedReleaseId);
+        }
+      }}
       disabled={isActionButtonDisabled}
     >
       {actionButtonLabel}

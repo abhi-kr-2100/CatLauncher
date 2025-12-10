@@ -7,6 +7,7 @@ use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
+use crate::analytics::helpers::track_event;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
@@ -45,6 +46,18 @@ pub async fn install_release(
     settings: State<'_, Settings>,
     on_download_progress: Channel,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
+    let handle = app_handle.clone();
+    let release_id_clone = release_id.to_string();
+    tauri::async_runtime::spawn(async move {
+        let mut props = std::collections::HashMap::new();
+        props.insert(
+            "release_id".to_string(),
+            serde_json::json!(release_id_clone),
+        );
+        props.insert("variant".to_string(), serde_json::json!(variant));
+        track_event(&handle, "release:install_release_click", props).await;
+    });
+
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;
 

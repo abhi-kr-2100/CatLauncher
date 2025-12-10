@@ -1,6 +1,7 @@
 pub mod constants;
 pub mod filesystem;
 pub mod settings;
+pub mod analytics;
 
 mod backups;
 mod fetch_releases;
