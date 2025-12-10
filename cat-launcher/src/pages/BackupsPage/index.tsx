@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import { toastCL } from "@/lib/utils";
 import { BackupsTable } from "./BackupsTable";
 import { CombinedBackup } from "./types/backups";
+import BackupFilter, { FilterFn } from "./BackupFilter";
 import { DeleteBackupDialog } from "./DeleteBackupDialog";
 import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { NewBackupDialog } from "./NewBackupDialog";
@@ -15,7 +16,10 @@ import { NewBackupDialog } from "./NewBackupDialog";
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } = useGameVariants();
   const [selectedVariant, setSelectedVariant] = useState<GameVariant | null>(
-    null
+    null,
+  );
+  const [appliedFilter, setAppliedFilter] = useState<FilterFn>(
+    () => (_r: CombinedBackup) => true,
   );
   const [newManualDialogOpen, setNewManualDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -50,6 +54,7 @@ function BackupsPage() {
       toastCL("error", "Failed to create manual backup", error);
     },
   });
+
 
   const handleSave = (values: { name: string; notes?: string }) => {
     createManualBackup({
@@ -91,13 +96,16 @@ function BackupsPage() {
         >
           New Backup
         </Button>
+        <BackupFilter
+          onChange={(filter) => setAppliedFilter(() => filter)}
+        />
       </div>
       {backupsLoading ? (
         <p>Loading...</p>
       ) : (
         activeVariant && (
           <BackupsTable
-            rows={combinedBackups}
+            rows={filteredBackups}
             onDeleteClick={openDeleteDialog}
             onRestoreClick={openRestoreDialog}
           />

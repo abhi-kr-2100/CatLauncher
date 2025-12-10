@@ -1,0 +1,37 @@
+
+> cat-launcher@0.7.0 dev /app/cat-launcher
+> vite
+
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::42069
+    at Server.setupListenHandle [as _listen11:38:17 AM [vite] (client) Pre-transform error: Failed to resolve import "./BackupFilter" from "src/pages/BackupsPage/index.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /app/cat-launcher/src/pages/BackupsPage/index.tsx:11:39
+  24 |  import { toastCL } from "@/lib/utils";
+  25 |  import { BackupsTable } from "./BackupsTable";
+  26 |  import BackupFilter from "./BackupFilter";
+     |                            ^
+  27 |  import { DeleteBackupDialog } from "./DeleteBackupDialog";
+  28 |  import { RestoreBackupDialog } from "./RestoreBackupDialog";
+11:38:18 AM [vite] Internal server error: Failed to resolve import "./BackupFilter" from "src/pages/BackupsPage/index.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /app/cat-launcher/src/pages/BackupsPage/index.tsx:11:39
+  24 |  import { toastCL } from "@/lib/utils";
+  25 |  import { BackupsTable } from "./BackupsTable";
+  26 |  import BackupFilter from "./BackupFilter";
+     |                            ^
+  27 |  import { DeleteBackupDialog } from "./DeleteBackupDialog";
+  28 |  import { RestoreBackupDialog } from "./RestoreBackupDialog";
+      at TransformPluginContext._formatLog (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:31106:43)
+      at TransformPluginContext.error (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:31103:14)
+      at normalizeUrl (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:29590:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+      at async file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:29648:32
+      at async Promise.all (index 11)
+      at async TransformPluginContext.transform (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:29616:4)
+      at async EnvironmentPluginContainer.transform (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:30905:14)
+      at async loadAndTransform (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:26043:26)
+      at async viteTransformMiddleware (file:///app/cat-launcher/node_modules/.pnpm/vite@7.1.12_@types+node@20.19.23_jiti@2.6.1_lightningcss@1.30.2_tsx@4.20.6/node_modules/vite/dist/node/chunks/config.js:27118:20)
