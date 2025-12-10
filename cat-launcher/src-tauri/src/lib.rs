@@ -1,6 +1,7 @@
 pub mod constants;
 pub mod filesystem;
 pub mod settings;
+#[macro_use]
 pub mod analytics;
 
 mod backups;

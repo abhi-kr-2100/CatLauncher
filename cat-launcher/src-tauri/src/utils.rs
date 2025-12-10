@@ -18,9 +18,10 @@ use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteMa
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
-use crate::analytics::service::{Analytics, PosthogAnalytics};
+use crate::analytics::{r#trait::Analytics, service::PosthogAnalytics};
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
+type AnalyticsService = Box<dyn Analytics<Error = posthog_rs::Error>>;
 
 #[derive(thiserror::Error, Debug)]
 pub enum SettingsError {
@@ -140,10 +141,10 @@ pub fn manage_posthog(app: &App) {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
                 let client = posthog_rs::client(options).await;
-                let analytics = PosthogAnalytics::new(client);
+                let analytics: AnalyticsService = Box::new(PosthogAnalytics::new(client));
                 let app_handle = handle.clone();
 
-                app_handle.manage(Box::new(analytics) as Box<dyn Analytics>);
+                app_handle.manage(analytics);
 
                 let user_repo: tauri::State<SqliteUsersRepository> = handle.state();
                 let user_id = match get_or_create_user_id(user_repo.inner()).await {
@@ -157,7 +158,7 @@ pub fn manage_posthog(app: &App) {
                     }
                 };
 
-                let analytics: tauri::State<Box<dyn Analytics>> = handle.state();
+                let analytics: tauri::State<AnalyticsService> = handle.state();
                 let mut props = std::collections::HashMap::new();
                 props.insert(
                     "$set".to_string(),

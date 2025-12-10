@@ -13,22 +13,14 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { usePostHog } from "@posthog/react";
-import { useEffect } from "react";
 
 import { useGameVariants } from "@/hooks/useGameVariants";
-import { trackPageView } from "@/lib/analytics";
+import { useTrackPageView } from "@/hooks/useTrackPageView";
 import { toastCL } from "@/lib/utils";
 import GameVariantCard from "./GameVariantCard";
 
 function PlayPage() {
-  const posthog = usePostHog();
-
-  useEffect(() => {
-    if (posthog) {
-      trackPageView(posthog, "PlayPage");
-    }
-  }, [posthog]);
+  useTrackPageView("PlayPage");
 
   const {
     gameVariants: orderedItems,

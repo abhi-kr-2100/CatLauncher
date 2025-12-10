@@ -4,13 +4,14 @@ use std::time::SystemTimeError;
 use strum::IntoStaticStr;
 use tauri::{Manager, State};
 
-use crate::analytics::helpers::track_event;
+use crate::analytics::r#trait::Analytics;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::manual_backups::manual_backups::{
     create_manual_backup, delete_manual_backup, list_manual_backups, restore_manual_backup,
     CreateManualBackupError, DeleteManualBackupError, ListManualBackupsError,
     RestoreManualBackupError,
 };
+use crate::track_event;
 use crate::manual_backups::repository::manual_backup_repository::ManualBackupEntry;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::variants::GameVariant;
@@ -75,14 +76,18 @@ pub async fn create_manual_backup_for_variant(
     notes: Option<String>,
     app_handle: tauri::AppHandle,
     backup_repository: State<'_, SqliteManualBackupRepository>,
+    users_repository: State<'_, crate::users::repository::sqlite_users_repository::SqliteUsersRepository>,
+    analytics: State<'_, Box<dyn Analytics<Error = posthog_rs::Error>>>,
 ) -> Result<i64, CreateManualBackupCommandError> {
-    let handle = app_handle.clone();
     let variant_clone = variant.clone();
-    tauri::async_runtime::spawn(async move {
-        let mut props = std::collections::HashMap::new();
-        props.insert("variant".to_string(), serde_json::json!(variant_clone));
-        track_event(&handle, "backup:create_manual_backup_click", props).await;
-    });
+    let mut props = std::collections::HashMap::new();
+    props.insert("variant".to_string(), serde_json::json!(variant_clone));
+    track_event!(
+        analytics,
+        users_repository,
+        "backup:create_manual_backup_click",
+        props
+    );
 
     let data_dir = app_handle.path().app_data_dir()?;
     let timestamp = std::time::SystemTime::now()

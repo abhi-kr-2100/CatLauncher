@@ -7,9 +7,10 @@ use strum::IntoStaticStr;
 use tauri::State;
 use tauri::{command, AppHandle, Emitter, Manager};
 
-use crate::analytics::helpers::track_event;
+use crate::analytics::r#trait::Analytics;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::track_event;
 use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPlayedVersionRepository;
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
@@ -42,18 +43,17 @@ pub async fn launch_game(
     last_played_repository: State<'_, SqliteLastPlayedVersionRepository>,
     backup_repository: State<'_, SqliteBackupRepository>,
     play_time_repository: State<'_, SqlitePlayTimeRepository>,
+    users_repository: State<'_, crate::users::repository::sqlite_users_repository::SqliteUsersRepository>,
+    analytics: State<'_, Box<dyn Analytics<Error = posthog_rs::Error>>>,
 ) -> Result<(), LaunchGameCommandError> {
-    let handle = app_handle.clone();
     let release_id_clone = release_id.to_string();
-    tauri::async_runtime::spawn(async move {
-        let mut props = std::collections::HashMap::new();
-        props.insert(
-            "release_id".to_string(),
-            serde_json::json!(release_id_clone),
-        );
-        props.insert("variant".to_string(), serde_json::json!(variant));
-        track_event(&handle, "game:launch_game_click", props).await;
-    });
+    let mut props = std::collections::HashMap::new();
+    props.insert(
+        "release_id".to_string(),
+        serde_json::json!(release_id_clone),
+    );
+    props.insert("variant".to_string(), serde_json::json!(variant));
+    track_event!(analytics, users_repository, "game:launch_game_click", props);
 
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;

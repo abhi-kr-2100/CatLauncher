@@ -7,9 +7,10 @@ use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
-use crate::analytics::helpers::track_event;
+use crate::analytics::r#trait::Analytics;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
+use crate::track_event;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::http_client::HTTP_CLIENT;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
@@ -44,19 +45,23 @@ pub async fn install_release(
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
     settings: State<'_, Settings>,
+    users_repository: State<'_, crate::users::repository::sqlite_users_repository::SqliteUsersRepository>,
+    analytics: State<'_, Box<dyn Analytics<Error = posthog_rs::Error>>>,
     on_download_progress: Channel,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
-    let handle = app_handle.clone();
     let release_id_clone = release_id.to_string();
-    tauri::async_runtime::spawn(async move {
-        let mut props = std::collections::HashMap::new();
-        props.insert(
-            "release_id".to_string(),
-            serde_json::json!(release_id_clone),
-        );
-        props.insert("variant".to_string(), serde_json::json!(variant));
-        track_event(&handle, "release:install_release_click", props).await;
-    });
+    let mut props = std::collections::HashMap::new();
+    props.insert(
+        "release_id".to_string(),
+        serde_json::json!(release_id_clone),
+    );
+    props.insert("variant".to_string(), serde_json::json!(variant));
+    track_event!(
+        analytics,
+        users_repository,
+        "release:install_release_click",
+        props
+    );
 
     let data_dir = app_handle.path().app_local_data_dir()?;
     let resource_dir = app_handle.path().resource_dir()?;

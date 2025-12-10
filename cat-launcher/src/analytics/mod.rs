@@ -1,4 +1,3 @@
 pub mod helpers;
-pub mod macros;
 pub mod service;
 pub mod r#trait;
