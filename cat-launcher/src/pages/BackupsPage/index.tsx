@@ -1,27 +1,31 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import { Combobox } from "@/components/ui/combobox";
 import { Button } from "@/components/ui/button";
-import { useGameVariants } from "@/hooks/useGameVariants";
-import { useCombinedBackups } from "@/hooks/useCombinedBackups";
+import { Combobox } from "@/components/ui/combobox";
 import { GameVariant } from "@/generated-types/GameVariant";
+import { useCombinedBackups } from "@/hooks/useCombinedBackups";
+import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
+import BackupFilter, { BackupFilterFn } from "./BackupFilter";
 import { BackupsTable } from "./BackupsTable";
-import { CombinedBackup } from "./types/backups";
 import { DeleteBackupDialog } from "./DeleteBackupDialog";
-import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { NewBackupDialog } from "./NewBackupDialog";
+import { RestoreBackupDialog } from "./RestoreBackupDialog";
+import { CombinedBackup } from "./types/backups";
 
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } = useGameVariants();
   const [selectedVariant, setSelectedVariant] = useState<GameVariant | null>(
-    null
+    null,
   );
   const [newManualDialogOpen, setNewManualDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [selectedBackup, setSelectedBackup] = useState<CombinedBackup | null>(
     null,
+  );
+  const [appliedFilter, setAppliedFilter] = useState<BackupFilterFn>(
+    () => (_backup: CombinedBackup) => true,
   );
 
   const activeVariant = (selectedVariant ?? gameVariants[0]?.id)!;
@@ -50,6 +54,11 @@ function BackupsPage() {
       toastCL("error", "Failed to create manual backup", error);
     },
   });
+
+  const filteredBackups = useMemo(
+    () => combinedBackups.filter(appliedFilter),
+    [combinedBackups, appliedFilter],
+  );
 
   const handleSave = (values: { name: string; notes?: string }) => {
     createManualBackup({
@@ -92,12 +101,17 @@ function BackupsPage() {
           New Backup
         </Button>
       </div>
+      <BackupFilter
+        onChange={(filter) =>
+          setAppliedFilter((_prev: BackupFilterFn) => filter)
+        }
+      />
       {backupsLoading ? (
         <p>Loading...</p>
       ) : (
         activeVariant && (
           <BackupsTable
-            rows={combinedBackups}
+            rows={filteredBackups}
             onDeleteClick={openDeleteDialog}
             onRestoreClick={openRestoreDialog}
           />
