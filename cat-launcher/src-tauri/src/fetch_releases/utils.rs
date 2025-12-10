@@ -82,12 +82,10 @@ pub fn get_releases_payload(
     gh_releases: &[GitHubRelease],
     status: ReleasesUpdateStatus,
 ) -> ReleasesUpdatePayload {
-    let mut releases: Vec<GameRelease> = gh_releases
+    let releases: Vec<GameRelease> = gh_releases
         .iter()
         .map(|r| gh_release_to_game_release(r, variant))
         .collect();
-
-    releases.sort_by(|a, b| b.created_at.cmp(&a.created_at));
 
     ReleasesUpdatePayload {
         variant: *variant,

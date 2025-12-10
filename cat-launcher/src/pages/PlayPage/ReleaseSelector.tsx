@@ -90,11 +90,25 @@ export default function ReleaseSelector({
   );
 
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
-    const latestRelease = releases[0];
+    const latestRelease = releases.reduce(
+      (prev: undefined | GameRelease, curr) => {
+        if (!prev) {
+          return curr;
+        }
+
+        if (curr.created_at > prev.created_at) {
+          return curr;
+        }
+
+        return prev;
+      },
+      undefined,
+    );
+
     return (
       releases.filter(appliedFilter).map((r) => {
         const isActive = r.version === activeRelease;
-        const isLatest = r.id === latestRelease?.id;
+        const isLatest = r.version === latestRelease?.version;
 
         return {
           value: r.version,
