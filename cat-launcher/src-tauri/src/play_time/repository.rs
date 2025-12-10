@@ -1,16 +1,7 @@
 use async_trait::async_trait;
-use serde::Serialize;
-use ts_rs::TS;
 
 use crate::variants::GameVariant;
 
-#[derive(Debug, Serialize, TS, Clone)]
-#[ts(export)]
-pub struct PlayTime {
-    pub game_variant: String,
-    pub version: String,
-    pub duration_in_seconds: i64,
-}
 
 #[derive(thiserror::Error, Debug)]
 pub enum PlayTimeRepositoryError {
@@ -53,5 +44,4 @@ pub trait PlayTimeRepository: Send + Sync {
         game_variant: &GameVariant,
     ) -> Result<i64, PlayTimeRepositoryError>;
 
-    async fn get_total_play_time(&self) -> Result<i64, PlayTimeRepositoryError>;
 }

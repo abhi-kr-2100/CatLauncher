@@ -98,22 +98,4 @@ impl PlayTimeRepository for SqlitePlayTimeRepository {
         .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
     }
 
-    async fn get_total_play_time(&self) -> Result<i64, PlayTimeRepositoryError> {
-        let pool = self.pool.clone();
-        task::spawn_blocking(move || {
-            let conn = pool
-                .get()
-                .map_err(|e| PlayTimeRepositoryError::GetTotalPlayTime(Box::new(e)))?;
-            let sum: i64 = conn
-                .query_row(
-                    "SELECT COALESCE(SUM(duration_in_seconds), 0) FROM play_time",
-                    rusqlite::params![],
-                    |row| row.get(0),
-                )
-                .map_err(|e| PlayTimeRepositoryError::GetTotalPlayTime(Box::new(e)))?;
-            Ok(sum)
-        })
-        .await
-        .map_err(|e| PlayTimeRepositoryError::JoinError(Box::new(e)))?
-    }
 }

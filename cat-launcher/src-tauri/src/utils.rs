@@ -79,12 +79,14 @@ pub enum RepositoryError {
     ConnectionPool(#[from] r2d2::Error),
 }
 
+use crate::paths::AppPaths;
+
 pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     let data_dir = app.path().app_local_data_dir()?;
+    let resource_dir = app.path().resource_dir()?;
     let db_path = get_db_path(&data_dir);
 
-    let resources_dir = app.path().resource_dir()?;
-    let schema_path = get_schema_file_path(&resources_dir)?;
+    let schema_path = get_schema_file_path(&resource_dir)?;
 
     let manager = SqliteConnectionManager::file(&db_path).with_init(|conn| {
         conn.pragma_update(None, "journal_mode", "WAL")?;
@@ -96,6 +98,10 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     let conn = pool.get()?;
     initialize_schema(&conn, &[schema_path])?;
 
+    app.manage(AppPaths {
+        data_dir,
+        resource_dir,
+    });
     app.manage(SqliteReleasesRepository::new(pool.clone()));
     app.manage(SqliteBackupRepository::new(pool.clone()));
     app.manage(SqliteManualBackupRepository::new(pool.clone()));

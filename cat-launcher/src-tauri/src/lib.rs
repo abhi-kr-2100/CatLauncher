@@ -1,5 +1,6 @@
 pub mod constants;
 pub mod filesystem;
+pub mod paths;
 pub mod settings;
 
 mod backups;
@@ -37,12 +38,15 @@ use crate::utils::{
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
 
+use tauri::Manager;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
+            app.manage(app.handle().clone());
             manage_settings(app)?;
             manage_repositories(app)?;
             manage_posthog(app);

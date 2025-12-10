@@ -3,7 +3,7 @@ use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use strum::IntoStaticStr;
 use tauri::State;
-use tauri::{command, AppHandle, Emitter, Manager};
+use tauri::{command, Emitter};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -31,25 +31,28 @@ pub enum LaunchGameCommandError {
     Os(#[from] OSNotSupportedError),
 }
 
+use crate::paths::AppPaths;
+
 #[command]
 pub async fn launch_game(
-    app_handle: AppHandle,
     variant: GameVariant,
     release_id: &str,
     settings: State<'_, Settings>,
+    paths: State<'_, AppPaths>,
     releases_repository: State<'_, SqliteReleasesRepository>,
     backup_repository: State<'_, SqliteBackupRepository>,
     play_time_repository: State<'_, SqlitePlayTimeRepository>,
     active_release_repository: State<'_, SqliteActiveReleaseRepository>,
+    app_handle: State<'_, tauri::AppHandle>,
 ) -> Result<(), LaunchGameCommandError> {
-    let data_dir = app_handle.path().app_local_data_dir()?;
-    let resource_dir = app_handle.path().resource_dir()?;
+    let data_dir = &paths.data_dir;
+    let resource_dir = &paths.resource_dir;
 
     let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
     let os = get_os_enum(OS)?;
 
-    let emitter = app_handle.clone();
+    let emitter = app_handle.inner().clone();
     let on_game_event = move |event: GameEvent| {
         let emitter = emitter.clone();
         async move {
