@@ -90,9 +90,11 @@ export default function ReleaseSelector({
   );
 
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
+    const latestRelease = releases[0];
     return (
       releases.filter(appliedFilter).map((r) => {
         const isActive = r.version === activeRelease;
+        const isLatest = r.id === latestRelease?.id;
 
         return {
           value: r.version,
@@ -101,6 +103,7 @@ export default function ReleaseSelector({
               variant={variant}
               version={r.version}
               isActive={isActive}
+              isLatest={isLatest}
             />
           ),
         };
