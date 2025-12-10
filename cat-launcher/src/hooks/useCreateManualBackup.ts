@@ -32,17 +32,18 @@ export function useCreateManualBackup(
         (old) => [
           ...(old ?? []),
           {
-            ...newBackup,
-            id: -1, // Temporary ID
+            id: BigInt(-1), // Temporary ID
+            name: newBackup.name,
             game_variant: variant,
-            timestamp: Date.now() / 1000,
+            timestamp: BigInt(Date.now() / 1000),
+            notes: newBackup.notes ?? null,
           },
         ],
       );
 
       return { previousBackups };
     },
-    onError: (err, newBackup, context) => {
+    onError: (err, _newBackup, context) => {
       queryClient.setQueryData(
         queryKeys.manualBackups(variant),
         context?.previousBackups,
