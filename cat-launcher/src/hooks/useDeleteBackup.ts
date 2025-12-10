@@ -12,7 +12,7 @@ interface UseDeleteBackupOptions {
 
 export function useDeleteBackup(
   variant: GameVariant,
-  { onSuccess, onError }: UseDeleteBackupOptions = {}
+  { onSuccess, onError }: UseDeleteBackupOptions = {},
 ) {
   const queryClient = useQueryClient();
 
@@ -22,12 +22,12 @@ export function useDeleteBackup(
       await queryClient.cancelQueries({ queryKey: queryKeys.backups(variant) });
 
       const previousBackups = queryClient.getQueryData<BackupEntry[]>(
-        queryKeys.backups(variant)
+        queryKeys.backups(variant),
       );
 
       queryClient.setQueryData<BackupEntry[]>(
         queryKeys.backups(variant),
-        (old) => old?.filter((backup) => backup.id !== id) ?? []
+        (old) => old?.filter((backup) => Number(backup.id) !== id) ?? [],
       );
 
       return { previousBackups };
@@ -37,7 +37,7 @@ export function useDeleteBackup(
       if (context?.previousBackups) {
         queryClient.setQueryData(
           queryKeys.backups(variant),
-          context.previousBackups
+          context.previousBackups,
         );
       }
       onError?.(error);
