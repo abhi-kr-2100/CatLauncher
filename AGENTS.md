@@ -67,7 +67,5 @@ The backend's business logic is strictly decoupled from the framework.
 ## Detailed Documentation
 
 For more in-depth information on the architecture, modules, and best practices, please refer to the documents in the `dev-docs` directory.
--   [Project Overview](./dev-docs/project-overview.md)
 -   [Backend Architecture](./dev-docs/backend-architecture.md)
--   [Frontend Architecture](./dev-docs/frontend-architecture.md)
 -   [Best Practices](./dev-docs/best-practices.md)
