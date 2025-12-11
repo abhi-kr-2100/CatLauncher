@@ -9,7 +9,7 @@ export function useRestoreManualBackup(
   } = {},
 ) {
   const { mutate } = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: bigint) => {
       await restoreManualBackupById(id);
     },
     onSuccess: options.onSuccess,

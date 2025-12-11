@@ -35,7 +35,7 @@ export function useCreateManualBackup(
             id: BigInt(-1), // Temporary ID
             name: newBackup.name,
             game_variant: variant,
-            timestamp: BigInt(Date.now() / 1000),
+            timestamp: BigInt(Math.floor(Date.now() / 1000)),
             notes: newBackup.notes ?? null,
           },
         ],

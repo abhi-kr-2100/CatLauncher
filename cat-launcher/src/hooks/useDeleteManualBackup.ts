@@ -15,7 +15,7 @@ export function useDeleteManualBackup(
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: bigint) => {
       await deleteManualBackupById(id);
     },
     onMutate: async (id) => {
@@ -29,7 +29,7 @@ export function useDeleteManualBackup(
 
       queryClient.setQueryData<ManualBackupEntry[]>(
         queryKeys.manualBackups(variant),
-        (old) => (old ?? []).filter((backup) => Number(backup.id) !== id),
+        (old) => (old ?? []).filter((backup) => backup.id !== id),
       );
 
       return { previousBackups };
