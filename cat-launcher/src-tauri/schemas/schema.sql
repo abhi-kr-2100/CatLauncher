@@ -4,6 +4,12 @@ CREATE TABLE IF NOT EXISTS variants (
     name TEXT PRIMARY KEY
 );
 
+-- This table stores the supported UI themes and ensures related tables
+-- can only reference valid theme names.
+CREATE TABLE IF NOT EXISTS themes (
+    name TEXT PRIMARY KEY
+);
+
 -- This table stores the GitHub release information for each game variant.
 CREATE TABLE IF NOT EXISTS releases (
     id INTEGER PRIMARY KEY,
@@ -80,6 +86,13 @@ CREATE TABLE IF NOT EXISTS game_variant_order (
 CREATE TABLE IF NOT EXISTS users (
     _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
     id TEXT NOT NULL UNIQUE
+);
+
+-- This table stores the persisted theme preference for the launcher UI.
+CREATE TABLE IF NOT EXISTS theme_preferences (
+    _id INTEGER PRIMARY KEY CHECK(_id = 1),
+    theme TEXT NOT NULL,
+    FOREIGN KEY (theme) REFERENCES themes (name)
 );
 
 -- This table stores metadata for each manual backup created for a game variant.

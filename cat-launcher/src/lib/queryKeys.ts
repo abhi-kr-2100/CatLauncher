@@ -1,8 +1,7 @@
 import type { GameVariant } from "@/generated-types/GameVariant";
 
 export const queryKeys = {
-  activeRelease: (variant: GameVariant) =>
-    ["active_release", variant] as const,
+  activeRelease: (variant: GameVariant) => ["active_release", variant] as const,
 
   installationStatus: (variant: GameVariant, releaseId: string | undefined) =>
     ["installation_status", variant, releaseId] as const,
@@ -24,4 +23,6 @@ export const queryKeys = {
   backups: (variant: GameVariant) => ["backups", variant] as const,
 
   manualBackups: (variant: GameVariant) => ["manual-backups", variant] as const,
+
+  themePreference: () => ["theme_preference"] as const,
 };
