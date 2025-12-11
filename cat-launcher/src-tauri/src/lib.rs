@@ -12,6 +12,7 @@ pub mod active_release;
 mod launch_game;
 mod manual_backups;
 mod play_time;
+mod theme;
 mod users;
 mod utils;
 mod variants;
@@ -30,6 +31,7 @@ use crate::manual_backups::commands::{
     restore_manual_backup_by_id,
 };
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
+use crate::theme::commands::{get_preferred_theme, set_preferred_theme};
 use crate::users::commands::get_user_id;
 use crate::utils::{
     autoupdate, manage_posthog, manage_repositories, manage_settings, migrate_backups,
@@ -72,6 +74,8 @@ pub fn run() {
             delete_manual_backup_by_id,
             restore_manual_backup_by_id,
             get_user_id,
+            get_preferred_theme,
+            set_preferred_theme,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
