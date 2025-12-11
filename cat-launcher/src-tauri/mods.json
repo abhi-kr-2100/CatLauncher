@@ -1,0 +1,197 @@
+{
+  "DarkDaysAhead": [
+    {
+      "id": "dda-aftershock",
+      "name": "Aftershock Expanded",
+      "description": "Adds late-game sci-fi factions, reactors, and megastructures to Dark Days Ahead.",
+      "authors": ["Aftershock Team"],
+      "maintainers": ["Munetmo Modding Group"],
+      "category": "Content Pack",
+      "repository": "https://github.com/CataclysmModding/Aftershock-Expanded"
+    },
+    {
+      "id": "dda-magiclysm",
+      "name": "Magiclysm Rebalanced",
+      "description": "Refines the Magiclysm progression tree with new quests, rituals, and spell variants.",
+      "authors": ["Eldritch Collective"],
+      "maintainers": ["Arcana Works"],
+      "category": "Total Conversion",
+      "repository": "https://github.com/CataclysmModding/Magiclysm-Rebalanced"
+    },
+    {
+      "id": "dda-crazy-cataclysm",
+      "name": "Crazy Cataclysm",
+      "description": "Adds whimsical monsters, artifacts, and high-chaos progression challenges.",
+      "authors": ["Chaos Facilitators"],
+      "maintainers": ["Chaos Facilitators"],
+      "category": "Challenge",
+      "repository": "https://github.com/CataclysmModding/Crazy-Cataclysm"
+    },
+    {
+      "id": "dda-catapp",
+      "name": "Cata++ Restored",
+      "description": "Community continuation of the classic Cata++ quest and item expansion.",
+      "authors": ["Whaley", "Community Contributors"],
+      "maintainers": ["Whaley", "Community Contributors"],
+      "category": "Content Pack",
+      "repository": "https://github.com/CataclysmModding/CataPlusPlus-Restored"
+    },
+    {
+      "id": "dda-arcana",
+      "name": "Arcana Faiths",
+      "description": "Integrates Arcana artifacts, cults, and rituals into mainline gameplay.",
+      "authors": ["Arcana Guild"],
+      "maintainers": ["Arcana Guild"],
+      "category": "Magic",
+      "repository": "https://github.com/CataclysmModding/Arcana-Faiths"
+    }
+  ],
+  "BrightNights": [
+    {
+      "id": "bn-dark-skies",
+      "name": "Dark Skies Above BN",
+      "description": "Adds the XEDRA invasion storyline with airships, orbital strikes, and unique missions.",
+      "authors": ["Xedra Initiative"],
+      "maintainers": ["Bright Nights Core Team"],
+      "category": "Story Arc",
+      "repository": "https://github.com/bright-nights/dark-skies-above"
+    },
+    {
+      "id": "bn-secronom",
+      "name": "Secronom Reanimated",
+      "description": "Expands aberrant biomancy, cult factions, and experimental mutation paths.",
+      "authors": ["Devonix"],
+      "maintainers": ["BN Modders Collective"],
+      "category": "Mutations",
+      "repository": "https://github.com/bright-nights/secronom"
+    },
+    {
+      "id": "bn-toolbox",
+      "name": "Bright Nights Toolset",
+      "description": "Quality-of-life crafting helpers, auto-learn tweaks, and expanded tool recipes.",
+      "authors": ["Maidable"],
+      "maintainers": ["Maidable"],
+      "category": "QualityOfLife",
+      "repository": "https://github.com/bright-nights/bn-toolbox"
+    },
+    {
+      "id": "bn-modular-turrets",
+      "name": "Modular Turrets BN",
+      "description": "Placeable turret frames with customizable ammunition logic and power systems.",
+      "authors": ["KingLemming"],
+      "maintainers": ["BN Defense Council"],
+      "category": "BaseBuilding",
+      "repository": "https://github.com/bright-nights/modular-turrets"
+    },
+    {
+      "id": "bn-wilderness",
+      "name": "Wilderness Overhaul",
+      "description": "Refreshes forests, animals, foraging, and camping progression for Bright Nights.",
+      "authors": ["Northwind Cartographers"],
+      "maintainers": ["Northwind Cartographers"],
+      "category": "Environment",
+      "repository": "https://github.com/bright-nights/wilderness-overhaul"
+    },
+    {
+      "id": "bn-legacy-armory",
+      "name": "Legacy Armory",
+      "description": "Reintroduces experimental firearms and heavy weapons from classic BN builds.",
+      "authors": ["Legacy Firearms Initiative"],
+      "maintainers": ["Legacy Firearms Initiative"],
+      "category": "Weapons",
+      "repository": "https://github.com/bright-nights/legacy-armory"
+    },
+    {
+      "id": "bn-faction-equipment",
+      "name": "Faction Equipment BN",
+      "description": "Adds craftable uniforms, insignias, and vehicles for major BN factions.",
+      "authors": ["Factioneers"],
+      "maintainers": ["Factioneers"],
+      "category": "Roleplay",
+      "repository": "https://github.com/bright-nights/faction-equipment"
+    },
+    {
+      "id": "bn-bionic-professions",
+      "name": "Bionic Professions BN",
+      "description": "Start scenarios centered on bespoke cybernetic loadouts and implants.",
+      "authors": ["Metalmind Labs"],
+      "maintainers": ["Metalmind Labs"],
+      "category": "Professions",
+      "repository": "https://github.com/bright-nights/bionic-professions"
+    },
+    {
+      "id": "bn-drone-warfare",
+      "name": "Drone Warfare",
+      "description": "Deploy remote drones, recon craft, signal boosters, and automated patrols.",
+      "authors": ["Uplink Aeronautics"],
+      "maintainers": ["BN Robotics Group"],
+      "category": "Technology",
+      "repository": "https://github.com/bright-nights/drone-warfare"
+    },
+    {
+      "id": "bn-frozen-north",
+      "name": "Frozen North",
+      "description": "Extends Bright Nights with arctic biomes, hazards, and expedition gear.",
+      "authors": ["Aurora Watch"],
+      "maintainers": ["Aurora Watch"],
+      "category": "Environment",
+      "repository": "https://github.com/bright-nights/frozen-north"
+    },
+    {
+      "id": "bn-astral-studies",
+      "name": "Astral Studies",
+      "description": "Adds psionics, dream quests, and star-bound anomalies to the Bright Nights world.",
+      "authors": ["Astralists"],
+      "maintainers": ["Astralists"],
+      "category": "Lore",
+      "repository": "https://github.com/bright-nights/astral-studies"
+    },
+    {
+      "id": "bn-community-pack",
+      "name": "Community Modpack BN",
+      "description": "Hand-curated bundle of balance tweaks and extras maintained for Bright Nights.",
+      "authors": ["Community Curators"],
+      "maintainers": ["Community Curators"],
+      "category": "Content Pack",
+      "repository": "https://github.com/bright-nights/community-pack"
+    },
+    {
+      "id": "bn-industrial-tools",
+      "name": "Industrial Tools BN",
+      "description": "Adds fabrication rigs, presses, and workshop furniture for heavy industry bases.",
+      "authors": ["ForgeWorks"],
+      "maintainers": ["ForgeWorks"],
+      "category": "Crafting",
+      "repository": "https://github.com/bright-nights/industrial-tools"
+    }
+  ],
+  "TheLastGeneration": [
+    {
+      "id": "tlg-iron-frontier",
+      "name": "Iron Frontier",
+      "description": "Introduces dieselpunk convoys, caravans, and hardened raider factions to TLG.",
+      "authors": ["Iron Caravan"],
+      "maintainers": ["Iron Caravan"],
+      "category": "Content Pack",
+      "repository": "https://github.com/the-last-generation/iron-frontier"
+    },
+    {
+      "id": "tlg-solstice",
+      "name": "Solstice Protocol",
+      "description": "Story arc revolving around orbital mirrors, weather control, and energy crises.",
+      "authors": ["Solstice Initiative"],
+      "maintainers": ["Solstice Initiative"],
+      "category": "Story Arc",
+      "repository": "https://github.com/the-last-generation/solstice-protocol"
+    },
+    {
+      "id": "tlg-nomad-radio",
+      "name": "Nomad Radio",
+      "description": "Adds traveling DJs, radio missions, and morale-driven encounters on the frontier.",
+      "authors": ["Freeband Broadcasters"],
+      "maintainers": ["Freeband Broadcasters"],
+      "category": "Roleplay",
+      "repository": "https://github.com/the-last-generation/nomad-radio"
+    }
+  ]
+}
