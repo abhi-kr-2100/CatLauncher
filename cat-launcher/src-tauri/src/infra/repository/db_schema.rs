@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use rusqlite::Connection;
 use strum::IntoEnumIterator;
 
+use crate::theme::theme::Theme;
 use crate::variants::game_variant::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -27,6 +28,13 @@ pub fn initialize_schema(
         conn.execute(
             "INSERT OR IGNORE INTO variants (name) VALUES (?1)",
             [variant.to_string()],
+        )?;
+    }
+
+    for theme in Theme::iter() {
+        conn.execute(
+            "INSERT OR IGNORE INTO themes (name) VALUES (?1)",
+            [theme.to_string()],
         )?;
     }
 

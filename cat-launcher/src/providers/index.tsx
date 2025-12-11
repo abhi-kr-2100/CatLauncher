@@ -12,6 +12,7 @@ import { store } from "@/store/store";
 import CatLauncherVersionTracker from "./CatLauncherVersionTracker";
 import { useFrontendReady } from "./hooks";
 import PostHogProviderWithIdentifiedUser from "./PostHogProviderWithIdentifiedUser";
+import ThemeBootstrapper from "@/theme/ThemeBootstrapper";
 
 export interface ProvidersProps {
   children: ReactNode;
@@ -24,28 +25,30 @@ export default function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PostHogProviderWithIdentifiedUser>
-        <CatLauncherVersionTracker>
-          <Provider store={store}>
-            <TooltipProvider>
-              {children}
-              <Toaster />
-              <AutoUpdateNotifier />
-              <GameSessionMonitor />
-              {import.meta.env.DEV && (
-                <TanStackDevtools
-                  plugins={[
-                    {
-                      name: "TanStack Query",
-                      render: <ReactQueryDevtoolsPanel />,
-                    },
-                  ]}
-                />
-              )}
-            </TooltipProvider>
-          </Provider>
-        </CatLauncherVersionTracker>
-      </PostHogProviderWithIdentifiedUser>
+      <ThemeBootstrapper>
+        <PostHogProviderWithIdentifiedUser>
+          <CatLauncherVersionTracker>
+            <Provider store={store}>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+                <AutoUpdateNotifier />
+                <GameSessionMonitor />
+                {import.meta.env.DEV && (
+                  <TanStackDevtools
+                    plugins={[
+                      {
+                        name: "TanStack Query",
+                        render: <ReactQueryDevtoolsPanel />,
+                      },
+                    ]}
+                  />
+                )}
+              </TooltipProvider>
+            </Provider>
+          </CatLauncherVersionTracker>
+        </PostHogProviderWithIdentifiedUser>
+      </ThemeBootstrapper>
     </QueryClientProvider>
   );
 }
