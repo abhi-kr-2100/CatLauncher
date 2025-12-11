@@ -37,3 +37,34 @@ When using `useMutation`, pass arguments to the mutation function, instead of re
 2. Project source files.
 
 These conventions help keep imports tidy and consistent across the codebase.
+
+### Error Handling with Strongly-Typed Errors
+
+Error enums should wrap lower-level errors using strongly-typed error variants, not strings. For example:
+
+```rust
+// Good: Strongly-typed error wrapping
+#[derive(thiserror::Error, Debug)]
+pub enum InstallModError {
+    #[error("failed to get user game data directory: {0}")]
+    UserDataDir(#[from] GetUserGameDataDirError),
+
+    #[error("failed to extract archive: {0}")]
+    Extraction(#[from] ExtractionError),
+}
+
+// Bad: String-based error wrapping
+#[derive(thiserror::Error, Debug)]
+pub enum InstallModError {
+    #[error("failed to get user game data directory: {0}")]
+    UserDataDir(String),  // Don't do this
+}
+```
+
+### Use Shared Infrastructure Utilities
+
+The project provides shared utilities that should be reused:
+
+-   **HTTP Client:** Use `HTTP_CLIENT` from `src-tauri/src/infra/http_client.rs` instead of creating new `reqwest::Client` instances.
+-   **Archive Extraction:** Use `extract_archive` from `src-tauri/src/infra/archive.rs` for extracting zip, tar.gz, dmg, and rar files.
+-   **Directory Copying:** Use `copy_dir_all` from `src-tauri/src/filesystem/utils.rs` for recursive directory copying.
