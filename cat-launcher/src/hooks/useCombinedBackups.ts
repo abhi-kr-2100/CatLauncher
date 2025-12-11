@@ -77,17 +77,17 @@ export function useCombinedBackups(
 
   const deleteBackup = (backup: CombinedBackup) => {
     if (backup.type === "manual") {
-      deleteManualBackup(Number(backup.id));
+      deleteManualBackup(backup.id);
     } else {
-      deleteAutoBackup(Number(backup.id));
+      deleteAutoBackup(backup.id);
     }
   };
 
   const restoreBackup = (backup: CombinedBackup) => {
     if (backup.type === "manual") {
-      restoreManualBackup(Number(backup.id));
+      restoreManualBackup(backup.id);
     } else {
-      restoreAutoBackup(Number(backup.id));
+      restoreAutoBackup(backup.id);
     }
   };
 

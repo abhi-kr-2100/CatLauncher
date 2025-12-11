@@ -12,7 +12,7 @@ export function useRestoreBackup({
   onError,
 }: UseRestoreBackupOptions = {}) {
   const { mutate: restoreBackup } = useMutation({
-    mutationFn: (id: number) => restoreBackupById(id),
+    mutationFn: (id: bigint) => restoreBackupById(id),
     onSuccess,
     onError,
   });
