@@ -2,8 +2,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import { routes } from "@/routes";
 
-
-
 function App() {
   return (
     <BrowserRouter>

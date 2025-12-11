@@ -12,6 +12,8 @@ import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
+import type { Theme } from "@/generated-types/Theme";
+import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToReleasesUpdate(
@@ -88,11 +90,14 @@ export async function getTips(variant: GameVariant): Promise<string[]> {
 }
 
 export async function listManualBackupsForVariant(
-  variant: GameVariant
+  variant: GameVariant,
 ): Promise<ManualBackupEntry[]> {
-  const response = await invoke<ManualBackupEntry[]>("list_manual_backups_for_variant", {
-    variant,
-  });
+  const response = await invoke<ManualBackupEntry[]>(
+    "list_manual_backups_for_variant",
+    {
+      variant,
+    },
+  );
 
   return response;
 }
@@ -100,7 +105,7 @@ export async function listManualBackupsForVariant(
 export async function createManualBackupForVariant(
   variant: GameVariant,
   name: string,
-  notes?: string
+  notes?: string,
 ): Promise<void> {
   await invoke("create_manual_backup_for_variant", {
     variant,
@@ -161,9 +166,7 @@ export async function getPlayTimeForVersion(
   return response;
 }
 
-export async function getActiveRelease(
-  variant: GameVariant,
-): Promise<string> {
+export async function getActiveRelease(variant: GameVariant): Promise<string> {
   const response = await invoke<string | null>("get_active_release", {
     variant,
   });
@@ -211,6 +214,17 @@ export async function getInstallationStatus(
   });
 
   return response;
+}
+
+export async function getPreferredTheme(): Promise<ThemePreference> {
+  const response = await invoke<ThemePreference>("get_preferred_theme");
+  return response;
+}
+
+export async function setPreferredTheme(theme: Theme): Promise<void> {
+  await invoke("set_preferred_theme", {
+    theme,
+  });
 }
 
 export async function getUserId(): Promise<string> {
