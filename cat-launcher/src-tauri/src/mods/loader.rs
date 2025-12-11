@@ -3,6 +3,7 @@ use std::path::Path;
 use std::str::FromStr;
 
 use serde::Deserialize;
+use tokio::fs;
 
 use crate::mods::models::ThirdPartyMod;
 use crate::variants::GameVariant;
@@ -53,10 +54,10 @@ pub enum LoadThirdPartyModsError {
 ///
 /// This helper normalises the shape into a flat list of [`ThirdPartyMod`] values by
 /// attaching the corresponding [`GameVariant`] to each entry.
-pub fn load_third_party_mods(
+pub async fn load_third_party_mods(
     mods_catalog_path: &Path,
 ) -> Result<Vec<ThirdPartyMod>, LoadThirdPartyModsError> {
-    let contents = std::fs::read_to_string(mods_catalog_path)?;
+    let contents = fs::read_to_string(mods_catalog_path).await?;
     let catalog: ModsCatalog = serde_json::from_str(&contents)?;
 
     let mut mods = Vec::new();

@@ -99,8 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_manual_backups_game_variant_timestamp ON manual_b
 CREATE TABLE IF NOT EXISTS installed_mods (
     variant TEXT NOT NULL,
     mod_id TEXT NOT NULL,
-    installed_at INTEGER NOT NULL,
-    last_updated_time TEXT,
+    installed_at TEXT NOT NULL,
     PRIMARY KEY (variant, mod_id),
     FOREIGN KEY (variant) REFERENCES variants (name) ON DELETE CASCADE
 );

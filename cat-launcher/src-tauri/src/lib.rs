@@ -30,6 +30,10 @@ use crate::manual_backups::commands::{
     create_manual_backup_for_variant, delete_manual_backup_by_id, list_manual_backups_for_variant,
     restore_manual_backup_by_id,
 };
+use crate::mods::commands::{
+    list_third_party_mods_for_variant, mark_third_party_mod_installed,
+    remove_third_party_mod_installation,
+};
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::users::commands::get_user_id;
 use crate::utils::{
@@ -72,6 +76,9 @@ pub fn run() {
             create_manual_backup_for_variant,
             delete_manual_backup_by_id,
             restore_manual_backup_by_id,
+            list_third_party_mods_for_variant,
+            mark_third_party_mod_installed,
+            remove_third_party_mod_installation,
             get_user_id,
         ])
         .run(tauri::generate_context!())

@@ -34,7 +34,8 @@ pub struct ThirdPartyMod {
 pub struct ThirdPartyModStatus {
     pub variant: GameVariant,
     pub mod_id: String,
-    pub installed_at: u64,
+    pub installed_at: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_updated_time: Option<String>,
 }
 

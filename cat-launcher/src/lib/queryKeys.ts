@@ -24,4 +24,6 @@ export const queryKeys = {
   backups: (variant: GameVariant) => ["backups", variant] as const,
 
   manualBackups: (variant: GameVariant) => ["manual-backups", variant] as const,
+
+  thirdPartyMods: (variant: GameVariant) => ["third-party-mods", variant] as const,
 };

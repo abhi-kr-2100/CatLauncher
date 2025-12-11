@@ -12,6 +12,8 @@ import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
+import type { ThirdPartyMod } from "@/generated-types/ThirdPartyMod";
+import type { ThirdPartyModStatus } from "@/generated-types/ThirdPartyModStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToReleasesUpdate(
@@ -216,4 +218,42 @@ export async function getInstallationStatus(
 export async function getUserId(): Promise<string> {
   const response = await invoke<string>("get_user_id");
   return response;
+}
+
+export async function listThirdPartyModsForVariant(
+  variant: GameVariant,
+): Promise<ThirdPartyMod[]> {
+  const response = await invoke<ThirdPartyMod[]>(
+    "list_third_party_mods_for_variant",
+    {
+      variant,
+    },
+  );
+
+  return response;
+}
+
+export async function markThirdPartyModInstalled(
+  variant: GameVariant,
+  modId: string,
+): Promise<ThirdPartyModStatus> {
+  const response = await invoke<ThirdPartyModStatus>(
+    "mark_third_party_mod_installed",
+    {
+      variant,
+      modId,
+    },
+  );
+
+  return response;
+}
+
+export async function removeThirdPartyModInstallation(
+  variant: GameVariant,
+  modId: string,
+): Promise<void> {
+  await invoke("remove_third_party_mod_installation", {
+    variant,
+    modId,
+  });
 }
