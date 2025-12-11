@@ -17,6 +17,7 @@ use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupReposi
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
+use crate::soundpacks::repository::sqlite_soundpacks_repository::SqliteSoundpacksRepository;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
@@ -102,6 +103,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     app.manage(SqliteActiveReleaseRepository::new(pool.clone()));
     app.manage(SqlitePlayTimeRepository::new(pool.clone()));
     app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
+    app.manage(SqliteSoundpacksRepository::new(pool.clone()));
     app.manage(SqliteUsersRepository::new(pool));
 
     Ok(())

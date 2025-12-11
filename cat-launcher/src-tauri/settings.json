@@ -49,5 +49,25 @@
         }
       ]
     }
-  }
+  },
+  "soundpacks": [
+    {
+      "id": "otopack",
+      "name": "Otopack",
+      "description": "High-quality sound effects pack with immersive audio",
+      "owner": "Kenan2000",
+      "repo": "Otopack-Mods-Updates",
+      "branch": "master",
+      "internal_path": "Otopack+ModsUpdates"
+    },
+    {
+      "id": "co-soundpack",
+      "name": "ChestOldSoundpack",
+      "description": "Classic sound effects collection",
+      "owner": "Fris0uman",
+      "repo": "CDDA-Soundpacks",
+      "branch": "master",
+      "internal_path": "ChestOldSoundpack"
+    }
+  ]
 }

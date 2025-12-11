@@ -4,6 +4,7 @@ use std::num::{NonZeroU16, NonZeroUsize};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::soundpacks::models::SoundpackCatalogEntry;
 use crate::variants::links::Link;
 use crate::constants::{DEFAULT_MAX_BACKUPS, DEFAULT_PARALLEL_REQUESTS};
 
@@ -18,6 +19,8 @@ pub struct Settings {
     pub max_backups: NonZeroUsize,
     pub parallel_requests: NonZeroU16,
     pub games: HashMap<String, GameSettings>,
+    #[serde(default)]
+    pub soundpacks: Vec<SoundpackCatalogEntry>,
 }
 
 #[derive(Debug, Error)]
@@ -35,6 +38,7 @@ impl Default for Settings {
             max_backups: NonZeroUsize::new(DEFAULT_MAX_BACKUPS).unwrap(),
             parallel_requests: NonZeroU16::new(DEFAULT_PARALLEL_REQUESTS).unwrap(),
             games: HashMap::new(),
+            soundpacks: Vec::new(),
         }
     }
 }

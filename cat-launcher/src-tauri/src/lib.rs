@@ -12,6 +12,7 @@ pub mod active_release;
 mod launch_game;
 mod manual_backups;
 mod play_time;
+mod soundpacks;
 mod users;
 mod utils;
 mod variants;
@@ -30,6 +31,10 @@ use crate::manual_backups::commands::{
     restore_manual_backup_by_id,
 };
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
+use crate::soundpacks::commands::{
+    get_last_updated_time_command, get_soundpacks_for_variants_command,
+    install_soundpack_command, uninstall_soundpack_command,
+};
 use crate::users::commands::get_user_id;
 use crate::utils::{
     autoupdate, manage_posthog, manage_repositories, manage_settings, migrate_backups,
@@ -72,6 +77,10 @@ pub fn run() {
             delete_manual_backup_by_id,
             restore_manual_backup_by_id,
             get_user_id,
+            get_soundpacks_for_variants_command,
+            get_last_updated_time_command,
+            install_soundpack_command,
+            uninstall_soundpack_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

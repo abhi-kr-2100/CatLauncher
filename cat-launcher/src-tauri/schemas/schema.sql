@@ -94,3 +94,15 @@ CREATE TABLE IF NOT EXISTS manual_backups (
 
 -- This composite index speeds up queries that filter by game_variant and order by timestamp.
 CREATE INDEX IF NOT EXISTS idx_manual_backups_game_variant_timestamp ON manual_backups (game_variant, timestamp);
+
+-- This table stores metadata for installed third-party soundpacks.
+CREATE TABLE IF NOT EXISTS installed_soundpacks (
+    soundpack_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    installed_last_updated_time TEXT NOT NULL,
+    PRIMARY KEY (soundpack_id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This composite index speeds up queries that filter by game_variant.
+CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_soundpacks (game_variant);
