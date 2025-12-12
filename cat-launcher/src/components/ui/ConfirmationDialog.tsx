@@ -17,6 +17,7 @@ interface ConfirmationDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
+  children?: React.ReactNode;
 }
 
 export function ConfirmationDialog({
@@ -27,6 +28,7 @@ export function ConfirmationDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  children,
 }: ConfirmationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -35,6 +37,7 @@ export function ConfirmationDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+        {children}
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline">{cancelText}</Button>
