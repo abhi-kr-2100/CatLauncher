@@ -1,9 +1,10 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use downloader::progress::Reporter;
-use downloader::{Download, Downloader};
 use serde::{Deserialize, Serialize};
+
+use crate::infra::download::{Downloader, DownloadFileError};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct GitHubAsset {
@@ -16,28 +17,19 @@ pub struct GitHubAsset {
 #[derive(thiserror::Error, Debug)]
 pub enum AssetDownloadError {
     #[error("failed to download asset: {0}")]
-    Download(#[from] downloader::Error),
-
-    #[error("no download result found")]
-    NoDownloadResult,
+    Download(#[from] DownloadFileError),
 }
 
 impl GitHubAsset {
     pub async fn download(
         &self,
-        downloader: &mut Downloader,
+        downloader: &Downloader,
+        download_dir: &Path,
         progress: Arc<dyn Reporter + Send + Sync>,
     ) -> Result<PathBuf, AssetDownloadError> {
-        let dl = Download::new(&self.browser_download_url).progress(progress);
-        let results = downloader.async_download(&[dl]).await?;
-
-        if let Some(res) = results.into_iter().next() {
-            match res {
-                Ok(summary) => Ok(summary.file_name),
-                Err(e) => Err(e.into()),
-            }
-        } else {
-            Err(AssetDownloadError::NoDownloadResult)
-        }
+        downloader
+            .download_file(&self.browser_download_url, download_dir, progress)
+            .await
+            .map_err(AssetDownloadError::from)
     }
 }
