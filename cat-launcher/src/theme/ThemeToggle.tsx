@@ -16,14 +16,13 @@ export default function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      onClick={() => toggleTheme()}
+      onClick={toggleTheme}
       aria-label="Toggle theme"
       title="Toggle theme"
       disabled={isUpdating}
       className="text-muted-foreground hover:text-primary"
     >
       <Icon className="h-4 w-4" />
-      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }

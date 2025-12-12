@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+
 import gameSessionReducer from "./gameSessionSlice";
 import installationProgressReducer from "./installationProgressSlice";
 import releasesReducer from "./releasesSlice";
