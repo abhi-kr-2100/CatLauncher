@@ -68,7 +68,7 @@ function PlayPage() {
         items={orderedItems.map((item) => item.id)}
         strategy={verticalListSortingStrategy}
       >
-        <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2 p-2">
+        <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2">
           {orderedItems.map((variantInfo) => (
             <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
           ))}

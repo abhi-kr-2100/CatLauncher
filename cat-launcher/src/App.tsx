@@ -6,11 +6,13 @@ function App() {
   return (
     <BrowserRouter>
       <NavBar />
-      <Routes>
-        {routes.map((route) => (
-          <Route key={route.path} path={route.path} element={route.element} />
-        ))}
-      </Routes>
+      <div className="p-2">
+        <Routes>
+          {routes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </div>
     </BrowserRouter>
   );
 }
