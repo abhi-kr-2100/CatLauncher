@@ -64,3 +64,7 @@ export function setImmediateInterval(callback: () => void, timeout?: number) {
 
   return setInterval(callback, timeout);
 }
+
+export function getHumanFriendlyText(text: string): string {
+  return text.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+}

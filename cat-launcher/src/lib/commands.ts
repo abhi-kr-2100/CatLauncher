@@ -11,6 +11,8 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
+import type { Mod } from "@/generated-types/Mod";
+import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
@@ -229,5 +231,43 @@ export async function setPreferredTheme(theme: Theme): Promise<void> {
 
 export async function getUserId(): Promise<string> {
   const response = await invoke<string>("get_user_id");
+  return response;
+}
+
+export async function installMod(
+  variant: GameVariant,
+  modId: string,
+): Promise<void> {
+  await invoke("install_mod", {
+    variant,
+    modId,
+  });
+}
+
+export async function listAllMods(variant: GameVariant): Promise<Mod[]> {
+  const response = await invoke<Mod[]>("list_all_mods", {
+    variant,
+  });
+  return response;
+}
+
+export async function uninstallModForVariant(
+  variant: GameVariant,
+  modId: string,
+): Promise<void> {
+  await invoke("uninstall_mod_for_variant", {
+    variant,
+    modId,
+  });
+}
+
+export async function getModInstallationStatus(
+  variant: GameVariant,
+  modId: string,
+): Promise<ModInstallationStatus> {
+  const response = await invoke<ModInstallationStatus>("get_mod_installation_status", {
+    variant,
+    modId,
+  });
   return response;
 }

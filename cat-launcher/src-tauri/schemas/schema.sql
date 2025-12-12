@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- This table stores the persisted theme preference for the launcher UI.
 CREATE TABLE IF NOT EXISTS theme_preferences (
-    _id INTEGER PRIMARY KEY CHECK(_id = 1),
+    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
     theme TEXT NOT NULL,
     FOREIGN KEY (theme) REFERENCES themes (name)
 );
@@ -107,3 +107,14 @@ CREATE TABLE IF NOT EXISTS manual_backups (
 
 -- This composite index speeds up queries that filter by game_variant and order by timestamp.
 CREATE INDEX IF NOT EXISTS idx_manual_backups_game_variant_timestamp ON manual_backups (game_variant, timestamp);
+
+-- This table stores installed third-party mods for each game variant.
+CREATE TABLE IF NOT EXISTS installed_mods (
+    mod_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    PRIMARY KEY (mod_id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+-- This index speeds up queries that filter by game_variant.
+CREATE INDEX IF NOT EXISTS idx_installed_mods_game_variant ON installed_mods (game_variant);

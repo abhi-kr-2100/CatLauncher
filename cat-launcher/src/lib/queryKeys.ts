@@ -25,4 +25,9 @@ export const queryKeys = {
   manualBackups: (variant: GameVariant) => ["manual-backups", variant] as const,
 
   themePreference: () => ["theme_preference"] as const,
+
+  mods: (variant: GameVariant) => ["mods", variant] as const,
+
+  modInstallationStatus: (variant: GameVariant, modId: string) =>
+    ["mod_installation_status", variant, modId] as const,
 };

@@ -1,0 +1,166 @@
+{
+  "DarkDaysAhead": [
+    {
+      "id": "arcana",
+      "name": "Arcana and Magic Items",
+      "authors": ["chaosvolt"],
+      "maintainers": ["Zlorthishen"],
+      "description": "Arcana and Magic Items mod for Cataclysm: Dark Days Ahead",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/cdda-arcana-mod/archive/refs/heads/master.zip",
+        "mod_dir": "cdda-arcana-mod-master/Arcana"
+      }
+    },
+    {
+      "id": "tefnuts_expansion",
+      "name": "Cataclysm: Second Chance",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "An expansion for Cataclysm:DDA that intends to add a little of everything",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Tefnuts-Expansion/archive/refs/heads/master.zip",
+        "mod_dir": "Tefnuts-Expansion-master/Tefnut's Expansion/expansion_tefnut"
+      }
+    },
+    {
+      "id": "fallout_in_cdda",
+      "name": "Fallout New England",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A mod that adds fallout content to CDDA",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Fallout-in-CDDA/archive/refs/heads/master.zip",
+        "mod_dir": "Fallout-in-CDDA-master/Fallout-CDDA"
+      }
+    },
+    {
+      "id": "tame_ants",
+      "name": "Tame Bugs",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A mod for Cataclysm: Dark Days Ahead. Contains the ability to tame various insects.",
+      "category": "creatures",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/CDDA-tame-ants/archive/refs/heads/master.zip",
+        "mod_dir": "CDDA-tame-ants-master"
+      }
+    },
+    {
+      "id": "fallout_new_england_remastered",
+      "name": "Fallout: New England Remastered",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A remastering of my original Fallout mod for C:DDA. Should work with newest Bright Nights release for as long as I update and maintain it.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Fallout-New-England-Remastered/archive/refs/heads/main.zip",
+        "mod_dir": "Fallout-New-England-Remastered-main/FNE-Remastered"
+      }
+    }
+  ],
+
+  "TheLastGeneration": [
+    {
+      "id": "mind_over_matter",
+      "name": "Mind Over Matter",
+      "authors": ["StandingStorm"],
+      "maintainers": ["Vegetabs"],
+      "description": "Port of MoM from CDDA to CTLG. Adds nine separate psionic power paths to Cataclysm including Biokinesis, Clairsentience, Electrokinesis, Photokinesis, Pyrokinesis, Telekinesis, Telepathy, Teleportation, and Vitakinesis.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/MindOverMatter-CTLG/archive/refs/heads/main.zip",
+        "mod_dir": "MindOverMatter-CTLG-main"
+      }
+    },
+    {
+      "id": "bionics_expanded",
+      "name": "Bionics Expanded",
+      "authors": ["Vegetabs"],
+      "maintainers": ["Vegetabs"],
+      "description": "Expanded bionics system for Cataclysm: The Last Generation.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/BionicsExpanded-CTLG/archive/refs/heads/main.zip",
+        "mod_dir": "BionicsExpanded-CTLG-main"
+      }
+    },
+    {
+      "id": "mythical_martial_arts",
+      "name": "Mythical Martial Arts",
+      "authors": ["Photoloss"],
+      "maintainers": ["Vegetabs"],
+      "description": "Mythical martial arts mod ported to Cataclysm: The Last Generation.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/MythicalMartialArts-CTLG/archive/refs/heads/main.zip",
+        "mod_dir": "MythicalMartialArts-CTLG-main"
+      }
+    }
+  ],
+
+  "BrightNights": [
+    {
+      "id": "cataclysm_second_chance",
+      "name": "Cataclysm: Second Chance",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A mod for Cataclysm: Bright Nights which adds my own custom content to it",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Cataclysm-Second-Chance/archive/refs/heads/main.zip",
+        "mod_dir": "Cataclysm-Second-Chance-main/Second Chance Redux"
+      }
+    },
+    {
+      "id": "better_holsters",
+      "name": "Better Holsters",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A mod for Cataclysm: Bright Nights that improves the holster experience",
+      "category": "items",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Better-Holsters/archive/refs/heads/main.zip",
+        "mod_dir": "Better-Holsters-main/Better Holsters"
+      }
+    },
+    {
+      "id": "fallout_new_england_remastered",
+      "name": "Fallout: New England Remastered",
+      "authors": ["Tefnut"],
+      "maintainers": ["Tefnut"],
+      "description": "A remastering of my original Fallout mod for C:DDA. Should work with newest Bright Nights release for as long as I update and maintain it.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Fallout-New-England-Remastered/archive/refs/heads/main.zip",
+        "mod_dir": "Fallout-New-England-Remastered-main/FNE-Remastered"
+      }
+    },
+    {
+      "id": "realdarkskies",
+      "name": "Really Dark Skies",
+      "authors": ["Zlorthishen"],
+      "maintainers": ["Zlorthishen"],
+      "description": "Really Dark Skies. The community supported mod that enhances the Bright Nights experience by adding an inscrutable alien-humanoid paramilitary expeditionary force to your typical survival scenario.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Zlorthishen/Really_Dark_Skies/archive/refs/heads/main.zip",
+        "mod_dir": "Really_Dark_Skies-main/Really_Dark_Skies"
+      }
+    },
+    {
+      "id": "arcology",
+      "name": "The Arcology Mod",
+      "authors": ["Zlorthishen"],
+      "maintainers": ["Zlorthishen"],
+      "description": "The mod that adds Arcology-type buildings, very large, self-contained buildings with a Cyberpunk aesthetic to Bright Nights.",
+      "category": "buildings",
+      "installation": {
+        "download_url": "https://github.com/Zlorthishen/The_Arcology_Mod/archive/refs/heads/main.zip",
+        "mod_dir": "The_Arcology_Mod-main/Arcology_Mod"
+      }
+    }
+  ]
+}

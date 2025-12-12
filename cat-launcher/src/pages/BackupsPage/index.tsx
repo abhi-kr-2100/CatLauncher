@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Combobox } from "@/components/ui/combobox";
+import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
@@ -80,19 +80,11 @@ function BackupsPage() {
   return (
     <div className="flex flex-col gap-4 p-2">
       <div className="flex items-center gap-4">
-        <Combobox
-          items={gameVariants.map((v) => ({
-            value: v.id,
-            label: v.name,
-          }))}
-          value={selectedVariant ?? undefined}
-          onChange={(value) => setSelectedVariant(value as GameVariant)}
-          placeholder={
-            gameVariantsLoading ? "Loading..." : "Select a game variant"
-          }
-          disabled={gameVariantsLoading}
-          autoselect={true}
-          className="w-72"
+        <VariantSelector
+          gameVariants={gameVariants}
+          selectedVariant={selectedVariant}
+          onVariantChange={setSelectedVariant}
+          isLoading={gameVariantsLoading}
         />
         <Button
           onClick={() => setNewManualDialogOpen(true)}

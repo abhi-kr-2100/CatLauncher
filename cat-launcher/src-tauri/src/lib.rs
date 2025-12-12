@@ -11,6 +11,7 @@ mod install_release;
 pub mod active_release;
 mod launch_game;
 mod manual_backups;
+mod mods;
 mod play_time;
 mod theme;
 mod users;
@@ -30,6 +31,7 @@ use crate::manual_backups::commands::{
     create_manual_backup_for_variant, delete_manual_backup_by_id, list_manual_backups_for_variant,
     restore_manual_backup_by_id,
 };
+use crate::mods::commands::{get_mod_installation_status, install_mod, list_all_mods, uninstall_mod_for_variant};
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::theme::commands::{get_preferred_theme, set_preferred_theme};
 use crate::users::commands::get_user_id;
@@ -76,6 +78,10 @@ pub fn run() {
             get_user_id,
             get_preferred_theme,
             set_preferred_theme,
+            list_all_mods,
+            install_mod,
+            uninstall_mod_for_variant,
+            get_mod_installation_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
