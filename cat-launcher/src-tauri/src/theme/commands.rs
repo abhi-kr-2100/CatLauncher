@@ -18,8 +18,7 @@ pub enum GetPreferredThemeCommandError {
 pub async fn get_preferred_theme(
     repository: State<'_, SqliteThemePreferenceRepository>,
 ) -> Result<ThemePreference, GetPreferredThemeCommandError> {
-    let preference = get_theme_preference(repository.inner()).await?;
-    Ok(preference)
+    Ok(get_theme_preference(repository.inner()).await?)
 }
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
@@ -33,6 +32,5 @@ pub async fn set_preferred_theme(
     theme: Theme,
     repository: State<'_, SqliteThemePreferenceRepository>,
 ) -> Result<(), SetPreferredThemeCommandError> {
-    update_theme_preference(theme, repository.inner()).await?;
-    Ok(())
+    Ok(update_theme_preference(theme, repository.inner()).await?)
 }

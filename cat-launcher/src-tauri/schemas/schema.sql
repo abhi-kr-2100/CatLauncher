@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- This table stores the persisted theme preference for the launcher UI.
 CREATE TABLE IF NOT EXISTS theme_preferences (
-    _id INTEGER PRIMARY KEY CHECK(_id = 1),
+    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
     theme TEXT NOT NULL,
     FOREIGN KEY (theme) REFERENCES themes (name)
 );
