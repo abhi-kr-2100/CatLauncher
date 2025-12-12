@@ -359,3 +359,19 @@ pub async fn get_or_create_manual_backup_archive_filepath(
 
     Ok(backup_dir.join(format!("{}_{}.zip", id, get_safe_filename(name))))
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum GetOrCreateDirectoryError {
+    #[error("failed to create directory: {0}")]
+    DirFailed(#[from] io::Error),
+}
+
+pub async fn get_or_create_directory(
+    prefix: &Path,
+    dir: &str,
+) -> Result<PathBuf, GetOrCreateDirectoryError> {
+    let dir_path = prefix.join(dir);
+    create_dir_all(&dir_path).await?;
+
+    Ok(dir_path)
+}
