@@ -2,9 +2,10 @@ import { useMemo, useState } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { ReleaseType } from "@/generated-types/ReleaseType";
-import { GameRelease } from "@/generated-types/GameRelease";
+import { useAppSelector } from "@/store/hooks";
 
 export type FilterFn = (r: GameRelease) => boolean;
 
@@ -59,6 +60,19 @@ export default function ReleaseFilter({
     filters.map((f) => f.id), // default to all filters selected
   );
 
+  const installationStatuses = useAppSelector(
+    (state) => state.installationProgress.statusByVariant[variant],
+  );
+
+  const isInProgress = useMemo(() => {
+    if (!installationStatuses) {
+      return false;
+    }
+    return Object.values(installationStatuses).some(
+      (status) => status === "Downloading" || status === "Installing",
+    );
+  }, [installationStatuses]);
+
   function handleCheckedChange(checked: boolean, filterId: ReleaseType) {
     const appliedFilterIds = new Set(selectedFilterIds);
 
@@ -93,6 +107,7 @@ export default function ReleaseFilter({
               onCheckedChange={(checked: boolean) =>
                 handleCheckedChange(checked, filter.id)
               }
+              disabled={isInProgress}
             />
             <Label htmlFor={key} className="text-sm font-medium">
               {filter.label}
