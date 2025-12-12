@@ -1,7 +1,7 @@
+import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx, { type ClassValue } from "clsx";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -63,4 +63,8 @@ export function setImmediateInterval(callback: () => void, timeout?: number) {
   callback();
 
   return setInterval(callback, timeout);
+}
+
+export function getHumanFriendlyText(text: string): string {
+  return text.replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
