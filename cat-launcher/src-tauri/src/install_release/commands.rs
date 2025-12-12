@@ -11,12 +11,11 @@ use crate::active_release::repository::sqlite_active_release_repository::SqliteA
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
-use crate::infra::http_client::HTTP_CLIENT;
+use crate::infra::download::Downloader;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
 use crate::install_release::channel_reporter::ChannelReporter;
 use crate::install_release::install_release::ReleaseInstallationError;
 use crate::install_release::installation_progress_payload::InstallationProgressPayload;
-use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
@@ -37,6 +36,7 @@ pub enum InstallReleaseCommandError {
     Arch(#[from] ArchNotSupportedError),
 }
 
+
 #[command]
 pub async fn install_release(
     app_handle: AppHandle,
@@ -44,7 +44,7 @@ pub async fn install_release(
     release_id: &str,
     releases_repository: State<'_, SqliteReleasesRepository>,
     active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-    settings: State<'_, Settings>,
+    downloader: State<'_, Downloader>,
     on_download_progress: Channel,
 ) -> Result<GameRelease, InstallReleaseCommandError> {
     let data_dir = app_handle.path().app_local_data_dir()?;
@@ -75,14 +75,13 @@ pub async fn install_release(
 
     release
         .install_release(
-            &HTTP_CLIENT,
+            &downloader,
             &os,
             &arch,
             &data_dir,
             &resource_dir,
             &*releases_repository,
             &*active_release_repository,
-            &settings,
             on_status_update,
             progress,
         )
