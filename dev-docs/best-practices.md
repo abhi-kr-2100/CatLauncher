@@ -65,6 +65,6 @@ pub enum InstallModError {
 
 The project provides shared utilities that should be reused:
 
--   **HTTP Client:** Use `HTTP_CLIENT` from `src-tauri/src/infra/http_client.rs` instead of creating new `reqwest::Client` instances.
+-   **HTTP Client:** The `reqwest::Client` is managed by Tauri. To use it in a command, add `client: State<reqwest::Client>` to the function's parameters.
 -   **Archive Extraction:** Use `extract_archive` from `src-tauri/src/infra/archive.rs` for extracting zip, tar.gz, dmg, and rar files.
 -   **Directory Copying:** Use `copy_dir_all` from `src-tauri/src/filesystem/utils.rs` for recursive directory copying.
