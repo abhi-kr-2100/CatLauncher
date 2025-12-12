@@ -3,8 +3,7 @@ use strum::{Display, EnumIter, EnumString, IntoStaticStr};
 use ts_rs::TS;
 
 use crate::theme::theme_preference_repository::{
-    ThemePreferenceRepository,
-    ThemePreferenceRepositoryError,
+    ThemePreferenceRepository, ThemePreferenceRepositoryError,
 };
 
 #[derive(
@@ -43,10 +42,7 @@ pub enum GetThemeError {
 pub async fn get_theme_preference(
     repository: &impl ThemePreferenceRepository,
 ) -> Result<ThemePreference, GetThemeError> {
-    repository
-        .get_preferred_theme()
-        .await
-        .map_err(GetThemeError::from)
+    Ok(repository.get_preferred_theme().await?)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -59,8 +55,6 @@ pub async fn update_theme_preference(
     theme: Theme,
     repository: &impl ThemePreferenceRepository,
 ) -> Result<(), UpdateThemeError> {
-    repository
-        .set_preferred_theme(&theme)
-        .await
-        .map_err(UpdateThemeError::from)
+    repository.set_preferred_theme(&theme).await?;
+    Ok(())
 }
