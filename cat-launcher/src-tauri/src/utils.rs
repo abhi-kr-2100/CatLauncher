@@ -5,14 +5,16 @@ use std::time::Duration;
 use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Listener, Manager};
 
+use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::backups::migration::migrate_older_automatic_backups;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
 use crate::infra::autoupdate::update::run_updater;
+use crate::infra::download::Downloader;
+use crate::infra::http_client::create_http_client;
 use crate::infra::repository::db_schema::initialize_schema;
 use crate::infra::repository::db_schema::InitializeSchemaError;
-use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
@@ -118,6 +120,18 @@ pub fn migrate_backups(app: &App) {
             eprintln!("Failed to migrate backups: {}", e);
         }
     });
+}
+
+pub fn manage_downloader(app: &App) {
+    let settings: tauri::State<Settings> = app.state();
+    let client: tauri::State<reqwest::Client> = app.state();
+    let downloader = Downloader::new(client.inner().clone(), settings.parallel_requests);
+    app.manage(downloader);
+}
+
+pub fn manage_http_client(app: &App) {
+    let client = create_http_client();
+    app.manage(client);
 }
 
 pub fn manage_posthog(app: &App) {

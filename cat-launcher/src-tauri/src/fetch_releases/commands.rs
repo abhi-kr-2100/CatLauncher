@@ -1,3 +1,4 @@
+use reqwest::Client;
 use strum::IntoStaticStr;
 use tauri::{command, AppHandle, Emitter, Manager, State};
 
@@ -5,7 +6,6 @@ use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::fetch_releases::{FetchReleasesError, ReleasesUpdatePayload};
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::infra::http_client::HTTP_CLIENT;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
@@ -22,6 +22,7 @@ pub async fn fetch_releases_for_variant(
     app_handle: AppHandle,
     variant: GameVariant,
     releases_repository: State<'_, SqliteReleasesRepository>,
+    client: State<'_, Client>,
 ) -> Result<(), FetchReleasesCommandError> {
     let resources_dir = app_handle.path().resource_dir()?;
 
@@ -32,7 +33,7 @@ pub async fn fetch_releases_for_variant(
 
     variant
         .fetch_releases(
-            &HTTP_CLIENT,
+            &client,
             &resources_dir,
             &*releases_repository,
             on_releases,

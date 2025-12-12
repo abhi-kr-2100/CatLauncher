@@ -2,7 +2,6 @@ use std::path::Path;
 use std::sync::Arc;
 
 use downloader::progress::Reporter;
-use reqwest::Client;
 use tokio::fs;
 
 use crate::active_release::active_release::ActiveReleaseError;
@@ -14,14 +13,13 @@ use crate::filesystem::paths::{
 };
 use crate::game_release::game_release::{GameRelease, GameReleaseStatus};
 use crate::infra::archive::{extract_archive, ExtractionError};
+use crate::infra::download::Downloader;
 use crate::infra::github::asset::AssetDownloadError;
-use crate::infra::http_client::create_downloader;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_progress_payload::{
     InstallationProgressPayload, InstallationProgressStatus,
 };
 use crate::install_release::installation_status::status::GetInstallationStatusError;
-use crate::settings::Settings;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> {
@@ -56,14 +54,13 @@ pub enum ReleaseInstallationError<E: std::error::Error + Send + Sync + 'static> 
 impl GameRelease {
     pub async fn install_release<E: std::error::Error + Send + Sync + 'static, F, Fut>(
         &mut self,
-        client: &Client,
+        downloader: &Downloader,
         os: &OS,
         arch: &Arch,
         data_dir: &Path,
         resources_dir: &Path,
         releases_repository: &dyn ReleasesRepository,
         active_release_repository: &dyn ActiveReleaseRepository,
-        settings: &Settings,
         on_status_update: F,
         progress: Arc<dyn Reporter + Send + Sync>,
     ) -> Result<(), ReleaseInstallationError<E>>
@@ -99,9 +96,7 @@ impl GameRelease {
             .await
             .map_err(ReleaseInstallationError::Callback)?;
 
-            let mut downloader =
-                create_downloader(client.clone(), &download_dir, settings.parallel_requests)?;
-            asset.download(&mut downloader, progress).await?;
+            asset.download(downloader, &download_dir, progress).await?;
             self.status = GameReleaseStatus::NotInstalled;
         }
 
@@ -155,7 +150,7 @@ async fn delete_other_installations(installation_dir: &Path) {
 
     while let Ok(Some(entry)) = entries.next_entry().await {
         let path = entry.path();
-        
+
         let Ok(metadata) = fs::metadata(&path).await else {
             continue;
         };
