@@ -4,13 +4,16 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { fetchGameVariantsInfo, updateGameVariantOrder } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+import { useEffect } from "react";
 
 interface UseGameVariantsOptions {
   onOrderUpdateError?: (error: unknown) => void;
+  onFetchError?: (error: unknown) => void;
 }
 
 export function useGameVariants({
   onOrderUpdateError,
+  onFetchError,
 }: UseGameVariantsOptions = {}) {
   const queryClient = useQueryClient();
 
@@ -24,11 +27,23 @@ export function useGameVariants({
     queryFn: fetchGameVariantsInfo,
   });
 
+  useEffect(() => {
+    if (isError) {
+      onFetchError?.(error);
+    }
+  }, [isError, error, onFetchError]);
+
   const { mutate } = useMutation({
-    mutationFn: ({ ids }: { ids: GameVariant[]; newItems: GameVariantInfo[] }) =>
-      updateGameVariantOrder(ids),
+    mutationFn: ({
+      ids,
+    }: {
+      ids: GameVariant[];
+      newItems: GameVariantInfo[];
+    }) => updateGameVariantOrder(ids),
     onMutate: async ({ newItems }) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.gameVariantsInfo() });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.gameVariantsInfo(),
+      });
 
       const previousGameVariants = queryClient.getQueryData<GameVariantInfo[]>(
         queryKeys.gameVariantsInfo(),
