@@ -1,8 +1,10 @@
 import { useState } from "react";
 
+import { SearchInput } from "@/components/SearchInput";
 import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { useSearch } from "@/hooks/useSearch";
 import TilesetsList from "./TilesetsList";
 
 function TilesetsPage() {
@@ -10,6 +12,10 @@ function TilesetsPage() {
     useGameVariants();
   const [selectedVariant, setSelectedVariant] =
     useState<GameVariant | null>(null);
+
+  const { searchInput, setSearchInput } = useSearch([], {
+    debounceDelay: 300,
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -19,7 +25,21 @@ function TilesetsPage() {
         onVariantChange={setSelectedVariant}
         isLoading={gameVariantsLoading}
       />
-      {selectedVariant && <TilesetsList variant={selectedVariant} />}
+      {selectedVariant && (
+        <>
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search tilesets..."
+            className="mb-4 mt-2"
+          />
+          <TilesetsList
+            variant={selectedVariant}
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+          />
+        </>
+      )}
     </div>
   );
 }
