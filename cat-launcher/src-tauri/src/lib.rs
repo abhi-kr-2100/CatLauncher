@@ -13,6 +13,7 @@ mod launch_game;
 mod manual_backups;
 mod mods;
 mod play_time;
+mod soundpacks;
 mod theme;
 mod tilesets;
 mod users;
@@ -37,6 +38,10 @@ use crate::mods::commands::{
     list_all_mods_command, uninstall_third_party_mod_command,
 };
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
+use crate::soundpacks::commands::{
+    get_third_party_soundpack_installation_status_command, install_third_party_soundpack_command,
+    list_all_soundpacks_command, uninstall_third_party_soundpack_command,
+};
 use crate::theme::commands::{get_preferred_theme, set_preferred_theme};
 use crate::tilesets::commands::{
     get_third_party_tileset_installation_status_command, install_third_party_tileset_command,
@@ -94,6 +99,10 @@ pub fn run() {
             install_third_party_tileset_command,
             uninstall_third_party_tileset_command,
             get_third_party_tileset_installation_status_command,
+            list_all_soundpacks_command,
+            install_third_party_soundpack_command,
+            uninstall_third_party_soundpack_command,
+            get_third_party_soundpack_installation_status_command,
             get_user_id,
             get_preferred_theme,
             set_preferred_theme,
