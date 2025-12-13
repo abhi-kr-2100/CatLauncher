@@ -1,0 +1,52 @@
+{
+  "DarkDaysAhead": {
+    "xedra_evolved_innawoods": {
+      "id": "xedra_evolved_innawoods",
+      "name": "XedraWood: Stone and Sorcery",
+      "description": "Better blending for Xedra Evolved and Innawoods.  Also forms the core for a number of optional supplemental mods.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Standing-Storm/ccda-xedra-evolved-innawoods/archive/refs/heads/main.zip",
+        "modinfo": "ccda-xedra-evolved-innawoods-master/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Standing-Storm/ccda-xedra-evolved-innawoods"
+      }
+    }
+  },
+
+  "BrightNights": {
+    "realdarkskies": {
+      "id": "realdarkskies",
+      "name": "Really Dark Skies",
+      "description": "A supplement mod that increments the Cataclysm Bright Nights experience by adding an inscrutable evil, extra-terrestrial humanoid paramilitary expeditionary force to your typical survival scenario. Complements to the vanilla adding the evil aliens 'The Xenoids', a regenerating, alternative style of zombies called 'Strays', and terrifyingly armored [REDACTED], and even expansions to old foes like Mi-Go's, and Triffids! Prepare for a challenge.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Zlorthishen/Really_Dark_Skies/archive/refs/heads/main.zip",
+        "modinfo": "Really_Dark_Skies-master/Really_Dark_Skies/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Zlorthishen/Really_Dark_Skies"
+      }
+    }
+  },
+
+  "TheLastGeneration": {
+    "mindovermatter": {
+      "id": "mindovermatter",
+      "name": "Mind Over Matter",
+      "description": "Psionic powers for Cataclysm.  The Readme contains extensive information on how the process of gaining and using powers works, so make sure to check it if you're confused.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/MindOverMatter-CTLG/archive/refs/heads/main.zip",
+        "modinfo": "MindOverMatter-CTLG/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Vegetabs/MindOverMatter-CTLG"
+      }
+    }
+  }
+}

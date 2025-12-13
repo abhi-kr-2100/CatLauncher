@@ -107,3 +107,13 @@ CREATE TABLE IF NOT EXISTS manual_backups (
 
 -- This composite index speeds up queries that filter by game_variant and order by timestamp.
 CREATE INDEX IF NOT EXISTS idx_manual_backups_game_variant_timestamp ON manual_backups (game_variant, timestamp);
+
+-- This table stores installed mods for each game variant.
+CREATE TABLE IF NOT EXISTS installed_mods (
+    mod_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    PRIMARY KEY (mod_id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_installed_mods_game_variant ON installed_mods (game_variant);
