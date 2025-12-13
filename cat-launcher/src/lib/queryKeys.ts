@@ -25,4 +25,8 @@ export const queryKeys = {
   manualBackups: (variant: GameVariant) => ["manual-backups", variant] as const,
 
   themePreference: () => ["theme_preference"] as const,
+
+  mods: {
+    listAll: (variant: GameVariant) => ["mods", variant] as const,
+  },
 };
