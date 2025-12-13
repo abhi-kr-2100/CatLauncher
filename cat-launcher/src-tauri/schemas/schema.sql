@@ -117,3 +117,13 @@ CREATE TABLE IF NOT EXISTS installed_mods (
 );
 
 CREATE INDEX IF NOT EXISTS idx_installed_mods_game_variant ON installed_mods (game_variant);
+
+-- This table stores installed tilesets for each game variant.
+CREATE TABLE IF NOT EXISTS installed_tilesets (
+    tileset_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    PRIMARY KEY (tileset_id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_installed_tilesets_game_variant ON installed_mods (game_variant);
