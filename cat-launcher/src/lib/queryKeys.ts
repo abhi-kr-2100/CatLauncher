@@ -31,4 +31,10 @@ export const queryKeys = {
     installationStatus: (modId: string, variant: GameVariant) =>
       ["mods", "installation_status", modId, variant] as const,
   },
+
+  tilesets: {
+    listAll: (variant: GameVariant) => ["tilesets", variant] as const,
+    installationStatus: (tilesetId: string, variant: GameVariant) =>
+      ["tilesets", "installation_status", tilesetId, variant] as const,
+  },
 };
