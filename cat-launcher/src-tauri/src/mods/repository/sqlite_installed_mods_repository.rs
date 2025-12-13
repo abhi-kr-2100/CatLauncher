@@ -102,4 +102,32 @@ impl InstalledModsRepository for SqliteInstalledModsRepository {
         .await
         .map_err(|e| InstalledModsRepositoryError::Database(e.to_string()))?
     }
+
+    async fn is_mod_installed(
+        &self,
+        mod_id: &str,
+        game_variant: &GameVariant,
+    ) -> Result<bool, InstalledModsRepositoryError> {
+        let pool = self.pool.clone();
+        let mod_id = mod_id.to_string();
+        let variant_name = game_variant.to_string();
+
+        tokio::task::spawn_blocking(move || {
+            let conn = pool
+                .get()
+                .map_err(|e| InstalledModsRepositoryError::Database(e.to_string()))?;
+
+            let mut stmt = conn
+                .prepare("SELECT 1 FROM installed_mods WHERE mod_id = ?1 AND game_variant = ?2")
+                .map_err(|e| InstalledModsRepositoryError::Database(e.to_string()))?;
+
+            let exists = stmt
+                .exists([&mod_id, &variant_name])
+                .map_err(|e| InstalledModsRepositoryError::Database(e.to_string()))?;
+
+            Ok(exists)
+        })
+        .await
+        .map_err(|e| InstalledModsRepositoryError::Database(e.to_string()))?
+    }
 }

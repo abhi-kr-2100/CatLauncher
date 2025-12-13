@@ -28,5 +28,7 @@ export const queryKeys = {
 
   mods: {
     listAll: (variant: GameVariant) => ["mods", variant] as const,
+    installationStatus: (modId: string, variant: GameVariant) =>
+      ["mods", "installation_status", modId, variant] as const,
   },
 };

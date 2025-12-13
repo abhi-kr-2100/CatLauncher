@@ -8,10 +8,13 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::download::Downloader;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::mods::get_third_party_mod_installation_status::{
+    get_third_party_mod_installation_status, GetThirdPartyModInstallationStatusError,
+};
 use crate::mods::install_third_party_mod::{install_third_party_mod, InstallThirdPartyModError};
 use crate::mods::list_all_mods::{list_all_mods, ListAllModsError};
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
-use crate::mods::types::Mod;
+use crate::mods::types::{Mod, ModInstallationStatus};
 use crate::mods::uninstall_third_party_mod::{
     uninstall_third_party_mod, UninstallThirdPartyModError,
 };
@@ -107,4 +110,20 @@ pub async fn uninstall_third_party_mod_command(
 ) -> Result<(), UninstallThirdPartyModCommandError> {
     uninstall_third_party_mod(&mod_id, &game_variant, repository.inner()).await?;
     Ok(())
+}
+
+#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+pub enum GetThirdPartyModInstallationStatusCommandError {
+    #[error("failed to get mod installation status: {0}")]
+    GetStatus(#[from] GetThirdPartyModInstallationStatusError),
+}
+
+#[tauri::command]
+pub async fn get_third_party_mod_installation_status_command(
+    id: String,
+    variant: GameVariant,
+    repository: State<'_, SqliteInstalledModsRepository>,
+) -> Result<ModInstallationStatus, GetThirdPartyModInstallationStatusCommandError> {
+    let status = get_third_party_mod_installation_status(&id, &variant, repository.inner()).await?;
+    Ok(status)
 }
