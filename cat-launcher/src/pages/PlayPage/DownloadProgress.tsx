@@ -5,7 +5,10 @@ interface DownloadProgressProps {
   total: number;
 }
 
-export function DownloadProgress({ downloaded, total }: DownloadProgressProps) {
+export function DownloadProgress({
+  downloaded,
+  total,
+}: DownloadProgressProps) {
   const progress = total > 0 ? (downloaded * 100) / total : 0;
 
   return (

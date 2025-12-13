@@ -9,11 +9,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UPDATE_LINK } from "@/lib/constants";
-import { AutoUpdateStatus, useAutoUpdateEvents } from "@/providers/hooks";
+import {
+  AutoUpdateStatus,
+  useAutoUpdateEvents,
+} from "@/providers/hooks";
 import { ExternalLink } from "./ui/ExternalLink";
 
 const AutoUpdateNotifier = () => {
-  const { autoUpdateStatus, resetAutoUpdateStatus } = useAutoUpdateEvents();
+  const { autoUpdateStatus, resetAutoUpdateStatus } =
+    useAutoUpdateEvents();
 
   return (
     <Dialog
@@ -25,7 +29,9 @@ const AutoUpdateNotifier = () => {
           <DialogTitle>Autoupdate Failed</DialogTitle>
           <DialogDescription>
             Please manually update the app by visiting
-            <ExternalLink href={UPDATE_LINK}>{UPDATE_LINK}</ExternalLink>
+            <ExternalLink href={UPDATE_LINK}>
+              {UPDATE_LINK}
+            </ExternalLink>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

@@ -30,7 +30,7 @@ interface VirtualizedCommandProps {
   items: ComboboxItem[];
   placeholder: string;
   value?: string;
-  onSelect?: (value: string) => void;
+  onSelect?: (_value: string) => void;
 }
 
 const VirtualizedCommand = ({
@@ -40,7 +40,8 @@ const VirtualizedCommand = ({
   value,
   onSelect,
 }: VirtualizedCommandProps) => {
-  const [filteredItems, setFilteredItems] = useState<ComboboxItem[]>(items);
+  const [filteredItems, setFilteredItems] =
+    useState<ComboboxItem[]>(items);
   const [focusedIndex, setFocusedIndex] = useState(0);
 
   const parentRef = useRef<HTMLDivElement | null>(null);
@@ -67,7 +68,9 @@ const VirtualizedCommand = ({
       return;
     }
 
-    const option = filteredItems.find((option) => option.value === value);
+    const option = filteredItems.find(
+      (option) => option.value === value,
+    );
     if (!option) {
       return;
     }
@@ -81,7 +84,10 @@ const VirtualizedCommand = ({
 
   return (
     <Command shouldFilter={false}>
-      <CommandInput onValueChange={handleSearch} placeholder={placeholder} />
+      <CommandInput
+        onValueChange={handleSearch}
+        placeholder={placeholder}
+      />
       <CommandList
         ref={parentRef}
         style={{
@@ -112,7 +118,9 @@ const VirtualizedCommand = ({
                   transform: `translateY(${virtualOption.start}px)`,
                 }}
                 value={filteredItems[virtualOption.index].value}
-                onMouseEnter={() => setFocusedIndex(virtualOption.index)}
+                onMouseEnter={() =>
+                  setFocusedIndex(virtualOption.index)
+                }
                 onMouseLeave={() => setFocusedIndex(-1)}
                 onSelect={onSelect}
               >
@@ -133,7 +141,9 @@ interface ComboboxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  autoselect?: boolean | ((items: ComboboxItem[]) => ComboboxItem | undefined);
+  autoselect?:
+    | boolean
+    | ((items: ComboboxItem[]) => ComboboxItem | undefined);
   className?: string;
 }
 
@@ -171,7 +181,9 @@ export function VirtualizedCombobox({
   return (
     <div className={className}>
       {label ? (
-        <div className="text-sm text-muted-foreground mb-2">{label}</div>
+        <div className="text-sm text-muted-foreground mb-2">
+          {label}
+        </div>
       ) : null}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -201,7 +213,9 @@ export function VirtualizedCombobox({
                 (i) => i.value === currentValue,
               )?.value;
               if (selectedValue === undefined) {
-                throw new Error("Combobox: Selected value not found in items");
+                throw new Error(
+                  "Combobox: Selected value not found in items",
+                );
               }
               onChange(selectedValue);
               setOpen(false);

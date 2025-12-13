@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import type { Theme } from "@/generated-types/Theme";
 import { getPreferredTheme, setPreferredTheme } from "@/lib/commands";
@@ -35,7 +39,8 @@ export function useTheme(onError?: (error: unknown) => void) {
       root.classList.remove("dark");
     }
 
-    root.style.colorScheme = currentTheme === "Dark" ? "dark" : "light";
+    root.style.colorScheme =
+      currentTheme === "Dark" ? "dark" : "light";
   }, [currentTheme]);
 
   const { mutate: toggleTheme, isPending: isUpdating } = useMutation({

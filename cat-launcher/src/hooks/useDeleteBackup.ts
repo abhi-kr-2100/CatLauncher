@@ -19,7 +19,9 @@ export function useDeleteBackup(
   const { mutate: deleteBackup } = useMutation({
     mutationFn: (id: bigint) => deleteBackupById(id),
     onMutate: async (id: bigint) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.backups(variant) });
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.backups(variant),
+      });
 
       const previousBackups = queryClient.getQueryData<BackupEntry[]>(
         queryKeys.backups(variant),
@@ -43,7 +45,9 @@ export function useDeleteBackup(
       onError?.(error);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.backups(variant) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.backups(variant),
+      });
     },
   });
 

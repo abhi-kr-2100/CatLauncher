@@ -6,10 +6,10 @@ import { useGameVariants } from "@/hooks/useGameVariants";
 import SoundpacksList from "./SoundpacksList";
 
 function SoundpacksPage() {
-  const { gameVariants, isLoading: gameVariantsLoading } = useGameVariants();
-  const [selectedVariant, setSelectedVariant] = useState<GameVariant | null>(
-    null,
-  );
+  const { gameVariants, isLoading: gameVariantsLoading } =
+    useGameVariants();
+  const [selectedVariant, setSelectedVariant] =
+    useState<GameVariant | null>(null);
 
   return (
     <div className="flex flex-col gap-2">
@@ -19,7 +19,9 @@ function SoundpacksPage() {
         onVariantChange={setSelectedVariant}
         isLoading={gameVariantsLoading}
       />
-      {selectedVariant && <SoundpacksList variant={selectedVariant} />}
+      {selectedVariant && (
+        <SoundpacksList variant={selectedVariant} />
+      )}
     </div>
   );
 }

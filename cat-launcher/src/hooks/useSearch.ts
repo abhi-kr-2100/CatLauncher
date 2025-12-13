@@ -20,7 +20,10 @@ export function useSearch<T extends SearchableItem>(
   const { debounceDelay = 300, searchFn } = options;
 
   const [searchInput, setSearchInput] = useState("");
-  const debouncedSearchQuery = useDebounce(searchInput, debounceDelay);
+  const debouncedSearchQuery = useDebounce(
+    searchInput,
+    debounceDelay,
+  );
 
   const filteredItems = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {
@@ -28,7 +31,9 @@ export function useSearch<T extends SearchableItem>(
     }
 
     const searchFunction = searchFn || defaultSearchFn;
-    return items.filter((item) => searchFunction(item, debouncedSearchQuery));
+    return items.filter((item) =>
+      searchFunction(item, debouncedSearchQuery),
+    );
   }, [items, debouncedSearchQuery, searchFn, defaultSearchFn]);
 
   return {
@@ -40,7 +45,10 @@ export function useSearch<T extends SearchableItem>(
   };
 }
 
-function defaultSearchFn(item: SearchableItem, query: string): boolean {
+function defaultSearchFn(
+  item: SearchableItem,
+  query: string,
+): boolean {
   const lowerQuery = query.toLowerCase().trim();
   return (
     item.name.toLowerCase().includes(lowerQuery) ||

@@ -26,9 +26,12 @@ export default function AboutPage() {
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-2xl font-bold">CatLauncher</h1>
         <p className="text-center">
-          An opinionated cross-platform launcher for Cataclysm games with modern social features.
+          An opinionated cross-platform launcher for Cataclysm games
+          with modern social features.
         </p>
-        <p className="text-muted-foreground text-sm">v{pkg.version}</p>
+        <p className="text-muted-foreground text-sm">
+          v{pkg.version}
+        </p>
       </div>
 
       <div className="flex flex-col gap-2">

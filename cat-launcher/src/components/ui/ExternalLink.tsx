@@ -1,10 +1,12 @@
+import { ReactNode } from "react";
+
 import { Button } from "@/components/ui/button";
 import { openLink } from "@/lib/utils";
 import { ExternalLinkIcon } from "lucide-react";
 
 interface ExternalLinkProps {
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function ExternalLink({ href, children }: ExternalLinkProps) {

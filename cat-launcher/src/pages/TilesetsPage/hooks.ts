@@ -1,4 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
@@ -17,13 +21,17 @@ export function useInstallThirdPartyTileset(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (tilesetId: string) => installThirdPartyTileset(tilesetId, variant),
+    mutationFn: (tilesetId: string) =>
+      installThirdPartyTileset(tilesetId, variant),
     onSuccess: (_data, tilesetId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tilesets.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.installationStatus(tilesetId, variant),
+        queryKey: queryKeys.tilesets.installationStatus(
+          tilesetId,
+          variant,
+        ),
       });
       onSuccess?.();
     },
@@ -41,8 +49,12 @@ export function useGetThirdPartyTilesetInstallationStatus(
   variant: GameVariant,
 ) {
   const query = useQuery({
-    queryKey: queryKeys.tilesets.installationStatus(tilesetId, variant),
-    queryFn: () => getThirdPartyTilesetInstallationStatus(tilesetId, variant),
+    queryKey: queryKeys.tilesets.installationStatus(
+      tilesetId,
+      variant,
+    ),
+    queryFn: () =>
+      getThirdPartyTilesetInstallationStatus(tilesetId, variant),
   });
 
   return {
@@ -59,13 +71,17 @@ export function useUninstallThirdPartyTileset(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (tilesetId: string) => uninstallThirdPartyTileset(tilesetId, variant),
+    mutationFn: (tilesetId: string) =>
+      uninstallThirdPartyTileset(tilesetId, variant),
     onSuccess: (_data, tilesetId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tilesets.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.installationStatus(tilesetId, variant),
+        queryKey: queryKeys.tilesets.installationStatus(
+          tilesetId,
+          variant,
+        ),
       });
       onSuccess?.();
     },
@@ -79,14 +95,14 @@ export function useUninstallThirdPartyTileset(
 }
 
 export function useListAllTilesets(variant: GameVariant) {
-    const query = useQuery({
-        queryKey: queryKeys.tilesets.listAll(variant),
-        queryFn: () => listAllTilesets(variant),
-    });
+  const query = useQuery({
+    queryKey: queryKeys.tilesets.listAll(variant),
+    queryFn: () => listAllTilesets(variant),
+  });
 
-    return {
-        tilesets: query.data,
-        isLoading: query.isLoading,
-        error: query.error,
-    };
+  return {
+    tilesets: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
 }

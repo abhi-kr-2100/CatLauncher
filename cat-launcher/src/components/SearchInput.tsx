@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 export interface SearchInputProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (_value: string) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;

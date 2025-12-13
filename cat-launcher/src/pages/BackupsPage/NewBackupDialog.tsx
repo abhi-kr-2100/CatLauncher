@@ -57,9 +57,14 @@ export function NewBackupDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Backup</DialogTitle>
-          <DialogDescription>Create a new manual backup.</DialogDescription>
+          <DialogDescription>
+            Create a new manual backup.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSave)}
+          className="space-y-4"
+        >
           <Field
             data-invalid={!!form.formState.errors.name}
             aria-invalid={!!form.formState.errors.name}

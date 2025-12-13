@@ -51,7 +51,9 @@ export function useReleaseEvents() {
   }, [dispatch]);
 }
 
-export function useAllReleasesInstallationStatuses(variant: GameVariant) {
+export function useAllReleasesInstallationStatuses(
+  variant: GameVariant,
+) {
   const releases = useAppSelector(
     (state) => state.releases.releasesByVariant[variant],
   );
@@ -70,7 +72,8 @@ export function useAllReleasesInstallationStatuses(variant: GameVariant) {
     return results.reduce(
       (acc, result, index) => {
         if (releases && releases[index]) {
-          acc[releases[index].version] = result.data as GameReleaseStatus;
+          acc[releases[index].version] =
+            result.data as GameReleaseStatus;
         }
         return acc;
       },
@@ -126,7 +129,8 @@ export function useInstallAndMonitorRelease(
     };
 
     const cleanup = setupEventListener(
-      (payload) => listenToInstallationStatusUpdate(selectedReleaseId, payload),
+      (payload) =>
+        listenToInstallationStatusUpdate(selectedReleaseId, payload),
       installationProgressStatusUpdate,
       "Failed to subscribe to installation progress.",
     );
@@ -141,15 +145,19 @@ export function useInstallAndMonitorRelease(
       if (!releaseId) {
         throw new Error("No release selected");
       }
-      return installReleaseForVariant(variant, releaseId, (progress) => {
-        dispatch(
-          setDownloadProgress({
-            variant,
-            releaseId,
-            progress,
-          }),
-        );
-      });
+      return installReleaseForVariant(
+        variant,
+        releaseId,
+        (progress) => {
+          dispatch(
+            setDownloadProgress({
+              variant,
+              releaseId,
+              progress,
+            }),
+          );
+        },
+      );
     },
 
     onSuccess: (updatedRelease, releaseId) => {
@@ -183,7 +191,11 @@ export function useInstallAndMonitorRelease(
       }
 
       dispatch(
-        setInstallationProgress({ variant, releaseId, status: "Success" }),
+        setInstallationProgress({
+          variant,
+          releaseId,
+          status: "Success",
+        }),
       );
     },
 
@@ -213,8 +225,12 @@ export function useInstallationStatus(
 ) {
   const { data: installationStatus, error: installationStatusError } =
     useQuery<GameReleaseStatus>({
-      queryKey: queryKeys.installationStatus(variant, selectedReleaseId),
-      queryFn: () => getInstallationStatus(variant, selectedReleaseId!),
+      queryKey: queryKeys.installationStatus(
+        variant,
+        selectedReleaseId,
+      ),
+      queryFn: () =>
+        getInstallationStatus(variant, selectedReleaseId!),
       enabled: Boolean(selectedReleaseId),
       initialData: "Unknown",
     });
@@ -262,25 +278,31 @@ export function usePlayGame(variant: GameVariant) {
   return { play, isStartingGame };
 }
 
-export function usePlayTime(variant: GameVariant, releaseId?: string) {
+export function usePlayTime(
+  variant: GameVariant,
+  releaseId?: string,
+) {
   const queryClient = useQueryClient();
-  const { data: totalPlayTime, error: totalPlayTimeError } = useQuery({
-    queryKey: queryKeys.playTimeForVariant(variant),
-    queryFn: () => getPlayTimeForVariant(variant),
-    initialData: 0,
-  });
-
-  const { data: versionPlayTime, error: versionPlayTimeError } = useQuery({
-    queryKey: queryKeys.playTimeForVersion(variant, releaseId),
-    queryFn: () => {
-      if (!releaseId) {
-        return Promise.resolve(0);
-      }
-      return getPlayTimeForVersion(variant, releaseId);
+  const { data: totalPlayTime, error: totalPlayTimeError } = useQuery(
+    {
+      queryKey: queryKeys.playTimeForVariant(variant),
+      queryFn: () => getPlayTimeForVariant(variant),
+      initialData: 0,
     },
-    enabled: !!releaseId,
-    initialData: 0,
-  });
+  );
+
+  const { data: versionPlayTime, error: versionPlayTimeError } =
+    useQuery({
+      queryKey: queryKeys.playTimeForVersion(variant, releaseId),
+      queryFn: () => {
+        if (!releaseId) {
+          return Promise.resolve(0);
+        }
+        return getPlayTimeForVersion(variant, releaseId);
+      },
+      enabled: !!releaseId,
+      initialData: 0,
+    });
 
   useEffect(() => {
     if (totalPlayTimeError) {
@@ -310,7 +332,10 @@ export function usePlayTime(variant: GameVariant, releaseId?: string) {
         });
         if (releaseId) {
           queryClient.invalidateQueries({
-            queryKey: queryKeys.playTimeForVersion(variant, releaseId),
+            queryKey: queryKeys.playTimeForVersion(
+              variant,
+              releaseId,
+            ),
           });
         }
       }

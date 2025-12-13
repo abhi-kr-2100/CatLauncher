@@ -21,13 +21,14 @@ export interface GameVariantProps {
   variantInfo: GameVariantInfo;
 }
 
-export default function GameVariantCard({ variantInfo }: GameVariantProps) {
+export default function GameVariantCard({
+  variantInfo,
+}: GameVariantProps) {
   const [selectedReleaseId, setSelectedReleaseId] = useState<
     string | undefined
   >();
-  const { attributes, listeners, setNodeRef, style } = useSortableItem(
-    variantInfo.id,
-  );
+  const { attributes, listeners, setNodeRef, style } =
+    useSortableItem(variantInfo.id);
 
   return (
     <Card ref={setNodeRef} style={style} {...attributes}>
@@ -63,7 +64,10 @@ export default function GameVariantCard({ variantInfo }: GameVariantProps) {
           variant={variantInfo.id}
           selectedReleaseId={selectedReleaseId}
         />
-        <PlayTime variant={variantInfo.id} releaseId={selectedReleaseId} />
+        <PlayTime
+          variant={variantInfo.id}
+          releaseId={selectedReleaseId}
+        />
       </CardFooter>
     </Card>
   );
