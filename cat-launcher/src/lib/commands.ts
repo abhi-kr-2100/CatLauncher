@@ -1,8 +1,7 @@
-import { invoke, Channel } from "@tauri-apps/api/core";
+import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
-import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -11,6 +10,8 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
+import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
+import type { Mod } from "@/generated-types/Mod";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
@@ -229,5 +230,12 @@ export async function setPreferredTheme(theme: Theme): Promise<void> {
 
 export async function getUserId(): Promise<string> {
   const response = await invoke<string>("get_user_id");
+  return response;
+}
+
+export async function listAllMods(variant: GameVariant): Promise<Mod[]> {
+  const response = await invoke<Mod[]>("list_all_mods_command", {
+    variant,
+  });
   return response;
 }

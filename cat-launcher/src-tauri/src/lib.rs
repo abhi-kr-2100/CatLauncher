@@ -11,6 +11,7 @@ mod infra;
 mod install_release;
 mod launch_game;
 mod manual_backups;
+mod mods;
 mod play_time;
 mod theme;
 mod users;
@@ -29,6 +30,9 @@ use crate::launch_game::commands::launch_game;
 use crate::manual_backups::commands::{
     create_manual_backup_for_variant, delete_manual_backup_by_id, list_manual_backups_for_variant,
     restore_manual_backup_by_id,
+};
+use crate::mods::commands::{
+    install_third_party_mod_command, list_all_mods_command, uninstall_third_party_mod_command,
 };
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::theme::commands::{get_preferred_theme, set_preferred_theme};
@@ -76,6 +80,9 @@ pub fn run() {
             create_manual_backup_for_variant,
             delete_manual_backup_by_id,
             restore_manual_backup_by_id,
+            list_all_mods_command,
+            install_third_party_mod_command,
+            uninstall_third_party_mod_command,
             get_user_id,
             get_preferred_theme,
             set_preferred_theme,
