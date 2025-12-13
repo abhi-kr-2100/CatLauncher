@@ -32,7 +32,8 @@ use crate::manual_backups::commands::{
     restore_manual_backup_by_id,
 };
 use crate::mods::commands::{
-    install_third_party_mod_command, list_all_mods_command, uninstall_third_party_mod_command,
+    get_third_party_mod_installation_status_command, install_third_party_mod_command,
+    list_all_mods_command, uninstall_third_party_mod_command,
 };
 use crate::play_time::commands::{get_play_time_for_variant, get_play_time_for_version};
 use crate::theme::commands::{get_preferred_theme, set_preferred_theme};
@@ -83,6 +84,7 @@ pub fn run() {
             list_all_mods_command,
             install_third_party_mod_command,
             uninstall_third_party_mod_command,
+            get_third_party_mod_installation_status_command,
             get_user_id,
             get_preferred_theme,
             set_preferred_theme,

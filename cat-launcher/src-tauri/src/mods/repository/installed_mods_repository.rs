@@ -29,4 +29,10 @@ pub trait InstalledModsRepository: Send + Sync {
         mod_id: &str,
         game_variant: &GameVariant,
     ) -> Result<(), InstalledModsRepositoryError>;
+
+    async fn is_mod_installed(
+        &self,
+        mod_id: &str,
+        game_variant: &GameVariant,
+    ) -> Result<bool, InstalledModsRepositoryError>;
 }
