@@ -7,7 +7,7 @@
       "category": "content",
       "installation": {
         "download_url": "https://github.com/Standing-Storm/ccda-xedra-evolved-innawoods/archive/refs/heads/main.zip",
-        "modinfo": "ccda-xedra-evolved-innawoods-master/modinfo.json"
+        "modinfo": "ccda-xedra-evolved-innawoods-main/modinfo.json"
       },
       "activity": {
         "activity_type": "github_commit",
@@ -24,7 +24,7 @@
       "category": "content",
       "installation": {
         "download_url": "https://github.com/Zlorthishen/Really_Dark_Skies/archive/refs/heads/main.zip",
-        "modinfo": "Really_Dark_Skies-master/Really_Dark_Skies/modinfo.json"
+        "modinfo": "Really_Dark_Skies-main/Really_Dark_Skies/modinfo.json"
       },
       "activity": {
         "activity_type": "github_commit",
@@ -41,7 +41,7 @@
       "category": "content",
       "installation": {
         "download_url": "https://github.com/Vegetabs/MindOverMatter-CTLG/archive/refs/heads/main.zip",
-        "modinfo": "MindOverMatter-CTLG/modinfo.json"
+        "modinfo": "MindOverMatter-CTLG-main/modinfo.json"
       },
       "activity": {
         "activity_type": "github_commit",

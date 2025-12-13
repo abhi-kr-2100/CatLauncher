@@ -239,3 +239,13 @@ export async function listAllMods(variant: GameVariant): Promise<Mod[]> {
   });
   return response;
 }
+
+export async function installThirdPartyMod(
+  modId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("install_third_party_mod_command", {
+    id: modId,
+    variant,
+  });
+}
