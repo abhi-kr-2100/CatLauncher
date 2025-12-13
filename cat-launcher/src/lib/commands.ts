@@ -12,6 +12,7 @@ import type { InstallationProgressPayload } from "@/generated-types/Installation
 import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { Mod } from "@/generated-types/Mod";
+import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
@@ -247,5 +248,29 @@ export async function installThirdPartyMod(
   await invoke("install_third_party_mod_command", {
     id: modId,
     variant,
+  });
+}
+
+export async function getThirdPartyModInstallationStatus(
+  modId: string,
+  variant: GameVariant,
+): Promise<ModInstallationStatus> {
+  const response = await invoke<ModInstallationStatus>(
+    "get_third_party_mod_installation_status_command",
+    {
+      id: modId,
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function uninstallThirdPartyMod(
+  modId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("uninstall_third_party_mod_command", {
+    mod_id: modId,
+    game_variant: variant,
   });
 }
