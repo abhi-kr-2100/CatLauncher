@@ -270,7 +270,7 @@ export async function uninstallThirdPartyMod(
   variant: GameVariant,
 ): Promise<void> {
   await invoke("uninstall_third_party_mod_command", {
-    mod_id: modId,
-    game_variant: variant,
+    id: modId,
+    variant: variant,
   });
 }
