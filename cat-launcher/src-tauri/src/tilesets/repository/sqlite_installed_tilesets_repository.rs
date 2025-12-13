@@ -2,32 +2,34 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 
 use crate::tilesets::repository::installed_tilesets_repository::{
-    InstalledTilesetsRepository, InstalledTilesetsRepositoryError,
+  InstalledTilesetsRepository, InstalledTilesetsRepositoryError,
 };
 use crate::variants::GameVariant;
 
 pub struct SqliteInstalledTilesetsRepository {
-    pool: r2d2::Pool<SqliteConnectionManager>,
+  pool: r2d2::Pool<SqliteConnectionManager>,
 }
 
 impl SqliteInstalledTilesetsRepository {
-    pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
-        Self { pool }
-    }
+  pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
+    Self { pool }
+  }
 }
 
 #[async_trait]
-impl InstalledTilesetsRepository for SqliteInstalledTilesetsRepository {
-    async fn add_installed_tileset(
-        &self,
-        tileset_id: &str,
-        game_variant: &GameVariant,
-    ) -> Result<(), InstalledTilesetsRepositoryError> {
-        let pool = self.pool.clone();
-        let tileset_id = tileset_id.to_string();
-        let variant_name = game_variant.to_string();
+impl InstalledTilesetsRepository
+  for SqliteInstalledTilesetsRepository
+{
+  async fn add_installed_tileset(
+    &self,
+    tileset_id: &str,
+    game_variant: &GameVariant,
+  ) -> Result<(), InstalledTilesetsRepositoryError> {
+    let pool = self.pool.clone();
+    let tileset_id = tileset_id.to_string();
+    let variant_name = game_variant.to_string();
 
-        tokio::task::spawn_blocking(move || {
+    tokio::task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
@@ -42,46 +44,18 @@ impl InstalledTilesetsRepository for SqliteInstalledTilesetsRepository {
         })
         .await
         .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?
-    }
+  }
 
-    async fn get_installed_tilesets_for_variant(
-        &self,
-        game_variant: &GameVariant,
-    ) -> Result<Vec<String>, InstalledTilesetsRepositoryError> {
-        let pool = self.pool.clone();
-        let variant_name = game_variant.to_string();
+  async fn delete_installed_tileset(
+    &self,
+    tileset_id: &str,
+    game_variant: &GameVariant,
+  ) -> Result<(), InstalledTilesetsRepositoryError> {
+    let pool = self.pool.clone();
+    let tileset_id = tileset_id.to_string();
+    let variant_name = game_variant.to_string();
 
-        tokio::task::spawn_blocking(move || {
-            let conn = pool
-                .get()
-                .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
-
-            let mut stmt = conn
-                .prepare("SELECT tileset_id FROM installed_tilesets WHERE game_variant = ?1")
-                .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
-
-            let tileset_ids = stmt
-                .query_map([&variant_name], |row| row.get::<_, String>(0))
-                .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?
-                .collect::<Result<Vec<_>, _>>()
-                .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
-
-            Ok(tileset_ids)
-        })
-        .await
-        .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?
-    }
-
-    async fn delete_installed_tileset(
-        &self,
-        tileset_id: &str,
-        game_variant: &GameVariant,
-    ) -> Result<(), InstalledTilesetsRepositoryError> {
-        let pool = self.pool.clone();
-        let tileset_id = tileset_id.to_string();
-        let variant_name = game_variant.to_string();
-
-        tokio::task::spawn_blocking(move || {
+    tokio::task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
@@ -101,18 +75,18 @@ impl InstalledTilesetsRepository for SqliteInstalledTilesetsRepository {
         })
         .await
         .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?
-    }
+  }
 
-    async fn is_tileset_installed(
-        &self,
-        tileset_id: &str,
-        game_variant: &GameVariant,
-    ) -> Result<bool, InstalledTilesetsRepositoryError> {
-        let pool = self.pool.clone();
-        let tileset_id = tileset_id.to_string();
-        let variant_name = game_variant.to_string();
+  async fn is_tileset_installed(
+    &self,
+    tileset_id: &str,
+    game_variant: &GameVariant,
+  ) -> Result<bool, InstalledTilesetsRepositoryError> {
+    let pool = self.pool.clone();
+    let tileset_id = tileset_id.to_string();
+    let variant_name = game_variant.to_string();
 
-        tokio::task::spawn_blocking(move || {
+    tokio::task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?;
@@ -129,5 +103,5 @@ impl InstalledTilesetsRepository for SqliteInstalledTilesetsRepository {
         })
         .await
         .map_err(|e| InstalledTilesetsRepositoryError::Database(e.to_string()))?
-    }
+  }
 }

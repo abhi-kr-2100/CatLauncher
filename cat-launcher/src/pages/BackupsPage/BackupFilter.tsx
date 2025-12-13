@@ -6,7 +6,7 @@ import { CombinedBackup } from "./types/backups";
 
 export type BackupFilterFn = (backup: CombinedBackup) => boolean;
 
-export type BackupFilter = {
+export type BackupFilterType = {
   id: "automatic" | "manual";
   label: string;
   apply: BackupFilterFn;
@@ -16,7 +16,7 @@ interface BackupFilterProps {
   onChange: (filterFn: BackupFilterFn) => void;
 }
 
-const FILTERS: BackupFilter[] = [
+const FILTERS: BackupFilterType[] = [
   {
     id: "automatic",
     label: "Automatic",
@@ -29,7 +29,9 @@ const FILTERS: BackupFilter[] = [
   },
 ];
 
-export default function BackupFilter({ onChange }: BackupFilterProps) {
+export default function BackupFilter({
+  onChange,
+}: BackupFilterProps) {
   const [selectedFilterIds, setSelectedFilterIds] = useState<
     ("automatic" | "manual")[]
   >(FILTERS.map((f) => f.id)); // default to all filters selected

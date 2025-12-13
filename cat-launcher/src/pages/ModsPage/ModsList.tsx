@@ -32,7 +32,9 @@ export default function ModsList({ variant }: ModsListProps) {
   }
 
   if (!mods || mods.length === 0) {
-    return <p className="text-muted-foreground">No mods available.</p>;
+    return (
+      <p className="text-muted-foreground">No mods available.</p>
+    );
   }
 
   return (

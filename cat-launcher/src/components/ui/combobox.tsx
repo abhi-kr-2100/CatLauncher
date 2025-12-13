@@ -24,10 +24,12 @@ interface ComboboxProps {
   items: ComboboxItem[];
   value?: string;
   label?: string;
-  onChange: (value: string) => void;
+  onChange: (_value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  autoselect?: boolean | ((items: ComboboxItem[]) => ComboboxItem | undefined);
+  autoselect?:
+    | boolean
+    | ((_items: ComboboxItem[]) => ComboboxItem | undefined);
   className?: string;
 }
 
@@ -65,7 +67,9 @@ export function Combobox({
   return (
     <div className={className}>
       {label ? (
-        <div className="text-sm text-muted-foreground mb-2">{label}</div>
+        <div className="text-sm text-muted-foreground mb-2">
+          {label}
+        </div>
       ) : null}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

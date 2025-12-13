@@ -1,8 +1,10 @@
+import { HTMLAttributes } from "react";
+
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { cn } from "@/lib/utils";
 import { usePlayTime } from "./hooks";
 
-interface PlayTimeProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PlayTimeProps extends HTMLAttributes<HTMLDivElement> {
   variant: GameVariant;
   releaseId?: string;
 }
@@ -27,7 +29,10 @@ export function PlayTime({
   className,
   ...props
 }: PlayTimeProps) {
-  const { totalPlayTime, versionPlayTime } = usePlayTime(variant, releaseId);
+  const { totalPlayTime, versionPlayTime } = usePlayTime(
+    variant,
+    releaseId,
+  );
 
   const formattedVersionPlayTime = formatPlayTime(versionPlayTime);
   const formattedTotalPlayTime = formatPlayTime(totalPlayTime);

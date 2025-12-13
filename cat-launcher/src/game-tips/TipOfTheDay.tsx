@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Lightbulb } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { getTips } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
