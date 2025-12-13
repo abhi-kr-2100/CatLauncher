@@ -12,7 +12,8 @@
     "lint": "eslint . --max-warnings 0 && cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings",
     "lint:fix": "eslint . --fix && cargo clippy --manifest-path ./src-tauri/Cargo.toml --fix --allow-dirty",
     "format": "prettier --write . && cargo fmt --manifest-path ./src-tauri/Cargo.toml",
-    "format:check": "prettier --check . && cargo fmt --manifest-path ./src-tauri/Cargo.toml -- --check"
+    "format:check": "prettier --check . && cargo fmt --manifest-path ./src-tauri/Cargo.toml -- --check",
+    "prepare": "cd .. && husky cat-launcher/.husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -69,6 +70,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
+    "husky": "^9.1.7",
     "prettier": "^3.7.4",
     "typescript": "~5.8.3",
     "vite": "^7.2.7"
