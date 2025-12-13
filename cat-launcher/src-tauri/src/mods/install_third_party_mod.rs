@@ -104,10 +104,10 @@ pub async fn install_third_party_mod(
 
 #[derive(Debug, thiserror::Error)]
 pub enum GetModFromJsonError {
-    #[error("failed to read modinfo.json: {0}")]
+    #[error("failed to read mods.json: {0}")]
     ReadModInfoJson(#[from] std::io::Error),
 
-    #[error("failed to parse modinfo.json: {0}")]
+    #[error("failed to parse mods.json: {0}")]
     ParseModInfoJson(#[from] serde_json::Error),
 
     #[error("no mods found for variant {0}")]

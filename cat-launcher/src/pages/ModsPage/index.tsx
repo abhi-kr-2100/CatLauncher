@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import VariantSelector from "@/components/VariantSelector";
-import { GameVariant } from "@/generated-types/GameVariant";
+import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import ModsList from "./ModsList";
 
