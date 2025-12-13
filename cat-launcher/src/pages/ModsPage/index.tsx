@@ -1,8 +1,10 @@
 import { useState } from "react";
 
+import { SearchInput } from "@/components/SearchInput";
 import VariantSelector from "@/components/VariantSelector";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { useSearch } from "@/hooks/useSearch";
 import ModsList from "./ModsList";
 
 function ModsPage() {
@@ -10,6 +12,10 @@ function ModsPage() {
     useGameVariants();
   const [selectedVariant, setSelectedVariant] =
     useState<GameVariant | null>(null);
+
+  const { searchInput, setSearchInput } = useSearch([], {
+    debounceDelay: 300,
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -19,7 +25,21 @@ function ModsPage() {
         onVariantChange={setSelectedVariant}
         isLoading={gameVariantsLoading}
       />
-      {selectedVariant && <ModsList variant={selectedVariant} />}
+      {selectedVariant && (
+        <>
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            placeholder="Search mods..."
+            className="mb-4 mt-2"
+          />
+          <ModsList
+            variant={selectedVariant}
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+          />
+        </>
+      )}
     </div>
   );
 }

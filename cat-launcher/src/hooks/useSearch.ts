@@ -2,39 +2,47 @@ import { useMemo, useState } from "react";
 
 import { useDebounce } from "./useDebounce";
 
-export interface SearchableItem {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface UseSearchOptions<T extends SearchableItem> {
+export interface UseSearchOptions<T> {
   debounceDelay?: number;
   searchFn?: (item: T, query: string) => boolean;
+  searchInput?: string;
+  setSearchInput?: (value: string) => void;
 }
 
-export function useSearch<T extends SearchableItem>(
+export function useSearch<T>(
   items: T[],
   options: UseSearchOptions<T> = {},
 ) {
-  const { debounceDelay = 300, searchFn } = options;
+  const {
+    debounceDelay = 300,
+    searchFn,
+    searchInput: externalSearchInput,
+    setSearchInput: externalSetSearchInput,
+  } = options;
 
-  const [searchInput, setSearchInput] = useState("");
+  const [internalSearchInput, setInternalSearchInput] = useState("");
+
+  const searchInput =
+    externalSearchInput !== undefined
+      ? externalSearchInput
+      : internalSearchInput;
+  const setSearchInput =
+    externalSetSearchInput || setInternalSearchInput;
+
   const debouncedSearchQuery = useDebounce(
     searchInput,
     debounceDelay,
   );
 
   const filteredItems = useMemo(() => {
-    if (!debouncedSearchQuery.trim()) {
+    if (!debouncedSearchQuery.trim() || !searchFn) {
       return items;
     }
 
-    const searchFunction = searchFn || defaultSearchFn;
     return items.filter((item) =>
-      searchFunction(item, debouncedSearchQuery),
+      searchFn(item, debouncedSearchQuery),
     );
-  }, [items, debouncedSearchQuery, searchFn, defaultSearchFn]);
+  }, [items, debouncedSearchQuery, searchFn]);
 
   return {
     searchInput,
@@ -43,16 +51,4 @@ export function useSearch<T extends SearchableItem>(
     filteredItems,
     hasActiveSearch: debouncedSearchQuery.trim().length > 0,
   };
-}
-
-function defaultSearchFn(
-  item: SearchableItem,
-  query: string,
-): boolean {
-  const lowerQuery = query.toLowerCase().trim();
-  return (
-    item.name.toLowerCase().includes(lowerQuery) ||
-    item.description.toLowerCase().includes(lowerQuery) ||
-    item.id.toLowerCase().includes(lowerQuery)
-  );
 }

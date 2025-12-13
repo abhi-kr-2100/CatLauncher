@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/SearchInput";
 import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { useSearch } from "@/hooks/useSearch";
 import { toastCL } from "@/lib/utils";
 import BackupFilter, { BackupFilterFn } from "./BackupFilter";
 import { BackupsTable } from "./BackupsTable";
@@ -55,10 +57,24 @@ function BackupsPage() {
     },
   });
 
-  const filteredBackups = useMemo(
-    () => combinedBackups.filter(appliedFilter),
-    [combinedBackups, appliedFilter],
-  );
+  const {
+    searchInput,
+    setSearchInput,
+    filteredItems: searchedBackups,
+  } = useSearch(combinedBackups, {
+    searchFn: (backup, query) => {
+      const lowerQuery = query.toLowerCase().trim();
+      return (
+        backup.name.toLowerCase().includes(lowerQuery) ||
+        backup.notes?.toLowerCase().includes(lowerQuery) ||
+        backup.timestamp.toString().toLowerCase().includes(lowerQuery)
+      );
+    },
+  });
+
+  const filteredBackups = useMemo(() => {
+    return searchedBackups.filter(appliedFilter);
+  }, [searchedBackups, appliedFilter]);
 
   const handleSave = (values: { name: string; notes?: string }) => {
     createManualBackup({
@@ -93,6 +109,12 @@ function BackupsPage() {
           New Backup
         </Button>
       </div>
+      <SearchInput
+        value={searchInput}
+        onChange={setSearchInput}
+        placeholder="Search backups..."
+        className="mb-4"
+      />
       <BackupFilter
         onChange={(filter) =>
           setAppliedFilter((_prev: BackupFilterFn) => filter)
