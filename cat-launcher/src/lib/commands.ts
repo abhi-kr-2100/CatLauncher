@@ -18,6 +18,8 @@ import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
+import type { Soundpack } from "@/generated-types/Soundpack";
+import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToReleasesUpdate(
@@ -316,6 +318,49 @@ export async function uninstallThirdPartyTileset(
 ): Promise<void> {
   await invoke("uninstall_third_party_tileset_command", {
     id: tilesetId,
+    variant: variant,
+  });
+}
+
+export async function listAllSoundpacks(
+  variant: GameVariant,
+): Promise<Soundpack[]> {
+  const response = await invoke<Soundpack[]>("list_all_soundpacks_command", {
+    variant,
+  });
+  return response;
+}
+
+export async function installThirdPartySoundpack(
+  soundpackId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("install_third_party_soundpack_command", {
+    id: soundpackId,
+    variant,
+  });
+}
+
+export async function getThirdPartySoundpackInstallationStatus(
+  soundpackId: string,
+  variant: GameVariant,
+): Promise<SoundpackInstallationStatus> {
+  const response = await invoke<SoundpackInstallationStatus>(
+    "get_third_party_soundpack_installation_status_command",
+    {
+      id: soundpackId,
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function uninstallThirdPartySoundpack(
+  soundpackId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("uninstall_third_party_soundpack_command", {
+    id: soundpackId,
     variant: variant,
   });
 }
