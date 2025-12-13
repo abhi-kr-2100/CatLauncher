@@ -5,8 +5,8 @@ use tauri::{Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::active_release::repository::active_release_repository;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+use crate::infra::download::Downloader;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::mods::install_third_party_mod::{install_third_party_mod, InstallThirdPartyModError};
 use crate::mods::list_all_mods::{list_all_mods, ListAllModsError};
@@ -54,17 +54,42 @@ pub async fn list_all_mods_command(
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
 pub enum InstallThirdPartyModCommandError {
+    #[error("failed to get app data directory")]
+    AppDataDir(#[from] tauri::Error),
+
+    #[error("failed to get OS information")]
+    OSInfo(#[from] OSNotSupportedError),
+
     #[error("failed to install mod: {0}")]
     Install(#[from] InstallThirdPartyModError),
 }
 
 #[tauri::command]
 pub async fn install_third_party_mod_command(
-    mod_id: String,
-    game_variant: GameVariant,
+    id: String,
+    variant: GameVariant,
+    app: tauri::AppHandle,
+    downloader: State<'_, Downloader>,
     repository: State<'_, SqliteInstalledModsRepository>,
 ) -> Result<(), InstallThirdPartyModCommandError> {
-    install_third_party_mod(&mod_id, &game_variant, repository.inner()).await?;
+    let data_dir = app.path().app_local_data_dir()?;
+    let resource_dir = app.path().resource_dir()?;
+    let temp_dir = app.path().app_cache_dir()?;
+
+    let os = get_os_enum(OS)?;
+
+    install_third_party_mod(
+        &id,
+        &variant,
+        &data_dir,
+        &resource_dir,
+        &temp_dir,
+        &os,
+        downloader.inner(),
+        repository.inner(),
+    )
+    .await?;
+
     Ok(())
 }
 
