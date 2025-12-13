@@ -21,6 +21,7 @@ use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledMo
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
+use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
@@ -108,6 +109,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
     app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
     app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
     app.manage(SqliteInstalledModsRepository::new(pool.clone()));
+    app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
     app.manage(SqliteUsersRepository::new(pool));
 
     Ok(())

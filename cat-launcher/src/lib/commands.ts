@@ -16,6 +16,8 @@ import type { ModInstallationStatus } from "@/generated-types/ModInstallationSta
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
+import type { Tileset } from "@/generated-types/Tileset";
+import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToReleasesUpdate(
@@ -271,6 +273,49 @@ export async function uninstallThirdPartyMod(
 ): Promise<void> {
   await invoke("uninstall_third_party_mod_command", {
     id: modId,
+    variant: variant,
+  });
+}
+
+export async function listAllTilesets(
+  variant: GameVariant,
+): Promise<Tileset[]> {
+  const response = await invoke<Tileset[]>("list_all_tilesets_command", {
+    variant,
+  });
+  return response;
+}
+
+export async function installThirdPartyTileset(
+  tilesetId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("install_third_party_tileset_command", {
+    id: tilesetId,
+    variant,
+  });
+}
+
+export async function getThirdPartyTilesetInstallationStatus(
+  tilesetId: string,
+  variant: GameVariant,
+): Promise<TilesetInstallationStatus> {
+  const response = await invoke<TilesetInstallationStatus>(
+    "get_third_party_tileset_installation_status_command",
+    {
+      id: tilesetId,
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function uninstallThirdPartyTileset(
+  tilesetId: string,
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("uninstall_third_party_tileset_command", {
+    id: tilesetId,
     variant: variant,
   });
 }
