@@ -1,7 +1,8 @@
-import PlayPage from "@/pages/PlayPage";
 import AboutPage from "@/pages/AboutPage";
 import BackupsPage from "@/pages/BackupsPage";
-import { FileUp, Gamepad2, Info } from "lucide-react";
+import ModsPage from "@/pages/ModsPage";
+import PlayPage from "@/pages/PlayPage";
+import { FileUp, Gamepad2, Info, Package } from "lucide-react";
 
 export const routes = [
   {
@@ -15,6 +16,12 @@ export const routes = [
     element: <BackupsPage />,
     label: "Backups",
     icon: FileUp,
+  },
+  {
+    path: "/mods",
+    element: <ModsPage />,
+    label: "Mods",
+    icon: Package,
   },
   {
     path: "/about",
