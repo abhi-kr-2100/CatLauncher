@@ -2,31 +2,33 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
-use crate::active_release::repository::{ActiveReleaseRepository, ActiveReleaseRepositoryError};
+use crate::active_release::repository::{
+  ActiveReleaseRepository, ActiveReleaseRepositoryError,
+};
 use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
 pub struct SqliteActiveReleaseRepository {
-    pool: Pool,
+  pool: Pool,
 }
 
 impl SqliteActiveReleaseRepository {
-    pub fn new(pool: Pool) -> Self {
-        Self { pool }
-    }
+  pub fn new(pool: Pool) -> Self {
+    Self { pool }
+  }
 }
 
 #[async_trait]
 impl ActiveReleaseRepository for SqliteActiveReleaseRepository {
-    async fn get_active_release(
-        &self,
-        game_variant: &GameVariant,
-    ) -> Result<Option<String>, ActiveReleaseRepositoryError> {
-        let pool = self.pool.clone();
-        let game_variant = game_variant.clone();
+  async fn get_active_release(
+    &self,
+    game_variant: &GameVariant,
+  ) -> Result<Option<String>, ActiveReleaseRepositoryError> {
+    let pool = self.pool.clone();
+    let game_variant = *game_variant;
 
-        task::spawn_blocking(move || {
+    task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?;
@@ -47,18 +49,18 @@ impl ActiveReleaseRepository for SqliteActiveReleaseRepository {
         })
         .await
         .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?
-    }
+  }
 
-    async fn set_active_release(
-        &self,
-        game_variant: &GameVariant,
-        version: &str,
-    ) -> Result<(), ActiveReleaseRepositoryError> {
-        let pool = self.pool.clone();
-        let game_variant = game_variant.clone();
-        let version = version.to_string();
+  async fn set_active_release(
+    &self,
+    game_variant: &GameVariant,
+    version: &str,
+  ) -> Result<(), ActiveReleaseRepositoryError> {
+    let pool = self.pool.clone();
+    let game_variant = *game_variant;
+    let version = version.to_string();
 
-        task::spawn_blocking(move || {
+    task::spawn_blocking(move || {
             let conn = pool.get().map_err(|e| ActiveReleaseRepositoryError::Set(Box::new(e)))?;
             conn.execute(
                 "INSERT OR REPLACE INTO active_release (game_variant, version) VALUES (?1, ?2)",
@@ -70,5 +72,5 @@ impl ActiveReleaseRepository for SqliteActiveReleaseRepository {
         })
         .await
         .map_err(|e| ActiveReleaseRepositoryError::Set(Box::new(e)))?
-    }
+  }
 }

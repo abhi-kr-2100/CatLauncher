@@ -23,9 +23,9 @@ export function useDeleteManualBackup(
         queryKey: queryKeys.manualBackups(variant),
       });
 
-      const previousBackups = queryClient.getQueryData<ManualBackupEntry[]>(
-        queryKeys.manualBackups(variant),
-      );
+      const previousBackups = queryClient.getQueryData<
+        ManualBackupEntry[]
+      >(queryKeys.manualBackups(variant));
 
       queryClient.setQueryData<ManualBackupEntry[]>(
         queryKeys.manualBackups(variant),

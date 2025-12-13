@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -29,31 +28,35 @@ function getSoundpackType(soundpack: Soundpack): string {
   return soundpack.type === "Stock" ? "Pre-Installed" : "Third-Party";
 }
 
-export default function SoundpackCard({ variant, soundpack }: SoundpackCardProps) {
+export default function SoundpackCard({
+  variant,
+  soundpack,
+}: SoundpackCardProps) {
   const name = getSoundpackName(soundpack);
   const soundpackType = getSoundpackType(soundpack);
 
   const isThirdParty = soundpack.type !== "Stock";
   const soundpackId = soundpack.content.id;
 
-  const { installationStatus } = useGetThirdPartySoundpackInstallationStatus(
-    soundpackId,
-    variant,
-  );
+  const { installationStatus } =
+    useGetThirdPartySoundpackInstallationStatus(soundpackId, variant);
 
   const isInstalled = installationStatus === "Installed";
 
   const { isInstalling, install } = useInstallThirdPartySoundpack(
     variant,
     () => toastCL("success", "Soundpack installed successfully."),
-    (error) => toastCL("error", "Failed to install soundpack.", error),
+    (error) =>
+      toastCL("error", "Failed to install soundpack.", error),
   );
 
-  const { isUninstalling, uninstall } = useUninstallThirdPartySoundpack(
-    variant,
-    () => toastCL("success", "Soundpack uninstalled successfully."),
-    (error) => toastCL("error", "Failed to uninstall soundpack.", error),
-  );
+  const { isUninstalling, uninstall } =
+    useUninstallThirdPartySoundpack(
+      variant,
+      () => toastCL("success", "Soundpack uninstalled successfully."),
+      (error) =>
+        toastCL("error", "Failed to uninstall soundpack.", error),
+    );
 
   return (
     <Card className="flex flex-col">

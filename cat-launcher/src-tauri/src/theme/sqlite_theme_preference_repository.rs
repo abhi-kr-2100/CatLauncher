@@ -7,27 +7,29 @@ use tokio::task;
 
 use crate::theme::theme::{Theme, ThemePreference};
 use crate::theme::theme_preference_repository::{
-    ThemePreferenceRepository, ThemePreferenceRepositoryError,
+  ThemePreferenceRepository, ThemePreferenceRepositoryError,
 };
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
 #[derive(Clone)]
 pub struct SqliteThemePreferenceRepository {
-    pool: Pool,
+  pool: Pool,
 }
 
 impl SqliteThemePreferenceRepository {
-    pub fn new(pool: Pool) -> Self {
-        Self { pool }
-    }
+  pub fn new(pool: Pool) -> Self {
+    Self { pool }
+  }
 }
 
 #[async_trait]
 impl ThemePreferenceRepository for SqliteThemePreferenceRepository {
-    async fn get_preferred_theme(&self) -> Result<ThemePreference, ThemePreferenceRepositoryError> {
-        let pool = self.pool.clone();
-        task::spawn_blocking(move || {
+  async fn get_preferred_theme(
+    &self,
+  ) -> Result<ThemePreference, ThemePreferenceRepositoryError> {
+    let pool = self.pool.clone();
+    task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| ThemePreferenceRepositoryError::Get(Box::new(e)))?;
@@ -61,15 +63,15 @@ impl ThemePreferenceRepository for SqliteThemePreferenceRepository {
         })
         .await
         .map_err(|e| ThemePreferenceRepositoryError::Get(Box::new(e)))?
-    }
+  }
 
-    async fn set_preferred_theme(
-        &self,
-        theme: &Theme,
-    ) -> Result<(), ThemePreferenceRepositoryError> {
-        let pool = self.pool.clone();
-        let theme_value = theme.to_string();
-        task::spawn_blocking(move || {
+  async fn set_preferred_theme(
+    &self,
+    theme: &Theme,
+  ) -> Result<(), ThemePreferenceRepositoryError> {
+    let pool = self.pool.clone();
+    let theme_value = theme.to_string();
+    task::spawn_blocking(move || {
             let conn = pool
                 .get()
                 .map_err(|e| ThemePreferenceRepositoryError::Update(Box::new(e)))?;
@@ -83,5 +85,5 @@ impl ThemePreferenceRepository for SqliteThemePreferenceRepository {
         })
         .await
         .map_err(|e| ThemePreferenceRepositoryError::Update(Box::new(e)))?
-    }
+  }
 }

@@ -25,7 +25,9 @@ export enum GameStatus {
 }
 
 export function useGameSessionEvents() {
-  const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.IDLE);
+  const [gameStatus, setGameStatus] = useState<GameStatus>(
+    GameStatus.IDLE,
+  );
   const [logs, setLogs] = useState<string[]>([]);
   const [exitCode, setExitCode] = useState<number | null | undefined>(
     undefined,
@@ -59,7 +61,10 @@ export function useGameSessionEvents() {
           if (code === null) {
             // Game was terminated by signal (null)
             setGameStatus(GameStatus.TERMINATED);
-          } else if (code === 0 || currentlyPlaying === "BrightNights") {
+          } else if (
+            code === 0 ||
+            currentlyPlaying === "BrightNights"
+          ) {
             // BrightNights returns non-zero exit code almost always, even if it exited
             // successfully. To not overwhelm the user, we don't show crash logs for it.
             resetGameSessionMonitor();
@@ -70,7 +75,10 @@ export function useGameSessionEvents() {
         }
         case "Error":
           dispatch(clearCurrentlyPlaying());
-          setLogs((prev) => [...prev, `ERROR: ${event.payload.message}`]);
+          setLogs((prev) => [
+            ...prev,
+            `ERROR: ${event.payload.message}`,
+          ]);
           setGameStatus(GameStatus.ERROR);
           break;
       }
@@ -94,9 +102,8 @@ export enum AutoUpdateStatus {
 }
 
 export function useAutoUpdateEvents() {
-  const [autoUpdateStatus, setAutoUpdateStatus] = useState<AutoUpdateStatus>(
-    AutoUpdateStatus.IDLE,
-  );
+  const [autoUpdateStatus, setAutoUpdateStatus] =
+    useState<AutoUpdateStatus>(AutoUpdateStatus.IDLE);
   const resetAutoUpdateStatus = useCallback(() => {
     setAutoUpdateStatus(AutoUpdateStatus.IDLE);
   }, []);

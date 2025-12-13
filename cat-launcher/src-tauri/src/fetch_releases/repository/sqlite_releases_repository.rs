@@ -4,33 +4,35 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
+use crate::fetch_releases::repository::{
+  ReleasesRepository, ReleasesRepositoryError,
+};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::fetch_releases::repository::{ReleasesRepository, ReleasesRepositoryError};
 use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
 pub struct SqliteReleasesRepository {
-    pool: Pool,
+  pool: Pool,
 }
 
 impl SqliteReleasesRepository {
-    pub fn new(pool: Pool) -> Self {
-        Self { pool }
-    }
+  pub fn new(pool: Pool) -> Self {
+    Self { pool }
+  }
 }
 
 #[async_trait]
 impl ReleasesRepository for SqliteReleasesRepository {
-    async fn get_cached_releases(
-        &self,
-        game_variant: &GameVariant,
-    ) -> Result<Vec<GitHubRelease>, ReleasesRepositoryError> {
-        let pool = self.pool.clone();
-        let game_variant = game_variant.clone();
+  async fn get_cached_releases(
+    &self,
+    game_variant: &GameVariant,
+  ) -> Result<Vec<GitHubRelease>, ReleasesRepositoryError> {
+    let pool = self.pool.clone();
+    let game_variant = *game_variant;
 
-        task::spawn_blocking(move || {
+    task::spawn_blocking(move || {
             let conn = pool.get().map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
             let mut stmt = conn
@@ -72,20 +74,17 @@ impl ReleasesRepository for SqliteReleasesRepository {
                 let (release_id, tag_name, prerelease, created_at_str, asset) =
                     row.map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
-                if !releases_map.contains_key(&release_id) {
+                if let std::collections::hash_map::Entry::Vacant(e) = releases_map.entry(release_id) {
                     let created_at = created_at_str.parse().map_err(|e| {
                         ReleasesRepositoryError::Get(Box::new(e))
                     })?;
-                    releases_map.insert(
-                        release_id,
-                        GitHubRelease {
+                    e.insert(GitHubRelease {
                             id: release_id,
                             tag_name,
                             prerelease,
                             assets: Vec::new(),
                             created_at,
-                        },
-                    );
+                        });
                 }
 
                 if let Some(asset) = asset {
@@ -99,18 +98,18 @@ impl ReleasesRepository for SqliteReleasesRepository {
         })
         .await
         .map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?
-    }
+  }
 
-    async fn update_cached_releases(
-        &self,
-        game_variant: &GameVariant,
-        releases: &[GitHubRelease],
-    ) -> Result<(), ReleasesRepositoryError> {
-        let pool = self.pool.clone();
-        let game_variant = game_variant.clone();
-        let releases = releases.to_vec();
+  async fn update_cached_releases(
+    &self,
+    game_variant: &GameVariant,
+    releases: &[GitHubRelease],
+  ) -> Result<(), ReleasesRepositoryError> {
+    let pool = self.pool.clone();
+    let game_variant = *game_variant;
+    let releases = releases.to_vec();
 
-        task::spawn_blocking(move || {
+    task::spawn_blocking(move || {
             let mut conn = pool.get().map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
             let tx = conn
                 .transaction()
@@ -150,5 +149,5 @@ impl ReleasesRepository for SqliteReleasesRepository {
         })
         .await
         .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?
-    }
+  }
 }

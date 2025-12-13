@@ -10,7 +10,10 @@ interface ReleaseLabelProps {
   isLatest: boolean;
 }
 
-function getShortReleaseName(variant: GameVariant, version: string): string {
+function getShortReleaseName(
+  variant: GameVariant,
+  version: string,
+): string {
   switch (variant) {
     case "BrightNights": {
       return version;
@@ -46,7 +49,9 @@ export default function ReleaseLabel({
 
   return (
     <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-2">{shortReleaseName}</div>
+      <div className="flex items-center gap-2">
+        {shortReleaseName}
+      </div>
       <div className="flex items-center gap-1">
         {isLatest && <Badge>Latest</Badge>}
         {isActive && <Badge>Active</Badge>}

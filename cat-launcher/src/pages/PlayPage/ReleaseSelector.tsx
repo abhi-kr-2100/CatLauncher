@@ -41,17 +41,23 @@ export default function ReleaseSelector({
     (state) => state.releases.fetchStatusByVariant[variant],
   );
 
-  const { mutate: triggerFetchReleases, isPending: isReleasesTriggerLoading } =
-    useMutation({
-      mutationFn: triggerFetchReleasesForVariant,
-      onMutate: (variant: GameVariant) => {
-        dispatch(startFetchingReleases({ variant }));
-      },
-      onError: (error: unknown, variant) => {
-        dispatch(onFetchingReleasesFailed({ variant }));
-        toastCL("error", `Failed to fetch releases for ${variant}.`, error);
-      },
-    });
+  const {
+    mutate: triggerFetchReleases,
+    isPending: isReleasesTriggerLoading,
+  } = useMutation({
+    mutationFn: triggerFetchReleasesForVariant,
+    onMutate: (variant: GameVariant) => {
+      dispatch(startFetchingReleases({ variant }));
+    },
+    onError: (error: unknown, variant) => {
+      dispatch(onFetchingReleasesFailed({ variant }));
+      toastCL(
+        "error",
+        `Failed to fetch releases for ${variant}.`,
+        error,
+      );
+    },
+  });
 
   useEffect(() => {
     // Fetch only if we don't have releases yet. Don't trigger fetch even if
@@ -152,7 +158,8 @@ export default function ReleaseSelector({
 
   // Consider isReleaseFetchingComplete even if it completes due to an error
   const isReleaseFetchingComplete =
-    !isReleasesTriggerLoading && releasesFetchStatus !== FetchStatus.Fetching;
+    !isReleasesTriggerLoading &&
+    releasesFetchStatus !== FetchStatus.Fetching;
 
   // Even if isReleasesTriggerLoading is true, releases from previous release
   // events might be available. Consider isReleaseFetchingLoading only when
@@ -163,7 +170,9 @@ export default function ReleaseSelector({
   const installationStatusByVersion = useAppSelector(
     (state) => state.installationProgress.statusByVariant[variant],
   );
-  const isInstalling = Object.values(installationStatusByVersion ?? {}).some(
+  const isInstalling = Object.values(
+    installationStatusByVersion ?? {},
+  ).some(
     (status) => status === "Downloading" || status === "Installing",
   );
 
@@ -177,7 +186,9 @@ export default function ReleaseSelector({
     <div className="flex flex-col gap-2">
       <ReleaseFilter
         variant={variant}
-        onChange={(filter) => setAppliedFilter((_prev: FilterFn) => filter)}
+        onChange={(filter) =>
+          setAppliedFilter((_prev: FilterFn) => filter)
+        }
       />
       <div className="flex items-end gap-2">
         <div className="flex-grow">
@@ -198,7 +209,9 @@ export default function ReleaseSelector({
           disabled={!isReleaseFetchingComplete || isInstalling}
         >
           <RefreshCw
-            className={cn(!isReleaseFetchingComplete && "animate-spin")}
+            className={cn(
+              !isReleaseFetchingComplete && "animate-spin",
+            )}
             size={16}
           />
         </Button>

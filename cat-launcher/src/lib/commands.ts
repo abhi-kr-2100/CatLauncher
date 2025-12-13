@@ -25,9 +25,12 @@ import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
 ) {
-  return await listen<ReleasesUpdatePayload>("releases-update", (event) => {
-    onUpdate(event.payload);
-  });
+  return await listen<ReleasesUpdatePayload>(
+    "releases-update",
+    (event) => {
+      onUpdate(event.payload);
+    },
+  );
 }
 
 export async function listenToAutoupdateStatus(
@@ -38,7 +41,9 @@ export async function listenToAutoupdateStatus(
   });
 }
 
-export async function listenToGameEvent(onEvent: (payload: GameEvent) => void) {
+export async function listenToGameEvent(
+  onEvent: (payload: GameEvent) => void,
+) {
   return await listen<GameEvent>("game-event", (event) => {
     onEvent(event.payload);
   });
@@ -70,8 +75,12 @@ export async function triggerFetchReleasesForVariant(
   });
 }
 
-export async function fetchGameVariantsInfo(): Promise<GameVariantInfo[]> {
-  const response = await invoke<GameVariantInfo[]>("get_game_variants_info");
+export async function fetchGameVariantsInfo(): Promise<
+  GameVariantInfo[]
+> {
+  const response = await invoke<GameVariantInfo[]>(
+    "get_game_variants_info",
+  );
   return response;
 }
 
@@ -87,7 +96,9 @@ export async function restoreBackupById(id: bigint): Promise<void> {
   });
 }
 
-export async function getTips(variant: GameVariant): Promise<string[]> {
+export async function getTips(
+  variant: GameVariant,
+): Promise<string[]> {
   const response = await invoke<string[]>("get_tips", {
     variant,
   });
@@ -120,13 +131,17 @@ export async function createManualBackupForVariant(
   });
 }
 
-export async function deleteManualBackupById(id: bigint): Promise<void> {
+export async function deleteManualBackupById(
+  id: bigint,
+): Promise<void> {
   await invoke("delete_manual_backup_by_id", {
     id,
   });
 }
 
-export async function restoreManualBackupById(id: bigint): Promise<void> {
+export async function restoreManualBackupById(
+  id: bigint,
+): Promise<void> {
   await invoke("restore_manual_backup_by_id", {
     id,
   });
@@ -135,9 +150,12 @@ export async function restoreManualBackupById(id: bigint): Promise<void> {
 export async function listBackupsForVariant(
   variant: GameVariant,
 ): Promise<BackupEntry[]> {
-  const response = await invoke<BackupEntry[]>("list_backups_for_variant", {
-    variant,
-  });
+  const response = await invoke<BackupEntry[]>(
+    "list_backups_for_variant",
+    {
+      variant,
+    },
+  );
 
   return response;
 }
@@ -172,7 +190,9 @@ export async function getPlayTimeForVersion(
   return response;
 }
 
-export async function getActiveRelease(variant: GameVariant): Promise<string> {
+export async function getActiveRelease(
+  variant: GameVariant,
+): Promise<string> {
   const response = await invoke<string | null>("get_active_release", {
     variant,
   });
@@ -214,16 +234,21 @@ export async function getInstallationStatus(
   variant: GameVariant,
   releaseId: string,
 ): Promise<GameReleaseStatus> {
-  const response = await invoke<GameReleaseStatus>("get_installation_status", {
-    variant,
-    releaseId,
-  });
+  const response = await invoke<GameReleaseStatus>(
+    "get_installation_status",
+    {
+      variant,
+      releaseId,
+    },
+  );
 
   return response;
 }
 
 export async function getPreferredTheme(): Promise<ThemePreference> {
-  const response = await invoke<ThemePreference>("get_preferred_theme");
+  const response = await invoke<ThemePreference>(
+    "get_preferred_theme",
+  );
   return response;
 }
 
@@ -238,7 +263,9 @@ export async function getUserId(): Promise<string> {
   return response;
 }
 
-export async function listAllMods(variant: GameVariant): Promise<Mod[]> {
+export async function listAllMods(
+  variant: GameVariant,
+): Promise<Mod[]> {
   const response = await invoke<Mod[]>("list_all_mods_command", {
     variant,
   });
@@ -282,9 +309,12 @@ export async function uninstallThirdPartyMod(
 export async function listAllTilesets(
   variant: GameVariant,
 ): Promise<Tileset[]> {
-  const response = await invoke<Tileset[]>("list_all_tilesets_command", {
-    variant,
-  });
+  const response = await invoke<Tileset[]>(
+    "list_all_tilesets_command",
+    {
+      variant,
+    },
+  );
   return response;
 }
 
@@ -325,9 +355,12 @@ export async function uninstallThirdPartyTileset(
 export async function listAllSoundpacks(
   variant: GameVariant,
 ): Promise<Soundpack[]> {
-  const response = await invoke<Soundpack[]>("list_all_soundpacks_command", {
-    variant,
-  });
+  const response = await invoke<Soundpack[]>(
+    "list_all_soundpacks_command",
+    {
+      variant,
+    },
+  );
   return response;
 }
 

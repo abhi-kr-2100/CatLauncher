@@ -6,10 +6,10 @@ import { useGameVariants } from "@/hooks/useGameVariants";
 import TilesetsList from "./TilesetsList";
 
 function TilesetsPage() {
-  const { gameVariants, isLoading: gameVariantsLoading } = useGameVariants();
-  const [selectedVariant, setSelectedVariant] = useState<GameVariant | null>(
-    null,
-  );
+  const { gameVariants, isLoading: gameVariantsLoading } =
+    useGameVariants();
+  const [selectedVariant, setSelectedVariant] =
+    useState<GameVariant | null>(null);
 
   return (
     <div className="flex flex-col gap-2">

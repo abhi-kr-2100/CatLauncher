@@ -47,10 +47,8 @@ export default function ModCard({ variant, mod }: ModCardProps) {
   const isThirdParty = mod.type !== "Stock";
   const modId = mod.content.id;
 
-  const { installationStatus } = useGetThirdPartyModInstallationStatus(
-    modId,
-    variant,
-  );
+  const { installationStatus } =
+    useGetThirdPartyModInstallationStatus(modId, variant);
 
   const isInstalled = installationStatus === "Installed";
 

@@ -1,9 +1,7 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -30,17 +28,18 @@ function getTilesetType(tileset: Tileset): string {
   return tileset.type === "Stock" ? "Pre-Installed" : "Third-Party";
 }
 
-export default function TilesetCard({ variant, tileset }: TilesetCardProps) {
+export default function TilesetCard({
+  variant,
+  tileset,
+}: TilesetCardProps) {
   const name = getTilesetName(tileset);
   const tilesetType = getTilesetType(tileset);
 
   const isThirdParty = tileset.type !== "Stock";
   const tilesetId = tileset.content.id;
 
-  const { installationStatus } = useGetThirdPartyTilesetInstallationStatus(
-    tilesetId,
-    variant,
-  );
+  const { installationStatus } =
+    useGetThirdPartyTilesetInstallationStatus(tilesetId, variant);
 
   const isInstalled = installationStatus === "Installed";
 
@@ -53,7 +52,8 @@ export default function TilesetCard({ variant, tileset }: TilesetCardProps) {
   const { isUninstalling, uninstall } = useUninstallThirdPartyTileset(
     variant,
     () => toastCL("success", "Tileset uninstalled successfully."),
-    (error) => toastCL("error", "Failed to uninstall tileset.", error),
+    (error) =>
+      toastCL("error", "Failed to uninstall tileset.", error),
   );
 
   return (

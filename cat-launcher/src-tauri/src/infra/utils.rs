@@ -6,67 +6,75 @@ use tokio::fs;
 
 use crate::variants::GameVariant;
 
-pub fn get_github_repo_for_variant(variant: &GameVariant) -> &'static str {
-    match variant {
-        GameVariant::DarkDaysAhead => "CleverRaven/Cataclysm-DDA",
-        GameVariant::BrightNights => "cataclysmbnteam/Cataclysm-BN",
-        GameVariant::TheLastGeneration => "Cataclysm-TLG/Cataclysm-TLG",
-    }
+pub fn get_github_repo_for_variant(
+  variant: &GameVariant,
+) -> &'static str {
+  match variant {
+    GameVariant::DarkDaysAhead => "CleverRaven/Cataclysm-DDA",
+    GameVariant::BrightNights => "cataclysmbnteam/Cataclysm-BN",
+    GameVariant::TheLastGeneration => "Cataclysm-TLG/Cataclysm-TLG",
+  }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReadFromFileError {
-    #[error("failed to read from file: {0}")]
-    Read(#[from] io::Error),
+  #[error("failed to read from file: {0}")]
+  Read(#[from] io::Error),
 
-    #[error("failed to deserialize data: {0}")]
-    Deserialize(#[from] serde_json::Error),
+  #[error("failed to deserialize data: {0}")]
+  Deserialize(#[from] serde_json::Error),
 }
 
-pub async fn read_from_file<T: DeserializeOwned>(path: &Path) -> Result<T, ReadFromFileError> {
-    let contents = fs::read_to_string(path).await?;
-    let v = serde_json::from_str(&contents)?;
-    Ok(v)
+pub async fn read_from_file<T: DeserializeOwned>(
+  path: &Path,
+) -> Result<T, ReadFromFileError> {
+  let contents = fs::read_to_string(path).await?;
+  let v = serde_json::from_str(&contents)?;
+  Ok(v)
 }
 
 #[derive(Debug, PartialEq)]
 pub enum OS {
-    Linux,
-    Windows,
-    MacOS,
+  Linux,
+  Windows,
+  Mac,
 }
 
 #[derive(Debug, thiserror::Error)]
 #[error("OS not supported: {os}")]
 pub struct OSNotSupportedError {
-    os: &'static str,
+  os: &'static str,
 }
 
-pub fn get_os_enum(os: &'static str) -> Result<OS, OSNotSupportedError> {
-    match os {
-        "linux" => Ok(OS::Linux),
-        "windows" => Ok(OS::Windows),
-        "macos" => Ok(OS::MacOS),
-        _ => Err(OSNotSupportedError { os }),
-    }
+pub fn get_os_enum(
+  os: &'static str,
+) -> Result<OS, OSNotSupportedError> {
+  match os {
+    "linux" => Ok(OS::Linux),
+    "windows" => Ok(OS::Windows),
+    "macos" => Ok(OS::Mac),
+    _ => Err(OSNotSupportedError { os }),
+  }
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Arch {
-    ARM64,
-    X64,
+  ARM64,
+  X64,
 }
 
 #[derive(Debug, thiserror::Error)]
 #[error("Architecture not supported: {arch}")]
 pub struct ArchNotSupportedError {
-    arch: &'static str,
+  arch: &'static str,
 }
 
-pub fn get_arch_enum(arch: &'static str) -> Result<Arch, ArchNotSupportedError> {
-    match arch {
-        "aarch64" => Ok(Arch::ARM64),
-        "x86_64" => Ok(Arch::X64),
-        _ => Err(ArchNotSupportedError { arch }),
-    }
+pub fn get_arch_enum(
+  arch: &'static str,
+) -> Result<Arch, ArchNotSupportedError> {
+  match arch {
+    "aarch64" => Ok(Arch::ARM64),
+    "x86_64" => Ok(Arch::X64),
+    _ => Err(ArchNotSupportedError { arch }),
+  }
 }
