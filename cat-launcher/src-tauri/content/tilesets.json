@@ -1,0 +1,46 @@
+{
+  "DarkDaysAhead": {
+    "UNDEAD_PEOPLE_BASE_v2": {
+      "id": "UNDEAD_PEOPLE_BASE_v2",
+      "name": "UNDEAD_PEOPLE (by Goodgulf_PL)",
+      "installation": {
+        "download_url": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version/archive/refs/heads/main.zip",
+        "tileset": "UndeadPeopleTileset_Unpacked_New_Version-main/dda/gfx/MSX++UnDeadPeopleEdition_v2/tileset.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version"
+      }
+    }
+  },
+
+  "BrightNights": {
+    "UNDEAD_PEOPLE_BASE_v2": {
+      "id": "UNDEAD_PEOPLE_BASE_v2",
+      "name": "UNDEAD_PEOPLE (by Goodgulf_PL)",
+      "installation": {
+        "download_url": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version/archive/refs/heads/main.zip",
+        "tileset": "UndeadPeopleTileset_Unpacked_New_Version-main/dda/gfx/MSX++UnDeadPeopleEdition_v2/tileset.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version"
+      }
+    }
+  },
+
+  "TheLastGeneration": {
+    "UNDEAD_PEOPLE_BASE_v2": {
+      "id": "UNDEAD_PEOPLE_BASE_v2",
+      "name": "UNDEAD_PEOPLE (by Goodgulf_PL)",
+      "installation": {
+        "download_url": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version/archive/refs/heads/main.zip",
+        "tileset": "UndeadPeopleTileset_Unpacked_New_Version-main/dda/gfx/MSX++UnDeadPeopleEdition_v2/tileset.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Goodgulf-PL/UndeadPeopleTileset_Unpacked_New_Version"
+      }
+    }
+  }
+}
