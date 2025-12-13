@@ -1,0 +1,46 @@
+{
+  "DarkDaysAhead": {
+    "otopack": {
+      "id": "otopack",
+      "name": "Otopack",
+      "installation": {
+        "download_url": "https://github.com/Kenan2000/Otopack-Mods-Updates/archive/refs/heads/master.zip",
+        "soundpack": "Otopack-Mods-Updates-master/Otopack+ModsUpdates/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
+      }
+    }
+  },
+
+  "BrightNights": {
+    "otopack": {
+      "id": "otopack",
+      "name": "Otopack",
+      "installation": {
+        "download_url": "https://github.com/Kenan2000/Otopack-Mods-Updates/archive/refs/heads/master.zip",
+        "soundpack": "Otopack-Mods-Updates-master/Otopack+ModsUpdates/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
+      }
+    }
+  },
+
+  "TheLastGeneration": {
+    "otopack": {
+      "id": "otopack",
+      "name": "Otopack",
+      "installation": {
+        "download_url": "https://github.com/Kenan2000/Otopack-Mods-Updates/archive/refs/heads/master.zip",
+        "soundpack": "Otopack-Mods-Updates-master/Otopack+ModsUpdates/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
+      }
+    }
+  }
+}
