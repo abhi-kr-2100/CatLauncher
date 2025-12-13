@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,13 +13,13 @@ import {
 
 interface ConfirmationDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (_open: boolean) => void;
   onConfirm: () => void;
   title: string;
   description: string;
   confirmText?: string;
   cancelText?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export function ConfirmationDialog({

@@ -5,9 +5,11 @@ import { toastCL } from "@/lib/utils";
 import { useTheme } from "./useTheme";
 
 export default function ThemeToggle() {
-  const { currentTheme, toggleTheme, isUpdating } = useTheme((error) => {
-    toastCL("error", "Failed to update theme preference", error);
-  });
+  const { currentTheme, toggleTheme, isUpdating } = useTheme(
+    (error) => {
+      toastCL("error", "Failed to update theme preference", error);
+    },
+  );
 
   const Icon = currentTheme === "Dark" ? Sun : Moon;
 

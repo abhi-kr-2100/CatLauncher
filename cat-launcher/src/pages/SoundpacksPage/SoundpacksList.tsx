@@ -9,12 +9,11 @@ interface SoundpacksListProps {
   variant: GameVariant;
 }
 
-export default function SoundpacksList({ variant }: SoundpacksListProps) {
-  const {
-    soundpacks,
-    isLoading,
-    error,
-  } = useListAllSoundpacks(variant);
+export default function SoundpacksList({
+  variant,
+}: SoundpacksListProps) {
+  const { soundpacks, isLoading, error } =
+    useListAllSoundpacks(variant);
 
   useEffect(() => {
     if (error) {
@@ -23,11 +22,17 @@ export default function SoundpacksList({ variant }: SoundpacksListProps) {
   }, [error]);
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading soundpacks...</p>;
+    return (
+      <p className="text-muted-foreground">Loading soundpacks...</p>
+    );
   }
 
   if (!soundpacks || soundpacks.length === 0) {
-    return <p className="text-muted-foreground">No soundpacks available.</p>;
+    return (
+      <p className="text-muted-foreground">
+        No soundpacks available.
+      </p>
+    );
   }
 
   return (

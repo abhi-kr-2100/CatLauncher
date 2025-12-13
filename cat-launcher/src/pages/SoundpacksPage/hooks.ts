@@ -1,4 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
@@ -17,13 +21,17 @@ export function useInstallThirdPartySoundpack(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (soundpackId: string) => installThirdPartySoundpack(soundpackId, variant),
+    mutationFn: (soundpackId: string) =>
+      installThirdPartySoundpack(soundpackId, variant),
     onSuccess: (_data, soundpackId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.soundpacks.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.soundpacks.installationStatus(soundpackId, variant),
+        queryKey: queryKeys.soundpacks.installationStatus(
+          soundpackId,
+          variant,
+        ),
       });
       onSuccess?.();
     },
@@ -41,8 +49,12 @@ export function useGetThirdPartySoundpackInstallationStatus(
   variant: GameVariant,
 ) {
   const query = useQuery({
-    queryKey: queryKeys.soundpacks.installationStatus(soundpackId, variant),
-    queryFn: () => getThirdPartySoundpackInstallationStatus(soundpackId, variant),
+    queryKey: queryKeys.soundpacks.installationStatus(
+      soundpackId,
+      variant,
+    ),
+    queryFn: () =>
+      getThirdPartySoundpackInstallationStatus(soundpackId, variant),
   });
 
   return {
@@ -59,13 +71,17 @@ export function useUninstallThirdPartySoundpack(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (soundpackId: string) => uninstallThirdPartySoundpack(soundpackId, variant),
+    mutationFn: (soundpackId: string) =>
+      uninstallThirdPartySoundpack(soundpackId, variant),
     onSuccess: (_data, soundpackId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.soundpacks.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.soundpacks.installationStatus(soundpackId, variant),
+        queryKey: queryKeys.soundpacks.installationStatus(
+          soundpackId,
+          variant,
+        ),
       });
       onSuccess?.();
     },
@@ -79,14 +95,14 @@ export function useUninstallThirdPartySoundpack(
 }
 
 export function useListAllSoundpacks(variant: GameVariant) {
-    const query = useQuery({
-        queryKey: queryKeys.soundpacks.listAll(variant),
-        queryFn: () => listAllSoundpacks(variant),
-    });
+  const query = useQuery({
+    queryKey: queryKeys.soundpacks.listAll(variant),
+    queryFn: () => listAllSoundpacks(variant),
+  });
 
-    return {
-        soundpacks: query.data,
-        isLoading: query.isLoading,
-        error: query.error,
-    };
+  return {
+    soundpacks: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
 }

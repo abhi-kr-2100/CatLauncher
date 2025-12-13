@@ -16,63 +16,66 @@ use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum LaunchGameCommandError {
-    #[error("failed to launch game: {0}")]
-    LaunchGame(#[from] LaunchGameError),
+  #[error("failed to launch game: {0}")]
+  LaunchGame(#[from] LaunchGameError),
 
-    #[error("system directory not found: {0}")]
-    SystemDirectoryNotFound(#[from] tauri::Error),
+  #[error("system directory not found: {0}")]
+  SystemDirectoryNotFound(#[from] tauri::Error),
 
-    #[error("failed to get system time: {0}")]
-    SystemTime(#[from] SystemTimeError),
+  #[error("failed to get system time: {0}")]
+  SystemTime(#[from] SystemTimeError),
 
-    #[error("failed to get OS enum: {0}")]
-    Os(#[from] OSNotSupportedError),
+  #[error("failed to get OS enum: {0}")]
+  Os(#[from] OSNotSupportedError),
 }
 
 #[command]
+#[allow(clippy::too_many_arguments)]
 pub async fn launch_game(
-    app_handle: AppHandle,
-    variant: GameVariant,
-    release_id: &str,
-    settings: State<'_, Settings>,
-    releases_repository: State<'_, SqliteReleasesRepository>,
-    backup_repository: State<'_, SqliteBackupRepository>,
-    play_time_repository: State<'_, SqlitePlayTimeRepository>,
-    active_release_repository: State<'_, SqliteActiveReleaseRepository>,
+  app_handle: AppHandle,
+  variant: GameVariant,
+  release_id: &str,
+  settings: State<'_, Settings>,
+  releases_repository: State<'_, SqliteReleasesRepository>,
+  backup_repository: State<'_, SqliteBackupRepository>,
+  play_time_repository: State<'_, SqlitePlayTimeRepository>,
+  active_release_repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<(), LaunchGameCommandError> {
-    let data_dir = app_handle.path().app_local_data_dir()?;
-    let resource_dir = app_handle.path().resource_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
+  let resource_dir = app_handle.path().resource_dir()?;
 
-    let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+  let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
-    let os = get_os_enum(OS)?;
+  let os = get_os_enum(OS)?;
 
-    let emitter = app_handle.clone();
-    let on_game_event = move |event: GameEvent| {
-        let emitter = emitter.clone();
-        async move {
-            // We cannot handle emit errors
-            let _ = emitter.emit("game-event", event);
-        }
-    };
+  let emitter = app_handle.clone();
+  let on_game_event = move |event: GameEvent| {
+    let emitter = emitter.clone();
+    async move {
+      // We cannot handle emit errors
+      let _ = emitter.emit("game-event", event);
+    }
+  };
 
-    launch_and_monitor_game(
-        &variant,
-        release_id,
-        &os,
-        time,
-        &data_dir,
-        &resource_dir,
-        &*releases_repository,
-        backup_repository.inner().clone(),
-        play_time_repository.inner().clone(),
-        &*active_release_repository,
-        on_game_event,
-        &settings,
-    )
-    .await?;
+  launch_and_monitor_game(
+    &variant,
+    release_id,
+    &os,
+    time,
+    &data_dir,
+    &resource_dir,
+    &*releases_repository,
+    backup_repository.inner().clone(),
+    play_time_repository.inner().clone(),
+    &*active_release_repository,
+    on_game_event,
+    &settings,
+  )
+  .await?;
 
-    Ok(())
+  Ok(())
 }

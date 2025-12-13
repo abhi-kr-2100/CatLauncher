@@ -1,8 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
-import { fetchGameVariantsInfo, updateGameVariantOrder } from "@/lib/commands";
+import {
+  fetchGameVariantsInfo,
+  updateGameVariantOrder,
+} from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { useEffect } from "react";
 
@@ -45,9 +52,9 @@ export function useGameVariants({
         queryKey: queryKeys.gameVariantsInfo(),
       });
 
-      const previousGameVariants = queryClient.getQueryData<GameVariantInfo[]>(
-        queryKeys.gameVariantsInfo(),
-      );
+      const previousGameVariants = queryClient.getQueryData<
+        GameVariantInfo[]
+      >(queryKeys.gameVariantsInfo());
 
       queryClient.setQueryData<GameVariantInfo[]>(
         queryKeys.gameVariantsInfo(),
@@ -66,7 +73,9 @@ export function useGameVariants({
       onOrderUpdateError?.(error);
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.gameVariantsInfo() });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.gameVariantsInfo(),
+      });
     },
   });
 

@@ -54,9 +54,14 @@ export default function ReleaseFilter({
   variant,
   onChange,
 }: ReleaseFilterProps) {
-  const filters = useMemo<Filter[]>(() => getFilters(variant), [variant]);
+  const filters = useMemo<Filter[]>(
+    () => getFilters(variant),
+    [variant],
+  );
 
-  const [selectedFilterIds, setSelectedFilterIds] = useState<ReleaseType[]>(
+  const [selectedFilterIds, setSelectedFilterIds] = useState<
+    ReleaseType[]
+  >(
     filters.map((f) => f.id), // default to all filters selected
   );
 
@@ -73,7 +78,10 @@ export default function ReleaseFilter({
     );
   }, [installationStatuses]);
 
-  function handleCheckedChange(checked: boolean, filterId: ReleaseType) {
+  function handleCheckedChange(
+    checked: boolean,
+    filterId: ReleaseType,
+  ) {
     const appliedFilterIds = new Set(selectedFilterIds);
 
     if (checked) {

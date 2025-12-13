@@ -1,4 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
@@ -16,7 +20,8 @@ export function useInstallThirdPartyMod(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (modId: string) => installThirdPartyMod(modId, variant),
+    mutationFn: (modId: string) =>
+      installThirdPartyMod(modId, variant),
     onSuccess: (_data, modId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.mods.listAll(variant),
@@ -58,7 +63,8 @@ export function useUninstallThirdPartyMod(
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (modId: string) => uninstallThirdPartyMod(modId, variant),
+    mutationFn: (modId: string) =>
+      uninstallThirdPartyMod(modId, variant),
     onSuccess: (_data, modId) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.mods.listAll(variant),

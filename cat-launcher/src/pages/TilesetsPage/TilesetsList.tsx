@@ -10,11 +10,7 @@ interface TilesetsListProps {
 }
 
 export default function TilesetsList({ variant }: TilesetsListProps) {
-  const {
-    tilesets,
-    isLoading,
-    error,
-  } = useListAllTilesets(variant);
+  const { tilesets, isLoading, error } = useListAllTilesets(variant);
 
   useEffect(() => {
     if (error) {
@@ -23,11 +19,15 @@ export default function TilesetsList({ variant }: TilesetsListProps) {
   }, [error]);
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading tilesets...</p>;
+    return (
+      <p className="text-muted-foreground">Loading tilesets...</p>
+    );
   }
 
   if (!tilesets || tilesets.length === 0) {
-    return <p className="text-muted-foreground">No tilesets available.</p>;
+    return (
+      <p className="text-muted-foreground">No tilesets available.</p>
+    );
   }
 
   return (

@@ -42,8 +42,12 @@ function PlayPage() {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = orderedItems.findIndex((item) => item.id === active.id);
-      const newIndex = orderedItems.findIndex((item) => item.id === over.id);
+      const oldIndex = orderedItems.findIndex(
+        (item) => item.id === active.id,
+      );
+      const newIndex = orderedItems.findIndex(
+        (item) => item.id === over.id,
+      );
 
       const newOrder = arrayMove(orderedItems, oldIndex, newIndex);
       updateOrder(newOrder);
@@ -55,7 +59,9 @@ function PlayPage() {
   }
 
   if (gameVariantsError) {
-    return <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>;
+    return (
+      <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
+    );
   }
 
   return (
@@ -70,7 +76,10 @@ function PlayPage() {
       >
         <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2">
           {orderedItems.map((variantInfo) => (
-            <GameVariantCard key={variantInfo.id} variantInfo={variantInfo} />
+            <GameVariantCard
+              key={variantInfo.id}
+              variantInfo={variantInfo}
+            />
           ))}
         </main>
       </SortableContext>

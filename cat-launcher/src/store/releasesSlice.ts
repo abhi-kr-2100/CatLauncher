@@ -36,13 +36,15 @@ export const releasesSlice = createSlice({
       state,
       action: PayloadAction<{ variant: GameVariant }>,
     ) => {
-      state.fetchStatusByVariant[action.payload.variant] = FetchStatus.Error;
+      state.fetchStatusByVariant[action.payload.variant] =
+        FetchStatus.Error;
     },
     startFetchingReleases: (
       state,
       action: PayloadAction<{ variant: GameVariant }>,
     ) => {
-      state.fetchStatusByVariant[action.payload.variant] = FetchStatus.Fetching;
+      state.fetchStatusByVariant[action.payload.variant] =
+        FetchStatus.Fetching;
     },
     updateReleasesForVariant: (
       state,
@@ -55,9 +57,12 @@ export const releasesSlice = createSlice({
       const releaseMap = new Map(
         [...oldReleases, ...newReleases].map((r) => [r.version, r]),
       );
-      state.releasesByVariant[variant] = Array.from(releaseMap.values()).sort(
+      state.releasesByVariant[variant] = Array.from(
+        releaseMap.values(),
+      ).sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime(),
       );
 
       if (status === "Success") {

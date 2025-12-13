@@ -8,7 +8,7 @@ import { GameVariant } from "@/generated-types/GameVariant";
 interface VariantSelectorProps {
   gameVariants: GameVariantInfo[];
   selectedVariant: GameVariant | null;
-  onVariantChange: (variant: GameVariant) => void;
+  onVariantChange: (_variant: GameVariant) => void;
   isLoading: boolean;
   placeholder?: string;
   disabled?: boolean;
@@ -33,7 +33,8 @@ export default function VariantSelector({
       value={selectedVariant ?? undefined}
       onChange={(value) => onVariantChange(value as GameVariant)}
       placeholder={
-        placeholder ?? (isLoading ? "Loading..." : "Select a game variant")
+        placeholder ??
+        (isLoading ? "Loading..." : "Select a game variant")
       }
       disabled={disabled || isLoading}
       autoselect={true}

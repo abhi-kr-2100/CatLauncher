@@ -28,10 +28,8 @@ export default function InteractionButton({
   const { install, installationProgressStatus, downloadProgress } =
     useInstallAndMonitorRelease(variant, selectedReleaseId);
 
-  const { installationStatus, installationStatusError } = useInstallationStatus(
-    variant,
-    selectedReleaseId,
-  );
+  const { installationStatus, installationStatusError } =
+    useInstallationStatus(variant, selectedReleaseId);
 
   const { play, isStartingGame } = usePlayGame(variant);
 
@@ -85,7 +83,8 @@ export default function InteractionButton({
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            This release is not yet available. Try again in a couple of hours.
+            This release is not yet available. Try again in a couple
+            of hours.
           </p>
         </TooltipContent>
       </Tooltip>

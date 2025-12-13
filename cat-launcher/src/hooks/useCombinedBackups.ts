@@ -34,10 +34,13 @@ export function useCombinedBackups(
   const { manualBackups, isLoading: manualBackupsLoading } =
     useManualBackups(variant);
 
-  const { deleteBackup: deleteAutoBackup } = useDeleteBackup(variant, {
-    onSuccess: onDeleteSuccess,
-    onError: onDeleteError,
-  });
+  const { deleteBackup: deleteAutoBackup } = useDeleteBackup(
+    variant,
+    {
+      onSuccess: onDeleteSuccess,
+      onError: onDeleteError,
+    },
+  );
 
   const { deleteManualBackup } = useDeleteManualBackup(variant, {
     onSuccess: onDeleteSuccess,
@@ -71,7 +74,10 @@ export function useCombinedBackups(
         name: `Automatic-${b.id}`,
         notes: "Automatic backup",
       })),
-      ...manualBackups.map((b) => ({ ...b, type: "manual" as const })),
+      ...manualBackups.map((b) => ({
+        ...b,
+        type: "manual" as const,
+      })),
     ];
   }, [backups, manualBackups, backupsLoading, manualBackupsLoading]);
 

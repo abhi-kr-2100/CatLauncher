@@ -20,116 +20,138 @@ use crate::mods::uninstall_third_party_mod::{
 };
 use crate::variants::GameVariant;
 
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum ListAllModsCommandError {
-    #[error("failed to get app data directory")]
-    AppDataDir(#[from] tauri::Error),
+  #[error("failed to get app data directory")]
+  AppDataDir(#[from] tauri::Error),
 
-    #[error("failed to get OS information")]
-    OSInfo(#[from] OSNotSupportedError),
+  #[error("failed to get OS information")]
+  OSInfo(#[from] OSNotSupportedError),
 
-    #[error("failed to list mods: {0}")]
-    ListMods(#[from] ListAllModsError),
+  #[error("failed to list mods: {0}")]
+  ListMods(#[from] ListAllModsError),
 }
 
 #[tauri::command]
 pub async fn list_all_mods_command(
-    variant: GameVariant,
-    app: tauri::AppHandle,
-    active_release_repository: State<'_, SqliteActiveReleaseRepository>,
+  variant: GameVariant,
+  app: tauri::AppHandle,
+  active_release_repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Vec<Mod>, ListAllModsCommandError> {
-    let data_dir = app.path().app_local_data_dir()?;
-    let resource_dir = app.path().resource_dir()?;
+  let data_dir = app.path().app_local_data_dir()?;
+  let resource_dir = app.path().resource_dir()?;
 
-    let os = get_os_enum(OS)?;
+  let os = get_os_enum(OS)?;
 
-    let mods = list_all_mods(
-        &variant,
-        &data_dir,
-        &resource_dir,
-        &os,
-        active_release_repository.inner(),
-    )
-    .await?;
+  let mods = list_all_mods(
+    &variant,
+    &data_dir,
+    &resource_dir,
+    &os,
+    active_release_repository.inner(),
+  )
+  .await?;
 
-    Ok(mods)
+  Ok(mods)
 }
 
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum InstallThirdPartyModCommandError {
-    #[error("failed to get app data directory")]
-    AppDataDir(#[from] tauri::Error),
+  #[error("failed to get app data directory")]
+  AppDataDir(#[from] tauri::Error),
 
-    #[error("failed to get OS information")]
-    OSInfo(#[from] OSNotSupportedError),
+  #[error("failed to get OS information")]
+  OSInfo(#[from] OSNotSupportedError),
 
-    #[error("failed to install mod: {0}")]
-    Install(#[from] InstallThirdPartyModError),
+  #[error("failed to install mod: {0}")]
+  Install(#[from] InstallThirdPartyModError),
 }
 
 #[tauri::command]
 pub async fn install_third_party_mod_command(
-    id: String,
-    variant: GameVariant,
-    app: tauri::AppHandle,
-    downloader: State<'_, Downloader>,
-    repository: State<'_, SqliteInstalledModsRepository>,
+  id: String,
+  variant: GameVariant,
+  app: tauri::AppHandle,
+  downloader: State<'_, Downloader>,
+  repository: State<'_, SqliteInstalledModsRepository>,
 ) -> Result<(), InstallThirdPartyModCommandError> {
-    let data_dir = app.path().app_local_data_dir()?;
-    let resource_dir = app.path().resource_dir()?;
-    let temp_dir = app.path().app_cache_dir()?;
+  let data_dir = app.path().app_local_data_dir()?;
+  let resource_dir = app.path().resource_dir()?;
+  let temp_dir = app.path().app_cache_dir()?;
 
-    let os = get_os_enum(OS)?;
+  let os = get_os_enum(OS)?;
 
-    install_third_party_mod(
-        &id,
-        &variant,
-        &data_dir,
-        &resource_dir,
-        &temp_dir,
-        &os,
-        downloader.inner(),
-        repository.inner(),
-    )
-    .await?;
+  install_third_party_mod(
+    &id,
+    &variant,
+    &data_dir,
+    &resource_dir,
+    &temp_dir,
+    &os,
+    downloader.inner(),
+    repository.inner(),
+  )
+  .await?;
 
-    Ok(())
+  Ok(())
 }
 
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum UninstallThirdPartyModCommandError {
-    #[error("failed to get app data directory: {0}")]
-    AppDataDir(#[from] tauri::Error),
+  #[error("failed to get app data directory: {0}")]
+  AppDataDir(#[from] tauri::Error),
 
-    #[error("failed to uninstall mod: {0}")]
-    Uninstall(#[from] UninstallThirdPartyModError),
+  #[error("failed to uninstall mod: {0}")]
+  Uninstall(#[from] UninstallThirdPartyModError),
 }
 
 #[tauri::command]
 pub async fn uninstall_third_party_mod_command(
-    id: String,
-    variant: GameVariant,
-    app: tauri::AppHandle,
-    repository: State<'_, SqliteInstalledModsRepository>,
+  id: String,
+  variant: GameVariant,
+  app: tauri::AppHandle,
+  repository: State<'_, SqliteInstalledModsRepository>,
 ) -> Result<(), UninstallThirdPartyModCommandError> {
-    let data_dir = app.path().app_local_data_dir()?;
+  let data_dir = app.path().app_local_data_dir()?;
 
-    uninstall_third_party_mod(&id, &variant, &data_dir, repository.inner()).await?;
-    Ok(())
+  uninstall_third_party_mod(
+    &id,
+    &variant,
+    &data_dir,
+    repository.inner(),
+  )
+  .await?;
+  Ok(())
 }
 
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum GetThirdPartyModInstallationStatusCommandError {
-    #[error("failed to get mod installation status: {0}")]
-    GetStatus(#[from] GetThirdPartyModInstallationStatusError),
+  #[error("failed to get mod installation status: {0}")]
+  GetStatus(#[from] GetThirdPartyModInstallationStatusError),
 }
 
 #[tauri::command]
 pub async fn get_third_party_mod_installation_status_command(
-    id: String,
-    variant: GameVariant,
-    repository: State<'_, SqliteInstalledModsRepository>,
-) -> Result<ModInstallationStatus, GetThirdPartyModInstallationStatusCommandError> {
-    let status = get_third_party_mod_installation_status(&id, &variant, repository.inner()).await?;
-    Ok(status)
+  id: String,
+  variant: GameVariant,
+  repository: State<'_, SqliteInstalledModsRepository>,
+) -> Result<
+  ModInstallationStatus,
+  GetThirdPartyModInstallationStatusCommandError,
+> {
+  let status = get_third_party_mod_installation_status(
+    &id,
+    &variant,
+    repository.inner(),
+  )
+  .await?;
+  Ok(status)
 }

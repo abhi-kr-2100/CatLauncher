@@ -16,16 +16,20 @@ export function useCreateManualBackup(
 
   const { mutate } = useMutation({
     mutationFn: async (values: { name: string; notes?: string }) => {
-      await createManualBackupForVariant(variant, values.name, values.notes);
+      await createManualBackupForVariant(
+        variant,
+        values.name,
+        values.notes,
+      );
     },
     onMutate: async (newBackup) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.manualBackups(variant),
       });
 
-      const previousBackups = queryClient.getQueryData<ManualBackupEntry[]>(
-        queryKeys.manualBackups(variant),
-      );
+      const previousBackups = queryClient.getQueryData<
+        ManualBackupEntry[]
+      >(queryKeys.manualBackups(variant));
 
       queryClient.setQueryData<ManualBackupEntry[]>(
         queryKeys.manualBackups(variant),

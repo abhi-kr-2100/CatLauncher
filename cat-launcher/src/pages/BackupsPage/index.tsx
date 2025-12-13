@@ -14,16 +14,16 @@ import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { CombinedBackup } from "./types/backups";
 
 function BackupsPage() {
-  const { gameVariants, isLoading: gameVariantsLoading } = useGameVariants();
-  const [selectedVariant, setSelectedVariant] = useState<GameVariant | null>(
-    null,
-  );
-  const [newManualDialogOpen, setNewManualDialogOpen] = useState(false);
+  const { gameVariants, isLoading: gameVariantsLoading } =
+    useGameVariants();
+  const [selectedVariant, setSelectedVariant] =
+    useState<GameVariant | null>(null);
+  const [newManualDialogOpen, setNewManualDialogOpen] =
+    useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
-  const [selectedBackup, setSelectedBackup] = useState<CombinedBackup | null>(
-    null,
-  );
+  const [selectedBackup, setSelectedBackup] =
+    useState<CombinedBackup | null>(null);
   const [appliedFilter, setAppliedFilter] = useState<BackupFilterFn>(
     () => (_backup: CombinedBackup) => true,
   );
