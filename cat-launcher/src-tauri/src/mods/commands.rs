@@ -98,17 +98,23 @@ pub async fn install_third_party_mod_command(
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
 pub enum UninstallThirdPartyModCommandError {
+    #[error("failed to get app data directory: {0}")]
+    AppDataDir(#[from] tauri::Error),
+
     #[error("failed to uninstall mod: {0}")]
     Uninstall(#[from] UninstallThirdPartyModError),
 }
 
 #[tauri::command]
 pub async fn uninstall_third_party_mod_command(
-    mod_id: String,
-    game_variant: GameVariant,
+    id: String,
+    variant: GameVariant,
+    app: tauri::AppHandle,
     repository: State<'_, SqliteInstalledModsRepository>,
 ) -> Result<(), UninstallThirdPartyModCommandError> {
-    uninstall_third_party_mod(&mod_id, &game_variant, repository.inner()).await?;
+    let data_dir = app.path().app_local_data_dir()?;
+
+    uninstall_third_party_mod(&id, &variant, &data_dir, repository.inner()).await?;
     Ok(())
 }
 
