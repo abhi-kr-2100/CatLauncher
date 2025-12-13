@@ -40,6 +40,7 @@ export default function ModsList({ variant }: ModsListProps) {
       {mods.map((mod) => (
         <ModCard
           key={`${variant}-${mod.content.id}`}
+          variant={variant}
           mod={mod}
         />
       ))}
