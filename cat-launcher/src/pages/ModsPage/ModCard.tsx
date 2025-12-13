@@ -8,10 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
 import { getHumanFriendlyText, toastCL } from "@/lib/utils";
-import { useInstallThirdPartyMod } from "./hooks";
-import { GameVariant } from "@/generated-types/GameVariant";
+import {
+  useGetThirdPartyModInstallationStatus,
+  useInstallThirdPartyMod,
+  useUninstallThirdPartyMod,
+} from "./hooks";
 
 interface ModCardProps {
   variant: GameVariant;
@@ -41,11 +45,25 @@ export default function ModCard({ variant, mod }: ModCardProps) {
   const category = getModCategory(mod);
 
   const isThirdParty = mod.type !== "Stock";
+  const modId = mod.content.id;
+
+  const { installationStatus } = useGetThirdPartyModInstallationStatus(
+    modId,
+    variant,
+  );
+
+  const isInstalled = installationStatus === "Installed";
 
   const { isInstalling, install } = useInstallThirdPartyMod(
     variant,
     () => toastCL("success", "Mod installed successfully."),
     (error) => toastCL("error", "Failed to install mod.", error),
+  );
+
+  const { isUninstalling, uninstall } = useUninstallThirdPartyMod(
+    variant,
+    () => toastCL("success", "Mod uninstalled successfully."),
+    (error) => toastCL("error", "Failed to uninstall mod.", error),
   );
 
   return (
@@ -72,13 +90,24 @@ export default function ModCard({ variant, mod }: ModCardProps) {
       </CardContent>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">
-          <Button
-            className="w-full"
-            onClick={() => install(mod.content.id)}
-            disabled={isInstalling}
-          >
-            {isInstalling ? "Installing..." : "Install"}
-          </Button>
+          {isInstalled ? (
+            <Button
+              className="w-full"
+              variant="destructive"
+              onClick={() => uninstall(modId)}
+              disabled={isUninstalling}
+            >
+              {isUninstalling ? "Uninstalling..." : "Uninstall"}
+            </Button>
+          ) : (
+            <Button
+              className="w-full"
+              onClick={() => install(modId)}
+              disabled={isInstalling}
+            >
+              {isInstalling ? "Installing..." : "Install"}
+            </Button>
+          )}
         </CardFooter>
       )}
     </Card>

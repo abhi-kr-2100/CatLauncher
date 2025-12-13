@@ -38,3 +38,10 @@ pub enum Mod {
     Stock(StockMod),
     ThirdParty(ThirdPartyMod),
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum ModInstallationStatus {
+    Installed,
+    NotInstalled,
+}
