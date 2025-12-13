@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+target
+.tauri
+coverage
+pnpm-lock.yaml
+Cargo.lock
+*.min.js
+.next
+out
