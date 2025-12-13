@@ -38,7 +38,7 @@ pub async fn list_all_mods_command(
     app: tauri::AppHandle,
     active_release_repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Vec<Mod>, ListAllModsCommandError> {
-    let data_dir = app.path().app_data_dir()?;
+    let data_dir = app.path().app_local_data_dir()?;
     let resource_dir = app.path().resource_dir()?;
 
     let os = get_os_enum(OS)?;
