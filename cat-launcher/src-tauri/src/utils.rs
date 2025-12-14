@@ -123,12 +123,17 @@ async fn migrate_backup_directory(
   let app_data_dir = handle.path().app_data_dir();
   let app_local_data_dir = handle.path().app_local_data_dir();
 
-  if let (Ok(app_data_dir), Ok(app_local_data_dir)) = (app_data_dir, app_local_data_dir) {
+  if let (Ok(app_data_dir), Ok(app_local_data_dir)) =
+    (app_data_dir, app_local_data_dir)
+  {
     if app_data_dir == app_local_data_dir {
       return Ok(());
     }
     let old_backups_dir = app_data_dir.join("Backups");
-    if !old_backups_dir.exists() {
+    if !tokio::fs::try_exists(&old_backups_dir)
+      .await
+      .unwrap_or(false)
+    {
       return Ok(());
     }
 
@@ -138,7 +143,7 @@ async fn migrate_backup_directory(
     let mut entries = tokio::fs::read_dir(&old_backups_dir).await?;
     while let Some(entry) = entries.next_entry().await? {
       let new_path = new_backups_dir.join(entry.file_name());
-      if !new_path.exists() {
+      if !tokio::fs::try_exists(&new_path).await.unwrap_or(true) {
         tokio::fs::rename(entry.path(), new_path).await?;
       }
     }
@@ -157,11 +162,18 @@ pub fn migrate_backups(app: &App) {
     }
 
     let state: tauri::State<SqliteBackupRepository> = handle.state();
-    let data_dir = handle.path().app_local_data_dir().unwrap();
-    if let Err(e) =
-      migrate_older_automatic_backups(&data_dir, state.inner()).await
-    {
-      eprintln!("Failed to migrate backups: {}", e);
+    match handle.path().app_local_data_dir() {
+      Ok(data_dir) => {
+        if let Err(e) =
+          migrate_older_automatic_backups(&data_dir, state.inner())
+            .await
+        {
+          eprintln!("Failed to migrate backups: {}", e);
+        }
+      }
+      Err(e) => {
+        eprintln!("Failed to get app local data directory: {}", e);
+      }
     }
   });
 }
