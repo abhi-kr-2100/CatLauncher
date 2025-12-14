@@ -15,6 +15,18 @@
     "format:check": "prettier --check . && cargo fmt --manifest-path ./src-tauri/Cargo.toml -- --check",
     "prepare": "cd .. && husky cat-launcher/.husky"
   },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,md}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0"
+    ],
+    "src-tauri/src/**/*.rs": [
+      "sh -c 'cd src-tauri && cargo fmt --all'",
+      "sh -c 'cd src-tauri && cargo clippy -- -D warnings'"
+    ]
+  },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
@@ -71,6 +83,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "typescript": "~5.8.3",
     "vite": "^7.2.7"
