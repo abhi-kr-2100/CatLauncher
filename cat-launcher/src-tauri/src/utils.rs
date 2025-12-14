@@ -117,9 +117,45 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   Ok(())
 }
 
+async fn migrate_backup_directory(
+  handle: &tauri::AppHandle,
+) -> Result<(), io::Error> {
+  let app_data_dir = handle.path().app_data_dir();
+  let app_local_data_dir = handle.path().app_local_data_dir();
+
+  if let (Ok(app_data_dir), Ok(app_local_data_dir)) = (app_data_dir, app_local_data_dir) {
+    if app_data_dir == app_local_data_dir {
+      return Ok(());
+    }
+    let old_backups_dir = app_data_dir.join("Backups");
+    if !old_backups_dir.exists() {
+      return Ok(());
+    }
+
+    let new_backups_dir = app_local_data_dir.join("Backups");
+    tokio::fs::create_dir_all(&new_backups_dir).await?;
+
+    let mut entries = tokio::fs::read_dir(&old_backups_dir).await?;
+    while let Some(entry) = entries.next_entry().await? {
+      let new_path = new_backups_dir.join(entry.file_name());
+      if !new_path.exists() {
+        tokio::fs::rename(entry.path(), new_path).await?;
+      }
+    }
+
+    tokio::fs::remove_dir_all(&old_backups_dir).await?;
+  }
+
+  Ok(())
+}
+
 pub fn migrate_backups(app: &App) {
   let handle = app.handle().clone();
   tauri::async_runtime::spawn(async move {
+    if let Err(e) = migrate_backup_directory(&handle).await {
+      eprintln!("Failed to migrate backups directory: {}", e);
+    }
+
     let state: tauri::State<SqliteBackupRepository> = handle.state();
     let data_dir = handle.path().app_local_data_dir().unwrap();
     if let Err(e) =

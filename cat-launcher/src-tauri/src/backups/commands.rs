@@ -46,7 +46,7 @@ pub async fn delete_backup_by_id(
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<(), DeleteBackupCommandError> {
-  let data_dir = app_handle.path().app_data_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
   delete_backup(id, &data_dir, backup_repository.inner()).await?;
   Ok(())
 }
@@ -69,7 +69,7 @@ pub async fn restore_backup_by_id(
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<(), RestoreBackupCommandError> {
-  let data_dir = app_handle.path().app_data_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
   restore_backup(id, &data_dir, backup_repository.inner(), &os)
     .await?;
