@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer, Serializer};
 
+#[allow(dead_code)]
 pub fn serialize<S>(
   date: &DateTime<Utc>,
   serializer: S,
@@ -13,6 +14,7 @@ where
   serializer.serialize_str(&s)
 }
 
+#[allow(dead_code)]
 pub fn deserialize<'de, D>(
   deserializer: D,
 ) -> Result<DateTime<Utc>, D::Error>

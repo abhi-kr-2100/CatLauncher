@@ -170,7 +170,7 @@ pub enum GetModActivityCommandError {
 
 #[tauri::command]
 pub async fn get_mod_activity_command(
-    mod_id: String,
+    id: String,
     variant: GameVariant,
     app: tauri::AppHandle,
     http_client: State<'_, reqwest::Client>,
@@ -178,7 +178,7 @@ pub async fn get_mod_activity_command(
     let resource_dir = app.path().resource_dir()?;
 
     let activity =
-        get_mod_activity(&mod_id, &variant, &resource_dir, http_client.inner()).await?;
+        get_mod_activity(&id, &variant, &resource_dir, http_client.inner()).await?;
 
     Ok(activity)
 }

@@ -1,39 +1,39 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 
 use downloader::progress::Reporter;
 use serde::{Deserialize, Serialize};
 
-use crate::infra::download::{DownloadFileError, Downloader};
+use crate::infra::download::{Downloader, DownloadFileError};
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GitHubAsset {
-  pub id: u64,
-  pub browser_download_url: String,
-  pub name: String,
-  pub digest: Option<String>,
+    pub id: u64,
+    pub browser_download_url: String,
+    pub name: String,
+    pub digest: Option<String>,
+}
+
+impl GitHubAsset {
+    pub async fn download(
+        &self,
+        downloader: &Downloader,
+        download_dir: &Path,
+        progress: Arc<dyn Reporter + Send + Sync>,
+    ) -> Result<(), AssetDownloadError> {
+        downloader
+            .download_file(
+                &self.browser_download_url,
+                &download_dir.join(&self.name),
+                progress,
+            )
+            .await?;
+        Ok(())
+    }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum AssetDownloadError {
-  #[error("failed to download asset: {0}")]
-  Download(#[from] DownloadFileError),
-}
-
-impl GitHubAsset {
-  pub async fn download(
-    &self,
-    downloader: &Downloader,
-    download_dir: &Path,
-    progress: Arc<dyn Reporter + Send + Sync>,
-  ) -> Result<PathBuf, AssetDownloadError> {
-    downloader
-      .download_file(
-        &self.browser_download_url,
-        download_dir,
-        progress,
-      )
-      .await
-      .map_err(AssetDownloadError::from)
-  }
+    #[error("failed to download asset: {0}")]
+    Download(#[from] DownloadFileError),
 }

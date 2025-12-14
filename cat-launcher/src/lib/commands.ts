@@ -307,11 +307,11 @@ export async function uninstallThirdPartyMod(
 }
 
 export async function getModActivity(
-  modId: string,
+  id: string,
   variant: GameVariant,
 ): Promise<string> {
   return await invoke<string>("get_mod_activity_command", {
-    modId,
+    id,
     variant,
   });
 }
