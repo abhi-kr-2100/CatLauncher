@@ -9,6 +9,7 @@ mod game_release;
 mod game_tips;
 mod infra;
 mod install_release;
+mod last_played_world;
 mod launch_game;
 mod manual_backups;
 mod mods;
@@ -28,6 +29,7 @@ use crate::fetch_releases::commands::fetch_releases_for_variant;
 use crate::game_tips::commands::get_tips;
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
+use crate::last_played_world::commands::get_last_played_world;
 use crate::launch_game::commands::launch_game;
 use crate::manual_backups::commands::{
   create_manual_backup_for_variant, delete_manual_backup_by_id,
@@ -113,6 +115,7 @@ pub fn run() {
       get_user_id,
       get_preferred_theme,
       set_preferred_theme,
+      get_last_played_world,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
