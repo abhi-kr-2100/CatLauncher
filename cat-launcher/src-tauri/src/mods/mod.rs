@@ -1,5 +1,5 @@
 pub mod commands;
-pub mod get_mods_activity;
+pub mod get_mod_activity;
 pub mod get_third_party_mod;
 pub mod get_third_party_mod_installation_status;
 pub mod install_third_party_mod;

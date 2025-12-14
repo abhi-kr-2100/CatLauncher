@@ -14,18 +14,19 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 
 export function useGetModActivity(
-  modId: string,
   variant: GameVariant,
+  onSuccess?: (data: string | null) => void,
+  onError?: (error: unknown) => void,
 ) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: queryKeys.mods.activity(modId, variant),
-    queryFn: () => getModActivity(modId, variant),
+  const mutation = useMutation({
+    mutationFn: (modId: string) => getModActivity(modId, variant),
+    onSuccess,
+    onError,
   });
 
   return {
-    activity: data,
-    isLoading,
-    isError,
+    isGettingActivity: mutation.isPending,
+    getActivity: (modId: string) => mutation.mutate(modId),
   };
 }
 

@@ -8,8 +8,7 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::download::Downloader;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use std::collections::HashMap;
-use crate::mods::get_mods_activity::{get_mods_activity, GetModsActivityError};
+use crate::mods::get_mod_activity::{get_mod_activity, GetModActivityError};
 use crate::mods::get_third_party_mod_installation_status::{
     get_third_party_mod_installation_status, GetThirdPartyModInstallationStatusError,
 };
@@ -161,33 +160,25 @@ pub async fn get_third_party_mod_installation_status_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetModsActivityCommandError {
-  #[error("failed to get app resource directory")]
-  ResourceDir(#[from] tauri::Error),
+pub enum GetModActivityCommandError {
+    #[error("failed to get app resource directory")]
+    ResourceDir(#[from] tauri::Error),
 
-  #[error("failed to get mods activity: {0}")]
-  GetModsActivity(#[from] GetModsActivityError),
+    #[error("failed to get mod activity: {0}")]
+    GetModActivity(#[from] GetModActivityError),
 }
 
 #[tauri::command]
-pub async fn get_mods_activity_command(
-  ids: Vec<String>,
-  variant: GameVariant,
-  app: tauri::AppHandle,
-  http_client: State<'_, reqwest::Client>,
-) -> Result<
-  HashMap<String, Option<String>>,
-  GetModsActivityCommandError,
-> {
-  let resource_dir = app.path().resource_dir()?;
+pub async fn get_mod_activity_command(
+    id: String,
+    variant: GameVariant,
+    app: tauri::AppHandle,
+    http_client: State<'_, reqwest::Client>,
+) -> Result<Option<String>, GetModActivityCommandError> {
+    let resource_dir = app.path().resource_dir()?;
 
-  let activity = get_mods_activity(
-    ids,
-    &variant,
-    &resource_dir,
-    http_client.inner(),
-  )
-  .await?;
+    let activity =
+        get_mod_activity(&id, &variant, &resource_dir, http_client.inner()).await?;
 
-  Ok(activity)
+    Ok(activity)
 }

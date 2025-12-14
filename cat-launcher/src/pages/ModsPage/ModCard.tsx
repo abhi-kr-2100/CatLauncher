@@ -12,15 +12,16 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
 import { getHumanFriendlyText, toastCL } from "@/lib/utils";
 import {
+  useGetModActivity,
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
 } from "./hooks";
+import { useState } from "react";
 
 interface ModCardProps {
   variant: GameVariant;
   mod: Mod;
-  activity?: string | null;
 }
 
 function getModName(mod: Mod): string {
@@ -39,15 +40,12 @@ function getModCategory(mod: Mod): string {
   return getHumanFriendlyText(mod.content.category);
 }
 
-export default function ModCard({
-  variant,
-  mod,
-  activity,
-}: ModCardProps) {
+export default function ModCard({ variant, mod }: ModCardProps) {
   const name = getModName(mod);
   const description = getModDescription(mod);
   const modType = getModType(mod);
   const category = getModCategory(mod);
+  const [activity, setActivity] = useState<string | null>(null);
 
   const isThirdParty = mod.type !== "Stock";
   const modId = mod.content.id;
@@ -67,6 +65,12 @@ export default function ModCard({
     variant,
     () => toastCL("success", "Mod uninstalled successfully."),
     (error) => toastCL("error", "Failed to uninstall mod.", error),
+  );
+
+  const { isGettingActivity, getActivity } = useGetModActivity(
+    variant,
+    (data) => setActivity(data),
+    (error) => toastCL("error", "Failed to get mod activity.", error),
   );
 
   return (
@@ -116,6 +120,16 @@ export default function ModCard({
               {isInstalling ? "Installing..." : "Install"}
             </Button>
           )}
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={() => getActivity(modId)}
+            disabled={isGettingActivity}
+          >
+            {isGettingActivity
+              ? "Getting activity..."
+              : "Get Last Activity"}
+          </Button>
         </CardFooter>
       )}
     </Card>
