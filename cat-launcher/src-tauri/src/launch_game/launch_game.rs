@@ -102,6 +102,7 @@ impl GameRelease {
   pub async fn prepare_launch(
     &self,
     os: &OS,
+    world: Option<&str>,
     timestamp: u64,
     data_dir: &Path,
     backup_repository: &dyn BackupRepository,
@@ -147,6 +148,10 @@ impl GameRelease {
       .arg(user_data_dir)
       .stdout(Stdio::piped())
       .stderr(Stdio::piped());
+
+    if let Some(world) = world {
+      command.arg("--world").arg(world);
+    }
 
     Ok(command)
   }
@@ -261,6 +266,7 @@ async fn cleanup_old_backups(
 pub async fn launch_and_monitor_game<F, Fut>(
   variant: &GameVariant,
   release_id: &str,
+  world: Option<&str>,
   os: &OS,
   timestamp: u64,
   data_dir: &Path,
@@ -292,7 +298,13 @@ where
     .await;
 
   let command = release
-    .prepare_launch(os, timestamp, data_dir, &backup_repository)
+    .prepare_launch(
+      os,
+      world,
+      timestamp,
+      data_dir,
+      &backup_repository,
+    )
     .await?;
 
   let backup_repository_clone = backup_repository.clone();

@@ -60,4 +60,7 @@ export const queryKeys = {
         variant,
       ] as const,
   },
+
+  lastPlayedWorld: (variant: GameVariant) =>
+    ["last_played_world", variant] as const,
 };
