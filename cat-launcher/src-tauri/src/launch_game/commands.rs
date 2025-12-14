@@ -2,8 +2,7 @@ use std::env::consts::OS;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use strum::IntoStaticStr;
-use tauri::State;
-use tauri::{command, AppHandle, Emitter, Manager};
+use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -39,6 +38,7 @@ pub async fn launch_game(
   app_handle: AppHandle,
   variant: GameVariant,
   release_id: &str,
+  world: Option<&str>,
   settings: State<'_, Settings>,
   releases_repository: State<'_, SqliteReleasesRepository>,
   backup_repository: State<'_, SqliteBackupRepository>,
@@ -64,6 +64,7 @@ pub async fn launch_game(
   launch_and_monitor_game(
     &variant,
     release_id,
+    world,
     &os,
     time,
     &data_dir,

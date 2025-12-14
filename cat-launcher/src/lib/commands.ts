@@ -223,10 +223,12 @@ export async function installReleaseForVariant(
 export async function launchGame(
   variant: GameVariant,
   releaseId: string,
+  world: string | null,
 ): Promise<void> {
   await invoke("launch_game", {
     variant,
     releaseId,
+    world,
   });
 }
 
@@ -239,6 +241,19 @@ export async function getInstallationStatus(
     {
       variant,
       releaseId,
+    },
+  );
+
+  return response;
+}
+
+export async function getLastPlayedWorld(
+  variant: GameVariant,
+): Promise<string | null> {
+  const response = await invoke<string | null>(
+    "get_last_played_world",
+    {
+      variant,
     },
   );
 

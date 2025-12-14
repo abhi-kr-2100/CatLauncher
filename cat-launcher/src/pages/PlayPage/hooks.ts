@@ -21,6 +21,7 @@ import {
   listenToGameEvent,
   listenToInstallationStatusUpdate,
   listenToReleasesUpdate,
+  getLastPlayedWorld,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener, toastCL } from "@/lib/utils";
@@ -254,14 +255,73 @@ export function useInstallationStatus(
 }
 
 export function usePlayGame(variant: GameVariant) {
+  const { launch, isStartingGame } = useLaunchGame(variant);
+  return { play: launch, isStartingGame };
+}
+
+export function useLastPlayedWorld(
+  variant: GameVariant,
+  {
+    onError,
+  }: {
+    onError: (error: Error) => void;
+  },
+) {
+  const { data: lastPlayedWorld, error: lastPlayedWorldError } =
+    useQuery<string | null>({
+      queryKey: queryKeys.lastPlayedWorld(variant),
+      queryFn: () => getLastPlayedWorld(variant),
+      refetchInterval: 5000,
+    });
+
+  useEffect(() => {
+    if (lastPlayedWorldError) {
+      onError(lastPlayedWorldError as Error);
+    }
+  }, [lastPlayedWorldError, onError]);
+
+  return { lastPlayedWorld };
+}
+
+export function useResumeLastWorld(
+  variant: GameVariant,
+  {
+    onError,
+  }: {
+    onError: (error: Error) => void;
+  },
+) {
+  const { lastPlayedWorld } = useLastPlayedWorld(variant, {
+    onError,
+  });
+
+  const { launch, isStartingGame } = useLaunchGame(variant, {
+    worldName: lastPlayedWorld ?? undefined,
+    onError,
+  });
+
+  return { resume: launch, isStartingGame, lastPlayedWorld };
+}
+
+export function useLaunchGame(
+  variant: GameVariant,
+  {
+    worldName,
+    onError,
+  }: {
+    worldName?: string | null;
+    onError?: (error: Error) => void;
+  } = {},
+) {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-  const { mutate: play, isPending: isStartingGame } = useMutation({
+
+  const { mutate: launch, isPending: isStartingGame } = useMutation({
     mutationFn: (releaseId: string | undefined) => {
       if (!releaseId) {
         throw new Error("No release selected");
       }
-      return launchGame(variant, releaseId);
+      return launchGame(variant, releaseId, worldName ?? null);
     },
     onSuccess: (_, releaseId) => {
       dispatch(setCurrentlyPlaying({ variant }));
@@ -271,11 +331,15 @@ export function usePlayGame(variant: GameVariant) {
       );
     },
     onError: (e) => {
-      toastCL("error", "Failed to launch game.", e);
+      if (onError) {
+        onError(e as Error);
+      } else {
+        toastCL("error", "Failed to launch game.", e);
+      }
     },
   });
 
-  return { play, isStartingGame };
+  return { launch, isStartingGame };
 }
 
 export function usePlayTime(
