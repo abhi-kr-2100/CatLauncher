@@ -12,7 +12,6 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
 import { getHumanFriendlyText, toastCL } from "@/lib/utils";
 import {
-  useGetModActivity,
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
@@ -21,6 +20,7 @@ import {
 interface ModCardProps {
   variant: GameVariant;
   mod: Mod;
+  activity?: string | null;
 }
 
 function getModName(mod: Mod): string {
@@ -39,7 +39,11 @@ function getModCategory(mod: Mod): string {
   return getHumanFriendlyText(mod.content.category);
 }
 
-export default function ModCard({ variant, mod }: ModCardProps) {
+export default function ModCard({
+  variant,
+  mod,
+  activity,
+}: ModCardProps) {
   const name = getModName(mod);
   const description = getModDescription(mod);
   const modType = getModType(mod);
@@ -47,8 +51,6 @@ export default function ModCard({ variant, mod }: ModCardProps) {
 
   const isThirdParty = mod.type !== "Stock";
   const modId = mod.content.id;
-
-  const { activity } = useGetModActivity(modId, variant);
 
   const { installationStatus } =
     useGetThirdPartyModInstallationStatus(modId, variant);

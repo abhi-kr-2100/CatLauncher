@@ -34,7 +34,7 @@ use crate::manual_backups::commands::{
   list_manual_backups_for_variant, restore_manual_backup_by_id,
 };
 use crate::mods::commands::{
-  get_mod_activity_command,
+  get_mods_activity_command,
   get_third_party_mod_installation_status_command,
   install_third_party_mod_command, list_all_mods_command,
   uninstall_third_party_mod_command,
@@ -103,7 +103,7 @@ pub fn run() {
       install_third_party_mod_command,
       uninstall_third_party_mod_command,
       get_third_party_mod_installation_status_command,
-      get_mod_activity_command,
+      get_mods_activity_command,
       list_all_tilesets_command,
       install_third_party_tileset_command,
       uninstall_third_party_tileset_command,

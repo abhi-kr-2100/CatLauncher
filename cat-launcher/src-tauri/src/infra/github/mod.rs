@@ -1,4 +1,5 @@
 pub mod api;
-pub mod utils;
-pub mod release;
 pub mod asset;
+pub mod release;
+pub mod types;
+pub mod utils;
