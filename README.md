@@ -51,3 +51,7 @@ If you encounter issues with the AppImage, you can try installing CatLauncher us
 ## License
 
 CatLauncher © 2025 by Abhishek Kumar is licensed under CC BY-NC-ND 4.0. To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+<div align="center">
+  <img src="cat-launcher/src-tauri/icons/icon.png?raw=true" width="256" alt="CatLauncher Icon">
+</div>
