@@ -6,11 +6,28 @@ import {
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
+  getModActivity,
   getThirdPartyModInstallationStatus,
   installThirdPartyMod,
   uninstallThirdPartyMod,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+
+export function useGetModActivity(
+  modId: string,
+  variant: GameVariant,
+) {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: queryKeys.mods.activity(modId, variant),
+    queryFn: () => getModActivity(modId, variant),
+  });
+
+  return {
+    activity: data,
+    isLoading,
+    isError,
+  };
+}
 
 export function useInstallThirdPartyMod(
   variant: GameVariant,

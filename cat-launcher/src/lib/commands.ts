@@ -306,6 +306,16 @@ export async function uninstallThirdPartyMod(
   });
 }
 
+export async function getModActivity(
+  modId: string,
+  variant: GameVariant,
+): Promise<string> {
+  return await invoke<string>("get_mod_activity_command", {
+    modId,
+    variant,
+  });
+}
+
 export async function listAllTilesets(
   variant: GameVariant,
 ): Promise<Tileset[]> {

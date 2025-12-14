@@ -12,6 +12,7 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
 import { getHumanFriendlyText, toastCL } from "@/lib/utils";
 import {
+  useGetModActivity,
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
@@ -46,6 +47,8 @@ export default function ModCard({ variant, mod }: ModCardProps) {
 
   const isThirdParty = mod.type !== "Stock";
   const modId = mod.content.id;
+
+  const { activity } = useGetModActivity(modId, variant);
 
   const { installationStatus } =
     useGetThirdPartyModInstallationStatus(modId, variant);
@@ -85,6 +88,11 @@ export default function ModCard({ variant, mod }: ModCardProps) {
             {description}
           </AlertDescription>
         </Alert>
+        {activity && (
+          <div className="text-sm text-muted-foreground">
+            Last updated: {new Date(activity).toLocaleDateString()}
+          </div>
+        )}
       </CardContent>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">

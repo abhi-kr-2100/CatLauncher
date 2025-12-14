@@ -8,6 +8,7 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::download::Downloader;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::mods::get_mod_activity::{get_mod_activity, GetModActivityError};
 use crate::mods::get_third_party_mod_installation_status::{
     get_third_party_mod_installation_status, GetThirdPartyModInstallationStatusError,
 };
@@ -154,4 +155,30 @@ pub async fn get_third_party_mod_installation_status_command(
   )
   .await?;
   Ok(status)
+}
+
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
+pub enum GetModActivityCommandError {
+    #[error("failed to get app resource directory")]
+    ResourceDir(#[from] tauri::Error),
+
+    #[error("failed to get mod activity: {0}")]
+    GetModActivity(#[from] GetModActivityError),
+}
+
+#[tauri::command]
+pub async fn get_mod_activity_command(
+    mod_id: String,
+    variant: GameVariant,
+    app: tauri::AppHandle,
+    http_client: State<'_, reqwest::Client>,
+) -> Result<String, GetModActivityCommandError> {
+    let resource_dir = app.path().resource_dir()?;
+
+    let activity =
+        get_mod_activity(&mod_id, &variant, &resource_dir, http_client.inner()).await?;
+
+    Ok(activity)
 }
