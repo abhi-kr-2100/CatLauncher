@@ -13,7 +13,9 @@ import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
   usePlayGame,
+  useResumeLastWorld,
 } from "./hooks";
+import { toastCL } from "@/lib/utils";
 
 export default function InteractionButton({
   variant,
@@ -31,7 +33,20 @@ export default function InteractionButton({
   const { installationStatus, installationStatusError } =
     useInstallationStatus(variant, selectedReleaseId);
 
-  const { play, isStartingGame } = usePlayGame(variant);
+  const { play, isStartingGame: isStartingGameFromPlay } =
+    usePlayGame(variant);
+
+  const {
+    resume,
+    isStartingGame: isStartingGameFromResume,
+    lastPlayedWorld,
+  } = useResumeLastWorld(variant, {
+    onError: (e) => {
+      toastCL("error", "Failed to get last played world.", e);
+    },
+  });
+  const isStartingGame =
+    isStartingGameFromPlay || isStartingGameFromResume;
 
   const actionButtonLabel = getActionButtonLabel(
     selectedReleaseId,
@@ -62,17 +77,28 @@ export default function InteractionButton({
   }
 
   const button = (
-    <Button
-      className="w-full"
-      onClick={() =>
-        installationStatus === "ReadyToPlay"
-          ? play(selectedReleaseId)
-          : install(selectedReleaseId)
-      }
-      disabled={isActionButtonDisabled}
-    >
-      {actionButtonLabel}
-    </Button>
+    <div className="flex gap-2 w-full">
+      <Button
+        className="grow w-[50%]"
+        onClick={() =>
+          installationStatus === "ReadyToPlay"
+            ? play(selectedReleaseId)
+            : install(selectedReleaseId)
+        }
+        disabled={isActionButtonDisabled}
+      >
+        {actionButtonLabel}
+      </Button>
+      {selectedReleaseId && installationStatus === "ReadyToPlay" && (
+        <Button
+          className="grow w-[50%]"
+          onClick={() => resume(selectedReleaseId)}
+          disabled={isActionButtonDisabled || !lastPlayedWorld}
+        >
+          Resume Last World
+        </Button>
+      )}
+    </div>
   );
 
   if (installationStatus === "NotAvailable") {
