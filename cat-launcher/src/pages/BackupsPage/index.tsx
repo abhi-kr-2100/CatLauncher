@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/SearchInput";
 import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { useSearch } from "@/hooks/useSearch";
 import { toastCL } from "@/lib/utils";
 import BackupFilter, { BackupFilterFn } from "./BackupFilter";
 import { BackupsTable } from "./BackupsTable";
@@ -12,6 +14,19 @@ import { DeleteBackupDialog } from "./DeleteBackupDialog";
 import { NewBackupDialog } from "./NewBackupDialog";
 import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { CombinedBackup } from "./types/backups";
+
+function formatTimestampForSearch(timestamp: bigint): string {
+  const date = new Date(Number(timestamp) * 1000);
+
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = date.toLocaleString("default", { month: "long" });
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+
+  return `${day} ${month}, ${year}, ${hours}:${minutes}:${seconds}`;
+}
 
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
@@ -55,10 +70,26 @@ function BackupsPage() {
     },
   });
 
-  const filteredBackups = useMemo(
-    () => combinedBackups.filter(appliedFilter),
-    [combinedBackups, appliedFilter],
-  );
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredItems: searchedBackups,
+  } = useSearch(combinedBackups, {
+    searchFn: (backup, query) => {
+      const formattedTimestamp = formatTimestampForSearch(
+        backup.timestamp,
+      );
+      return (
+        backup.name.toLowerCase().includes(query) ||
+        backup.notes?.toLowerCase().includes(query) ||
+        formattedTimestamp.toLowerCase().includes(query)
+      );
+    },
+  });
+
+  const filteredBackups = useMemo(() => {
+    return searchedBackups.filter(appliedFilter);
+  }, [searchedBackups, appliedFilter]);
 
   const handleSave = (values: { name: string; notes?: string }) => {
     createManualBackup({
@@ -93,6 +124,12 @@ function BackupsPage() {
           New Backup
         </Button>
       </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search backups..."
+        className="mb-4"
+      />
       <BackupFilter
         onChange={(filter) =>
           setAppliedFilter((_prev: BackupFilterFn) => filter)

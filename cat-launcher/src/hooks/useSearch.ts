@@ -2,57 +2,41 @@ import { useMemo, useState } from "react";
 
 import { useDebounce } from "./useDebounce";
 
-export interface SearchableItem {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface UseSearchOptions<T extends SearchableItem> {
+export interface UseSearchOptions<T> {
   debounceDelay?: number;
   searchFn?: (item: T, query: string) => boolean;
 }
 
-export function useSearch<T extends SearchableItem>(
+export function useSearch<T>(
   items: T[],
   options: UseSearchOptions<T> = {},
 ) {
   const { debounceDelay = 300, searchFn } = options;
 
   const [searchInput, setSearchInput] = useState("");
+
   const debouncedSearchQuery = useDebounce(
     searchInput,
     debounceDelay,
   );
+  const normalizedSearchQuery = useMemo(() => {
+    return debouncedSearchQuery.trim().toLowerCase();
+  }, [debouncedSearchQuery]);
 
   const filteredItems = useMemo(() => {
-    if (!debouncedSearchQuery.trim()) {
+    if (!normalizedSearchQuery || !searchFn) {
       return items;
     }
 
-    const searchFunction = searchFn || defaultSearchFn;
     return items.filter((item) =>
-      searchFunction(item, debouncedSearchQuery),
+      searchFn(item, normalizedSearchQuery),
     );
-  }, [items, debouncedSearchQuery, searchFn, defaultSearchFn]);
+  }, [items, normalizedSearchQuery, searchFn]);
 
   return {
-    searchInput,
-    setSearchInput,
-    debouncedSearchQuery,
+    searchQuery: searchInput,
+    setSearchQuery: setSearchInput,
     filteredItems,
-    hasActiveSearch: debouncedSearchQuery.trim().length > 0,
+    hasActiveSearch: normalizedSearchQuery.length > 0,
   };
-}
-
-function defaultSearchFn(
-  item: SearchableItem,
-  query: string,
-): boolean {
-  const lowerQuery = query.toLowerCase().trim();
-  return (
-    item.name.toLowerCase().includes(lowerQuery) ||
-    item.description.toLowerCase().includes(lowerQuery) ||
-    item.id.toLowerCase().includes(lowerQuery)
-  );
 }
