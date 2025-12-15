@@ -5,13 +5,16 @@ use std::sync::Arc;
 
 use tokio::fs::{create_dir_all, read_to_string};
 
+use downloader::progress::Reporter;
+
 use crate::filesystem::paths::{
-    get_or_create_directory, get_or_create_user_game_data_dir, GetOrCreateDirectoryError,
-    GetUserGameDataDirError,
+  get_or_create_directory, get_or_create_user_game_data_dir,
+  GetOrCreateDirectoryError, GetUserGameDataDirError,
 };
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{extract_archive, ExtractionError};
-use crate::infra::download::{DownloadFileError, Downloader, NoOpReporter};
+use crate::infra::download::{DownloadFileError, Downloader};
+
 use crate::infra::utils::OS;
 use crate::soundpacks::paths::get_soundpacks_resource_path;
 use crate::soundpacks::repository::installed_soundpacks_repository::{
@@ -60,6 +63,7 @@ pub async fn install_third_party_soundpack(
   os: &OS,
   downloader: &Downloader,
   repository: &impl InstalledSoundpacksRepository,
+  reporter: Arc<dyn Reporter + Send + Sync>,
 ) -> Result<(), InstallThirdPartySoundpackError> {
   // Get soundpack details from soundpacks.json
   let soundpack_details =
@@ -73,7 +77,6 @@ pub async fn install_third_party_soundpack(
   create_dir_all(&soundpack_temp_dir).await?;
 
   // Download the soundpack
-  let reporter = Arc::new(NoOpReporter);
   let downloaded_file = downloader
     .download_file(
       &soundpack_details.installation.download_url,

@@ -56,12 +56,3 @@ impl Downloader {
     }
   }
 }
-
-pub struct NoOpReporter;
-
-impl Reporter for NoOpReporter {
-  fn setup(&self, _max_progress: Option<u64>, _message: &str) {}
-  fn progress(&self, _current: u64) {}
-  fn set_message(&self, _message: &str) {}
-  fn done(&self) {}
-}

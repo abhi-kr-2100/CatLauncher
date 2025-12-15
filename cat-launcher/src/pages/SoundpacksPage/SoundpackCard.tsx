@@ -1,3 +1,4 @@
+import { DownloadProgress } from "@/components/DownloadProgress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,8 +44,14 @@ export default function SoundpackCard({
 
   const isInstalled = installationStatus === "Installed";
 
-  const { isInstalling, install } = useInstallThirdPartySoundpack(
+  const {
+    isInstalling,
+    install,
+    installationProgressStatus: soundpackInstallationProgress,
+    downloadProgress: soundpackDownloadProgress,
+  } = useInstallThirdPartySoundpack(
     variant,
+    soundpackId,
     () => toastCL("success", "Soundpack installed successfully."),
     (error) =>
       toastCL("error", "Failed to install soundpack.", error),
@@ -72,7 +79,13 @@ export default function SoundpackCard({
       </CardHeader>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">
-          {isInstalled ? (
+          {soundpackInstallationProgress === "Downloading" &&
+          soundpackDownloadProgress ? (
+            <DownloadProgress
+              downloaded={soundpackDownloadProgress.bytes_downloaded}
+              total={soundpackDownloadProgress.total_bytes}
+            />
+          ) : isInstalled ? (
             <Button
               className="w-full"
               variant="destructive"
@@ -85,9 +98,15 @@ export default function SoundpackCard({
             <Button
               className="w-full"
               onClick={() => install(soundpackId)}
-              disabled={isInstalling}
+              disabled={
+                isInstalling || !!soundpackInstallationProgress
+              }
             >
-              {isInstalling ? "Installing..." : "Install"}
+              {soundpackInstallationProgress === "Installing"
+                ? "Installing..."
+                : soundpackInstallationProgress === "Downloading"
+                  ? "Downloading..."
+                  : "Install"}
             </Button>
           )}
         </CardFooter>

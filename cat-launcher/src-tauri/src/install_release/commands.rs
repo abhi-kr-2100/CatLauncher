@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use strum::IntoStaticStr;
 use tauri::ipc::Channel;
-use tauri::{command, AppHandle, Emitter, Manager, State};
+use tauri::{command, AppHandle, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -12,10 +12,10 @@ use crate::fetch_releases::repository::sqlite_releases_repository::SqliteRelease
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::download::Downloader;
+use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
-use crate::install_release::channel_reporter::ChannelReporter;
 use crate::install_release::install_release::ReleaseInstallationError;
-use crate::install_release::installation_progress_payload::InstallationProgressPayload;
+
 use crate::variants::GameVariant;
 
 #[derive(
@@ -26,7 +26,7 @@ pub enum InstallReleaseCommandError {
   SystemDir(#[from] tauri::Error),
 
   #[error("installation failed: {0}")]
-  Install(#[from] ReleaseInstallationError<tauri::Error>),
+  Install(#[from] ReleaseInstallationError),
 
   #[error("failed to obtain release: {0}")]
   Release(#[from] GetReleaseError),
@@ -64,14 +64,6 @@ pub async fn install_release(
   )
   .await?;
 
-  let on_status_update = {
-    let app_handle = app_handle.clone();
-    move |payload: InstallationProgressPayload| {
-      let app_handle = app_handle.clone();
-      async move { app_handle.emit("installation-status-update", payload) }
-    }
-  };
-
   let progress = Arc::new(ChannelReporter::new(on_download_progress));
 
   release
@@ -83,7 +75,6 @@ pub async fn install_release(
       &resource_dir,
       &*releases_repository,
       &*active_release_repository,
-      on_status_update,
       progress,
     )
     .await?;
