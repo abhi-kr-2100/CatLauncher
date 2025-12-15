@@ -75,6 +75,12 @@ pub fn run() {
       manage_posthog(app);
 
       migrate_backups(app);
+      let handle = app.handle().clone();
+      tokio::spawn(async move {
+          if let Err(e) = crate::utils::migrate_to_local_dir(&handle).await {
+              eprintln!("Failed to migrate to local dir: {}", e);
+          }
+      });
 
       autoupdate(app);
 
