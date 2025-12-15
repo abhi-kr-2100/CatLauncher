@@ -3,6 +3,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+use downloader::progress::Reporter;
 use tokio::fs::{create_dir_all, read_to_string};
 
 use crate::filesystem::paths::{
@@ -11,9 +12,7 @@ use crate::filesystem::paths::{
 };
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{extract_archive, ExtractionError};
-use crate::infra::download::{
-  DownloadFileError, Downloader, NoOpReporter,
-};
+use crate::infra::download::{DownloadFileError, Downloader};
 use crate::infra::utils::OS;
 use crate::mods::paths::get_mods_resource_path;
 use crate::mods::repository::installed_mods_repository::{
@@ -62,18 +61,15 @@ pub async fn install_third_party_mod(
   os: &OS,
   downloader: &Downloader,
   repository: &impl InstalledModsRepository,
+  reporter: Arc<dyn Reporter + Send + Sync>,
 ) -> Result<(), InstallThirdPartyModError> {
-  // Get mod details from mods.json
   let mod_details =
     get_mod_from_json(game_variant, mod_id, resource_dir).await?;
 
-  // Create a temp directory for this mod download
   let mod_temp_dir =
     temp_dir.join("cat-launcher-mod-install-dir").join(mod_id);
   create_dir_all(&mod_temp_dir).await?;
 
-  // Download the mod
-  let reporter = Arc::new(NoOpReporter);
   let downloaded_file = downloader
     .download_file(
       &mod_details.installation.download_url,
@@ -82,32 +78,26 @@ pub async fn install_third_party_mod(
     )
     .await?;
 
-  // Extract the mod to the temp directory
   let extraction_dir = mod_temp_dir.join("extracted");
   create_dir_all(&extraction_dir).await?;
   extract_archive(&downloaded_file, &extraction_dir, os).await?;
 
-  // Get the mod parent directory from the modinfo path
   let mod_parent_dir = get_mod_parent_dir(
     &extraction_dir,
     &mod_details.installation.modinfo,
   )?;
 
-  // Get the mods directory in user game data
   let user_game_data_dir =
     get_or_create_user_game_data_dir(game_variant, data_dir).await?;
   let mods_dir =
     get_or_create_directory(&user_game_data_dir, "mods").await?;
 
-  // Copy the mod parent directory to the mods directory
   let mod_install_dir = mods_dir.join(mod_id);
   copy_dir_all(&mod_parent_dir, &mod_install_dir, os).await?;
 
-  // Mark the mod as installed in the repository
-  repository.add_installed_mod(mod_id, game_variant).await?;
-
-  // Clean up temp files, ignore any errors
   let _ = tokio::fs::remove_dir_all(&mod_temp_dir).await;
+
+  repository.add_installed_mod(mod_id, game_variant).await?;
 
   Ok(())
 }

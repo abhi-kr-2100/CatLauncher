@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use downloader::progress::Reporter;
 use tauri::ipc::{Channel, InvokeResponseBody};
 
-use crate::install_release::installation_progress_payload::DownloadProgress;
+use crate::infra::installation_progress_monitor::download_progress::DownloadProgress;
 
 pub struct ChannelReporter {
   channel: Channel,

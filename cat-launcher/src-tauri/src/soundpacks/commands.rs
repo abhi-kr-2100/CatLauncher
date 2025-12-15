@@ -1,12 +1,15 @@
 use std::env::consts::OS;
+use std::sync::Arc;
 
 use strum::IntoStaticStr;
+use tauri::ipc::Channel;
 use tauri::{Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::download::Downloader;
+use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::soundpacks::get_third_party_soundpack_installation_status::{
     get_third_party_soundpack_installation_status, GetThirdPartySoundpackInstallationStatusError,
@@ -77,6 +80,7 @@ pub enum InstallThirdPartySoundpackCommandError {
 pub async fn install_third_party_soundpack_command(
   id: String,
   variant: GameVariant,
+  channel: Channel,
   app: tauri::AppHandle,
   downloader: State<'_, Downloader>,
   repository: State<'_, SqliteInstalledSoundpacksRepository>,
@@ -87,6 +91,8 @@ pub async fn install_third_party_soundpack_command(
 
   let os = get_os_enum(OS)?;
 
+  let reporter = Arc::new(ChannelReporter::new(channel));
+
   install_third_party_soundpack(
     &id,
     &variant,
@@ -96,6 +102,7 @@ pub async fn install_third_party_soundpack_command(
     &os,
     downloader.inner(),
     repository.inner(),
+    reporter,
   )
   .await?;
 

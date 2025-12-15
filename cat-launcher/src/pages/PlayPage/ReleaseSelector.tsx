@@ -141,8 +141,24 @@ export default function ReleaseSelector({
     }
   }, [comboboxItems, selectedReleaseId, setSelectedReleaseId]);
 
+  const installationStatusByVersion = useAppSelector(
+    (state) =>
+      state.installationProgress.installationStatusByVariant.release[
+        variant
+      ],
+  );
+
   const autoselect = useCallback(
     (items: ComboboxItem[]) => {
+      const installingOrDownloadingRelease = items.find((item) => {
+        const status = installationStatusByVersion?.[item.value];
+        return status === "Downloading" || status === "Installing";
+      });
+
+      if (installingOrDownloadingRelease) {
+        return installingOrDownloadingRelease;
+      }
+
       if (isActiveReleaseLoading) {
         return;
       }
@@ -153,7 +169,12 @@ export default function ReleaseSelector({
 
       return items.find((i) => i.value === activeRelease) ?? items[0];
     },
-    [activeRelease, isActiveReleaseLoading, activeReleaseError],
+    [
+      activeRelease,
+      isActiveReleaseLoading,
+      activeReleaseError,
+      installationStatusByVersion,
+    ],
   );
 
   // Consider isReleaseFetchingComplete even if it completes due to an error
@@ -167,9 +188,6 @@ export default function ReleaseSelector({
   const isReleaseFetchingLoading =
     isReleasesTriggerLoading && comboboxItems.length === 0;
 
-  const installationStatusByVersion = useAppSelector(
-    (state) => state.installationProgress.statusByVariant[variant],
-  );
   const isInstalling = Object.values(
     installationStatusByVersion ?? {},
   ).some(
@@ -191,7 +209,7 @@ export default function ReleaseSelector({
         }
       />
       <div className="flex items-end gap-2">
-        <div className="flex-grow">
+        <div className="grow">
           <VirtualizedCombobox
             label="Version"
             items={comboboxItems}
