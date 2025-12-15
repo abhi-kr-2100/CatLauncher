@@ -1,3 +1,4 @@
+import { DownloadProgress } from "@/components/DownloadProgress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import type { Tileset } from "@/generated-types/Tileset";
 import { toastCL } from "@/lib/utils";
 import {
   useGetThirdPartyTilesetInstallationStatus,
-  useInstallThirdPartyTileset,
+  useInstallAndMonitorThirdPartyTileset,
   useUninstallThirdPartyTileset,
 } from "./hooks";
 
@@ -43,8 +44,14 @@ export default function TilesetCard({
 
   const isInstalled = installationStatus === "Installed";
 
-  const { isInstalling, install } = useInstallThirdPartyTileset(
+  const {
+    isInstalling,
+    install,
+    installationProgressStatus: tilesetInstallationProgress,
+    downloadProgress: tilesetDownloadProgress,
+  } = useInstallAndMonitorThirdPartyTileset(
     variant,
+    tilesetId,
     () => toastCL("success", "Tileset installed successfully."),
     (error) => toastCL("error", "Failed to install tileset.", error),
   );
@@ -70,7 +77,13 @@ export default function TilesetCard({
       </CardHeader>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">
-          {isInstalled ? (
+          {tilesetInstallationProgress === "Downloading" &&
+          tilesetDownloadProgress ? (
+            <DownloadProgress
+              downloaded={tilesetDownloadProgress.bytes_downloaded}
+              total={tilesetDownloadProgress.total_bytes}
+            />
+          ) : isInstalled ? (
             <Button
               className="w-full"
               variant="destructive"
@@ -83,9 +96,13 @@ export default function TilesetCard({
             <Button
               className="w-full"
               onClick={() => install(tilesetId)}
-              disabled={isInstalling}
+              disabled={isInstalling || !!tilesetInstallationProgress}
             >
-              {isInstalling ? "Installing..." : "Install"}
+              {tilesetInstallationProgress === "Installing"
+                ? "Installing..."
+                : tilesetInstallationProgress === "Downloading"
+                  ? "Downloading..."
+                  : "Install"}
             </Button>
           )}
         </CardFooter>

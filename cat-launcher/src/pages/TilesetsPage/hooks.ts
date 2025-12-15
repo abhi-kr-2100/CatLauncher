@@ -1,9 +1,10 @@
 import {
-  useMutation,
   useQuery,
   useQueryClient,
+  useMutation,
 } from "@tanstack/react-query";
 
+import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
   getThirdPartyTilesetInstallationStatus,
@@ -13,34 +14,43 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
-export function useInstallThirdPartyTileset(
+export function useInstallAndMonitorThirdPartyTileset(
   variant: GameVariant,
+  tilesetId: string | undefined,
   onSuccess?: () => void,
-  onError?: (error: unknown) => void,
+  onError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (tilesetId: string) =>
-      installThirdPartyTileset(tilesetId, variant),
-    onSuccess: (_data, tilesetId) => {
+  const {
+    install,
+    isInstalling,
+    downloadProgress,
+    installationProgressStatus,
+  } = useInstallAndMonitor(
+    "tileset",
+    variant,
+    tilesetId,
+    installThirdPartyTileset,
+    (id: string) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.tilesets.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.installationStatus(
-          tilesetId,
-          variant,
-        ),
+        queryKey: queryKeys.tilesets.installationStatus(id, variant),
       });
       onSuccess?.();
     },
-    onError,
-  });
+    (error: Error) => {
+      onError?.(error);
+    },
+  );
 
   return {
-    isInstalling: mutation.isPending,
-    install: (tilesetId: string) => mutation.mutate(tilesetId),
+    install,
+    isInstalling,
+    downloadProgress,
+    installationProgressStatus,
   };
 }
 

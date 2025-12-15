@@ -66,7 +66,10 @@ export default function ReleaseFilter({
   );
 
   const installationStatuses = useAppSelector(
-    (state) => state.installationProgress.statusByVariant[variant],
+    (state) =>
+      state.installationProgress.installationStatusByVariant.release[
+        variant
+      ],
   );
 
   const isInProgress = useMemo(() => {

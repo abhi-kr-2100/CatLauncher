@@ -1,3 +1,4 @@
+import { DownloadProgress } from "@/components/DownloadProgress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,8 +53,14 @@ export default function ModCard({ variant, mod }: ModCardProps) {
 
   const isInstalled = installationStatus === "Installed";
 
-  const { isInstalling, install } = useInstallThirdPartyMod(
+  const {
+    isInstalling,
+    install,
+    downloadProgress: modDownloadProgress,
+    installationProgressStatus: modInstallationProgress,
+  } = useInstallThirdPartyMod(
     variant,
+    modId,
     () => toastCL("success", "Mod installed successfully."),
     (error) => toastCL("error", "Failed to install mod.", error),
   );
@@ -88,7 +95,13 @@ export default function ModCard({ variant, mod }: ModCardProps) {
       </CardContent>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">
-          {isInstalled ? (
+          {modInstallationProgress === "Downloading" &&
+          modDownloadProgress ? (
+            <DownloadProgress
+              downloaded={modDownloadProgress.bytes_downloaded}
+              total={modDownloadProgress.total_bytes}
+            />
+          ) : isInstalled ? (
             <Button
               className="w-full"
               variant="destructive"
@@ -101,9 +114,13 @@ export default function ModCard({ variant, mod }: ModCardProps) {
             <Button
               className="w-full"
               onClick={() => install(modId)}
-              disabled={isInstalling}
+              disabled={isInstalling || !!modInstallationProgress}
             >
-              {isInstalling ? "Installing..." : "Install"}
+              {modInstallationProgress === "Installing"
+                ? "Installing..."
+                : modInstallationProgress === "Downloading"
+                  ? "Downloading..."
+                  : "Install"}
             </Button>
           )}
         </CardFooter>

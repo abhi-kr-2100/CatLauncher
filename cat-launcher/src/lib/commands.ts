@@ -8,8 +8,6 @@ import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
-import type { InstallationProgressPayload } from "@/generated-types/InstallationProgressPayload";
-import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { Mod } from "@/generated-types/Mod";
 import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
@@ -47,20 +45,6 @@ export async function listenToGameEvent(
   return await listen<GameEvent>("game-event", (event) => {
     onEvent(event.payload);
   });
-}
-
-export async function listenToInstallationStatusUpdate(
-  selectedReleaseId: string,
-  onUpdate: (payload: InstallationProgressStatus) => void,
-) {
-  return await listen<InstallationProgressPayload>(
-    "installation-status-update",
-    (event) => {
-      if (event.payload.release_id === selectedReleaseId) {
-        onUpdate(event.payload.status);
-      }
-    },
-  );
 }
 
 export async function onFrontendReady(): Promise<void> {
@@ -202,8 +186,8 @@ export async function getActiveRelease(
 }
 
 export async function installReleaseForVariant(
-  variant: GameVariant,
   releaseId: string,
+  variant: GameVariant,
   onDownloadProgress: (progress: DownloadProgress) => void,
 ): Promise<GameRelease> {
   const channel = new Channel();
@@ -290,10 +274,17 @@ export async function listAllMods(
 export async function installThirdPartyMod(
   modId: string,
   variant: GameVariant,
+  onDownloadProgress: (progress: DownloadProgress) => void,
 ): Promise<void> {
+  const channel = new Channel();
+  channel.onmessage = (progress) => {
+    onDownloadProgress(progress as DownloadProgress);
+  };
+
   await invoke("install_third_party_mod_command", {
     id: modId,
     variant,
+    channel,
   });
 }
 
@@ -336,10 +327,17 @@ export async function listAllTilesets(
 export async function installThirdPartyTileset(
   tilesetId: string,
   variant: GameVariant,
+  onDownloadProgress: (progress: DownloadProgress) => void,
 ): Promise<void> {
+  const channel = new Channel();
+  channel.onmessage = (progress) => {
+    onDownloadProgress(progress as DownloadProgress);
+  };
+
   await invoke("install_third_party_tileset_command", {
     id: tilesetId,
     variant,
+    channel,
   });
 }
 
@@ -382,10 +380,17 @@ export async function listAllSoundpacks(
 export async function installThirdPartySoundpack(
   soundpackId: string,
   variant: GameVariant,
+  onDownloadProgress: (progress: DownloadProgress) => void,
 ): Promise<void> {
+  const channel = new Channel();
+  channel.onmessage = (progress) => {
+    onDownloadProgress(progress as DownloadProgress);
+  };
+
   await invoke("install_third_party_soundpack_command", {
     id: soundpackId,
     variant,
+    channel,
   });
 }
 

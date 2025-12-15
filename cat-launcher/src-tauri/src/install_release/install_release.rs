@@ -19,15 +19,10 @@ use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::download::Downloader;
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::utils::{Arch, OS};
-use crate::install_release::installation_progress_payload::{
-  InstallationProgressPayload, InstallationProgressStatus,
-};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 
 #[derive(thiserror::Error, Debug)]
-pub enum ReleaseInstallationError<
-  E: std::error::Error + Send + Sync + 'static,
-> {
+pub enum ReleaseInstallationError {
   #[error("failed to get download directory: {0}")]
   DownloadDir(#[from] AssetDownloadDirError),
 
@@ -49,20 +44,13 @@ pub enum ReleaseInstallationError<
   #[error("failed to get release status: {0}")]
   ReleaseStatus(#[from] GetInstallationStatusError),
 
-  #[error("status update callback failed: {0}")]
-  Callback(E),
-
   #[error("failed to set active release: {0}")]
   ActiveRelease(#[from] ActiveReleaseError),
 }
 
 impl GameRelease {
   #[allow(clippy::too_many_arguments)]
-  pub async fn install_release<
-    E: std::error::Error + Send + Sync + 'static,
-    F,
-    Fut,
-  >(
+  pub async fn install_release(
     &mut self,
     downloader: &Downloader,
     os: &OS,
@@ -71,13 +59,8 @@ impl GameRelease {
     resources_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     active_release_repository: &dyn ActiveReleaseRepository,
-    on_status_update: F,
     progress: Arc<dyn Reporter + Send + Sync>,
-  ) -> Result<(), ReleaseInstallationError<E>>
-  where
-    F: Fn(InstallationProgressPayload) -> Fut,
-    Fut: std::future::Future<Output = Result<(), E>> + Send,
-  {
+  ) -> Result<(), ReleaseInstallationError> {
     if self.status == GameReleaseStatus::Unknown {
       self.status =
         self.get_installation_status(os, data_dir).await?;
@@ -103,13 +86,6 @@ impl GameRelease {
       || self.status == GameReleaseStatus::Corrupted
       || self.status == GameReleaseStatus::Unknown
     {
-      on_status_update(InstallationProgressPayload {
-        status: InstallationProgressStatus::Downloading,
-        release_id: self.version.clone(),
-      })
-      .await
-      .map_err(ReleaseInstallationError::Callback)?;
-
       asset.download(downloader, &download_dir, progress).await?;
       self.status = GameReleaseStatus::NotInstalled;
     }
@@ -121,13 +97,6 @@ impl GameRelease {
       data_dir,
     )
     .await?;
-
-    on_status_update(InstallationProgressPayload {
-      status: InstallationProgressStatus::Installing,
-      release_id: self.version.clone(),
-    })
-    .await
-    .map_err(ReleaseInstallationError::Callback)?;
 
     extract_archive(&download_filepath, &installation_dir, os)
       .await?;
@@ -143,13 +112,6 @@ impl GameRelease {
     let _ = fs::remove_file(&download_filepath).await;
 
     delete_other_installations(&installation_dir).await;
-
-    on_status_update(InstallationProgressPayload {
-      status: InstallationProgressStatus::Success,
-      release_id: self.version.clone(),
-    })
-    .await
-    .map_err(ReleaseInstallationError::Callback)?;
 
     Ok(())
   }
