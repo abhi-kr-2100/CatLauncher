@@ -1,6 +1,12 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+#[derive(Debug, Clone, Serialize, Deserialize, TS, PartialEq)]
+pub enum ActivityType {
+  #[serde(rename = "github_commit")]
+  GithubCommit,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct ModInstallation {
   pub download_url: String,
@@ -9,7 +15,7 @@ pub struct ModInstallation {
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct ModActivity {
-  pub activity_type: String,
+  pub activity_type: ActivityType,
   pub github: Option<String>,
 }
 

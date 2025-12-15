@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::io;
 use std::path::Path;
 
@@ -8,10 +7,11 @@ use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
 use crate::infra::utils::OS;
-use crate::mods::paths::{
-  get_mods_resource_path, get_stock_mods_dir, GetStockModsDirError,
-};
+use crate::mods::paths::{get_stock_mods_dir, GetStockModsDirError};
 use crate::mods::types::{Mod, StockMod, ThirdPartyMod};
+use crate::mods::utils::{
+  get_third_party_mods_json, GetThirdPartyModsJsonError,
+};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -164,30 +164,18 @@ async fn list_all_stock_mods(
 
 #[derive(thiserror::Error, Debug)]
 pub enum ListThirdPartyModsError {
-  #[error("failed to read mods.json: {0}")]
-  ReadModsJson(#[from] io::Error),
+  #[error("failed to get third party mods json: {0}")]
+  GetThirdPartyModsJson(#[from] GetThirdPartyModsJsonError),
 
-  #[error("failed to parse mods.json: {0}")]
-  ParseModsJson(#[from] serde_json::Error),
+  #[error("failed to parse mod: {0}")]
+  ParseMod(#[from] serde_json::Error),
 }
 
 async fn list_all_third_party_mods(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<Mod>, ListThirdPartyModsError> {
-  // Construct the path to mods.json
-  let mods_json_path = get_mods_resource_path(resource_dir);
-
-  // Try to read the mods.json file
-  let content = match read_to_string(&mods_json_path).await {
-    Ok(content) => content,
-    Err(e) => return Err(ListThirdPartyModsError::ReadModsJson(e)),
-  };
-
-  let mods_data: HashMap<
-    GameVariant,
-    HashMap<String, serde_json::Value>,
-  > = serde_json::from_str(&content)?;
+  let mods_data = get_third_party_mods_json(resource_dir).await?;
 
   let variant_mods = match mods_data.get(game_variant) {
     Some(mods) => mods,
@@ -197,15 +185,8 @@ async fn list_all_third_party_mods(
   let mut mods = Vec::new();
   for mod_data in variant_mods.values() {
     let third_party_mod =
-      serde_json::from_value::<ThirdPartyMod>(mod_data.clone());
-    match third_party_mod {
-      Ok(third_party_mod) => {
-        mods.push(Mod::ThirdParty(third_party_mod))
-      }
-      Err(e) => {
-        return Err(ListThirdPartyModsError::ParseModsJson(e))
-      }
-    }
+      serde_json::from_value::<ThirdPartyMod>(mod_data.clone())?;
+    mods.push(Mod::ThirdParty(third_party_mod))
   }
 
   Ok(mods)

@@ -5,9 +5,6 @@ use reqwest::Client;
 pub enum GetLatestCommitError {
   #[error("failed to make request to github api: {0}")]
   GitHubApiRequest(#[from] reqwest::Error),
-
-  #[error("failed to parse github url `{0}`")]
-  ParseGithubUrl(String),
 }
 
 pub async fn get_latest_commit(

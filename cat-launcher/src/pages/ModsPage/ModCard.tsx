@@ -12,12 +12,12 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
 import { getHumanFriendlyText, toastCL } from "@/lib/utils";
 import {
-  useGetModActivity,
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
 } from "./hooks";
 import { useState } from "react";
+import InstallModDialog from "./InstallModDialog";
 
 interface ModCardProps {
   variant: GameVariant;
@@ -45,7 +45,8 @@ export default function ModCard({ variant, mod }: ModCardProps) {
   const description = getModDescription(mod);
   const modType = getModType(mod);
   const category = getModCategory(mod);
-  const [activity, setActivity] = useState<string | null>(null);
+  const [isInstallDialogOpen, setIsInstallDialogOpen] =
+    useState(false);
 
   const isThirdParty = mod.type !== "Stock";
   const modId = mod.content.id;
@@ -65,12 +66,6 @@ export default function ModCard({ variant, mod }: ModCardProps) {
     variant,
     () => toastCL("success", "Mod uninstalled successfully."),
     (error) => toastCL("error", "Failed to uninstall mod.", error),
-  );
-
-  const { isGettingActivity, getActivity } = useGetModActivity(
-    variant,
-    (data) => setActivity(data),
-    (error) => toastCL("error", "Failed to get mod activity.", error),
   );
 
   return (
@@ -94,11 +89,6 @@ export default function ModCard({ variant, mod }: ModCardProps) {
             {description}
           </AlertDescription>
         </Alert>
-        {activity && (
-          <div className="text-sm text-muted-foreground">
-            Last updated: {new Date(activity).toLocaleDateString()}
-          </div>
-        )}
       </CardContent>
       {isThirdParty && (
         <CardFooter className="flex flex-col gap-4 items-stretch">
@@ -112,24 +102,23 @@ export default function ModCard({ variant, mod }: ModCardProps) {
               {isUninstalling ? "Uninstalling..." : "Uninstall"}
             </Button>
           ) : (
-            <Button
-              className="w-full"
-              onClick={() => install(modId)}
-              disabled={isInstalling}
-            >
-              {isInstalling ? "Installing..." : "Install"}
-            </Button>
+            <>
+              <Button
+                className="w-full"
+                onClick={() => setIsInstallDialogOpen(true)}
+                disabled={isInstalling}
+              >
+                {isInstalling ? "Installing..." : "Install"}
+              </Button>
+              <InstallModDialog
+                open={isInstallDialogOpen}
+                onOpenChange={setIsInstallDialogOpen}
+                onConfirm={() => install(modId)}
+                modId={modId}
+                variant={variant}
+              />
+            </>
           )}
-          <Button
-            className="w-full"
-            variant="secondary"
-            onClick={() => getActivity(modId)}
-            disabled={isGettingActivity}
-          >
-            {isGettingActivity
-              ? "Getting activity..."
-              : "Get Last Activity"}
-          </Button>
         </CardFooter>
       )}
     </Card>

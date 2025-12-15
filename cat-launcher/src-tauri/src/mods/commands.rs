@@ -161,24 +161,29 @@ pub async fn get_third_party_mod_installation_status_command(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetModActivityCommandError {
-    #[error("failed to get app resource directory")]
-    ResourceDir(#[from] tauri::Error),
+  #[error("failed to get app resource directory")]
+  ResourceDir(#[from] tauri::Error),
 
-    #[error("failed to get mod activity: {0}")]
-    GetModActivity(#[from] GetModActivityError),
+  #[error("failed to get mod activity: {0}")]
+  GetModActivity(#[from] GetModActivityError),
 }
 
 #[tauri::command]
 pub async fn get_mod_activity_command(
-    id: String,
-    variant: GameVariant,
-    app: tauri::AppHandle,
-    http_client: State<'_, reqwest::Client>,
+  id: String,
+  variant: GameVariant,
+  app: tauri::AppHandle,
+  http_client: State<'_, reqwest::Client>,
 ) -> Result<Option<String>, GetModActivityCommandError> {
-    let resource_dir = app.path().resource_dir()?;
+  let resource_dir = app.path().resource_dir()?;
 
-    let activity =
-        get_mod_activity(&id, &variant, &resource_dir, http_client.inner()).await?;
+  let activity = get_mod_activity(
+    &id,
+    &variant,
+    &resource_dir,
+    http_client.inner(),
+  )
+  .await?;
 
-    Ok(activity)
+  Ok(activity)
 }
