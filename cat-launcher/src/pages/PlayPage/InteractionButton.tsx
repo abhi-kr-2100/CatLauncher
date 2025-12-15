@@ -6,9 +6,8 @@ import {
 } from "@/components/ui/tooltip";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import { useAppSelector } from "@/store/hooks";
-import { DownloadProgress } from "./DownloadProgress";
+import { DownloadProgress } from "@/components/DownloadProgress";
 import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
@@ -16,6 +15,7 @@ import {
   useResumeLastWorld,
 } from "./hooks";
 import { toastCL } from "@/lib/utils";
+import { InstallationProgressStatus } from "@/store/installationProgressSlice";
 
 export default function InteractionButton({
   variant,
@@ -70,8 +70,8 @@ export default function InteractionButton({
   if (installationProgressStatus === "Downloading") {
     return (
       <DownloadProgress
-        downloaded={Number(downloadProgress?.bytes_downloaded ?? 0)}
-        total={Number(downloadProgress?.total_bytes ?? 0)}
+        downloaded={downloadProgress?.bytes_downloaded ?? 0n}
+        total={downloadProgress?.total_bytes ?? 0n}
       />
     );
   }
@@ -83,7 +83,7 @@ export default function InteractionButton({
         onClick={() =>
           installationStatus === "ReadyToPlay"
             ? play(selectedReleaseId)
-            : install(selectedReleaseId)
+            : selectedReleaseId && install(selectedReleaseId)
         }
         disabled={isActionButtonDisabled}
       >

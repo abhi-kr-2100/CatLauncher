@@ -1,9 +1,6 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
   getThirdPartyModInstallationStatus,
@@ -11,32 +8,45 @@ import {
   uninstallThirdPartyMod,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+import { useMutation } from "@tanstack/react-query";
 
 export function useInstallThirdPartyMod(
   variant: GameVariant,
+  modId: string | undefined,
   onSuccess?: () => void,
-  onError?: (error: unknown) => void,
+  onError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: (modId: string) =>
-      installThirdPartyMod(modId, variant),
-    onSuccess: (_data, modId) => {
+  const {
+    install,
+    isInstalling,
+    downloadProgress,
+    installationProgressStatus,
+  } = useInstallAndMonitor(
+    "mod",
+    variant,
+    modId,
+    installThirdPartyMod,
+    (id: string) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.mods.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.installationStatus(modId, variant),
+        queryKey: queryKeys.mods.installationStatus(id, variant),
       });
       onSuccess?.();
     },
-    onError,
-  });
+    (error: Error) => {
+      onError?.(error);
+    },
+  );
 
   return {
-    isInstalling: mutation.isPending,
-    install: (modId: string) => mutation.mutate(modId),
+    install,
+    isInstalling,
+    downloadProgress,
+    installationProgressStatus,
   };
 }
 

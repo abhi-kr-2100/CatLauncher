@@ -3,6 +3,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+use downloader::progress::Reporter;
 use tokio::fs::{create_dir_all, read_to_string};
 
 use crate::filesystem::paths::{
@@ -11,9 +12,8 @@ use crate::filesystem::paths::{
 };
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{extract_archive, ExtractionError};
-use crate::infra::download::{
-  DownloadFileError, Downloader, NoOpReporter,
-};
+use crate::infra::download::{DownloadFileError, Downloader};
+
 use crate::infra::utils::OS;
 use crate::tilesets::paths::get_tilesets_resource_path;
 use crate::tilesets::repository::installed_tilesets_repository::{
@@ -62,20 +62,17 @@ pub async fn install_third_party_tileset(
   os: &OS,
   downloader: &Downloader,
   repository: &impl InstalledTilesetsRepository,
+  reporter: Arc<dyn Reporter + Send + Sync>,
 ) -> Result<(), InstallThirdPartyTilesetError> {
-  // Get tileset details from tilesets.json
   let tileset_details =
     get_tileset_from_json(game_variant, tileset_id, resource_dir)
       .await?;
 
-  // Create a temp directory for this tileset download
   let tileset_temp_dir = temp_dir
     .join("cat-launcher-tileset-install-dir")
     .join(tileset_id);
   create_dir_all(&tileset_temp_dir).await?;
 
-  // Download the tileset
-  let reporter = Arc::new(NoOpReporter);
   let downloaded_file = downloader
     .download_file(
       &tileset_details.installation.download_url,
@@ -84,34 +81,28 @@ pub async fn install_third_party_tileset(
     )
     .await?;
 
-  // Extract the tileset to the temp directory
   let extraction_dir = tileset_temp_dir.join("extracted");
   create_dir_all(&extraction_dir).await?;
   extract_archive(&downloaded_file, &extraction_dir, os).await?;
 
-  // Get the tileset parent directory from the tileset path
   let tileset_parent_dir = get_tileset_parent_dir(
     &extraction_dir,
     &tileset_details.installation.tileset,
   )?;
 
-  // Get the gfx directory in user game data
   let user_game_data_dir =
     get_or_create_user_game_data_dir(game_variant, data_dir).await?;
   let gfx_dir =
     get_or_create_directory(&user_game_data_dir, "gfx").await?;
 
-  // Copy the tileset parent directory to the gfx directory
   let tileset_install_dir = gfx_dir.join(tileset_id);
   copy_dir_all(&tileset_parent_dir, &tileset_install_dir, os).await?;
 
-  // Mark the tileset as installed in the repository
+  let _ = tokio::fs::remove_dir_all(&tileset_temp_dir).await;
+
   repository
     .add_installed_tileset(tileset_id, game_variant)
     .await?;
-
-  // Clean up temp files, ignore any errors
-  let _ = tokio::fs::remove_dir_all(&tileset_temp_dir).await;
 
   Ok(())
 }

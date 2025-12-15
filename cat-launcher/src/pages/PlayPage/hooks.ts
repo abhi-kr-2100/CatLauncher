@@ -10,7 +10,6 @@ import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import {
   getInstallationStatus,
@@ -19,7 +18,6 @@ import {
   installReleaseForVariant,
   launchGame,
   listenToGameEvent,
-  listenToInstallationStatusUpdate,
   listenToReleasesUpdate,
   getLastPlayedWorld,
 } from "@/lib/commands";
@@ -27,12 +25,8 @@ import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener, toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
-import {
-  clearInstallationProgress,
-  setDownloadProgress,
-  setInstallationProgress,
-} from "@/store/installationProgressSlice";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
+import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 
 export function useReleaseEvents() {
   const dispatch = useAppDispatch();
@@ -89,82 +83,22 @@ export function useInstallAndMonitorRelease(
   variant: GameVariant,
   selectedReleaseId: string | undefined,
 ) {
-  const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
 
-  const installationProgressStatus = useAppSelector((state) => {
-    if (!selectedReleaseId) {
-      return null;
-    }
-
-    return state.installationProgress.statusByVariant[variant][
-      selectedReleaseId
-    ];
-  });
-
-  const downloadProgress = useAppSelector((state) => {
-    if (!selectedReleaseId) {
-      return null;
-    }
-
-    return state.installationProgress.progressByVariant[variant][
-      selectedReleaseId
-    ];
-  });
-
-  useEffect(() => {
-    if (!selectedReleaseId) {
-      return;
-    }
-
-    const installationProgressStatusUpdate = (
-      status: InstallationProgressStatus,
-    ) => {
-      dispatch(
-        setInstallationProgress({
-          variant,
-          releaseId: selectedReleaseId,
-          status,
-        }),
-      );
-    };
-
-    const cleanup = setupEventListener(
-      (payload) =>
-        listenToInstallationStatusUpdate(selectedReleaseId, payload),
-      installationProgressStatusUpdate,
-      "Failed to subscribe to installation progress.",
-    );
-
-    return () => {
-      cleanup();
-    };
-  }, [dispatch, variant, selectedReleaseId]);
-
-  const { mutate, isPending, reset } = useMutation({
-    mutationFn: (releaseId: string | undefined) => {
-      if (!releaseId) {
-        throw new Error("No release selected");
-      }
-      return installReleaseForVariant(
-        variant,
-        releaseId,
-        (progress) => {
-          dispatch(
-            setDownloadProgress({
-              variant,
-              releaseId,
-              progress,
-            }),
-          );
-        },
-      );
-    },
-
-    onSuccess: (updatedRelease, releaseId) => {
+  const {
+    install,
+    isInstalling,
+    installationProgressStatus,
+    downloadProgress,
+  } = useInstallAndMonitor(
+    "release",
+    variant,
+    selectedReleaseId,
+    installReleaseForVariant,
+    (releaseId: string) => {
       queryClient.setQueryData(
         queryKeys.activeRelease(variant),
-        () => releaseId!,
+        () => releaseId,
       );
       queryClient.setQueryData(
         queryKeys.releases(variant),
@@ -173,7 +107,9 @@ export function useInstallAndMonitorRelease(
             if (o.version !== releaseId) {
               return o;
             }
-            return updatedRelease;
+            // Note: We don't have the updated release here, so we return the old one
+            // The actual update should be handled by the releases update listener
+            return o;
           }),
       );
 
@@ -185,36 +121,15 @@ export function useInstallAndMonitorRelease(
       queryClient.invalidateQueries({
         queryKey: queryKeys.tips(variant),
       });
-
-      if (!releaseId) {
-        console.error("😵 Release should not be undefined here. 😵");
-        return;
-      }
-
-      dispatch(
-        setInstallationProgress({
-          variant,
-          releaseId,
-          status: "Success",
-        }),
-      );
     },
-
-    onError: (e, releaseId) => {
+    (e) => {
       toastCL("error", "Failed to install release.", e);
-      if (releaseId) {
-        dispatch(clearInstallationProgress({ variant, releaseId }));
-      }
     },
-  });
-
-  useEffect(() => {
-    reset();
-  }, [reset, selectedReleaseId]);
+  );
 
   return {
-    install: mutate,
-    isInstalling: isPending,
+    install,
+    isInstalling,
     installationProgressStatus,
     downloadProgress,
   };

@@ -1,29 +1,74 @@
-import type { DownloadProgress } from "@/generated-types/DownloadProgress";
-import type { GameVariant } from "@/generated-types/GameVariant";
-import type { InstallationProgressStatus } from "@/generated-types/InstallationProgressStatus";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+import type { DownloadProgress } from "@/generated-types/DownloadProgress";
+import type { GameVariant } from "@/generated-types/GameVariant";
+
+type InstallationType = "release" | "mod" | "soundpack" | "tileset";
+
+export type InstallationProgressStatus =
+  | "Downloading"
+  | "Installing"
+  | "Success"
+  | "Error";
+
 interface InstallationProgressState {
-  statusByVariant: Record<
-    GameVariant,
-    Record<string, InstallationProgressStatus | null>
+  installationStatusByVariant: Record<
+    InstallationType,
+    Record<
+      GameVariant,
+      Record<string, InstallationProgressStatus | null>
+    >
   >;
-  progressByVariant: Record<
-    GameVariant,
-    Record<string, DownloadProgress | null>
+  downloadProgressByVariant: Record<
+    InstallationType,
+    Record<GameVariant, Record<string, DownloadProgress | null>>
   >;
 }
 
 const initialState: InstallationProgressState = {
-  statusByVariant: {
-    BrightNights: {},
-    DarkDaysAhead: {},
-    TheLastGeneration: {},
+  installationStatusByVariant: {
+    release: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    mod: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    soundpack: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    tileset: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
   },
-  progressByVariant: {
-    BrightNights: {},
-    DarkDaysAhead: {},
-    TheLastGeneration: {},
+  downloadProgressByVariant: {
+    release: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    mod: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    soundpack: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
+    tileset: {
+      BrightNights: {},
+      DarkDaysAhead: {},
+      TheLastGeneration: {},
+    },
   },
 };
 
@@ -31,58 +76,49 @@ export const installationProgressSlice = createSlice({
   name: "installationProgress",
   initialState,
   reducers: {
-    setInstallationProgress: (
-      state,
-      action: PayloadAction<{
-        variant: GameVariant;
-        releaseId: string;
-        status: InstallationProgressStatus;
-      }>,
-    ) => {
-      const { variant, releaseId, status } = action.payload;
-      if (!state.statusByVariant[variant]) {
-        state.statusByVariant[variant] = {};
-      }
-      state.statusByVariant[variant][releaseId] = status;
-    },
-
     setDownloadProgress: (
       state,
       action: PayloadAction<{
+        type: InstallationType;
         variant: GameVariant;
-        releaseId: string;
+        id: string;
         progress: DownloadProgress;
       }>,
     ) => {
-      const { variant, releaseId, progress } = action.payload;
-      if (!state.progressByVariant[variant]) {
-        state.progressByVariant[variant] = {};
+      const { type, variant, id, progress } = action.payload;
+      state.downloadProgressByVariant[type][variant][id] = progress;
+
+      const { bytes_downloaded, total_bytes } = progress;
+
+      if (total_bytes === 0n) {
+        state.installationStatusByVariant[type][variant][id] =
+          "Downloading";
+      } else if (bytes_downloaded === total_bytes) {
+        state.installationStatusByVariant[type][variant][id] =
+          "Installing";
+      } else {
+        state.installationStatusByVariant[type][variant][id] =
+          "Downloading";
       }
-      state.progressByVariant[variant][releaseId] = progress;
     },
 
     clearInstallationProgress: (
       state,
       action: PayloadAction<{
         variant: GameVariant;
-        releaseId: string | undefined;
+        id: string;
+        type: InstallationType;
       }>,
     ) => {
-      const { variant, releaseId } = action.payload;
-      if (releaseId && state.statusByVariant[variant]) {
-        state.statusByVariant[variant][releaseId] = null;
-      }
-      if (releaseId && state.progressByVariant[variant]) {
-        state.progressByVariant[variant][releaseId] = null;
-      }
+      const { variant, id, type } = action.payload;
+
+      state.installationStatusByVariant[type][variant][id] = null;
+      state.downloadProgressByVariant[type][variant][id] = null;
     },
   },
 });
 
-export const {
-  setInstallationProgress,
-  clearInstallationProgress,
-  setDownloadProgress,
-} = installationProgressSlice.actions;
+export const { setDownloadProgress, clearInstallationProgress } =
+  installationProgressSlice.actions;
 
 export default installationProgressSlice.reducer;
