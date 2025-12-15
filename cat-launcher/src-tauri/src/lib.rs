@@ -76,11 +76,7 @@ pub fn run() {
 
       migrate_backups(app);
       let handle = app.handle().clone();
-      tokio::spawn(async move {
-          if let Err(e) = crate::utils::migrate_to_local_dir(&handle).await {
-              eprintln!("Failed to migrate to local dir: {}", e);
-          }
-      });
+      crate::utils::migrate_to_local_dir(&handle);
 
       autoupdate(app);
 

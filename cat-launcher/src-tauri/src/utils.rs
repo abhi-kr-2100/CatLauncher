@@ -119,39 +119,60 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   Ok(())
 }
 
-async fn migrate_dir_contents(from: &Path, to: &Path) -> Result<(), io::Error> {
-    let mut entries = tokio_fs::read_dir(from).await?;
-    while let Some(entry) = entries.next_entry().await? {
-        let new_path = to.join(entry.file_name());
-        if entry.file_type().await?.is_dir() {
-            tokio_fs::create_dir_all(&new_path).await?;
-            Box::pin(migrate_dir_contents(&entry.path(), &new_path)).await?;
-            tokio_fs::remove_dir(&entry.path()).await?;
-        } else if !tokio_fs::try_exists(&new_path).await.unwrap_or(true) {
-            tokio_fs::rename(entry.path(), new_path).await?;
-        }
+async fn migrate_dir_contents(
+  from: &Path,
+  to: &Path,
+) -> Result<(), io::Error> {
+  let mut entries = tokio_fs::read_dir(from).await?;
+  while let Some(entry) = entries.next_entry().await? {
+    let new_path = to.join(entry.file_name());
+    if entry.file_type().await?.is_dir() {
+      tokio_fs::create_dir_all(&new_path).await?;
+      Box::pin(migrate_dir_contents(&entry.path(), &new_path))
+        .await?;
+      tokio_fs::remove_dir(&entry.path()).await?;
+    } else if !tokio_fs::try_exists(&new_path).await.unwrap_or(true) {
+      tokio_fs::rename(entry.path(), new_path).await?;
     }
+  }
 
-    Ok(())
+  Ok(())
 }
 
-pub async fn migrate_to_local_dir(handle: &tauri::AppHandle) -> Result<(), io::Error> {
+pub fn migrate_to_local_dir(handle: &tauri::AppHandle) {
+  let handle = handle.clone();
+  tokio::spawn(async move {
     let app_data_dir = handle.path().app_data_dir();
     let app_local_data_dir = handle.path().app_local_data_dir();
 
-    if let (Ok(app_data_dir), Ok(app_local_data_dir)) = (app_data_dir, app_local_data_dir) {
-        if app_data_dir == app_local_data_dir {
-            return Ok(());
-        }
+    if let (Ok(app_data_dir), Ok(app_local_data_dir)) =
+      (app_data_dir, app_local_data_dir)
+    {
+      if app_data_dir == app_local_data_dir {
+        return;
+      }
 
-        if tokio_fs::try_exists(&app_data_dir).await.unwrap_or(false) {
-            tokio_fs::create_dir_all(&app_local_data_dir).await?;
-            migrate_dir_contents(&app_data_dir, &app_local_data_dir).await?;
-            tokio_fs::remove_dir_all(&app_data_dir).await?;
+      if tokio_fs::try_exists(&app_data_dir).await.unwrap_or(false) {
+        if let Err(e) =
+          tokio_fs::create_dir_all(&app_local_data_dir).await
+        {
+          eprintln!("Failed to create local data directory: {}", e);
+          return;
         }
+        if let Err(e) =
+          migrate_dir_contents(&app_data_dir, &app_local_data_dir)
+            .await
+        {
+          eprintln!("Failed to migrate dir contents: {}", e);
+          return;
+        }
+        if let Err(e) = tokio_fs::remove_dir_all(&app_data_dir).await
+        {
+          eprintln!("Failed to remove old data directory: {}", e);
+        }
+      }
     }
-
-    Ok(())
+  });
 }
 
 pub fn migrate_backups(app: &App) {
@@ -161,7 +182,8 @@ pub fn migrate_backups(app: &App) {
     match handle.path().app_local_data_dir() {
       Ok(data_dir) => {
         if let Err(e) =
-          migrate_older_automatic_backups(&data_dir, state.inner()).await
+          migrate_older_automatic_backups(&data_dir, state.inner())
+            .await
         {
           eprintln!("Failed to migrate backups: {}", e);
         }
