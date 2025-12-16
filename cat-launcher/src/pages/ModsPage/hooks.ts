@@ -35,7 +35,7 @@ export function useInstallThirdPartyMod(
         queryKey: queryKeys.mods.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.installationStatus(id, variant),
+        queryKey: queryKeys.mods.installationStatus(variant, id),
       });
       onSuccess?.();
     },
@@ -57,7 +57,7 @@ export function useGetThirdPartyModInstallationStatus(
   variant: GameVariant,
 ) {
   const query = useQuery({
-    queryKey: queryKeys.mods.installationStatus(modId, variant),
+    queryKey: queryKeys.mods.installationStatus(variant, modId),
     queryFn: () => getThirdPartyModInstallationStatus(modId, variant),
   });
 
@@ -82,7 +82,7 @@ export function useUninstallThirdPartyMod(
         queryKey: queryKeys.mods.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.installationStatus(modId, variant),
+        queryKey: queryKeys.mods.installationStatus(variant, modId),
       });
       onSuccess?.();
     },
@@ -102,7 +102,7 @@ export function useGetLastModActivity(
   onError?: (error: unknown) => void,
 ) {
   const query = useQuery({
-    queryKey: queryKeys.mods.lastActivity(modId, variant),
+    queryKey: queryKeys.mods.lastActivity(variant, modId),
     queryFn: () => getLastModActivity(modId, variant),
     enabled,
   });

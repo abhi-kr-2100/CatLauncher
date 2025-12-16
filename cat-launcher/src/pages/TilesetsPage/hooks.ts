@@ -37,7 +37,7 @@ export function useInstallAndMonitorThirdPartyTileset(
         queryKey: queryKeys.tilesets.listAll(variant),
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.installationStatus(id, variant),
+        queryKey: queryKeys.tilesets.installationStatus(variant, id),
       });
       onSuccess?.();
     },
@@ -60,8 +60,8 @@ export function useGetThirdPartyTilesetInstallationStatus(
 ) {
   const query = useQuery({
     queryKey: queryKeys.tilesets.installationStatus(
-      tilesetId,
       variant,
+      tilesetId,
     ),
     queryFn: () =>
       getThirdPartyTilesetInstallationStatus(tilesetId, variant),
@@ -89,8 +89,8 @@ export function useUninstallThirdPartyTileset(
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.tilesets.installationStatus(
-          tilesetId,
           variant,
+          tilesetId,
         ),
       });
       onSuccess?.();

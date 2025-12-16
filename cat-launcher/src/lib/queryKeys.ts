@@ -34,32 +34,32 @@ export const queryKeys = {
 
   mods: {
     listAll: (variant: GameVariant) => ["mods", variant] as const,
-    installationStatus: (modId: string, variant: GameVariant) =>
-      ["mods", "installation_status", modId, variant] as const,
-    lastActivity: (modId: string, variant: GameVariant) =>
-      ["mods", "last_activity", modId, variant] as const,
+    installationStatus: (variant: GameVariant, modId: string) =>
+      ["mods", "installation_status", variant, modId] as const,
+    lastActivity: (variant: GameVariant, modId: string) =>
+      ["mods", "last_activity", variant, modId] as const,
   },
 
   tilesets: {
     listAll: (variant: GameVariant) => ["tilesets", variant] as const,
-    installationStatus: (tilesetId: string, variant: GameVariant) =>
+    installationStatus: (variant: GameVariant, tilesetId: string) =>
       [
         "tilesets",
         "installation_status",
-        tilesetId,
         variant,
+        tilesetId,
       ] as const,
   },
 
   soundpacks: {
     listAll: (variant: GameVariant) =>
       ["soundpacks", variant] as const,
-    installationStatus: (soundpackId: string, variant: GameVariant) =>
+    installationStatus: (variant: GameVariant, soundpackId: string) =>
       [
         "soundpacks",
         "installation_status",
-        soundpackId,
         variant,
+        soundpackId,
       ] as const,
   },
 

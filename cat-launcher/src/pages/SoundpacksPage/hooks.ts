@@ -38,8 +38,8 @@ export function useInstallThirdPartySoundpack(
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.soundpacks.installationStatus(
-          id,
           variant,
+          id,
         ),
       });
       onSuccess?.();
@@ -63,8 +63,8 @@ export function useGetThirdPartySoundpackInstallationStatus(
 ) {
   const query = useQuery({
     queryKey: queryKeys.soundpacks.installationStatus(
-      soundpackId,
       variant,
+      soundpackId,
     ),
     queryFn: () =>
       getThirdPartySoundpackInstallationStatus(soundpackId, variant),
@@ -92,8 +92,8 @@ export function useUninstallThirdPartySoundpack(
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.soundpacks.installationStatus(
-          soundpackId,
           variant,
+          soundpackId,
         ),
       });
       onSuccess?.();
