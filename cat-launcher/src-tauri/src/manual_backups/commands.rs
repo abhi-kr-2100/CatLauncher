@@ -78,7 +78,7 @@ pub async fn create_manual_backup_for_variant(
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
 ) -> Result<i64, CreateManualBackupCommandError> {
-  let data_dir = app_handle.path().app_data_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
   let timestamp = std::time::SystemTime::now()
     .duration_since(std::time::UNIX_EPOCH)?
     .as_secs();
@@ -122,7 +122,7 @@ pub async fn delete_manual_backup_by_id(
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
 ) -> Result<(), DeleteManualBackupCommandError> {
-  let data_dir = app_handle.path().app_data_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
   delete_manual_backup(id, &data_dir, backup_repository.inner())
     .await?;
   Ok(())
@@ -158,7 +158,7 @@ pub async fn restore_manual_backup_by_id(
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
 ) -> Result<(), RestoreManualBackupCommandError> {
-  let data_dir = app_handle.path().app_data_dir()?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
   restore_manual_backup(
     id,
