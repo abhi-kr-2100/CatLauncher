@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import type { DownloadProgress } from "@/generated-types/DownloadProgress";
+import type { SerializableDownloadProgress } from "@/lib/types";
 import type { GameVariant } from "@/generated-types/GameVariant";
 
 type InstallationType = "release" | "mod" | "soundpack" | "tileset";
@@ -21,7 +21,10 @@ interface InstallationProgressState {
   >;
   downloadProgressByVariant: Record<
     InstallationType,
-    Record<GameVariant, Record<string, DownloadProgress | null>>
+    Record<
+      GameVariant,
+      Record<string, SerializableDownloadProgress | null>
+    >
   >;
 }
 
@@ -82,7 +85,7 @@ export const installationProgressSlice = createSlice({
         type: InstallationType;
         variant: GameVariant;
         id: string;
-        progress: DownloadProgress;
+        progress: SerializableDownloadProgress;
       }>,
     ) => {
       const { type, variant, id, progress } = action.payload;
@@ -90,7 +93,7 @@ export const installationProgressSlice = createSlice({
 
       const { bytes_downloaded, total_bytes } = progress;
 
-      if (total_bytes === 0n) {
+      if (total_bytes === 0) {
         state.installationStatusByVariant[type][variant][id] =
           "Downloading";
       } else if (bytes_downloaded === total_bytes) {
