@@ -70,8 +70,8 @@ export default function InteractionButton({
   if (installationProgressStatus === "Downloading") {
     return (
       <DownloadProgress
-        downloaded={downloadProgress?.bytes_downloaded ?? 0n}
-        total={downloadProgress?.total_bytes ?? 0n}
+        downloaded={downloadProgress?.bytes_downloaded ?? 0}
+        total={downloadProgress?.total_bytes ?? 0}
       />
     );
   }
