@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::infra::utils::Asset;
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct SoundpackInstallation {
   pub download_url: String,
@@ -33,6 +35,19 @@ pub struct StockSoundpack {
 pub enum Soundpack {
   Stock(StockSoundpack),
   ThirdParty(ThirdPartySoundpack),
+}
+
+impl Asset for Soundpack {
+  fn is_third_party(&self) -> bool {
+    matches!(self, Soundpack::ThirdParty(_))
+  }
+
+  fn id(&self) -> &str {
+    match self {
+      Soundpack::Stock(s) => &s.id,
+      Soundpack::ThirdParty(s) => &s.id,
+    }
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
