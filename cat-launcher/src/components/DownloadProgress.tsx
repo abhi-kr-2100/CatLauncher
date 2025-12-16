@@ -1,23 +1,18 @@
 import { Progress } from "@/components/ui/progress";
 
 interface DownloadProgressProps {
-  downloaded: bigint;
-  total: bigint;
+  downloaded: number;
+  total: number;
 }
 
 export function DownloadProgress({
   downloaded,
   total,
 }: DownloadProgressProps) {
-  const downloadedNumber = Number(downloaded);
-  const totalNumber = Number(total);
-
   // For some downloads, the total size is not known.
-  const showIndeterminateProgress =
-    totalNumber === 0 && downloadedNumber > 0;
+  const showIndeterminateProgress = total === 0 && downloaded > 0;
 
-  const progress =
-    totalNumber > 0 ? (downloadedNumber * 100) / totalNumber : 0;
+  const progress = total > 0 ? (downloaded * 100) / total : 0;
 
   return (
     <Progress

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useThrottle } from "@/hooks/useThrottle";
+import { toSerializableDownloadProgress } from "@/lib/types";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearInstallationProgress,
@@ -50,7 +51,9 @@ export function useInstallAndMonitor<T>(
 
   const throttledOnProgress = useThrottle(
     (itemId: string, progress: DownloadProgress) => {
-      if (progress.total_bytes === 0n) {
+      const serializableProgress =
+        toSerializableDownloadProgress(progress);
+      if (serializableProgress.total_bytes === 0) {
         return;
       }
 
@@ -59,7 +62,7 @@ export function useInstallAndMonitor<T>(
           type,
           variant,
           id: itemId,
-          progress,
+          progress: serializableProgress,
         }),
       );
     },
@@ -83,8 +86,8 @@ export function useInstallAndMonitor<T>(
           variant,
           id: itemId,
           progress: {
-            bytes_downloaded: 0n,
-            total_bytes: 0n,
+            bytes_downloaded: 0,
+            total_bytes: 0,
           },
         }),
       );
