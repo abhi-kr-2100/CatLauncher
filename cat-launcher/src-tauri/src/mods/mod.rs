@@ -1,4 +1,6 @@
 pub mod commands;
+pub mod get_last_activity_for_third_party_mod;
+pub mod get_third_party_mod_by_id;
 pub mod get_third_party_mod_installation_status;
 pub mod install_third_party_mod;
 pub mod list_all_mods;

@@ -171,7 +171,7 @@ pub enum ListThirdPartyModsError {
   ParseModsJson(#[from] serde_json::Error),
 }
 
-async fn list_all_third_party_mods(
+pub async fn list_all_third_party_mods(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<Mod>, ListThirdPartyModsError> {
