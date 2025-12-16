@@ -1,71 +1,133 @@
-# Agent Instructions for CatLauncher
+# Frontend
 
-This document provides a high-level overview of the CatLauncher project for AI agents. Its purpose is to guide you in understanding the architecture and finding more detailed documentation.
+* Tools: `pnpm`, `shadcn/ui`, `lucide`, `tailwind`, `tanstack-query`, `redux-toolkit`
 
-## Technologies
+## Verification
 
-The project uses a modern technology stack. For a comprehensive overview, please see the [Project Overview](./dev-docs/project-overview.md) document. Key technologies include:
+At the end of every task, run the following commands in order:
 
--   **Backend:** Rust, Tauri
--   **Frontend:** TypeScript, React, TanStack Query
--   **Styling:** Tailwind CSS, shadcn/ui
--   **Database:** SQLite
+* `rm -rf cat-launcher/src/generated-types && cargo test --manifest-path cat-launcher/src-tauri/Cargo.toml`: This will generate TypeScript types from Rust types using `ts-rs`.
+* `pnpm --prefix cat-launcher format && pnpm --prefix cat-launcher lint:fix`
+* `pnpm --prefix cat-launcher lint`: To ensure there are no errors.
 
-## Core Principles
+You should not run any other build, test, or dev commands.
 
-### Vertical Slice Architecture
-The project is organized by features, not layers. Both the frontend and backend follow this principle, meaning that all the code for a single feature is located in the same directory.
+## UI
 
--   **Backend Feature Directory:** A typical backend feature slice (e.g., `src-tauri/src/fetch_releases/`) contains:
-    -   `mod.rs`: The module declaration file.
-    -   `commands.rs`: The bridge to the Tauri framework.
-    -   A file with the core business logic (e.g., `fetch_releases.rs`).
-    -   `repository.rs`: The trait definition for the repository.
-    -   `sqlite_repository.rs`: The SQLite implementation of the repository trait.
+`shadcn/ui` is used for UI components. To add a new component, run:
 
--   **Frontend Feature Directory:** A typical frontend feature slice (e.g., `src/pages/PlayPage/`) contains:
-    -   `PlayPage.tsx`: The main page component.
-    -   `hooks.tsx`: Custom hooks related to the page.
-    -   `utils.tsx`: Utility functions specific to the page.
-    -   `constants.tsx`: Constants used on the page.
+* `pnpm --prefix cat-launcher dlx shadcn@latest add {component_name}`: This will install the component in the `cat-launcher/src/components/ui` directory.
 
-### Clean Architecture
-The backend's business logic is strictly decoupled from the framework.
+You can browse the documentation of a component by visiting `https://ui.shadcn.com/docs/components/{component_name}`
 
--   **Framework Components:** Anything that is not pure business logic is considered part of the "framework." This includes:
-    -   Tauri (the application framework itself)
-    -   SQLite repository implementations
-    -   The operating system (OS) abstraction
-    -   System time
-    -   Filesystem paths
+You can combine shadcn/ui components to create helper components. Keep these helper components in the `cat-launcher/src/components` directory, separate from the shadcn/ui components.
 
--   **Interaction Boundaries:**
-    -   Interaction with Tauri happens exclusively in `commands.rs` files.
-    -   Business logic functions **never** depend directly on the SQLite implementation of a repository. Instead, they depend on a `repository` trait (an abstract interface).
-    -   All framework-level dependencies (OS, time, paths, repository implementations) are passed as parameters to business logic functions from the `commands.rs` functions.
+`lucide` is used for icons, and `tailwind` is used for styling. Never write manual CSS; always prefer `tailwind`.
 
-## Coding Conventions
+## Data Fetching and Mutations
 
-### Backend (Rust)
+`tanstack-query` is used for data fetching and mutations.
 
--   **Error Handling:** `thiserror` is used for creating custom error types. The `anyhow` crate is not used. Each function defines its own error enum. The `#[from]` attribute is used to wrap lower-level errors within higher-level ones. Internal errors must be strongly-typed and not simple strings.
+* Raw `useQuery` and `useMutation` hooks are not used. Instead create custom hooks that wrap `useQuery` and `useMutation`.
+* All query keys must be stored in the `cat-launcher/src/lib/queryKeys.ts` file.
 
--   **Database:** The repository pattern is used to abstract database access. A `repository.rs` file defines a trait with the methods needed for data access. Business logic functions depend only on this trait, not on any specific implementation.
+## Directory Structure
 
--   **Type Generation:** `ts-rs` is used to automatically generate TypeScript type definitions from Rust structs and enums.
-    -   Types are generated into the `src/generated-types/` directory in the frontend.
-    -   To regenerate the types after modifying a Rust struct with `#[ts(export)]`, you must run the backend tests: `cargo test --manifest-path ./cat-launcher/src-tauri/Cargo.toml`.
+* `cat-launcher/src/components`: General and reusable helper components used by many frontend features.
+* `cat-launcher/src/hooks`: General and reusable hooks used by many frontend features.
+* `cat-launcher/src/lib`: General and reusable utilities used by many frontend features.
+* `cat-launcher/src/store`: General and reusable Redux store used by many frontend features.
+* `cat-launcher/src/pages/{feature_name}`: A single self-contained frontend feature.
+  - `cat-launcher/src/pages/{feature_name}/index.tsx`: The main page component.
+  - `cat-launcher/src/pages/{feature_name}/components`: Components specific to this feature.
+  - `cat-launcher/src/pages/{feature_name}/hooks`: Hooks specific to this feature.
+  - `cat-launcher/src/pages/{feature_name}/lib`: Utilities specific to this feature.
+  - `cat-launcher/src/pages/{feature_name}/store`: Redux store specific to this feature.
+  
+Always follow the directory structure above when creating a new feature.
 
-### Frontend (TypeScript/React)
+# Backend
 
--   **Data Fetching:** `@tanstack/react-query` is used for all asynchronous operations and state caching.
-    -   Query keys are centrally managed in `src/lib/queryKeys.ts`. Using string literals or "magic literals" for query keys is not allowed; always import them from the central file.
+* Tools: `tauri`, `thiserror`, `tokio`
 
--   **Styling:** Tailwind CSS and `shadcn/ui` are used for styling and UI components.
-    -   To add new `shadcn/ui` components, you must use the CLI: `pnpx shadcn-ui@latest add <component_name>`.
+## Commands
 
-## Detailed Documentation
+* The backend implements Tauri commands which are used by the frontend.
+* Commands should be straightforward and should not perform business logic.
+* Commands should prepare arguments to pass to business logic functions. The entire context or framework-dependent data should not be passed to business logic functions.
+* Error thrown by command should derive `thiserror::Error`, `Debug`, `IntoStaticStr`, `CommandErrorSerialize`.
 
-For more in-depth information on the architecture, modules, and best practices, please refer to the documents in the `dev-docs` directory.
--   [Backend Architecture](./dev-docs/backend-architecture.md)
--   [Best Practices](./dev-docs/best-practices.md)
+```rust
+// Good commands
+
+#[command]
+pub async fn get_active_release(
+    variant: GameVariant, active_release_repo: State<'_, SqliteActiveReleaseRepository>,
+) -> Result<Option<String>, ActiveReleaseCommandError> {
+  // Collect all arguments to pass to the business logic function
+  let repo = active_release_repo.inner();
+
+  // Call the business logic function
+  let active_release = variant.get_active_release(repo).await?;
+
+  // Return the results
+  Ok(active_release)
+}
+
+// Error Handling
+#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+pub enum ActiveReleaseCommandError {
+  #[error("failed to get active release: {0}")]
+  GetActiveRelease(#[from] ActiveReleaseError),
+
+  #[error("failed to get system directory: {0}")]
+  SystemDirectory(#[from] tauri::Error),
+} 
+```
+
+## Error Handling
+
+* Use `thiserror::Error`, `#[error]` and `#[from]` from the `thiserror` crate to define errors.
+* Define one error enum for every function. The error name should be `{FunctionName}Error`
+* Don't convert errors to strings. Use `#[from]` to compose errors.
+
+```rust
+// Good error handling
+#[derive(thiserror::Error, Debug)]
+pub enum GetAllTipsError {
+  #[error("failed to get active release: {0}")]
+  GetActiveRelease(#[from] ActiveReleaseError),
+
+  #[error("failed to get system directory: {0}")]
+  SystemDirectory(#[from] io::Error),
+}
+
+pub fn get_all_tips() -> Result<(), GetAllTipsError> {
+  let active_release = get_active_release()?;
+  let system_dir = get_system_directory()?;
+  
+  Ok(())
+}
+```
+
+## Repository
+
+* Data is stored in a SQLite database.
+* However, business logic functions don't depend on the SQLite database directly.
+* Define a Repository trait independent of SQLite that business logic functions depend on.
+* Implement the Repository trait for SQLite.
+
+## Directory Structure
+
+* `cat-launcher/src-tauri/`: All Rust code. No Rust code should be outside this directory.
+* `cat-launcher/src-tauri/src/{feature_name}`: A single self-contained backend feature.
+  - `cat-launcher/src-tauri/src/{feature_name}/mod.rs`: Module declaration for this feature. This file should only contain `mod` and `use` statements.
+  - `cat-launcher/src-tauri/src/{feature_name}/commands.rs`: Tauri commands defined for this feature.
+  - `cat-launcher/src-tauri/src/{feature_name}/lib.rs`: Utilities specific to this feature.
+  - `cat-launcher/src-tauri/src/{feature_name}/types.rs`: Enums, structs, and other data types specific to this feature.
+  - `cat-launcher/src-tauri/src/{feature_name}/repository`: Repository specific to this feature. It should contain an abstract repository trait and its implementation in two separate files.
+
+# Agent Responsibility
+
+* At the end of each task, run the Verification commands to ensure correctness.
+* Run `git log` to check the recent commit history. Then, either create a new commit or amend/squash previous commits.
