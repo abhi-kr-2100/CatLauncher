@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::infra::utils::Asset;
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct TilesetInstallation {
   pub download_url: String,
@@ -33,6 +35,19 @@ pub struct StockTileset {
 pub enum Tileset {
   Stock(StockTileset),
   ThirdParty(ThirdPartyTileset),
+}
+
+impl Asset for Tileset {
+  fn is_third_party(&self) -> bool {
+    matches!(self, Tileset::ThirdParty(_))
+  }
+
+  fn id(&self) -> &str {
+    match self {
+      Tileset::Stock(t) => &t.id,
+      Tileset::ThirdParty(t) => &t.id,
+    }
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

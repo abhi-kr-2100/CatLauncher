@@ -9,7 +9,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::infra::utils::OS;
+use crate::infra::utils::{sort_assets, OS};
 use crate::tilesets::paths::{
   get_stock_tilesets_dir, get_tilesets_resource_path,
   GetStockTilesetsDirError,
@@ -65,6 +65,8 @@ pub async fn list_all_tilesets(
       list_all_stock_tilesets(&stock_tilesets_dir).await?;
     tilesets.extend(stock_tilesets);
   }
+
+  sort_assets(&mut tilesets);
 
   Ok(tilesets)
 }
