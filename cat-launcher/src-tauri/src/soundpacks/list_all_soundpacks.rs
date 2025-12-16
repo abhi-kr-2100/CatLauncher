@@ -9,7 +9,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::infra::utils::OS;
+use crate::infra::utils::{sort_assets, OS};
 use crate::soundpacks::paths::{
   get_soundpacks_resource_path, get_stock_soundpacks_dir,
   GetStockSoundpacksDirError,
@@ -66,6 +66,8 @@ pub async fn list_all_soundpacks(
       list_all_stock_soundpacks(&stock_soundpacks_dir).await?;
     soundpacks.extend(stock_soundpacks);
   }
+
+  sort_assets(&mut soundpacks);
 
   Ok(soundpacks)
 }

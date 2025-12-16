@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::infra::utils::Asset;
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct ModInstallation {
   pub download_url: String,
@@ -37,6 +39,19 @@ pub struct StockMod {
 pub enum Mod {
   Stock(StockMod),
   ThirdParty(ThirdPartyMod),
+}
+
+impl Asset for Mod {
+  fn is_third_party(&self) -> bool {
+    matches!(self, Mod::ThirdParty(_))
+  }
+
+  fn id(&self) -> &str {
+    match self {
+      Mod::Stock(m) => &m.id,
+      Mod::ThirdParty(m) => &m.id,
+    }
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
