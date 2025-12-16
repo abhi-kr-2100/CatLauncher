@@ -1,6 +1,7 @@
 use std::env::consts::OS;
 use std::sync::Arc;
 
+use reqwest::Client;
 use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{Manager, State};
@@ -11,6 +12,10 @@ use crate::active_release::repository::sqlite_active_release_repository::SqliteA
 use crate::infra::download::Downloader;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::mods::get_last_activity_for_third_party_mod::{
+  get_last_activity_for_third_party_mod, GetLastActivityError,
+  LastModActivity,
+};
 use crate::mods::get_third_party_mod_installation_status::{
   get_third_party_mod_installation_status,
   GetThirdPartyModInstallationStatusError,
@@ -164,4 +169,38 @@ pub async fn get_third_party_mod_installation_status_command(
   )
   .await?;
   Ok(status)
+}
+
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
+pub enum GetLastActivityCommandError {
+  #[error("failed to get app data directory")]
+  AppDataDir(#[from] tauri::Error),
+
+  #[error("failed to get OS information")]
+  OSInfo(#[from] OSNotSupportedError),
+
+  #[error("failed to get last activity: {0}")]
+  GetActivity(#[from] GetLastActivityError),
+}
+
+#[tauri::command]
+pub async fn get_last_activity_on_third_party_mod_command(
+  id: String,
+  variant: GameVariant,
+  app: tauri::AppHandle,
+  client: State<'_, Client>,
+) -> Result<LastModActivity, GetLastActivityCommandError> {
+  let resource_dir = app.path().resource_dir()?;
+
+  let last_activity = get_last_activity_for_third_party_mod(
+    &id,
+    &variant,
+    &resource_dir,
+    client.inner(),
+  )
+  .await?;
+
+  Ok(last_activity)
 }

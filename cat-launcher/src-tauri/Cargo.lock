@@ -471,6 +471,7 @@ dependencies = [
  "tokio",
  "ts-rs",
  "unrar",
+ "url",
  "uuid",
  "zip 6.0.0",
 ]

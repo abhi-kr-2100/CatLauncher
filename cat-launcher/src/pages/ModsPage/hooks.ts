@@ -6,9 +6,11 @@ import {
   getThirdPartyModInstallationStatus,
   installThirdPartyMod,
   uninstallThirdPartyMod,
+  getLastModActivity,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export function useInstallThirdPartyMod(
   variant: GameVariant,
@@ -90,5 +92,29 @@ export function useUninstallThirdPartyMod(
   return {
     isUninstalling: mutation.isPending,
     uninstall: (modId: string) => mutation.mutate(modId),
+  };
+}
+
+export function useGetLastModActivity(
+  enabled: boolean,
+  modId: string,
+  variant: GameVariant,
+  onError?: (error: unknown) => void,
+) {
+  const query = useQuery({
+    queryKey: queryKeys.mods.lastActivity(modId, variant),
+    queryFn: () => getLastModActivity(modId, variant),
+    enabled,
+  });
+
+  useEffect(() => {
+    if (query.error) {
+      onError?.(query.error);
+    }
+  }, [query.error, onError]);
+
+  return {
+    lastActivity: query.data,
+    isLoading: query.isLoading,
   };
 }

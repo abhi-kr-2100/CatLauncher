@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DownloadProgress } from "@/components/DownloadProgress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ import {
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
 } from "./hooks";
+import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
 
 interface ModCardProps {
   variant: GameVariant;
@@ -40,6 +42,9 @@ function getModCategory(mod: Mod): string {
 }
 
 export default function ModCard({ variant, mod }: ModCardProps) {
+  const [confirmationDialogOpen, setConfirmationDialogOpen] =
+    useState(false);
+
   const name = getModName(mod);
   const description = getModDescription(mod);
   const modType = getModType(mod);
@@ -70,6 +75,15 @@ export default function ModCard({ variant, mod }: ModCardProps) {
     () => toastCL("success", "Mod uninstalled successfully."),
     (error) => toastCL("error", "Failed to uninstall mod.", error),
   );
+
+  const handleInstallClick = () => {
+    setConfirmationDialogOpen(true);
+  };
+
+  const handleConfirmInstall = () => {
+    setConfirmationDialogOpen(false);
+    install(modId);
+  };
 
   return (
     <Card className="flex flex-col">
@@ -113,7 +127,7 @@ export default function ModCard({ variant, mod }: ModCardProps) {
           ) : (
             <Button
               className="w-full"
-              onClick={() => install(modId)}
+              onClick={handleInstallClick}
               disabled={isInstalling || !!modInstallationProgress}
             >
               {modInstallationProgress === "Installing"
@@ -125,6 +139,13 @@ export default function ModCard({ variant, mod }: ModCardProps) {
           )}
         </CardFooter>
       )}
+      <ModInstallationConfirmationDialog
+        open={confirmationDialogOpen}
+        onOpenChange={setConfirmationDialogOpen}
+        onConfirm={handleConfirmInstall}
+        modId={modId}
+        variant={variant}
+      />
     </Card>
   );
 }

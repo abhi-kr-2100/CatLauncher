@@ -11,6 +11,7 @@ import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { Mod } from "@/generated-types/Mod";
 import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
+import type { LastModActivity } from "@/generated-types/LastModActivity";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
@@ -310,6 +311,20 @@ export async function uninstallThirdPartyMod(
     id: modId,
     variant: variant,
   });
+}
+
+export async function getLastModActivity(
+  modId: string,
+  variant: GameVariant,
+): Promise<LastModActivity> {
+  const response = await invoke<LastModActivity>(
+    "get_last_activity_on_third_party_mod_command",
+    {
+      id: modId,
+      variant,
+    },
+  );
+  return response;
 }
 
 export async function listAllTilesets(
