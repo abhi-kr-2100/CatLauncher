@@ -10,7 +10,7 @@ pub struct ModInstallation {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 pub struct ModActivity {
   pub activity_type: String,
-  pub github: Option<String>,
+  pub github: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
