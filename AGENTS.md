@@ -31,6 +31,12 @@ You can combine shadcn/ui components to create helper components. Keep these hel
 * Raw `useQuery` and `useMutation` hooks are not used. Instead create custom hooks that wrap `useQuery` and `useMutation`.
 * All query keys must be stored in the `cat-launcher/src/lib/queryKeys.ts` file.
 
+## Strings
+
+* All strings displayed to the user should be internationalization-ready.
+* Avoid string construction in parts to avoid problems in non-English languages where grammar and word order differ.
+* Avoid string manipulation to format a string value into a user-displayable value as this might not work during translation. Instead, use a mapping function or constant that maps values to displayable labels.
+
 ## Directory Structure
 
 * `cat-launcher/src/components`: General and reusable helper components used by many frontend features.
