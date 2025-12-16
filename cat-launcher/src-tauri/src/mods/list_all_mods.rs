@@ -7,7 +7,7 @@ use tokio::fs::{read_dir, read_to_string};
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::infra::utils::OS;
+use crate::infra::utils::{sort_assets, OS};
 use crate::mods::paths::{
   get_mods_resource_path, get_stock_mods_dir, GetStockModsDirError,
 };
@@ -59,6 +59,8 @@ pub async fn list_all_mods(
     let stock_mods = list_all_stock_mods(&stock_mods_dir).await?;
     mods.extend(stock_mods);
   }
+
+  sort_assets(&mut mods);
 
   Ok(mods)
 }

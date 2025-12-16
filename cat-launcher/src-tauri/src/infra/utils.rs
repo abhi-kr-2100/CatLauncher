@@ -6,6 +6,12 @@ use tokio::fs;
 
 use crate::variants::GameVariant;
 
+pub trait Asset {
+  fn is_third_party(&self) -> bool;
+
+  fn id(&self) -> &str;
+}
+
 pub fn get_github_repo_for_variant(
   variant: &GameVariant,
 ) -> &'static str {
@@ -77,4 +83,13 @@ pub fn get_arch_enum(
     "x86_64" => Ok(Arch::X64),
     _ => Err(ArchNotSupportedError { arch }),
   }
+}
+
+pub fn sort_assets<T: Asset>(items: &mut [T]) {
+  items.sort_by(|a, b| {
+    a.is_third_party()
+      .cmp(&b.is_third_party())
+      .reverse()
+      .then_with(|| a.id().cmp(b.id()))
+  });
 }
