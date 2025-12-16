@@ -1,22 +1,162 @@
 {
   "DarkDaysAhead": {
-    "xedra_evolved_innawoods": {
-      "id": "xedra_evolved_innawoods",
-      "name": "XedraWood: Stone and Sorcery",
-      "description": "Better blending for Xedra Evolved and Innawoods.  Also forms the core for a number of optional supplemental mods.",
+    "Arcana": {
+      "id": "Arcana",
+      "name": "Arcana and Magic Items",
+      "description": "Adds a host of craftable magic items and spells, centered around the use of Arcana skill to research and exploit otherworldly monsters and anomalies.",
       "category": "content",
       "installation": {
-        "download_url": "https://github.com/Standing-Storm/ccda-xedra-evolved-innawoods/archive/refs/heads/main.zip",
-        "modinfo": "ccda-xedra-evolved-innawoods-main/modinfo.json"
+        "download_url": "https://github.com/chaosvolt/cdda-arcana-mod/archive/refs/heads/master.zip",
+        "modinfo": "cdda-arcana-mod-master/Arcana/modinfo.json"
       },
       "activity": {
         "activity_type": "github_commit",
-        "github": "https://github.com/Standing-Storm/ccda-xedra-evolved-innawoods"
+        "github": "https://github.com/chaosvolt/cdda-arcana-mod"
+      }
+    },
+    "Cata++": {
+      "id": "Cata++",
+      "name": "Cataclysm++",
+      "description": "The unofficial expansion mod for Cataclysm: Dark Days Ahead.\n\nThe gigantic jabberwock of a mod that adds a lot of content to the game: new items, buildings, scenarios, monsters, etc. It also reworks and adds alternatives to many things from recipes to scenarios. It also adds a pseudo-story and lore on the works.\n\nThe Bio-Weapon, Super Soldier, Commandeers, Slave Fighters and the Old World Prepper NPC factions join the world.\n\nSeek the Bio-weapons, find loot, take down new monsters and invest in skills for new craftable items.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Noctifer-de-Mortem/nocts_cata_mod/archive/refs/heads/master.zip",
+        "modinfo": "nocts_cata_mod-master/nocts_cata_mod_DDA/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Noctifer-de-Mortem/nocts_cata_mod"
+      }
+    },
+    "fallout_rework": {
+      "id": "fallout_rework",
+      "name": "Fallout New England Remastered",
+      "description": "Brings a little bit of that retro-futuristic class to the Cataclysm. Guns, beasts, and more. Stuff from the Core Region, all the way to the Commonwealth. Remade from scratch.",
+      "category": "items",
+      "installation": {
+        "download_url": "https://github.com/Tefnut/Fallout-New-England-Remastered/archive/refs/heads/main.zip",
+        "modinfo": "Fallout-New-England-Remastered-main/FNE-Remastered/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Tefnut/Fallout-New-England-Remastered"
+      }
+    },
+    "Dorf_Life": {
+      "id": "Dorf_Life",
+      "name": "Dorf Life",
+      "description": "Adds multi-level caverns hidden away in the underground, breaching the subways to add various strange sights to explore.",
+      "category": "buildings",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/Dorf-Life-CDDA/archive/refs/heads/master.zip",
+        "modinfo": "Dorf-Life-CDDA-master/Dorf_Life/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/Dorf-Life-CDDA"
+      }
+    },
+    "MST_Extra": {
+      "id": "MST_Extra",
+      "name": "MST Extra",
+      "description": "The sequel to CDDA's old More Survival Tools mod, adding additional useful innawoods content.",
+      "category": "items",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/MST_Extra_Mod/archive/refs/heads/master.zip",
+        "modinfo": "MST_Extra_Mod-master/MST_Extra/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/MST_Extra_Mod"
+      }
+    },
+    "Tankmod_Revived": {
+      "id": "Tankmod_Revived",
+      "name": "Tankmod: Revived",
+      "description": "The intended successor of my older, obsoleted Tanks and Other Vehicles mod.",
+      "category": "vehicles",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/cdda-tankmod-revived-mod/archive/refs/heads/master.zip",
+        "modinfo": "cdda-tankmod-revived-mod-master/Tankmod_Revived/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/cdda-tankmod-revived-mod"
       }
     }
   },
 
   "BrightNights": {
+    "Arcana": {
+      "id": "Arcana",
+      "name": "Arcana and Magic Items",
+      "description": "Adds a host of craftable magic items and spells, centered around the use of Arcana skill to research and exploit otherworldly monsters and anomalies.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/cdda-arcana-mod/archive/refs/heads/master.zip",
+        "modinfo": "cdda-arcana-mod-master/Arcana_BN/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/cdda-arcana-mod"
+      }
+    },
+    "Cata++": {
+      "id": "Cata++",
+      "name": "Cataclysm++",
+      "description": "The unofficial expansion mod for Cataclysm: Dark Days Ahead.\n\nThe gigantic jabberwock of a mod that adds a lot of content to the game: new items, buildings, scenarios, monsters, etc. It also reworks and adds alternatives to many things from recipes to scenarios. It also adds a pseudo-story and lore on the works.\n\nThe Bio-Weapon, Super Soldier, Commandeers, Slave Fighters and the Old World Prepper NPC factions join the world.\n\nSeek the Bio-weapons, find loot, take down new monsters and invest in skills for new craftable items.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/Noctifer-de-Mortem/nocts_cata_mod/archive/refs/heads/master.zip",
+        "modinfo": "nocts_cata_mod-master/nocts_cata_mod_BN/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Noctifer-de-Mortem/nocts_cata_mod"
+      }
+    },
+    "Dorf_Life": {
+      "id": "Dorf_Life",
+      "name": "Dorf Life",
+      "description": "Adds multi-level caverns hidden away in the underground, breaching the subways to add various strange sights to explore.",
+      "category": "buildings",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/Dorf-Life-CDDA/archive/refs/heads/master.zip",
+        "modinfo": "Dorf-Life-CDDA-master/Dorf_Life_BN/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/Dorf-Life-CDDA"
+      }
+    },
+    "fallout_combined": {
+      "id": "fallout_combined",
+      "name": "Fallout: New England Combined",
+      "description": "Brings the retro-futuristic feel of Fallout series to the Cataclysm. Guns, factions, monsters, craftable items, mutations, food, drinks, locations and even more. Stuff from the Core Region, all the way to the Commonwealth. Fusion of the two fallout mods by tefnut and Jolmar7.",
+      "category": "content",
+      "installation": {
+        "download_url": "https://github.com/WarriorKingBob/Fallout_BrightNights/archive/refs/heads/main.zip",
+        "modinfo": "Fallout_BrightNights-main/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/WarriorKingBob/Fallout_BrightNights"
+      }
+    },
+    "MST_Extra": {
+      "id": "MST_Extra",
+      "name": "MST Extra",
+      "description": "The sequel to CDDA's old More Survival Tools mod, adding additional useful innawoods content.",
+      "category": "items",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/MST_Extra_Mod/archive/refs/heads/master.zip",
+        "modinfo": "MST_Extra_Mod-master/MST_Extra_BN/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/MST_Extra_Mod"
+      }
+    },
     "realdarkskies": {
       "id": "realdarkskies",
       "name": "Really Dark Skies",
@@ -30,10 +170,38 @@
         "activity_type": "github_commit",
         "github": "https://github.com/Zlorthishen/Really_Dark_Skies"
       }
+    },
+    "Tankmod_Revived": {
+      "id": "Tankmod_Revived",
+      "name": "Tankmod: Revived",
+      "description": "The intended successor of my older, obsoleted Tanks and Other Vehicles mod.",
+      "category": "vehicles",
+      "installation": {
+        "download_url": "https://github.com/chaosvolt/cdda-tankmod-revived-mod/archive/refs/heads/master.zip",
+        "modinfo": "cdda-tankmod-revived-mod-master/Tankmod_Revived_BN/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chaosvolt/cdda-tankmod-revived-mod"
+      }
     }
   },
 
   "TheLastGeneration": {
+    "bionics_expanded": {
+      "id": "bionics_expanded",
+      "name": "Bionics Expanded",
+      "description": "A collection of various (hopefully) interesting CBMs.",
+      "category": "misc_additions",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/BionicsExpanded-CTLG/archive/refs/heads/main.zip",
+        "modinfo": "BionicsExpanded-CTLG-main/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Vegetabs/BionicsExpanded-CTLG"
+      }
+    },
     "mindovermatter": {
       "id": "mindovermatter",
       "name": "Mind Over Matter",
@@ -46,6 +214,20 @@
       "activity": {
         "activity_type": "github_commit",
         "github": "https://github.com/Vegetabs/MindOverMatter-CTLG"
+      }
+    },
+    "MMA": {
+      "id": "MMA",
+      "name": "Mythical Martial Arts",
+      "description": "A collection of fictional, mythologically inspired or otherwise unrealistic martial arts.",
+      "category": "misc_additions",
+      "installation": {
+        "download_url": "https://github.com/Vegetabs/MythicalMartialArts-CTLG/archive/refs/heads/main.zip",
+        "modinfo": "MythicalMartialArts-CTLG-main/modinfo.json"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/Vegetabs/MythicalMartialArts-CTLG"
       }
     }
   }
