@@ -1,3 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldContent,
@@ -14,12 +19,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Textarea } from "@/components/ui/textarea";
 import { GameVariant } from "@/generated-types/GameVariant";
-import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -31,6 +32,7 @@ interface NewBackupDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (values: z.infer<typeof formSchema>) => void;
   variant: GameVariant;
+  isCreating: boolean;
 }
 
 export function NewBackupDialog({
@@ -38,6 +40,7 @@ export function NewBackupDialog({
   onOpenChange,
   onSave,
   variant,
+  isCreating,
 }: NewBackupDialogProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -98,7 +101,9 @@ export function NewBackupDialog({
             </FieldContent>
           </Field>
           <DialogFooter>
-            <Button type="submit">Save</Button>
+            <Button type="submit" disabled={isCreating}>
+              Save
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
