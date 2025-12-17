@@ -14,7 +14,7 @@ export function useCreateManualBackup(
 ) {
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async (values: { name: string; notes?: string }) => {
       await createManualBackupForVariant(
         variant,
@@ -62,5 +62,8 @@ export function useCreateManualBackup(
     onSuccess: options.onSuccess,
   });
 
-  return { createManualBackup: mutate };
+  return {
+    createManualBackup: mutate,
+    isCreatingManualBackup: isPending,
+  };
 }
