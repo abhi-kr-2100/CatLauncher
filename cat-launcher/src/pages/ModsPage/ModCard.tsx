@@ -50,7 +50,7 @@ export default function ModCard({ variant, mod }: ModCardProps) {
   const modType = getModType(mod);
   const category = getModCategory(mod);
 
-  const isThirdParty = mod.type !== "Stock";
+  const isThirdParty = mod.type === "ThirdParty";
   const modId = mod.content.id;
 
   const { installationStatus } =

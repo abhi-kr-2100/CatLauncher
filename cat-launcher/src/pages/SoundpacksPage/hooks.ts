@@ -13,6 +13,7 @@ import {
   uninstallThirdPartySoundpack,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+import { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 
 export function useInstallThirdPartySoundpack(
   variant: GameVariant,
@@ -33,15 +34,10 @@ export function useInstallThirdPartySoundpack(
     soundpackId,
     installThirdPartySoundpack,
     (id: string) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.soundpacks.listAll(variant),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.soundpacks.installationStatus(
-          variant,
-          id,
-        ),
-      });
+      queryClient.setQueryData<SoundpackInstallationStatus>(
+        queryKeys.soundpacks.installationStatus(variant, id),
+        "Installed",
+      );
       onSuccess?.();
     },
     (error: Error) => {
