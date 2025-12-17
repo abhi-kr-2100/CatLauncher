@@ -36,7 +36,7 @@ export default function TilesetCard({
   const name = getTilesetName(tileset);
   const tilesetType = getTilesetType(tileset);
 
-  const isThirdParty = tileset.type !== "Stock";
+  const isThirdParty = tileset.type === "ThirdParty";
   const tilesetId = tileset.content.id;
 
   const { installationStatus } =

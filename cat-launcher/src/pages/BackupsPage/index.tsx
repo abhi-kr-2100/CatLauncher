@@ -49,6 +49,7 @@ function BackupsPage() {
     combinedBackups,
     isLoading: backupsLoading,
     createManualBackup,
+    isCreatingManualBackup,
     deleteBackup,
     restoreBackup,
   } = useCombinedBackups(activeVariant, {
@@ -169,6 +170,7 @@ function BackupsPage() {
         onOpenChange={setNewManualDialogOpen}
         onSave={handleSave}
         variant={activeVariant}
+        isCreating={isCreatingManualBackup}
       />
     </div>
   );

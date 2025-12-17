@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { useThrottle } from "@/hooks/useThrottle";
+import { useThrottleWithCancel } from "@/hooks/useThrottleWithCancel";
 import { toSerializableDownloadProgress } from "@/lib/types";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -49,13 +49,13 @@ export function useInstallAndMonitor<T>(
     ][variant][id];
   });
 
-  const throttledOnProgress = useThrottle(
+  const {
+    throttledFunc: throttledOnProgress,
+    cancel: cancelThrottle,
+  } = useThrottleWithCancel(
     (itemId: string, progress: DownloadProgress) => {
       const serializableProgress =
         toSerializableDownloadProgress(progress);
-      if (serializableProgress.total_bytes === 0) {
-        return;
-      }
 
       dispatch(
         setDownloadProgress({
@@ -96,6 +96,10 @@ export function useInstallAndMonitor<T>(
       onSuccess?.(itemId);
     },
     onSettled: (_data, _error, itemId) => {
+      // Cancel any pending throttled dispatches to prevent setting progress
+      // after installation has completed
+      cancelThrottle();
+
       dispatch(
         clearInstallationProgress({
           variant,

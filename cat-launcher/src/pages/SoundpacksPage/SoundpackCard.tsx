@@ -36,7 +36,7 @@ export default function SoundpackCard({
   const name = getSoundpackName(soundpack);
   const soundpackType = getSoundpackType(soundpack);
 
-  const isThirdParty = soundpack.type !== "Stock";
+  const isThirdParty = soundpack.type === "ThirdParty";
   const soundpackId = soundpack.content.id;
 
   const { installationStatus } =

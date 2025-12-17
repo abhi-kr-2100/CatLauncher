@@ -10,10 +10,10 @@ An opinionated cross-platform launcher for Cataclysm games with modern social fe
 
 - [x] Supports Dark Days Ahead, Bright Nights, and The Last Generation.
 - [x] Works on Windows, macOS, and Linux.
-- [x] Automatic migration of saves, configs, installed mods, soundpacks, and tilesets from your last played game.
+- [x] Supports third-party mods, soundpacks, and tilesets.
+- [x] Automatic migration of saves and configs.
 - [x] Backup and restore saves.
 - [x] Track play time.
-- [ ] Support for third-party soundpacks, tilesets, fonts, and mods.
 - [ ] Share saves with friends and strangers online.
 
 ## Installation
@@ -44,7 +44,7 @@ CatLauncher is 100% open-source and the .dmg is built directly from the source c
 
 Downloading the AppImage is the easiest way to install CatLauncher and keep it automatically up-to-date. However, the AppImage may not work on all Linux distros. It's been tested to work on Ubuntu 24.04.
 
-To use the AppImage, download it, and make it executable by running `chmod a+x cat-launcher_0.8.1_amd64.AppImage`, and then run it like you would any other executable.
+To use the AppImage, download it, and make it executable by running `chmod a+x cat-launcher_0.9.1_amd64.AppImage`, and then run it like you would any other executable.
 
 If you encounter issues with the AppImage, you can try installing CatLauncher using the .deb or the .rpm package. It would also help if you can open an issue on GitHub with details of your distro.
 
