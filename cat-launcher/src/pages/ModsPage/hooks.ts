@@ -11,6 +11,7 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 
 export function useInstallThirdPartyMod(
   variant: GameVariant,
@@ -31,12 +32,10 @@ export function useInstallThirdPartyMod(
     modId,
     installThirdPartyMod,
     (id: string) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.listAll(variant),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.installationStatus(variant, id),
-      });
+      queryClient.setQueryData<ModInstallationStatus>(
+        queryKeys.mods.installationStatus(variant, id),
+        "Installed",
+      );
       onSuccess?.();
     },
     (error: Error) => {
