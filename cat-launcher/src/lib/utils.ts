@@ -71,3 +71,21 @@ export function setImmediateInterval(
 export function getHumanFriendlyText(text: string): string {
   return text.replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
+
+export function formatBytes(bytes: number): [number, string] {
+  if (bytes == 0) {
+    return [0, "B"];
+  }
+
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.min(
+    sizes.length - 1,
+    Math.floor(Math.log(bytes) / Math.log(k)),
+  );
+
+  const number = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
+  const size = sizes[i];
+
+  return [number, size];
+}
