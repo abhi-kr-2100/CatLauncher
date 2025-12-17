@@ -53,9 +53,6 @@ export function useInstallAndMonitor<T>(
     (itemId: string, progress: DownloadProgress) => {
       const serializableProgress =
         toSerializableDownloadProgress(progress);
-      if (serializableProgress.total_bytes === 0) {
-        return;
-      }
 
       dispatch(
         setDownloadProgress({
