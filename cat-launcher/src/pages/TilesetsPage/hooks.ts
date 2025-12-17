@@ -13,6 +13,7 @@ import {
   uninstallThirdPartyTileset,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+import { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 
 export function useInstallAndMonitorThirdPartyTileset(
   variant: GameVariant,
@@ -33,12 +34,10 @@ export function useInstallAndMonitorThirdPartyTileset(
     tilesetId,
     installThirdPartyTileset,
     (id: string) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.listAll(variant),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.tilesets.installationStatus(variant, id),
-      });
+      queryClient.setQueryData<TilesetInstallationStatus>(
+        queryKeys.tilesets.installationStatus(variant, id),
+        "Installed",
+      );
       onSuccess?.();
     },
     (error: Error) => {
