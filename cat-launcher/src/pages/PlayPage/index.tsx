@@ -16,6 +16,7 @@ import {
 
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
+import { appErrorMap } from "@/lib/appErrors";
 import GameVariantCard from "./GameVariantCard";
 
 function PlayPage() {
@@ -27,7 +28,12 @@ function PlayPage() {
     error: gameVariantsErrorObj,
   } = useGameVariants({
     onOrderUpdateError: (error) => {
-      toastCL("error", "Failed to update game variants order", error);
+      toastCL(
+        "error",
+        "Failed to update game variants order",
+        error,
+        appErrorMap,
+      );
     },
   });
 

@@ -19,6 +19,7 @@ import {
   useUninstallThirdPartyMod,
 } from "./hooks";
 import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
+import { modsPageErrorMap } from "./lib/errors";
 
 interface ModCardProps {
   variant: GameVariant;
@@ -67,13 +68,25 @@ export default function ModCard({ variant, mod }: ModCardProps) {
     variant,
     modId,
     () => toastCL("success", "Mod installed successfully."),
-    (error) => toastCL("error", "Failed to install mod.", error),
+    (error) =>
+      toastCL(
+        "error",
+        "Failed to install mod.",
+        error,
+        modsPageErrorMap,
+      ),
   );
 
   const { isUninstalling, uninstall } = useUninstallThirdPartyMod(
     variant,
     () => toastCL("success", "Mod uninstalled successfully."),
-    (error) => toastCL("error", "Failed to uninstall mod.", error),
+    (error) =>
+      toastCL(
+        "error",
+        "Failed to uninstall mod.",
+        error,
+        modsPageErrorMap,
+      ),
   );
 
   const handleInstallClick = () => {

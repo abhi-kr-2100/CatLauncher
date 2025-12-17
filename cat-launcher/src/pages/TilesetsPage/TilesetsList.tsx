@@ -6,6 +6,7 @@ import { toastCL } from "@/lib/utils";
 import TilesetCard from "./TilesetCard";
 import { useListAllTilesets } from "./hooks";
 import { useSearch } from "@/hooks/useSearch";
+import { tilesetsPageErrorMap } from "./lib/errors";
 
 interface TilesetsListProps {
   variant: GameVariant;
@@ -30,7 +31,12 @@ export default function TilesetsList({ variant }: TilesetsListProps) {
 
   useEffect(() => {
     if (error) {
-      toastCL("error", "Failed to load tilesets.", error);
+      toastCL(
+        "error",
+        "Failed to load tilesets.",
+        error,
+        tilesetsPageErrorMap,
+      );
     }
   }, [error]);
 

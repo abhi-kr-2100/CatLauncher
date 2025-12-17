@@ -9,6 +9,7 @@ import {
   type StabilityRating,
 } from "./lib/stabilityRating";
 import { getRelativeTimeDisplay } from "./lib/timeFormatting";
+import { modsPageErrorMap } from "./lib/errors";
 
 interface ModInstallationConfirmationDialogProps {
   open: boolean;
@@ -60,6 +61,7 @@ export function ModInstallationConfirmationDialog({
         "error",
         "Failed to fetch mod stability rating.",
         error,
+        modsPageErrorMap,
       ),
   );
 

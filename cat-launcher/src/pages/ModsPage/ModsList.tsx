@@ -8,6 +8,7 @@ import ModCard from "./ModCard";
 import { useEffect } from "react";
 import { toastCL } from "@/lib/utils";
 import { useSearch } from "@/hooks/useSearch";
+import { modsPageErrorMap } from "./lib/errors";
 
 interface ModsListProps {
   variant: GameVariant;
@@ -40,7 +41,12 @@ export default function ModsList({ variant }: ModsListProps) {
 
   useEffect(() => {
     if (error) {
-      toastCL("error", "Failed to load mods.", error);
+      toastCL(
+        "error",
+        "Failed to load mods.",
+        error,
+        modsPageErrorMap,
+      );
     }
   }, [error]);
 
