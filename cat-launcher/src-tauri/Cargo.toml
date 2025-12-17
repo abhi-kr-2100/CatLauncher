@@ -15,32 +15,32 @@ name = "cat_launcher_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2.5.3", features = [] }
 
 [dependencies]
 cat-macros = { path = "../cat-macros" }
 strum = { version = "0.27.2", features = ["derive"] }
-tauri = { version = "2.8.5", features = [] }
-tauri-plugin-opener = "2"
+tauri = { version = "2.9.5", features = [] }
+tauri-plugin-opener = "2.5.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 thiserror = "2.0.17"
-reqwest = { version = "0.12.23", features = ["json"] }
-ts-rs = "11.0.1"
+reqwest = { version = "0.12.26", features = ["json"] }
+ts-rs = "11.1.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "e6227daac8dbb5ad14011c936031d0d41b8ac4e2" }
 zip = "6.0.0"
-tokio = { version = "1.47.1", features = ["rt-multi-thread", "process", "macros"] }
+tokio = { version = "1.48.0", features = ["rt-multi-thread", "process", "macros"] }
 tar = "0.4.44"
-flate2 = "1.1.4"
-sha2 = "0.10.9"
-regex = "1.12.1"
+flate2 = "1.1.5"
+sha2 = "0.11.0-rc.3"
+regex = "1.12.2"
 dmg = "0.1.2"
 unrar = "0.5.8"
 async-trait = "0.1.89"
-rusqlite = { version = "0.29.0", features = ["bundled"] }
+rusqlite = { version = "0.37.0", features = ["bundled"] }
 r2d2 = "0.8.10"
-r2d2_sqlite = "0.22.0"
+r2d2_sqlite = "0.31.0"
 uuid = { version = "1.19.0", features = ["v4"] }
 posthog-rs = "0.3.7"
 url = "2.5.7"
