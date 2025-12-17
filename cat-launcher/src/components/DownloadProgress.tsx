@@ -1,4 +1,5 @@
 import { Progress } from "@/components/ui/progress";
+import { formatBytes } from "@/lib/utils";
 
 interface DownloadProgressProps {
   downloaded: number;
@@ -10,17 +11,21 @@ export function DownloadProgress({
   total,
 }: DownloadProgressProps) {
   // For some downloads, the total size is not known.
-  const showIndeterminateProgress = total === 0 && downloaded > 0;
+  const isIndeterminate = total === 0 && downloaded > 0;
 
   const progress = total > 0 ? (downloaded * 100) / total : 0;
 
   return (
     <Progress
-      className={"h-9 rounded-md"}
-      value={showIndeterminateProgress ? 0 : progress}
+      className={
+        isIndeterminate
+          ? "h-9 rounded-md animate-pulse"
+          : "h-9 rounded-md"
+      }
+      value={isIndeterminate ? 0 : progress}
     >
-      {showIndeterminateProgress
-        ? "Downloading... This will take a while."
+      {isIndeterminate
+        ? `Downloading... ${formatBytes(downloaded).join(" ")}`
         : "Downloading..."}
     </Progress>
   );
