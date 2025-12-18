@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Lightbulb } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -8,9 +7,9 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { getTips } from "@/lib/commands";
-import { queryKeys } from "@/lib/queryKeys";
 import { randomInt, setImmediateInterval } from "@/lib/utils";
+import { useGetTips } from "./hooks/useGetTips";
+import { NO_TIPS_AVAILABLE } from "./lib/constants";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
 interface TipOfTheDayContentProps {
@@ -36,10 +35,7 @@ interface TipOfTheDayProps {
 }
 
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
-  const { data, status } = useQuery({
-    queryKey: queryKeys.tips(variant),
-    queryFn: async () => getTips(variant),
-  });
+  const { data, status } = useGetTips(variant);
 
   const [randomIndex, setRandomIndex] = useState(0);
 
@@ -71,11 +67,7 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
 
   return (
     <TipOfTheDayContent
-      tip={
-        tips.length === 0
-          ? "Install a game to start getting tips and hints."
-          : tips[randomIndex]
-      }
+      tip={tips.length === 0 ? NO_TIPS_AVAILABLE : tips[randomIndex]}
     />
   );
 }

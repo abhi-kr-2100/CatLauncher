@@ -10,12 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ExternalLink } from "@/components/ui/ExternalLink";
-import { TipOfTheDay } from "@/game-tips/TipOfTheDay";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { useSortableItem } from "@/hooks/useSortableItem";
 import InteractionButton from "./InteractionButton";
 import { PlayTime } from "./PlayTime";
 import ReleaseSelector from "./ReleaseSelector";
+import { TipOfTheDay } from "../game-tips/TipOfTheDay";
 
 export interface GameVariantProps {
   variantInfo: GameVariantInfo;
