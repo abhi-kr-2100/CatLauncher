@@ -1,3 +1,3 @@
 pub mod commands;
-pub mod error;
-pub mod game_tips;
+pub mod lib;
+pub mod types;
