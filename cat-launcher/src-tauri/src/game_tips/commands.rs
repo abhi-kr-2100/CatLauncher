@@ -3,12 +3,12 @@ use tauri::{command, AppHandle, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::game_tips::game_tips::get_all_tips_for_variant;
-use crate::game_tips::game_tips::GetAllTipsForVariantError;
+use crate::game_tips::lib::get_all_tips_for_variant;
+use crate::game_tips::lib::GetAllTipsForVariantError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::variants::GameVariant;
+use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
