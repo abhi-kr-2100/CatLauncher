@@ -14,7 +14,7 @@ import {
   useGetThirdPartySoundpackInstallationStatus,
   useInstallThirdPartySoundpack,
   useUninstallThirdPartySoundpack,
-} from "./hooks";
+} from "../hooks/hooks";
 
 interface SoundpackCardProps {
   variant: GameVariant;

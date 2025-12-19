@@ -14,7 +14,7 @@ import {
   useGetThirdPartyTilesetInstallationStatus,
   useInstallAndMonitorThirdPartyTileset,
   useUninstallThirdPartyTileset,
-} from "./hooks";
+} from "../hooks/hooks";
 
 interface TilesetCardProps {
   variant: GameVariant;

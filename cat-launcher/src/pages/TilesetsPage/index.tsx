@@ -3,7 +3,7 @@ import { useState } from "react";
 import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
-import TilesetsList from "./TilesetsList";
+import TilesetsList from "./components/TilesetsList";
 
 function TilesetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =

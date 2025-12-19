@@ -3,7 +3,7 @@ import { useState } from "react";
 import VariantSelector from "@/components/VariantSelector";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
-import SoundpacksList from "./SoundpacksList";
+import SoundpacksList from "./components/SoundpacksList";
 
 function SoundpacksPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =

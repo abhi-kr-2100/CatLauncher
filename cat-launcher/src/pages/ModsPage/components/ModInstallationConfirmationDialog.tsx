@@ -1,14 +1,14 @@
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { GameVariant } from "@/generated-types/GameVariant";
-import { useGetLastModActivity } from "./hooks";
-import { toastCL } from "@/lib/utils";
+import { useGetLastModActivity } from "../hooks/hooks";
 import {
   getStabilityRating,
   getStabilityLevelLabel,
   type StabilityRating,
-} from "./lib/stabilityRating";
-import { getRelativeTimeDisplay } from "./lib/timeFormatting";
+} from "../lib/stabilityRating";
+import { getRelativeTimeDisplay } from "../lib/timeFormatting";
+import { toastCL } from "@/lib/utils";
 
 interface ModInstallationConfirmationDialogProps {
   open: boolean;

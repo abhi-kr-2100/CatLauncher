@@ -4,7 +4,7 @@ import { SearchInput } from "@/components/SearchInput";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { toastCL } from "@/lib/utils";
 import SoundpackCard from "./SoundpackCard";
-import { useListAllSoundpacks } from "./hooks";
+import { useListAllSoundpacks } from "../hooks/hooks";
 import { useSearch } from "@/hooks/useSearch";
 
 interface SoundpacksListProps {

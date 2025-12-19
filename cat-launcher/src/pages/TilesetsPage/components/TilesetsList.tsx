@@ -4,7 +4,7 @@ import { SearchInput } from "@/components/SearchInput";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { toastCL } from "@/lib/utils";
 import TilesetCard from "./TilesetCard";
-import { useListAllTilesets } from "./hooks";
+import { useListAllTilesets } from "../hooks/hooks";
 import { useSearch } from "@/hooks/useSearch";
 
 interface TilesetsListProps {

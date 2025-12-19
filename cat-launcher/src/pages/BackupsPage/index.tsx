@@ -8,12 +8,14 @@ import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { useSearch } from "@/hooks/useSearch";
 import { toastCL } from "@/lib/utils";
-import BackupFilter, { BackupFilterFn } from "./BackupFilter";
-import { BackupsTable } from "./BackupsTable";
-import { DeleteBackupDialog } from "./DeleteBackupDialog";
-import { NewBackupDialog } from "./NewBackupDialog";
-import { RestoreBackupDialog } from "./RestoreBackupDialog";
-import { CombinedBackup } from "./types/backups";
+import BackupFilter, {
+  BackupFilterFn,
+} from "./components/BackupFilter";
+import { BackupsTable } from "./components/BackupsTable";
+import { DeleteBackupDialog } from "./components/DeleteBackupDialog";
+import { NewBackupDialog } from "./components/NewBackupDialog";
+import { RestoreBackupDialog } from "./components/RestoreBackupDialog";
+import { CombinedBackup } from "./lib/types/backups";
 
 function formatTimestampForSearch(timestamp: bigint): string {
   const date = new Date(Number(timestamp) * 1000);

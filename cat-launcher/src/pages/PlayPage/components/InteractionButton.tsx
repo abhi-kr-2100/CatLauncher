@@ -13,7 +13,7 @@ import {
   useInstallationStatus,
   usePlayGame,
   useResumeLastWorld,
-} from "./hooks";
+} from "../hooks/hooks";
 import { toastCL } from "@/lib/utils";
 import { InstallationProgressStatus } from "@/store/installationProgressSlice";
 

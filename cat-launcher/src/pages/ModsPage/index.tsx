@@ -3,7 +3,7 @@ import { useState } from "react";
 import VariantSelector from "@/components/VariantSelector";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
-import ModsList from "./ModsList";
+import ModsList from "./components/ModsList";
 
 function ModsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =

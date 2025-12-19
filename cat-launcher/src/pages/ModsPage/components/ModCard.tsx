@@ -17,7 +17,7 @@ import {
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
-} from "./hooks";
+} from "../hooks/hooks";
 import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
 
 interface ModCardProps {
