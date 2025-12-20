@@ -13,7 +13,8 @@
     "windows": [
       {
         "title": "CatLauncher",
-        "maximized": true
+        "maximized": true,
+        "backgroundColor": "#1a1a1a"
       }
     ],
     "security": {
