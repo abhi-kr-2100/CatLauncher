@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   useMutation,
   useQuery,
@@ -9,20 +9,44 @@ import type { Theme } from "@/generated-types/Theme";
 import { getPreferredTheme, setPreferredTheme } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+export const THEME_STORAGE_KEY = "cat-launcher-theme";
+
+export function getStoredTheme(): Theme | null {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  return stored === "Dark" || stored === "Light" ? stored : null;
+}
+
+export function setStoredTheme(theme: Theme): void {
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+}
+
+export function applyThemeToDom(theme: Theme): void {
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "Dark");
+  root.style.colorScheme = theme === "Dark" ? "dark" : "light";
+}
+
 export function useTheme(onError?: (error: unknown) => void) {
   const queryClient = useQueryClient();
-  const [currentTheme, setCurrentTheme] = useState<Theme>("Light");
 
   const { data: themePreference, error: fetchError } = useQuery({
     queryKey: queryKeys.themePreference(),
     queryFn: getPreferredTheme,
+    initialData: () => {
+      const theme = getStoredTheme();
+      return theme
+        ? {
+            theme,
+          }
+        : undefined;
+    },
+    staleTime: Infinity,
   });
 
-  useEffect(() => {
-    if (themePreference) {
-      setCurrentTheme(themePreference.theme);
-    }
-  }, [themePreference]);
+  const currentTheme = useMemo(
+    () => themePreference?.theme ?? "Light",
+    [themePreference],
+  );
 
   useEffect(() => {
     if (fetchError && onError) {
@@ -31,16 +55,8 @@ export function useTheme(onError?: (error: unknown) => void) {
   }, [fetchError, onError]);
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (currentTheme === "Dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-
-    root.style.colorScheme =
-      currentTheme === "Dark" ? "dark" : "light";
+    applyThemeToDom(currentTheme);
+    setStoredTheme(currentTheme);
   }, [currentTheme]);
 
   const { mutate: toggleTheme, isPending: isUpdating } = useMutation({
@@ -48,15 +64,11 @@ export function useTheme(onError?: (error: unknown) => void) {
       await setPreferredTheme(newTheme);
       return newTheme;
     },
-    onMutate: () => {
-      const nextTheme = currentTheme === "Dark" ? "Light" : "Dark";
-      setCurrentTheme(nextTheme);
-
+    onMutate: (newTheme) => {
       queryClient.setQueryData(queryKeys.themePreference(), {
-        theme: nextTheme,
+        theme: newTheme,
       });
-
-      return nextTheme;
+      return { newTheme };
     },
     onError: (error) => {
       // Don't revert the theme change even if the update fails.

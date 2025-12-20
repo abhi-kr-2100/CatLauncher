@@ -8,6 +8,18 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Tauri + React + Typescript</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("cat-launcher-theme");
+        const isDark = theme === "Dark";
+        document.documentElement.classList.toggle("dark", isDark);
+        document.documentElement.style.colorScheme = isDark
+          ? "dark"
+          : "light";
+      } catch {
+        // Ignore errors, fall back to light theme
+      }
+    </script>
   </head>
 
   <body>
