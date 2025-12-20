@@ -74,7 +74,7 @@ pub enum ExtractStockModError {
   NoModInfo,
 
   #[error("modinfo missing required field: {0}")]
-  MissingField(String),
+  MissingField(&'static str),
 }
 
 fn extract_stock_mod_from_modinfo(
@@ -94,13 +94,13 @@ fn extract_stock_mod_from_modinfo(
   let id = mod_info
     .get("id")
     .and_then(|i| i.as_str())
-    .ok_or(ExtractStockModError::MissingField("id".to_string()))?
+    .ok_or(ExtractStockModError::MissingField("id"))?
     .to_string();
 
   let name = mod_info
     .get("name")
     .and_then(|n| n.as_str())
-    .ok_or(ExtractStockModError::MissingField("name".to_string()))?
+    .ok_or(ExtractStockModError::MissingField("name"))?
     .to_string();
 
   let description = mod_info
