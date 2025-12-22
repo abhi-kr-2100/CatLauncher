@@ -8,7 +8,7 @@ export default function NavBar() {
   const location = useLocation();
 
   return (
-    <nav className="flex items-center justify-between gap-4 border-b bg-background px-4 py-3">
+    <nav className="flex shrink-0 items-center justify-between gap-4 border-b bg-background px-4 py-3">
       <div className="flex flex-1 items-center justify-center gap-4">
         {routes.map((route) => {
           const Icon = route.icon;

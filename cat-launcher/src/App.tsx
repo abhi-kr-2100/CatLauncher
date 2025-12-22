@@ -5,17 +5,19 @@ import { routes } from "@/routes";
 function App() {
   return (
     <BrowserRouter>
-      <NavBar />
-      <div className="p-2">
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            />
-          ))}
-        </Routes>
+      <div className="flex h-screen flex-col overflow-hidden">
+        <NavBar />
+        <main className="flex-1 overflow-y-auto p-2">
+          <Routes>
+            {routes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
+            ))}
+          </Routes>
+        </main>
       </div>
     </BrowserRouter>
   );
