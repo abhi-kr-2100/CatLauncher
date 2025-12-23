@@ -60,7 +60,7 @@ Always follow the directory structure above when creating a new feature.
 
 * The backend implements Tauri commands which are used by the frontend.
 * Commands should be straightforward and should not perform business logic.
-* Commands should prepare arguments to pass to business logic functions. The entire context or framework-dependent data should not be passed to business logic functions.
+* Commands should prepare arguments to pass to business logic functions. The entire context or framework-dependent data should not be passed to business logic functions, in particular, the Tauri `AppHandle` and `App` objects.
 * Error thrown by command should derive `thiserror::Error`, `Debug`, `IntoStaticStr`, `CommandErrorSerialize`.
 
 ```rust
@@ -132,6 +132,7 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
   - `cat-launcher/src-tauri/src/{feature_name}/lib.rs`: Utilities specific to this feature.
   - `cat-launcher/src-tauri/src/{feature_name}/types.rs`: Enums, structs, and other data types specific to this feature.
   - `cat-launcher/src-tauri/src/{feature_name}/repository`: Repository specific to this feature. It should contain an abstract repository trait and its implementation in two separate files.
+  - `cat-launcher/src-tauri/src/{feature_name}/{business_logic_files}`: Files implementing the business logic used in `commands.rs`.
 
 # Agent Responsibility
 
