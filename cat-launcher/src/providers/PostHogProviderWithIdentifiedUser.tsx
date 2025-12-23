@@ -8,6 +8,7 @@ import { getUserId } from "@/lib/commands";
 const posthogOptions = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: "2025-11-30",
+  persistence: "localStorage",
 } as const;
 
 export interface PostHogProviderWithIdentifiedUserProps {
