@@ -1,4 +1,3 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -9,19 +8,12 @@ import {
 } from "@/components/virtualized-combobox";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import {
-  getActiveRelease,
-  triggerFetchReleasesForVariant,
-} from "@/lib/commands";
-import { queryKeys } from "@/lib/queryKeys";
-import { cn, toastCL } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  FetchStatus,
-  onFetchingReleasesFailed,
-  startFetchingReleases,
-} from "@/store/releasesSlice";
-import { useReleaseEvents } from "./hooks";
+import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/store/hooks";
+import { FetchStatus } from "@/store/releasesSlice";
+import { useActiveRelease } from "../hooks/useActiveRelease";
+import { useReleaseEvents } from "../hooks/useReleaseEvents";
+import { useTriggerFetchReleases } from "../hooks/useTriggerFetchReleases";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 
@@ -32,8 +24,6 @@ export default function ReleaseSelector({
 }: ReleaseSelectorProps) {
   useReleaseEvents();
 
-  const dispatch = useAppDispatch();
-
   const releases = useAppSelector(
     (state) => state.releases.releasesByVariant[variant],
   );
@@ -41,23 +31,8 @@ export default function ReleaseSelector({
     (state) => state.releases.fetchStatusByVariant[variant],
   );
 
-  const {
-    mutate: triggerFetchReleases,
-    isPending: isReleasesTriggerLoading,
-  } = useMutation({
-    mutationFn: triggerFetchReleasesForVariant,
-    onMutate: (variant: GameVariant) => {
-      dispatch(startFetchingReleases({ variant }));
-    },
-    onError: (error: unknown, variant) => {
-      dispatch(onFetchingReleasesFailed({ variant }));
-      toastCL(
-        "error",
-        `Failed to fetch releases for ${variant}.`,
-        error,
-      );
-    },
-  });
+  const { triggerFetchReleases, isReleasesTriggerLoading } =
+    useTriggerFetchReleases();
 
   useEffect(() => {
     // Fetch only if we don't have releases yet. Don't trigger fetch even if
@@ -71,25 +46,10 @@ export default function ReleaseSelector({
   }, [variant, triggerFetchReleases, releases.length]);
 
   const {
-    data: activeRelease,
-    isLoading: isActiveReleaseLoading,
-    error: activeReleaseError,
-  } = useQuery<string | undefined>({
-    queryKey: queryKeys.activeRelease(variant),
-    queryFn: () => getActiveRelease(variant),
-  });
-
-  useEffect(() => {
-    if (!activeReleaseError) {
-      return;
-    }
-
-    toastCL(
-      "warning",
-      `Failed to get active release of ${variant}.`,
-      activeReleaseError,
-    );
-  }, [activeReleaseError, variant]);
+    activeRelease,
+    isActiveReleaseLoading,
+    activeReleaseError,
+  } = useActiveRelease(variant);
 
   const [appliedFilter, setAppliedFilter] = useState<FilterFn>(
     () => (_r: GameRelease) => true,

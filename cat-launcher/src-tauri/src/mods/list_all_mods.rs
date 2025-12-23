@@ -4,9 +4,7 @@ use std::path::Path;
 
 use tokio::fs::{read_dir, read_to_string};
 
-use crate::active_release::repository::{
-  ActiveReleaseRepository, ActiveReleaseRepositoryError,
-};
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::infra::utils::{sort_assets, OS};
 use crate::mods::paths::{
   get_mods_resource_path, get_stock_mods_dir, GetStockModsDirError,
@@ -23,7 +21,9 @@ pub enum ListAllModsError {
   ExtractStockMod(#[from] ListAllStockModsError),
 
   #[error("failed to get active release: {0}")]
-  GetActiveRelease(#[from] ActiveReleaseRepositoryError),
+  GetActiveRelease(
+    #[from] crate::active_release::repository::GetActiveReleaseError,
+  ),
 
   #[error("failed to list third-party mods: {0}")]
   ListThirdPartyMods(#[from] ListThirdPartyModsError),
