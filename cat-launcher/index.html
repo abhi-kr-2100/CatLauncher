@@ -7,8 +7,22 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'nonce-__VITE_NONCE__' https://*.posthog.com;
+        connect-src 'self' https://*.posthog.com;
+        worker-src 'self' blob: data:;
+        img-src 'self' https://*.posthog.com;
+        style-src 'self' https://*.posthog.com;
+        font-src https://*.posthog.com;
+        media-src https://*.posthog.com;
+        frame-ancestors 'self' https://*.posthog.com;
+      "
+    />
     <title>Tauri + React + Typescript</title>
-    <script>
+    <script nonce="__VITE_NONCE__">
       try {
         const theme = localStorage.getItem("cat-launcher-theme");
         const isDark = theme === "Dark";
