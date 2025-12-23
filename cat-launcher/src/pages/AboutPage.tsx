@@ -1,4 +1,4 @@
-import pkg from "../../../package.json";
+import pkg from "../../package.json";
 import { openLink } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 

@@ -15,7 +15,7 @@ import { useSortableItem } from "@/hooks/useSortableItem";
 import InteractionButton from "./InteractionButton";
 import { PlayTime } from "./PlayTime";
 import ReleaseSelector from "./ReleaseSelector";
-import { TipOfTheDay } from "../GameTipsPage/TipOfTheDay";
+import { TipOfTheDay } from "../game-tips/TipOfTheDay";
 
 export interface GameVariantProps {
   variantInfo: GameVariantInfo;

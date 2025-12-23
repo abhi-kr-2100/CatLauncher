@@ -1,9 +1,5 @@
 use std::path::Path;
 
-use crate::backups::repository::{
-  BackupRepository, BackupRepositoryError,
-};
-use crate::backups::types::BackupEntry;
 use crate::filesystem::paths::{
   get_or_create_automatic_backup_archive_filepath,
   get_or_create_user_game_data_dir,
@@ -11,6 +7,9 @@ use crate::filesystem::paths::{
 };
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::utils::OS;
+use crate::launch_game::repository::{
+  BackupRepository, BackupRepositoryError,
+};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -22,7 +21,10 @@ pub enum ListBackupsError {
 pub async fn list_backups(
   game_variant: &GameVariant,
   backup_repository: &impl BackupRepository,
-) -> Result<Vec<BackupEntry>, ListBackupsError> {
+) -> Result<
+  Vec<crate::launch_game::repository::BackupEntry>,
+  ListBackupsError,
+> {
   let backups = backup_repository
     .get_backups_sorted_by_timestamp(game_variant)
     .await?;

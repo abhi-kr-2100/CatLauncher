@@ -11,9 +11,6 @@ use tokio::task::JoinSet;
 use ts_rs::TS;
 
 use crate::active_release::repository::ActiveReleaseRepository;
-use crate::backups::repository::{
-  BackupRepository, BackupRepositoryError,
-};
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
   get_game_executable_filepath,
@@ -27,6 +24,9 @@ use crate::game_release::utils::{
   get_release_by_id, GetReleaseError,
 };
 use crate::infra::utils::OS;
+use crate::launch_game::repository::{
+  BackupRepository, BackupRepositoryError,
+};
 use crate::launch_game::utils::{backup_save_files, BackupError};
 use crate::play_time::repository::PlayTimeRepository;
 use crate::settings::Settings;

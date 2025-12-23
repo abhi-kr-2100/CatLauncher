@@ -1,9 +1,17 @@
-pub mod sqlite;
-
 use async_trait::async_trait;
+use serde::Serialize;
+use ts_rs::TS;
 
-use crate::backups::types::BackupEntry;
 use crate::variants::GameVariant;
+
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
+pub struct BackupEntry {
+  pub id: i64,
+  pub game_variant: GameVariant,
+  pub release_version: String,
+  pub timestamp: u64,
+}
 
 #[derive(thiserror::Error, Debug)]
 pub enum BackupRepositoryError {
