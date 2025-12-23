@@ -19,8 +19,9 @@
     "*.{ts,tsx,js,jsx,json,css,md}": [
       "prettier --write"
     ],
-    "*.{ts,tsx}": [
-      "eslint --fix --max-warnings 0 && pnpm tsc --noEmit"
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0",
+      "sh -c 'tsc --noEmit'"
     ],
     "src-tauri/src/**/*.rs": [
       "sh -c 'cd src-tauri && cargo fmt --all'",
