@@ -15,6 +15,7 @@ export default [
       ".tauri",
       "coverage",
       "*.min.js",
+      "src-tauri",
     ],
   },
   {
