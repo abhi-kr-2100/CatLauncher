@@ -9,7 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "eslint . --max-warnings 0 && cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings",
+    "lint": "eslint . --max-warnings 0 && pnpm tsc --noEmit && cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings",
     "lint:fix": "eslint . --fix && cargo clippy --manifest-path ./src-tauri/Cargo.toml --fix --allow-dirty",
     "format": "prettier --write . && cargo fmt --manifest-path ./src-tauri/Cargo.toml",
     "format:check": "prettier --check . && cargo fmt --manifest-path ./src-tauri/Cargo.toml -- --check",
@@ -20,7 +20,7 @@
       "prettier --write"
     ],
     "*.{ts,tsx}": [
-      "eslint --fix --max-warnings 0"
+      "eslint --fix --max-warnings 0 && pnpm tsc --noEmit"
     ],
     "src-tauri/src/**/*.rs": [
       "sh -c 'cd src-tauri && cargo fmt --all'",
