@@ -1,8 +1,6 @@
 use thiserror::Error;
 
-use crate::active_release::repository::{
-  ActiveReleaseRepository, ActiveReleaseRepositoryError,
-};
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::{
   ReleasesRepository, ReleasesRepositoryError,
 };
@@ -27,7 +25,9 @@ pub enum GetAllTipsForVariantError {
   SerdeJson(#[from] serde_json::Error),
 
   #[error("failed to get active release: {0}")]
-  GetActiveRelease(#[from] ActiveReleaseRepositoryError),
+  GetActiveRelease(
+    #[from] crate::active_release::repository::GetActiveReleaseError,
+  ),
 
   #[error("tokio io error: {0}")]
   Tokio(#[from] tokio::io::Error),

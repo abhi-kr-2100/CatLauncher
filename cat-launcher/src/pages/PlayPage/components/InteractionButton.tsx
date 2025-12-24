@@ -8,12 +8,10 @@ import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useAppSelector } from "@/store/hooks";
 import { DownloadProgress } from "@/components/DownloadProgress";
-import {
-  useInstallAndMonitorRelease,
-  useInstallationStatus,
-  usePlayGame,
-  useResumeLastWorld,
-} from "./hooks";
+import { useInstallAndMonitorRelease } from "../hooks/useInstallAndMonitorRelease";
+import { useInstallationStatus } from "../hooks/useInstallationStatus";
+import { usePlayGame } from "../hooks/usePlayGame";
+import { useResumeLastWorld } from "../hooks/useResumeLastWorld";
 import { toastCL } from "@/lib/utils";
 import { InstallationProgressStatus } from "@/store/installationProgressSlice";
 

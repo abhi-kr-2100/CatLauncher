@@ -6,9 +6,7 @@ use tokio::fs::File;
 use tokio::fs::{read_dir, read_to_string};
 use tokio::io::{AsyncBufReadExt, BufReader};
 
-use crate::active_release::repository::{
-  ActiveReleaseRepository, ActiveReleaseRepositoryError,
-};
+use crate::active_release::repository::ActiveReleaseRepository;
 use crate::infra::utils::{sort_assets, OS};
 use crate::soundpacks::paths::{
   get_soundpacks_resource_path, get_stock_soundpacks_dir,
@@ -28,7 +26,9 @@ pub enum ListAllSoundpacksError {
   ExtractStockSoundpack(#[from] ListAllStockSoundpacksError),
 
   #[error("failed to get active release: {0}")]
-  GetActiveRelease(#[from] ActiveReleaseRepositoryError),
+  GetActiveRelease(
+    #[from] crate::active_release::repository::GetActiveReleaseError,
+  ),
 
   #[error("failed to list third-party soundpacks: {0}")]
   ListThirdPartySoundpacks(#[from] ListThirdPartySoundpacksError),

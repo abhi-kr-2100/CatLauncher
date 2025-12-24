@@ -2,7 +2,7 @@ import { HTMLAttributes } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { cn } from "@/lib/utils";
-import { usePlayTime } from "./hooks";
+import { usePlayTime } from "../hooks/usePlayTime";
 
 interface PlayTimeProps extends HTMLAttributes<HTMLDivElement> {
   variant: GameVariant;
