@@ -137,4 +137,4 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 # Agent Responsibility
 
 * At the end of each task, run the Verification commands to ensure correctness.
-* Run `git log` to check the recent commit history. If the last commit is related to GitButler, do nothing. Otherwise, either create a new commit or amend/squash previous commits.
+* Run `git branch --show-current` to find the current branch name. If current branch is not `main`, `release`, or `gitbutler/workspace`, commit the changes with an appropriate commit message.
