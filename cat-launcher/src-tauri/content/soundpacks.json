@@ -11,6 +11,18 @@
         "activity_type": "github_commit",
         "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
       }
+    },
+    "black-edition-soundpack": {
+      "id": "black-edition-soundpack",
+      "name": "Bl@ck Edition",
+      "installation": {
+        "download_url": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack/archive/refs/heads/master.zip",
+        "soundpack": "Bl-ck-Edition-Soundpack-master/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack"
+      }
     }
   },
 
@@ -26,6 +38,18 @@
         "activity_type": "github_commit",
         "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
       }
+    },
+    "black-edition-soundpack": {
+      "id": "black-edition-soundpack",
+      "name": "Bl@ck Edition",
+      "installation": {
+        "download_url": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack/archive/refs/heads/master.zip",
+        "soundpack": "Bl-ck-Edition-Soundpack-master/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack"
+      }
     }
   },
 
@@ -40,6 +64,18 @@
       "activity": {
         "activity_type": "github_commit",
         "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
+      }
+    },
+    "black-edition-soundpack": {
+      "id": "black-edition-soundpack",
+      "name": "Bl@ck Edition",
+      "installation": {
+        "download_url": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack/archive/refs/heads/master.zip",
+        "soundpack": "Bl-ck-Edition-Soundpack-master/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack"
       }
     }
   }
