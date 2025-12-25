@@ -1,9 +1,12 @@
+pub mod bright_nights;
 pub mod commands;
+pub mod fetch_mods;
 pub mod get_last_activity_for_third_party_mod;
 pub mod get_third_party_mod_by_id;
 pub mod get_third_party_mod_installation_status;
 pub mod install_third_party_mod;
-pub mod list_all_mods;
+pub mod list_all_local_mods;
+pub mod list_third_party_mods_from_resource;
 pub mod paths;
 pub mod repository;
 pub mod types;

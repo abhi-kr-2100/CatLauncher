@@ -9,9 +9,9 @@ import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
-import type { Mod } from "@/generated-types/Mod";
-import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { LastModActivity } from "@/generated-types/LastModActivity";
+import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
+import type { ModsUpdatePayload } from "@/generated-types/ModsUpdatePayload";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
@@ -30,6 +30,14 @@ export async function listenToReleasesUpdate(
       onUpdate(event.payload);
     },
   );
+}
+
+export async function listenToModsUpdate(
+  onUpdate: (payload: ModsUpdatePayload) => void,
+) {
+  return await listen<ModsUpdatePayload>("mods-update", (event) => {
+    onUpdate(event.payload);
+  });
 }
 
 export async function listenToAutoupdateStatus(
@@ -56,6 +64,14 @@ export async function triggerFetchReleasesForVariant(
   variant: GameVariant,
 ): Promise<void> {
   await invoke("fetch_releases_for_variant", {
+    variant,
+  });
+}
+
+export async function triggerFetchModsForVariant(
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("fetch_mods_for_variant", {
     variant,
   });
 }
@@ -260,15 +276,6 @@ export async function setPreferredTheme(theme: Theme): Promise<void> {
 
 export async function getUserId(): Promise<string> {
   const response = await invoke<string>("get_user_id");
-  return response;
-}
-
-export async function listAllMods(
-  variant: GameVariant,
-): Promise<Mod[]> {
-  const response = await invoke<Mod[]>("list_all_mods_command", {
-    variant,
-  });
   return response;
 }
 

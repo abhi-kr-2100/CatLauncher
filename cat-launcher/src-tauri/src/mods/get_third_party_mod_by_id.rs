@@ -1,36 +1,27 @@
-use std::path::Path;
-
-use crate::mods::list_all_mods::{
-  list_all_third_party_mods, ListThirdPartyModsError,
+use crate::mods::repository::cached_mods_repository::{
+  CachedModsRepository, CachedModsRepositoryError,
 };
 use crate::mods::types::ThirdPartyMod;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetThirdPartyModByIdError {
-  #[error("failed to list third-party mods: {0}")]
-  ListThirdPartyMods(#[from] ListThirdPartyModsError),
+  #[error("failed to read cached mods: {0}")]
+  Repository(#[from] CachedModsRepositoryError),
 
-  #[error("mod not found")]
-  ModNotFound,
+  #[error("mod not found: {0}")]
+  ModNotFound(String),
 }
 
 pub async fn get_third_party_mod_by_id(
   mod_id: &str,
   variant: &GameVariant,
-  resource_dir: &Path,
+  cached_mods_repository: &dyn CachedModsRepository,
 ) -> Result<ThirdPartyMod, GetThirdPartyModByIdError> {
-  let mods = list_all_third_party_mods(variant, resource_dir).await?;
-
-  mods
-    .iter()
-    .find_map(|m| match m {
-      crate::mods::types::Mod::ThirdParty(third_party_mod)
-        if third_party_mod.id == mod_id =>
-      {
-        Some(third_party_mod.clone())
-      }
-      _ => None,
+  cached_mods_repository
+    .get_cached_mod_by_id(variant, mod_id)
+    .await?
+    .ok_or_else(|| {
+      GetThirdPartyModByIdError::ModNotFound(mod_id.to_string())
     })
-    .ok_or(GetThirdPartyModByIdError::ModNotFound)
 }

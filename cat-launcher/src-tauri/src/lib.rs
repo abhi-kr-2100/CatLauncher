@@ -36,10 +36,10 @@ use crate::manual_backups::commands::{
   list_manual_backups_for_variant, restore_manual_backup_by_id,
 };
 use crate::mods::commands::{
+  fetch_mods_for_variant,
   get_last_activity_on_third_party_mod_command,
   get_third_party_mod_installation_status_command,
-  install_third_party_mod_command, list_all_mods_command,
-  uninstall_third_party_mod_command,
+  install_third_party_mod_command, uninstall_third_party_mod_command,
 };
 use crate::play_time::commands::{
   get_play_time_for_variant, get_play_time_for_version,
@@ -101,7 +101,7 @@ pub fn run() {
       create_manual_backup_for_variant,
       delete_manual_backup_by_id,
       restore_manual_backup_by_id,
-      list_all_mods_command,
+      fetch_mods_for_variant,
       install_third_party_mod_command,
       uninstall_third_party_mod_command,
       get_third_party_mod_installation_status_command,

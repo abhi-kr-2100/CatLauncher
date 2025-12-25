@@ -1,10 +1,9 @@
-use std::collections::HashMap;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use downloader::progress::Reporter;
-use tokio::fs::{create_dir_all, read_to_string};
+use tokio::fs::create_dir_all;
 
 use crate::filesystem::paths::{
   get_or_create_directory, get_or_create_user_game_data_dir,
@@ -14,17 +13,19 @@ use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::download::{DownloadFileError, Downloader};
 use crate::infra::utils::OS;
-use crate::mods::paths::get_mods_resource_path;
+use crate::mods::get_third_party_mod_by_id::{
+  get_third_party_mod_by_id, GetThirdPartyModByIdError,
+};
+use crate::mods::repository::cached_mods_repository::CachedModsRepository;
 use crate::mods::repository::installed_mods_repository::{
   InstalledModsRepository, InstalledModsRepositoryError,
 };
-use crate::mods::types::ThirdPartyMod;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum InstallThirdPartyModError {
-  #[error("failed to get mod from mods.json: {0}")]
-  GetModFromJson(#[from] GetModFromJsonError),
+  #[error("failed to get mod details: {0}")]
+  GetMod(#[from] GetThirdPartyModByIdError),
 
   #[error("failed to create directory: {0}")]
   CreateDirectory(#[from] io::Error),
@@ -56,15 +57,19 @@ pub async fn install_third_party_mod(
   mod_id: &str,
   game_variant: &GameVariant,
   data_dir: &Path,
-  resource_dir: &Path,
   temp_dir: &Path,
   os: &OS,
   downloader: &Downloader,
-  repository: &impl InstalledModsRepository,
+  installed_mods_repository: &impl InstalledModsRepository,
+  cached_mods_repository: &dyn CachedModsRepository,
   reporter: Arc<dyn Reporter + Send + Sync>,
 ) -> Result<(), InstallThirdPartyModError> {
-  let mod_details =
-    get_mod_from_json(game_variant, mod_id, resource_dir).await?;
+  let mod_details = get_third_party_mod_by_id(
+    mod_id,
+    game_variant,
+    cached_mods_repository,
+  )
+  .await?;
 
   let mod_temp_dir =
     temp_dir.join("cat-launcher-mod-install-dir").join(mod_id);
@@ -97,51 +102,11 @@ pub async fn install_third_party_mod(
 
   let _ = tokio::fs::remove_dir_all(&mod_temp_dir).await;
 
-  repository.add_installed_mod(mod_id, game_variant).await?;
+  installed_mods_repository
+    .add_installed_mod(mod_id, game_variant)
+    .await?;
 
   Ok(())
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum GetModFromJsonError {
-  #[error("failed to read mods.json: {0}")]
-  ReadModInfoJson(#[from] std::io::Error),
-
-  #[error("failed to parse mods.json: {0}")]
-  ParseModInfoJson(#[from] serde_json::Error),
-
-  #[error("no mods found for variant {0}")]
-  NoModsForVariant(GameVariant),
-
-  #[error("mod with id {0} not found")]
-  ModNotFound(String),
-}
-
-async fn get_mod_from_json(
-  game_variant: &GameVariant,
-  mod_id: &str,
-  resource_dir: &Path,
-) -> Result<ThirdPartyMod, GetModFromJsonError> {
-  let mods_json_path = get_mods_resource_path(resource_dir);
-  let content = read_to_string(&mods_json_path).await?;
-
-  let mods_data: HashMap<
-    GameVariant,
-    HashMap<String, serde_json::Value>,
-  > = serde_json::from_str(&content)?;
-
-  let variant_mods = mods_data
-    .get(game_variant)
-    .ok_or(GetModFromJsonError::NoModsForVariant(*game_variant))?;
-
-  let mod_data = variant_mods
-    .get(mod_id)
-    .ok_or(GetModFromJsonError::ModNotFound(mod_id.to_string()))?;
-
-  let third_party_mod =
-    serde_json::from_value::<ThirdPartyMod>(mod_data.clone())?;
-
-  Ok(third_party_mod)
 }
 
 #[derive(Debug, thiserror::Error)]

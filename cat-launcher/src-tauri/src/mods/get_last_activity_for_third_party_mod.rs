@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -11,6 +9,7 @@ use crate::infra::github::get_last_commit::{
 use crate::mods::get_third_party_mod_by_id::{
   get_third_party_mod_by_id, GetThirdPartyModByIdError,
 };
+use crate::mods::repository::cached_mods_repository::CachedModsRepository;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -42,9 +41,6 @@ fn extract_repo(url_str: &str) -> Option<String> {
     .split('/')
     .collect();
 
-  // GitHub URLs have at least 3 parts: [owner, repo, ...rest]
-  // We want the first two parts only, ignoring any extra path segments
-  // like /tree/main, /issues, etc.
   if parts.len() >= 2 {
     let owner = parts[0];
     let repo = parts[1];
@@ -62,11 +58,15 @@ fn extract_repo(url_str: &str) -> Option<String> {
 pub async fn get_last_activity_for_third_party_mod(
   mod_id: &str,
   variant: &GameVariant,
-  resource_dir: &Path,
   client: &Client,
+  cached_mods_repository: &dyn CachedModsRepository,
 ) -> Result<LastModActivity, GetLastActivityError> {
-  let mod_data =
-    get_third_party_mod_by_id(mod_id, variant, resource_dir).await?;
+  let mod_data = get_third_party_mod_by_id(
+    mod_id,
+    variant,
+    cached_mods_repository,
+  )
+  .await?;
 
   let github_url = mod_data.activity.github;
 

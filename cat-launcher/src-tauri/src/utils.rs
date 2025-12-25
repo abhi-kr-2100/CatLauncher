@@ -18,6 +18,7 @@ use crate::infra::repository::db_schema::InitializeSchemaError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
+use crate::mods::repository::sqlite_cached_mods_repository::SqliteCachedModsRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
@@ -111,6 +112,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
   app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
   app.manage(SqliteInstalledModsRepository::new(pool.clone()));
+  app.manage(SqliteCachedModsRepository::new(pool.clone()));
   app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
   app.manage(SqliteInstalledSoundpacksRepository::new(pool.clone()));
   app.manage(SqliteUsersRepository::new(pool));

@@ -118,6 +118,26 @@ CREATE TABLE IF NOT EXISTS installed_mods (
 
 CREATE INDEX IF NOT EXISTS idx_installed_mods_game_variant ON installed_mods (game_variant);
 
+-- This table stores cached third-party mods for each game variant.
+--
+-- It contains third-party mod metadata (both local mods.json mods and fetched online mods).
+-- Stock mods are intentionally not included.
+CREATE TABLE IF NOT EXISTS cached_mods (
+    mod_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    download_url TEXT NOT NULL,
+    modinfo TEXT NOT NULL,
+    activity_type TEXT NOT NULL,
+    github TEXT NOT NULL,
+    PRIMARY KEY (mod_id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_cached_mods_game_variant ON cached_mods (game_variant);
+
 -- This table stores installed tilesets for each game variant.
 CREATE TABLE IF NOT EXISTS installed_tilesets (
     tileset_id TEXT NOT NULL,
