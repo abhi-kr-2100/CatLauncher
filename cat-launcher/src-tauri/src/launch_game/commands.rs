@@ -74,7 +74,7 @@ pub async fn launch_game(
     play_time_repository.inner().clone(),
     &*active_release_repository,
     on_game_event,
-    &settings,
+    settings.inner(),
   )
   .await?;
 

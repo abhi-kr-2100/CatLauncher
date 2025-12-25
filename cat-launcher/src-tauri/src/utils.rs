@@ -20,8 +20,9 @@ use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupReposi
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::settings::Settings;
+use crate::settings::settings::Settings;
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
+
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
@@ -29,7 +30,7 @@ use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 
 #[derive(thiserror::Error, Debug)]
-pub enum SettingsError {
+pub enum ManageSettingsError {
   #[error("failed to get system directory: {0}")]
   SystemDir(#[from] tauri::Error),
 
@@ -40,16 +41,13 @@ pub enum SettingsError {
   Parse(#[from] serde_json::Error),
 }
 
-pub fn manage_settings(app: &App) -> Result<(), SettingsError> {
+pub fn manage_settings(app: &App) -> Result<(), ManageSettingsError> {
+  let _handle = app.handle().clone();
   let resource_dir = app.path().resource_dir()?;
   let settings_path = get_settings_path(&resource_dir);
+  let data_dir = app.path().app_local_data_dir()?;
 
-  let settings = match fs::read_to_string(&settings_path) {
-    Ok(contents) => {
-      serde_json::from_str(&contents).unwrap_or_default()
-    }
-    Err(_) => Settings::default(),
-  };
+  let settings = Settings::new(settings_path, data_dir);
 
   app.manage(settings);
 
@@ -175,10 +173,16 @@ async fn migrate_to_local_data_dir_impl(
 pub fn manage_downloader(app: &App) {
   let settings: tauri::State<Settings> = app.state();
   let client: tauri::State<reqwest::Client> = app.state();
-  let downloader = Downloader::new(
-    client.inner().clone(),
-    settings.parallel_requests,
-  );
+  let parallel_requests = tokio::task::block_in_place(|| {
+    tokio::runtime::Handle::current().block_on(async {
+      settings
+        .parallel_requests()
+        .await
+        .unwrap_or(std::num::NonZeroU16::new(4).unwrap())
+    })
+  });
+  let downloader =
+    Downloader::new(client.inner().clone(), parallel_requests);
   app.manage(downloader);
 }
 

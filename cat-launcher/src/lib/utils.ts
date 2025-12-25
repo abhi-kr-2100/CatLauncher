@@ -1,4 +1,5 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { relaunch } from "@tauri-apps/plugin-process";
 import clsx, { type ClassValue } from "clsx";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
@@ -88,4 +89,8 @@ export function formatBytes(bytes: number): [number, string] {
   const size = sizes[i];
 
   return [number, size];
+}
+
+export async function restartApp() {
+  await relaunch();
 }

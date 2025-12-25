@@ -421,3 +421,38 @@ pub async fn get_or_create_directory(
 
   Ok(dir_path)
 }
+
+pub fn get_system_font_dirs(os: &OS) -> Vec<PathBuf> {
+  match os {
+    OS::Windows => {
+      let windows_dir = std::env::var("WINDIR")
+        .unwrap_or_else(|_| "C:\\Windows".to_string());
+      vec![PathBuf::from(windows_dir).join("Fonts")]
+    }
+    OS::Mac => {
+      let mut dirs = vec![
+        PathBuf::from("/Library/Fonts"),
+        PathBuf::from("/System/Library/Fonts"),
+      ];
+
+      if let Ok(home) = std::env::var("HOME") {
+        dirs.push(PathBuf::from(home).join("Library").join("Fonts"));
+      }
+
+      dirs
+    }
+    OS::Linux => {
+      let mut dirs = vec![
+        PathBuf::from("/usr/share/fonts"),
+        PathBuf::from("/usr/local/share/fonts"),
+      ];
+
+      if let Ok(home) = std::env::var("HOME") {
+        dirs.push(PathBuf::from(&home).join(".fonts"));
+        dirs.push(PathBuf::from(&home).join(".local/share/fonts"));
+      }
+
+      dirs
+    }
+  }
+}

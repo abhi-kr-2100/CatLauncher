@@ -1,10 +1,8 @@
-pub mod constants;
-pub mod filesystem;
-pub mod settings;
-
 pub mod active_release;
 mod backups;
+pub mod constants;
 mod fetch_releases;
+pub mod filesystem;
 mod game_release;
 mod game_tips;
 mod infra;
@@ -14,6 +12,7 @@ mod launch_game;
 mod manual_backups;
 mod mods;
 mod play_time;
+pub mod settings;
 mod soundpacks;
 mod theme;
 mod tilesets;
@@ -44,6 +43,10 @@ use crate::mods::commands::{
 use crate::play_time::commands::{
   get_play_time_for_variant, get_play_time_for_version,
 };
+use crate::settings::commands::{
+  apply_settings_command, get_settings_command, list_fonts_command,
+  list_themes_command,
+};
 use crate::soundpacks::commands::{
   get_third_party_soundpack_installation_status_command,
   install_third_party_soundpack_command, list_all_soundpacks_command,
@@ -70,6 +73,7 @@ pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_opener::init())
+    .plugin(tauri_plugin_process::init())
     .setup(|app| {
       manage_settings(app)?;
       manage_http_client(app);
@@ -118,6 +122,10 @@ pub fn run() {
       get_preferred_theme,
       set_preferred_theme,
       get_last_played_world,
+      get_settings_command,
+      list_fonts_command,
+      list_themes_command,
+      apply_settings_command,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

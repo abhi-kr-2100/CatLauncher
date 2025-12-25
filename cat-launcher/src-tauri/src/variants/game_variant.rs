@@ -33,20 +33,24 @@ impl GameVariant {
     self.into()
   }
 
-  pub fn name<'a>(&self, settings: &'a Settings) -> &'a str {
+  pub async fn name(&self, settings: &Settings) -> String {
     settings
-      .games
+      .games()
+      .await
+      .unwrap_or_default()
       .get(self.id())
-      .map(|variant_settings| variant_settings.name.as_str())
-      .unwrap_or_else(|| self.id())
+      .map(|variant_settings| variant_settings.name.clone())
+      .unwrap_or_else(|| self.id().to_string())
   }
 
-  pub fn links<'a>(&self, settings: &'a Settings) -> &'a [Link] {
+  pub async fn links(&self, settings: &Settings) -> Vec<Link> {
     settings
-      .games
+      .games()
+      .await
+      .unwrap_or_default()
       .get(self.id())
-      .map(|variant_settings| variant_settings.links.as_slice())
-      .unwrap_or_else(|| &[])
+      .map(|variant_settings| variant_settings.links.clone())
+      .unwrap_or_default()
   }
 
   pub fn determine_release_type(

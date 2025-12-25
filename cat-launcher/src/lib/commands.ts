@@ -17,6 +17,10 @@ import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
+import type { ColorTheme } from "@/generated-types/ColorTheme";
+import type { ThemeColors } from "@/generated-types/ThemeColors";
+import type { Font } from "@/generated-types/Font";
+import type { SettingsData } from "@/generated-types/SettingsData";
 import type { Soundpack } from "@/generated-types/Soundpack";
 import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
@@ -430,5 +434,34 @@ export async function uninstallThirdPartySoundpack(
   await invoke("uninstall_third_party_soundpack_command", {
     id: soundpackId,
     variant: variant,
+  });
+}
+
+export async function getSettings(): Promise<SettingsData> {
+  const response = await invoke<SettingsData>("get_settings_command");
+  return response;
+}
+
+export async function listFonts(): Promise<Font[]> {
+  const response = await invoke<Font[]>("list_fonts_command");
+  return response;
+}
+
+export async function listThemes(): Promise<ColorTheme[]> {
+  const response = await invoke<ColorTheme[]>("list_themes_command");
+  return response;
+}
+
+export async function applySettings(
+  maxBackups: number,
+  parallelRequests: number,
+  fontLocation?: string,
+  themeColors?: ThemeColors,
+): Promise<void> {
+  await invoke("apply_settings_command", {
+    maxBackups: maxBackups,
+    parallelRequests: parallelRequests,
+    fontLocation: fontLocation,
+    themeColors: themeColors,
   });
 }
