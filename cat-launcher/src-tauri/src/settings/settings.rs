@@ -3,7 +3,7 @@ use std::num::NonZeroU16;
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
-use strum::IntoEnumIterator;
+use strum::{IntoEnumIterator, IntoStaticStr};
 use ts_rs::TS;
 
 use crate::constants::{
@@ -13,8 +13,9 @@ use crate::constants::{
 use crate::filesystem::paths::{
   get_or_create_user_game_data_dir, GetUserGameDataDirError,
 };
-use crate::settings::apply_settings::SettingsUpdateError;
-use crate::settings::{ColorDefWrapper, FontsConfig, ThemeColors};
+use crate::settings::{
+  ColorDefWrapper, FontsConfig, GameSettings, ThemeColors,
+};
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -26,7 +27,7 @@ pub struct SettingsData {
   #[ts(type = "number")]
   pub parallel_requests: NonZeroU16,
 
-  pub games: HashMap<String, crate::settings::GameSettings>,
+  pub games: HashMap<String, GameSettings>,
 
   #[ts(optional)]
   pub font: Option<String>,
@@ -64,6 +65,24 @@ pub enum SettingsError {
 
   #[error("failed to get user game data dir: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
+
+  #[error("invalid font path: {0}")]
+  InvalidFontPath(String),
+}
+
+#[derive(thiserror::Error, Debug, IntoStaticStr)]
+pub enum SettingsUpdateError {
+  #[error("max_backups must be between 0 and 20")]
+  MaxBackupsInvalid,
+
+  #[error("parallel_requests must be between 1 and 16")]
+  ParallelRequestsInvalid,
+
+  #[error("failed to write settings: {0}")]
+  WriteSettings(#[from] std::io::Error),
+
+  #[error("settings error: {0}")]
+  Settings(#[from] SettingsError),
 }
 
 impl Settings {
@@ -161,7 +180,7 @@ impl Settings {
       .load_data()
       .await
       .map_err(SettingsUpdateError::Settings)?;
-    data.font = font_location.clone();
+    data.font = font_location;
     self
       .write_data(&data)
       .await
@@ -182,7 +201,7 @@ impl Settings {
       .load_data()
       .await
       .map_err(SettingsUpdateError::Settings)?;
-    data.theme = theme.clone();
+    data.theme = theme;
     self
       .write_data(&data)
       .await
@@ -200,11 +219,14 @@ impl Settings {
     data: &SettingsData,
   ) -> Result<(), SettingsError> {
     if let Some(font_location) = &data.font {
-      let source_path = std::path::PathBuf::from(font_location);
+      let source_path = PathBuf::from(font_location);
       let font_name = source_path
         .file_name()
-        .map(|n| n.to_string_lossy().to_string())
-        .unwrap_or_else(|| "unknown.ttf".to_string());
+        .ok_or_else(|| {
+          SettingsError::InvalidFontPath(font_location.clone())
+        })?
+        .to_string_lossy()
+        .to_string();
 
       for variant in GameVariant::iter() {
         let user_game_data_dir =
@@ -280,10 +302,7 @@ impl Settings {
 
       let source_path = std::path::PathBuf::from(font_location);
       let font_name = source_path.file_name().ok_or_else(|| {
-        std::io::Error::new(
-          std::io::ErrorKind::InvalidInput,
-          "Invalid font location",
-        )
+        SettingsError::InvalidFontPath(font_location.to_string())
       })?;
       let dest_path = user_font_dir.join(font_name);
 

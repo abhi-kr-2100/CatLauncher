@@ -3,7 +3,7 @@ use std::io;
 use strum::IntoStaticStr;
 
 use crate::settings::settings::{
-  Settings, SettingsError as SettingsSettingsError,
+  Settings, SettingsError, SettingsUpdateError,
 };
 use crate::settings::ThemeColors;
 
@@ -16,7 +16,7 @@ pub enum ApplySettingsError {
   SettingsUpdate(#[from] SettingsUpdateError),
 
   #[error("settings error: {0}")]
-  Settings(#[from] SettingsSettingsError),
+  Settings(#[from] SettingsError),
 }
 
 pub async fn apply_settings(
@@ -39,19 +39,4 @@ pub async fn apply_settings(
   }
 
   Ok(())
-}
-
-#[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum SettingsUpdateError {
-  #[error("max_backups must be between 0 and 20")]
-  MaxBackupsInvalid,
-
-  #[error("parallel_requests must be between 1 and 16")]
-  ParallelRequestsInvalid,
-
-  #[error("failed to write settings: {0}")]
-  WriteSettings(#[from] std::io::Error),
-
-  #[error("settings error: {0}")]
-  Settings(#[from] SettingsSettingsError),
 }

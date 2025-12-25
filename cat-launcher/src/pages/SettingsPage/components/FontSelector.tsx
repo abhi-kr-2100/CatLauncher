@@ -28,11 +28,7 @@ export default function FontSelector({
           <VirtualizedCombobox
             items={fonts.map((font) => ({
               value: font.location,
-              label: (
-                <div className="flex items-center gap-2">
-                  <span>{font.name}</span>
-                </div>
-              ),
+              label: font.name,
             }))}
             value={selectedFont ?? "Unknown"}
             onChange={(value) => onFontChange(value)}

@@ -459,9 +459,9 @@ export async function applySettings(
   themeColors?: ThemeColors,
 ): Promise<void> {
   await invoke("apply_settings_command", {
-    maxBackups: maxBackups,
-    parallelRequests: parallelRequests,
-    fontLocation: fontLocation,
-    themeColors: themeColors,
+    maxBackups,
+    parallelRequests,
+    fontLocation,
+    themeColors,
   });
 }

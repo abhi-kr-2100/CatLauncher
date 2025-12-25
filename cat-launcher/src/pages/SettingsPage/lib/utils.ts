@@ -4,10 +4,23 @@ export function isThemeEqual(
   themeColors: ThemeColors,
   settingsColors: ThemeColors,
 ): boolean {
-  const keys = Object.keys(themeColors) as Array<keyof ThemeColors>;
-  return keys.every((key) => {
-    const tc = themeColors[key];
-    const sc = settingsColors[key];
-    return tc[0] === sc[0] && tc[1] === sc[1] && tc[2] === sc[2];
+  const themeKeys = Object.keys(themeColors);
+  const settingsKeys = Object.keys(settingsColors);
+
+  // Check if both objects have the same number of keys
+  if (themeKeys.length !== settingsKeys.length) {
+    return false;
+  }
+
+  // Check if every key in themeColors exists in settingsColors and has equal values
+  return themeKeys.every((key) => {
+    const tc = themeColors[key as keyof ThemeColors];
+    const sc = settingsColors[key as keyof ThemeColors];
+    return (
+      sc !== undefined &&
+      tc[0] === sc[0] &&
+      tc[1] === sc[1] &&
+      tc[2] === sc[2]
+    );
   });
 }

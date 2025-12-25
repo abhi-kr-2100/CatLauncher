@@ -33,6 +33,18 @@ pub enum ListThemesError {
   ActiveRelease(#[from] ActiveReleaseRepositoryError),
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum GetThemesForVariantError {
+  #[error("failed to get active release: {0}")]
+  Repository(#[from] ActiveReleaseRepositoryError),
+
+  #[error("failed to get game resources dir: {0}")]
+  GameResourcesDirectory(#[from] GetGameExecutableDirError),
+
+  #[error("failed to read directory: {0}")]
+  ReadDirectory(#[from] io::Error),
+}
+
 pub async fn list_themes(
   data_dir: PathBuf,
   repository: &impl ActiveReleaseRepository,
@@ -41,10 +53,20 @@ pub async fn list_themes(
   let mut themes = Vec::new();
 
   for variant in GameVariant::iter() {
-    let variant_themes =
-      get_themes_for_variant(&variant, &data_dir, repository, os)
-        .await;
-    themes.extend(variant_themes);
+    match get_themes_for_variant(&variant, &data_dir, repository, os)
+      .await
+    {
+      Ok(variant_themes) => themes.extend(variant_themes),
+      Err(GetThemesForVariantError::Repository(e)) => {
+        return Err(ListThemesError::ActiveRelease(e))
+      }
+      Err(GetThemesForVariantError::GameResourcesDirectory(e)) => {
+        return Err(ListThemesError::GameResourcesDirectory(e))
+      }
+      Err(GetThemesForVariantError::ReadDirectory(e)) => {
+        return Err(ListThemesError::ReadDirectory(e))
+      }
+    }
   }
 
   // Remove duplicates
@@ -59,31 +81,30 @@ async fn get_themes_for_variant(
   data_dir: &Path,
   repository: &impl ActiveReleaseRepository,
   os: &OS,
-) -> Vec<ColorTheme> {
+) -> Result<Vec<ColorTheme>, GetThemesForVariantError> {
   let release = match repository.get_active_release(variant).await {
     Ok(Some(release)) => release,
-    _ => return Vec::new(),
+    Ok(None) => return Ok(Vec::new()),
+    Err(e) => return Err(GetThemesForVariantError::Repository(e)),
   };
 
   let resources_dir =
-    match get_game_resources_dir(variant, &release, data_dir, os)
+    get_game_resources_dir(variant, &release, data_dir, os)
       .await
-    {
-      Ok(dir) => dir,
-      _ => return Vec::new(),
-    };
+      .map_err(GetThemesForVariantError::GameResourcesDirectory)?;
 
   let themes_dir =
     resources_dir.join("data").join("raw").join("color_themes");
 
-  if !tokio::fs::try_exists(&themes_dir).await.unwrap_or(false) {
-    return Vec::new();
+  match tokio::fs::try_exists(&themes_dir).await {
+    Ok(true) => {}
+    Ok(false) => return Ok(Vec::new()),
+    Err(e) => return Err(GetThemesForVariantError::ReadDirectory(e)),
   }
 
-  let mut entries = match tokio::fs::read_dir(themes_dir).await {
-    Ok(entries) => entries,
-    _ => return Vec::new(),
-  };
+  let mut entries = tokio::fs::read_dir(themes_dir)
+    .await
+    .map_err(GetThemesForVariantError::ReadDirectory)?;
 
   let mut themes = Vec::new();
   while let Ok(Some(entry)) = entries.next_entry().await {
@@ -92,7 +113,7 @@ async fn get_themes_for_variant(
     }
   }
 
-  themes
+  Ok(themes)
 }
 
 async fn parse_theme_file(path: &Path) -> Option<ColorTheme> {

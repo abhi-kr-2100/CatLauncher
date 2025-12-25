@@ -9,7 +9,7 @@ use crate::settings::apply_settings::{
   apply_settings, ApplySettingsError,
 };
 use crate::settings::list_fonts::{list_fonts, ListFontsError};
-use crate::settings::list_themes::{list_themes, ListThemesError};
+use crate::settings::list_themes::{ListThemesError, list_themes };
 use crate::settings::settings::SettingsError;
 use crate::settings::{
   ColorTheme, Font, Settings, SettingsData, ThemeColors,
@@ -81,9 +81,6 @@ pub async fn list_themes_command(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum ApplySettingsCommandError {
-  #[error("failed to get system directory: {0}")]
-  SystemDirectory(#[from] tauri::Error),
-
   #[error("failed to apply settings: {0}")]
   ApplySettings(#[from] ApplySettingsError),
 }

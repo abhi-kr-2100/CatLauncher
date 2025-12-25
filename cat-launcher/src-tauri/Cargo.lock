@@ -446,6 +446,7 @@ dependencies = [
 name = "cat-launcher"
 version = "0.10.0"
 dependencies = [
+ "async-recursion",
  "async-trait",
  "cat-macros",
  "chrono",

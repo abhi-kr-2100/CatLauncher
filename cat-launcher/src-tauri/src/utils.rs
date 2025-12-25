@@ -6,6 +6,7 @@ use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Listener, Manager};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+use crate::constants::DEFAULT_PARALLEL_REQUESTS;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
@@ -42,7 +43,6 @@ pub enum ManageSettingsError {
 }
 
 pub fn manage_settings(app: &App) -> Result<(), ManageSettingsError> {
-  let _handle = app.handle().clone();
   let resource_dir = app.path().resource_dir()?;
   let settings_path = get_settings_path(&resource_dir);
   let data_dir = app.path().app_local_data_dir()?;
@@ -175,10 +175,9 @@ pub fn manage_downloader(app: &App) {
   let client: tauri::State<reqwest::Client> = app.state();
   let parallel_requests = tokio::task::block_in_place(|| {
     tokio::runtime::Handle::current().block_on(async {
-      settings
-        .parallel_requests()
-        .await
-        .unwrap_or(std::num::NonZeroU16::new(4).unwrap())
+      settings.parallel_requests().await.unwrap_or(
+        std::num::NonZeroU16::new(DEFAULT_PARALLEL_REQUESTS).unwrap(),
+      )
     })
   });
   let downloader =
