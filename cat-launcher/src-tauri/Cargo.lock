@@ -444,7 +444,7 @@ dependencies = [
 
 [[package]]
 name = "cat-launcher"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "async-trait",
  "cat-macros",
