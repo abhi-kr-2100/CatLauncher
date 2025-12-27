@@ -13,13 +13,6 @@ export default defineConfig(async () => ({
       },
     }),
     tailwindcss(),
-    {
-      name: "inject-nonce",
-      transformIndexHtml: (html: string) => {
-        const nonce = crypto.randomUUID();
-        return html.replace(/__VITE_NONCE__/g, nonce);
-      },
-    },
   ],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
