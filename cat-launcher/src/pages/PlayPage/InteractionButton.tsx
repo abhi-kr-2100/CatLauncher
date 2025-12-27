@@ -16,6 +16,7 @@ import {
 } from "./hooks";
 import { toastCL } from "@/lib/utils";
 import { InstallationProgressStatus } from "@/store/installationProgressSlice";
+import { playPageErrorMap } from "./lib/errors";
 
 export default function InteractionButton({
   variant,
@@ -42,7 +43,12 @@ export default function InteractionButton({
     lastPlayedWorld,
   } = useResumeLastWorld(variant, {
     onError: (e) => {
-      toastCL("error", "Failed to get last played world.", e);
+      toastCL(
+        "error",
+        "Failed to get last played world.",
+        e,
+        playPageErrorMap,
+      );
     },
   });
   const isStartingGame =

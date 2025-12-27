@@ -22,6 +22,7 @@ import {
   startFetchingReleases,
 } from "@/store/releasesSlice";
 import { useReleaseEvents } from "./hooks";
+import { playPageErrorMap } from "./lib/errors";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 
@@ -55,6 +56,7 @@ export default function ReleaseSelector({
         "error",
         `Failed to fetch releases for ${variant}.`,
         error,
+        playPageErrorMap,
       );
     },
   });

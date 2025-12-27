@@ -15,6 +15,7 @@ import {
   useInstallThirdPartySoundpack,
   useUninstallThirdPartySoundpack,
 } from "./hooks";
+import { soundpacksPageErrorMap } from "./lib/errors";
 
 interface SoundpackCardProps {
   variant: GameVariant;
@@ -54,7 +55,12 @@ export default function SoundpackCard({
     soundpackId,
     () => toastCL("success", "Soundpack installed successfully."),
     (error) =>
-      toastCL("error", "Failed to install soundpack.", error),
+      toastCL(
+        "error",
+        "Failed to install soundpack.",
+        error,
+        soundpacksPageErrorMap,
+      ),
   );
 
   const { isUninstalling, uninstall } =
@@ -62,7 +68,12 @@ export default function SoundpackCard({
       variant,
       () => toastCL("success", "Soundpack uninstalled successfully."),
       (error) =>
-        toastCL("error", "Failed to uninstall soundpack.", error),
+        toastCL(
+          "error",
+          "Failed to uninstall soundpack.",
+          error,
+          soundpacksPageErrorMap,
+        ),
     );
 
   return (

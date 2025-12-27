@@ -6,6 +6,7 @@ import { toastCL } from "@/lib/utils";
 import SoundpackCard from "./SoundpackCard";
 import { useListAllSoundpacks } from "./hooks";
 import { useSearch } from "@/hooks/useSearch";
+import { soundpacksPageErrorMap } from "./lib/errors";
 
 interface SoundpacksListProps {
   variant: GameVariant;
@@ -33,7 +34,12 @@ export default function SoundpacksList({
 
   useEffect(() => {
     if (error) {
-      toastCL("error", "Failed to load soundpacks.", error);
+      toastCL(
+        "error",
+        "Failed to load soundpacks.",
+        error,
+        soundpacksPageErrorMap,
+      );
     }
   }, [error]);
 

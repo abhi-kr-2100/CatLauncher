@@ -14,6 +14,7 @@ import { DeleteBackupDialog } from "./DeleteBackupDialog";
 import { NewBackupDialog } from "./NewBackupDialog";
 import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { CombinedBackup } from "./types/backups";
+import { backupsPageErrorMap } from "./lib/errors";
 
 function formatTimestampForSearch(timestamp: bigint): string {
   const date = new Date(Number(timestamp) * 1000);
@@ -54,20 +55,35 @@ function BackupsPage() {
     restoreBackup,
   } = useCombinedBackups(activeVariant, {
     onDeleteError: (error) => {
-      toastCL("error", "Failed to delete backup", error);
+      toastCL(
+        "error",
+        "Failed to delete backup",
+        error,
+        backupsPageErrorMap,
+      );
     },
     onRestoreSuccess: () => {
       toastCL("success", "Backup restored successfully");
     },
     onRestoreError: (error) => {
-      toastCL("error", "Failed to restore backup", error);
+      toastCL(
+        "error",
+        "Failed to restore backup",
+        error,
+        backupsPageErrorMap,
+      );
     },
     onCreateSuccess: () => {
       toastCL("success", "Manual backup created successfully");
       setNewManualDialogOpen(false);
     },
     onCreateError: (error) => {
-      toastCL("error", "Failed to create manual backup", error);
+      toastCL(
+        "error",
+        "Failed to create manual backup",
+        error,
+        backupsPageErrorMap,
+      );
     },
   });
 

@@ -27,6 +27,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 import { updateReleasesForVariant } from "@/store/releasesSlice";
 import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
+import { playPageErrorMap } from "./lib/errors";
 
 export function useReleaseEvents() {
   const dispatch = useAppDispatch();
@@ -123,7 +124,12 @@ export function useInstallAndMonitorRelease(
       });
     },
     (e) => {
-      toastCL("error", "Failed to install release.", e);
+      toastCL(
+        "error",
+        "Failed to install release.",
+        e,
+        playPageErrorMap,
+      );
     },
   );
 
@@ -160,6 +166,7 @@ export function useInstallationStatus(
       "error",
       `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
       installationStatusError,
+      playPageErrorMap,
     );
   }, [installationStatusError, variant, selectedReleaseId]);
 
@@ -249,7 +256,12 @@ export function useLaunchGame(
       if (onError) {
         onError(e as Error);
       } else {
-        toastCL("error", "Failed to launch game.", e);
+        toastCL(
+          "error",
+          "Failed to launch game.",
+          e,
+          playPageErrorMap,
+        );
       }
     },
   });
@@ -289,6 +301,7 @@ export function usePlayTime(
         "error",
         `Failed to get total play time for ${variant}.`,
         totalPlayTimeError,
+        playPageErrorMap,
       );
     }
   }, [totalPlayTimeError, variant]);
@@ -299,6 +312,7 @@ export function usePlayTime(
         "error",
         `Failed to get version play time for ${variant}.`,
         versionPlayTimeError,
+        playPageErrorMap,
       );
     }
   }, [versionPlayTimeError, variant]);

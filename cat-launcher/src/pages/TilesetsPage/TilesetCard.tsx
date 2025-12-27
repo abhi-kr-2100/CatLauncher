@@ -15,6 +15,7 @@ import {
   useInstallAndMonitorThirdPartyTileset,
   useUninstallThirdPartyTileset,
 } from "./hooks";
+import { tilesetsPageErrorMap } from "./lib/errors";
 
 interface TilesetCardProps {
   variant: GameVariant;
@@ -53,14 +54,25 @@ export default function TilesetCard({
     variant,
     tilesetId,
     () => toastCL("success", "Tileset installed successfully."),
-    (error) => toastCL("error", "Failed to install tileset.", error),
+    (error) =>
+      toastCL(
+        "error",
+        "Failed to install tileset.",
+        error,
+        tilesetsPageErrorMap,
+      ),
   );
 
   const { isUninstalling, uninstall } = useUninstallThirdPartyTileset(
     variant,
     () => toastCL("success", "Tileset uninstalled successfully."),
     (error) =>
-      toastCL("error", "Failed to uninstall tileset.", error),
+      toastCL(
+        "error",
+        "Failed to uninstall tileset.",
+        error,
+        tilesetsPageErrorMap,
+      ),
   );
 
   return (
