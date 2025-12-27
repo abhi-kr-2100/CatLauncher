@@ -186,19 +186,19 @@ pub async fn get_game_resources_dir(
   }
 }
 
-pub fn get_game_executable_filename(
+pub fn get_game_executable_filenames(
   variant: &GameVariant,
   os: &OS,
-) -> &'static str {
+) -> &'static [&'static str] {
   match (variant, os) {
     (g, OS::Windows) => match g {
-      GameVariant::BrightNights => "cataclysm-bn-tiles.exe",
-      GameVariant::DarkDaysAhead => "cataclysm-tiles.exe",
-      GameVariant::TheLastGeneration => "cataclysm-tiles.exe",
+      GameVariant::BrightNights => &["cataclysm-bn-tiles.exe"],
+      GameVariant::DarkDaysAhead => &["cataclysm-tiles.exe"],
+      GameVariant::TheLastGeneration => &["cataclysm-tiles.exe"],
     },
 
-    (_, OS::Linux) => "cataclysm-launcher",
-    (_, OS::Mac) => "Cataclysm.sh",
+    (_, OS::Linux) => &["cataclysm-launcher"],
+    (_, OS::Mac) => &["Cataclysm.sh"],
   }
 }
 
@@ -234,19 +234,22 @@ pub async fn get_game_executable_filepath(
     }
   };
 
-  let filename = get_game_executable_filename(variant, os);
-  let filepath = dir.join(filename);
+  let filenames = get_game_executable_filenames(variant, os);
 
-  match tokio::fs::metadata(&filepath).await {
-    Ok(metadata) => {
-      if !metadata.is_file() {
-        return Err(GetExecutablePathError::DoesNotExist);
+  for filename in filenames {
+    let filepath = dir.join(filename);
+
+    match tokio::fs::metadata(&filepath).await {
+      Ok(metadata) => {
+        if metadata.is_file() {
+          return Ok(filepath);
+        }
       }
+      Err(_) => continue,
     }
-    Err(_) => return Err(GetExecutablePathError::DoesNotExist),
   }
 
-  Ok(filepath)
+  Err(GetExecutablePathError::DoesNotExist)
 }
 
 #[derive(thiserror::Error, Debug)]
