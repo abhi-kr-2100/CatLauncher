@@ -18,7 +18,17 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self' https://*.posthog.com",
+        "connect-src": "'self' ipc: https://ipc.localhost https://*.posthog.com",
+        "worker-src": "'self' blob: data:",
+        "img-src": "'self' https://*.posthog.com",
+        "style-src": "'self' 'unsafe-inline' https://*.posthog.com",
+        "font-src": "'self' https://*.posthog.com",
+        "media-src": "'self' https://*.posthog.com",
+        "frame-ancestors": "'self' https://*.posthog.com"
+      }
     }
   },
   "bundle": {
