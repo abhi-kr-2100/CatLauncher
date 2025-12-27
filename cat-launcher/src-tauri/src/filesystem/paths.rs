@@ -194,7 +194,9 @@ pub fn get_game_executable_filenames(
     (g, OS::Windows) => match g {
       GameVariant::BrightNights => &["cataclysm-bn-tiles.exe"],
       GameVariant::DarkDaysAhead => &["cataclysm-tiles.exe"],
-      GameVariant::TheLastGeneration => &["cataclysm-tiles.exe"],
+      GameVariant::TheLastGeneration => {
+        &["cataclysm-tlg-tiles.exe", "cataclysm-tiles.exe"]
+      }
     },
 
     (_, OS::Linux) => &["cataclysm-launcher"],
