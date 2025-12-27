@@ -14,7 +14,8 @@
       {
         "title": "CatLauncher",
         "maximized": true,
-        "backgroundColor": "#1a1a1a"
+        "backgroundColor": "#1a1a1a",
+        "devtools": true
       }
     ],
     "security": {
