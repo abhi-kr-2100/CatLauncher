@@ -15,14 +15,14 @@ pub struct GameVariantInfo {
 }
 
 impl GameVariantInfo {
-  pub fn from_variant(
+  pub async fn from_variant(
     variant: GameVariant,
     settings: &Settings,
   ) -> Self {
     GameVariantInfo {
       id: variant,
-      name: variant.name(settings).to_string(),
-      links: variant.links(settings).to_vec(),
+      name: variant.name(settings).await,
+      links: variant.links(settings).await,
     }
   }
 }
@@ -46,9 +46,10 @@ pub async fn get_game_variants_info(
     ordered_variants
   };
 
-  let result = variants_to_display
-    .into_iter()
-    .map(|variant| GameVariantInfo::from_variant(variant, settings))
-    .collect();
+  let mut result = Vec::new();
+  for variant in variants_to_display {
+    result
+      .push(GameVariantInfo::from_variant(variant, settings).await);
+  }
   Ok(result)
 }

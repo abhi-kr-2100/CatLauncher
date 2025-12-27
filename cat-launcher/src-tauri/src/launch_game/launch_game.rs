@@ -11,6 +11,7 @@ use tokio::task::JoinSet;
 use ts_rs::TS;
 
 use crate::active_release::repository::ActiveReleaseRepository;
+use crate::constants::MAX_BACKUPS;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
   get_game_executable_filepath,
@@ -221,11 +222,13 @@ async fn cleanup_old_backups(
     .get_backups_sorted_by_timestamp(variant)
     .await?;
 
-  if backups.len() <= settings.max_backups.get() {
+  let max_backups =
+    settings.max_backups().await.unwrap_or(MAX_BACKUPS);
+  if backups.len() <= max_backups {
     return Ok(());
   }
 
-  let num_to_delete = backups.len() - settings.max_backups.get();
+  let num_to_delete = backups.len() - max_backups;
   let backups_to_delete = backups.into_iter().take(num_to_delete);
 
   let mut set = JoinSet::new();

@@ -1,17 +1,20 @@
-import AboutPage from "@/pages/AboutPage";
-import BackupsPage from "@/pages/BackupsPage";
-import ModsPage from "@/pages/ModsPage";
-import PlayPage from "@/pages/PlayPage";
-import TilesetsPage from "@/pages/TilesetsPage";
 import {
+  Drum,
   FileUp,
   Gamepad2,
   Info,
   Package,
   Palette,
-  Drum,
+  Settings,
 } from "lucide-react";
+
+import AboutPage from "@/pages/AboutPage";
+import BackupsPage from "@/pages/BackupsPage";
+import ModsPage from "@/pages/ModsPage";
+import PlayPage from "@/pages/PlayPage";
+import SettingsPage from "@/pages/SettingsPage";
 import SoundpacksPage from "@/pages/SoundpacksPage";
+import TilesetsPage from "@/pages/TilesetsPage";
 
 export const routes = [
   {
@@ -43,6 +46,12 @@ export const routes = [
     element: <TilesetsPage />,
     label: "Tilesets",
     icon: Palette,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
+    label: "Settings",
+    icon: Settings,
   },
   {
     path: "/about",

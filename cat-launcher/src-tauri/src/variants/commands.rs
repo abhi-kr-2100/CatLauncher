@@ -50,7 +50,7 @@ pub async fn get_game_variants_info(
   >,
 ) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoCommandError> {
   let res = get_game_variants_info::get_game_variants_info(
-    &settings,
+    settings.inner(),
     &*game_variant_order_repository,
   )
   .await?;
