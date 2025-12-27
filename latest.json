@@ -1,51 +1,51 @@
 {
-  "version": "0.10.0",
-  "notes": "CatLauncher v0.10.0",
-  "pub_date": "2025-12-25T06:48:39.165Z",
+  "version": "0.10.1",
+  "notes": "CatLauncher v0.10.1",
+  "pub_date": "2025-12-27T14:04:42.202Z",
   "platforms": {
-    "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUEvamc4QWluUDZDNnVwRXJRSi9zMTZVZzlwOVBqQTQ2b21sMU9uTE14dWFoWjdTdXVrWEY2d0lFLzZuRytzRlBhS2l5YXl6bXlGem5vTkovRys1QVFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ0OTAwCWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKb0xUVXh6WUs3NzhzcXhhVnF4bmswMkxETTEza1VZNmRxVGorMllDa0RxU1hqSERqbjBadmJuMkhEV0thRGpSVThzUlFQTEwxNFBRKyt2SjJFQUt2QXc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_aarch64.app.tar.gz"
-    },
-    "darwin-aarch64-app": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUEvamc4QWluUDZDNnVwRXJRSi9zMTZVZzlwOVBqQTQ2b21sMU9uTE14dWFoWjdTdXVrWEY2d0lFLzZuRytzRlBhS2l5YXl6bXlGem5vTkovRys1QVFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ0OTAwCWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKb0xUVXh6WUs3NzhzcXhhVnF4bmswMkxETTEza1VZNmRxVGorMllDa0RxU1hqSERqbjBadmJuMkhEV0thRGpSVThzUlFQTEwxNFBRKyt2SjJFQUt2QXc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_aarch64.app.tar.gz"
-    },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUJGTmNVNmVyQ1JibCtOS1BnQUFXT0ZsVVM4VDI5bENFM1lMMUlqSXRMSzdDNVBydVppVUxoQjV5eFZDbU9aT0phQngvNjR4NjVoNk5xYzhNa295TVFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MDE0CWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKT3BpR28vbGVieDFLNnVOSGlPUmxMMkFKdUlTTVJyc0ptd0RkTm96ZzZnVUk1Y2pjZ3B6Zjh0Lzl1RFFHbXV5QnBMNUlDbTNWdXNORkFkRlJXdzV0Qmc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUMrM1hENVpaeHlwQmNUN1pGYnZjM1o0cVNQeFA2OS9TbzkzcGluSHE0QW90UkJ2OXJTOVA2aHdNanJubEJjMkU4elhMWDE5KzgrZUlMSHhxcEJCa2c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQzOTE5CWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKT28xWWhNb09WY2tHSjRrSkZydVJySmFpOUluSXZFcE9rdDdHbnZ4NlJHOE9xNC9jTE9QeEVOU1lyK0RDcS9USXQzRDJIbmZRakFvMXNabEo0YVlNRFE9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_x64.app.tar.gz"
     },
     "darwin-x86_64-app": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUJGTmNVNmVyQ1JibCtOS1BnQUFXT0ZsVVM4VDI5bENFM1lMMUlqSXRMSzdDNVBydVppVUxoQjV5eFZDbU9aT0phQngvNjR4NjVoNk5xYzhNa295TVFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MDE0CWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKT3BpR28vbGVieDFLNnVOSGlPUmxMMkFKdUlTTVJyc0ptd0RkTm96ZzZnVUk1Y2pjZ3B6Zjh0Lzl1RFFHbXV5QnBMNUlDbTNWdXNORkFkRlJXdzV0Qmc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUMrM1hENVpaeHlwQmNUN1pGYnZjM1o0cVNQeFA2OS9TbzkzcGluSHE0QW90UkJ2OXJTOVA2aHdNanJubEJjMkU4elhMWDE5KzgrZUlMSHhxcEJCa2c4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQzOTE5CWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKT28xWWhNb09WY2tHSjRrSkZydVJySmFpOUluSXZFcE9rdDdHbnZ4NlJHOE9xNC9jTE9QeEVOU1lyK0RDcS9USXQzRDJIbmZRakFvMXNabEo0YVlNRFE9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_x64.app.tar.gz"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUF2cXh2Y3U2cVRyeDlEcUNxNURTdzNzdG5ZMWhvbnJpWTlZcmhXNTBhZzFHL0hCM3ZJdDRJQ2lITi9aeEpUL0grU3puZmE3SmJVVnRyQ0tjc0hEb0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQzOTIxCWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKRk44RDJuK3NqWkpDWVZqSVlIUlREdlhjSW5mTm40K3VhSWlaempXOUI3NVpSOFdxYnNDamFSZUNWRFUvZnJwd3NkcWp6WFRzaEZoeC90U1NZTmZzQlE9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_aarch64.app.tar.gz"
+    },
+    "darwin-aarch64-app": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUF2cXh2Y3U2cVRyeDlEcUNxNURTdzNzdG5ZMWhvbnJpWTlZcmhXNTBhZzFHL0hCM3ZJdDRJQ2lITi9aeEpUL0grU3puZmE3SmJVVnRyQ0tjc0hEb0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQzOTIxCWZpbGU6Y2F0LWxhdW5jaGVyLmFwcC50YXIuZ3oKRk44RDJuK3NqWkpDWVZqSVlIUlREdlhjSW5mTm40K3VhSWlaempXOUI3NVpSOFdxYnNDamFSZUNWRFUvZnJwd3NkcWp6WFRzaEZoeC90U1NZTmZzQlE9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_aarch64.app.tar.gz"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUpvbE9QZVhMMlNMUS8yOFd5amRpQ0FPVElGQjRwanY1RGVhZFFGaTBVYzZoOXl6UHRRQVZxUXJueGM2SzkzeUNHelM0Z0dvVzZ1U2dKRllhOFlKTndJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MTI5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF9hbWQ2NC5BcHBJbWFnZQpoemduQjJSUTk0dG82ZVhCcUc5RE5QYWY3Q0xtb1hBV0FBY3hYbnpranNKeWZud2ZNN1dlZ1ZnN2Y4Vm5URGRBdkZucXFsNU9MK3IySUpBQkk4RmhBdz09Cg==",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMU81YUFBM0c4TmwrdmwyKzBNQVYrV1VtQzdXOVhCb282RnQrdStTSzVmellEMEtnb0NCUVFURmhDbkx0ZXYyb3BPZ0FPVGQvUDZOSEZvdXo2NWl6aVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0MDc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV9hbWQ2NC5BcHBJbWFnZQpxOUF0dExBQUxVc0VYbmtYL1JMYnRVTHA5WDU1a0oyQ2s1c2ZBK2V2S1BKSlFrd01OQ0sxSmgrNkVhWVdDb0NBZ1pKTjNNVzJSY3pDSFlWYTVtY1pBZz09Cg==",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_amd64.AppImage"
     },
     "linux-x86_64-appimage": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUpvbE9QZVhMMlNMUS8yOFd5amRpQ0FPVElGQjRwanY1RGVhZFFGaTBVYzZoOXl6UHRRQVZxUXJueGM2SzkzeUNHelM0Z0dvVzZ1U2dKRllhOFlKTndJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MTI5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF9hbWQ2NC5BcHBJbWFnZQpoemduQjJSUTk0dG82ZVhCcUc5RE5QYWY3Q0xtb1hBV0FBY3hYbnpranNKeWZud2ZNN1dlZ1ZnN2Y4Vm5URGRBdkZucXFsNU9MK3IySUpBQkk4RmhBdz09Cg==",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMU81YUFBM0c4TmwrdmwyKzBNQVYrV1VtQzdXOVhCb282RnQrdStTSzVmellEMEtnb0NCUVFURmhDbkx0ZXYyb3BPZ0FPVGQvUDZOSEZvdXo2NWl6aVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0MDc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV9hbWQ2NC5BcHBJbWFnZQpxOUF0dExBQUxVc0VYbmtYL1JMYnRVTHA5WDU1a0oyQ2s1c2ZBK2V2S1BKSlFrd01OQ0sxSmgrNkVhWVdDb0NBZ1pKTjNNVzJSY3pDSFlWYTVtY1pBZz09Cg==",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_amd64.AppImage"
     },
     "linux-x86_64-deb": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMU9PUzJrQTJjMG4zT2t4dzhNVTBnekpuTGNxR0VKMXBYK0JwdVRjREk1c0tEcnpwSEVmZm9ndVlydE1pK2tQcWtFZDZQZEhvYTJaRmtnYm1weWNkcHdrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MTI5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF9hbWQ2NC5kZWIKZWd1YTdGdklwaGRVK3Nlb2ZDMDJDeFh0cXpPNzdOdG9HMFAvNWNXLzM5U2ZudnVPSXNXbEVnUmZobzFycGtSUzVtRXVJQmtkc3hjRHJEUjg4c2F3REE9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_amd64.deb"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMU5XQllDYTJscjBaQUR3cFN6TDBOMm4weVNLQkdEN2Vvd2ZxZFYyeWQwNVAvNU5YcVFaMnhydWZJdWZQN2tnTEtaNEhndWlKVDhFQ1oxRlJWZHZ1L2dvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0MDc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV9hbWQ2NC5kZWIKRVo3QTBINzB6Y0dueXdVQzhKcGVzOGo1LzdQbmxMWmQ1dTZLKy8ram1KMHFZVnBSSGl4UXYwdGZuVHRuNjd6N1FhL1M4bTlkTytSZ0xuOVducklqRFE9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_amd64.deb"
     },
     "linux-x86_64-rpm": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUJnWnNNOVFUbUpNbDIreThnTGlPWEFmMGlmT0hOYjQzK2grL25Ja2NscExsZy80bG93MjVDVldBKy9xZk45TDBhYWRpTE02bkNYR2tpR1k5RFN2TXd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MTI5CWZpbGU6Y2F0LWxhdW5jaGVyLTAuMTAuMC0xLng4Nl82NC5ycG0KMHJRMnRsRkhSUTF4dnErUTlWUDJ1bTl4RmorVWZRR1ZBZFM2cXI1QXlOQmFoV2s1aGZ5dXREYU02aTIvN0pwQVV2UHEveE5sL2k1azJCUFZxMlVxRGc9PQo=",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher-0.10.0-1.x86_64.rpm"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUxrbnh3NHBPVGtLSHhUZSt4d2ZYN3pZZEFzQWxUTXEwOFlQNzR6U3FlQTdoditNRE1UYTRZbFhXRDR2S2lqcXpMVTdjVlBwZ0NGM09kVENaQjkzcVFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0MDc5CWZpbGU6Y2F0LWxhdW5jaGVyLTAuMTAuMS0xLng4Nl82NC5ycG0KV3Y2bXhCTUpBOGNvUzV3UG9EZ0FFMHlEU3FtVU1JTkxWZndnSHkrMFJ2R1F2NUR3TFZqaXFEQjI1TWdCSE9iOHoyTnJneGRwOWw4bTdTWFlpZ2dZQWc9PQo=",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher-0.10.1-1.x86_64.rpm"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUhRMXA1Vkk1WHE0WFA2NEh5UEpuVnFqRHlyeGlJSnJ1eEUwMFNETDIxZFlBOEw1VVR5Q3JZVmpOamF5aWowWHFqZFY0Z3JQaTJkbENmTWpobU4xclF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MzE2CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF94NjQtc2V0dXAuZXhlCkhGcmpEWHN6S0YzS01PUmkvRVNLdTRkdWVLK0JxbjIyWS9tQmVLSUVUOUVHcEFKWlF6N0NKVk40dS83bmZvNVE2Qno3RmYvanRXTGlhN0l3aXpIeUJRPT0K",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUVROXZGWTIwZUFid0hBYVk5RVNjMzJENGFiT3h6bENFK3Y2SkNDWktudmt1TzdnUHdyQ3V1OTJTVmRDRmlTU2tpcW9DRm0xR3hOb3hZYUpTV2RYYWdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0Mjc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV94NjQtc2V0dXAuZXhlCjZKM1dKZ3FiYlZCbGw4REs2WHp1YS8zMkRWM1c0RUdEUmNJWGNldmR3c0wxNkN2SkQxNFl0M1JWZXR0N3VaODFjUkRsTFVza0w1Tm5rcy95ekhPZkNBPT0K",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_x64-setup.exe"
     },
     "windows-x86_64-nsis": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUhRMXA1Vkk1WHE0WFA2NEh5UEpuVnFqRHlyeGlJSnJ1eEUwMFNETDIxZFlBOEw1VVR5Q3JZVmpOamF5aWowWHFqZFY0Z3JQaTJkbENmTWpobU4xclF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MzE2CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF94NjQtc2V0dXAuZXhlCkhGcmpEWHN6S0YzS01PUmkvRVNLdTRkdWVLK0JxbjIyWS9tQmVLSUVUOUVHcEFKWlF6N0NKVk40dS83bmZvNVE2Qno3RmYvanRXTGlhN0l3aXpIeUJRPT0K",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUVROXZGWTIwZUFid0hBYVk5RVNjMzJENGFiT3h6bENFK3Y2SkNDWktudmt1TzdnUHdyQ3V1OTJTVmRDRmlTU2tpcW9DRm0xR3hOb3hZYUpTV2RYYWdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0Mjc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV94NjQtc2V0dXAuZXhlCjZKM1dKZ3FiYlZCbGw4REs2WHp1YS8zMkRWM1c0RUdEUmNJWGNldmR3c0wxNkN2SkQxNFl0M1JWZXR0N3VaODFjUkRsTFVza0w1Tm5rcy95ekhPZkNBPT0K",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_x64-setup.exe"
     },
     "windows-x86_64-msi": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMUUzZFdHRWFNNlM2Q1ZwcHFkTk5YYU5UWitldlBwMGxiWXVIYU9rdDI0c0NJNUFJZmlPWlVxM1FvQjJTOVZtSEsvamhvQlRoTTc3NU1mdVViSkU3MndRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NjQ1MzE2CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMF94NjRfZW4tVVMubXNpCjRpQ0l6ZVNhbVNHV2Z3YmZYVDBOQWlma1lKaTNtY3cyVWVaVlJDY1ltZFdXVDNBOUhBWXBFbzhLVEtyekVEMG1TSUdsSU5JcHowV1BuQzJidE0wakRBPT0K",
-      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.0/cat-launcher_0.10.0_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUNlhjbnFZN1hPMU5QWHhoMTV2Z2xCRXFLb1AyUFBHUk5OSkowa2M5OXU0UlQxZS9RZGJNdVoxaDVPVFJCUWgyVVpCTkg1cUtUV1U2dHc5ZEhWbVdrRjdZQzY3WkVxbmdvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2ODQ0Mjc5CWZpbGU6Y2F0LWxhdW5jaGVyXzAuMTAuMV94NjRfZW4tVVMubXNpCmVlZ0pLOGx3N3FHeHhZUkJtdEhuQVptUTgwNWw5WUtFbFlSc0d5RitaVmF4V0ZEaUNidVpmVWNzamRKN0ZUQUZIRTNjaEJzVXB1OTVaUmplVncwQkJRPT0K",
+      "url": "https://github.com/abhi-kr-2100/CatLauncher/releases/download/v0.10.1/cat-launcher_0.10.1_x64_en-US.msi"
     }
   }
 }
