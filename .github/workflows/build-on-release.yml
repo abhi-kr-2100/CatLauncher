@@ -6,6 +6,8 @@ on:
 
 env:
   TS_RS_EXPORT_DIR: "../src/generated-types"
+  VITE_PUBLIC_POSTHOG_KEY: "phc_WgUGvqUfEfyX5oitY1sOWq9qt7dNBCkRV5aXdwR9ZD8"
+  VITE_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"
 
 jobs:
   build-and-publish:
