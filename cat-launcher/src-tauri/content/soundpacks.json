@@ -50,6 +50,18 @@
         "activity_type": "github_commit",
         "github": "https://github.com/chronicpayne/Bl-ck-Edition-Soundpack"
       }
+    },
+    "otopack-bn-mk2": {
+      "id": "otopack-bn-mk2",
+      "name": "Otopack BN Mk 2",
+      "installation": {
+        "download_url": "https://github.com/NarandBD/Otopack-BN-Mk-2/archive/refs/heads/main.zip",
+        "soundpack": "Otopack-BN-Mk-2-main/Otopack+ModsUpdates BN/soundpack.txt"
+      },
+      "activity": {
+        "activity_type": "github_commit",
+        "github": "https://github.com/NarandBD/Otopack-BN-Mk-2"
+      }
     }
   },
 
