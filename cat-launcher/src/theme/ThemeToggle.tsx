@@ -11,7 +11,7 @@ export default function ThemeToggle() {
     },
   );
 
-  const Icon = currentTheme === "Dark" ? Sun : Moon;
+  const Icon = currentTheme === "Light" ? Moon : Sun;
 
   return (
     <Button

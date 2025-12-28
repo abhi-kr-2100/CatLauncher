@@ -51,7 +51,7 @@ impl ThemePreferenceRepository for SqliteThemePreferenceRepository {
                     Ok(ThemePreference { theme })
                 }
                 None => {
-                    let default = Theme::Light;
+                    let default = Theme::Dark;
                     conn.execute(
                         "INSERT OR REPLACE INTO theme_preferences (_id, theme) VALUES (1, ?1)",
                         [&default.to_string()],
