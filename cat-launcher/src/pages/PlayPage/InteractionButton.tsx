@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+
+import { DownloadProgress } from "@/components/DownloadProgress";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -6,26 +10,48 @@ import {
 } from "@/components/ui/tooltip";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
+import { getActiveRelease } from "@/lib/commands";
+import { queryKeys } from "@/lib/queryKeys";
+import { toastCL } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
-import { DownloadProgress } from "@/components/DownloadProgress";
+import { InstallationProgressStatus } from "@/store/installationProgressSlice";
 import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
   usePlayGame,
   useResumeLastWorld,
 } from "./hooks";
-import { toastCL } from "@/lib/utils";
-import { InstallationProgressStatus } from "@/store/installationProgressSlice";
 
 export default function InteractionButton({
   variant,
   selectedReleaseId,
+  setSelectedReleaseId,
 }: InteractionButtonProps) {
   const currentlyPlaying = useAppSelector(
     (state) => state.gameSession.currentlyPlaying,
   );
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
+
+  const latestReleaseId = useAppSelector(
+    (state) =>
+      state.releases.releasesByVariant[variant]?.[0]?.version,
+  );
+
+  const { data: activeRelease } = useQuery<string | undefined>({
+    queryKey: queryKeys.activeRelease(variant),
+    queryFn: () => getActiveRelease(variant),
+  });
+
+  const shouldAllowUpgrading = useMemo(() => {
+    return (
+      selectedReleaseId &&
+      activeRelease &&
+      selectedReleaseId === activeRelease &&
+      latestReleaseId &&
+      selectedReleaseId !== latestReleaseId
+    );
+  }, [selectedReleaseId, activeRelease, latestReleaseId]);
 
   const { install, installationProgressStatus, downloadProgress } =
     useInstallAndMonitorRelease(variant, selectedReleaseId);
@@ -77,9 +103,9 @@ export default function InteractionButton({
   }
 
   const button = (
-    <div className="flex gap-2 w-full">
+    <div className="flex gap-1 w-full">
       <Button
-        className="grow w-[50%]"
+        className="grow w-[30%]"
         onClick={() =>
           installationStatus === "ReadyToPlay"
             ? play(selectedReleaseId)
@@ -91,12 +117,35 @@ export default function InteractionButton({
       </Button>
       {selectedReleaseId && installationStatus === "ReadyToPlay" && (
         <Button
-          className="grow w-[50%]"
+          className="grow w-[40%]"
           onClick={() => resume(selectedReleaseId)}
           disabled={isActionButtonDisabled || !lastPlayedWorld}
         >
           Resume Last World
         </Button>
+      )}
+      {shouldAllowUpgrading && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="grow w-[30%]"
+              onClick={() => {
+                if (latestReleaseId) {
+                  setSelectedReleaseId(latestReleaseId);
+                  install(latestReleaseId);
+                }
+              }}
+              disabled={isAnyVariantRunning || isStartingGame}
+            >
+              Upgrade
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              Install and switch to the latest experimental version.
+            </p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
@@ -123,6 +172,7 @@ export default function InteractionButton({
 interface InteractionButtonProps {
   variant: GameVariant;
   selectedReleaseId: string | undefined;
+  setSelectedReleaseId: (value: string) => void;
 }
 
 function getActionButtonLabel(
