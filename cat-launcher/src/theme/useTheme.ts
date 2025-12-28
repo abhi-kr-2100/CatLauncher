@@ -22,8 +22,8 @@ export function setStoredTheme(theme: Theme): void {
 
 export function applyThemeToDom(theme: Theme): void {
   const root = document.documentElement;
-  root.classList.toggle("dark", theme === "Dark");
-  root.style.colorScheme = theme === "Dark" ? "dark" : "light";
+  root.classList.toggle("dark", theme !== "Light");
+  root.style.colorScheme = theme === "Light" ? "light" : "dark";
 }
 
 export function useTheme(onError?: (error: unknown) => void) {
@@ -44,7 +44,7 @@ export function useTheme(onError?: (error: unknown) => void) {
   });
 
   const currentTheme = useMemo(
-    () => themePreference?.theme ?? "Light",
+    () => themePreference?.theme ?? "Dark",
     [themePreference],
   );
 
@@ -81,7 +81,7 @@ export function useTheme(onError?: (error: unknown) => void) {
   });
 
   const handleToggle = () => {
-    const nextTheme = currentTheme === "Dark" ? "Light" : "Dark";
+    const nextTheme = currentTheme === "Light" ? "Dark" : "Light";
     toggleTheme(nextTheme);
   };
 
