@@ -3,12 +3,8 @@ import { useState } from "react";
 import VariantSelector from "@/components/VariantSelector";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
-import ModsList from "../ModsPage/ModsList";
-import SoundpacksList from "../SoundpacksPage/SoundpacksList";
-import TilesetsList from "../TilesetsPage/TilesetsList";
 import AssetTypeSelector from "./AssetTypeSelector";
-
-export type AssetType = "mods" | "soundpacks" | "tilesets";
+import { type AssetType, ASSET_COMPONENTS } from "./types";
 
 function AssetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
@@ -16,19 +12,6 @@ function AssetsPage() {
   const [selectedVariant, setSelectedVariant] =
     useState<GameVariant | null>(null);
   const [assetType, setAssetType] = useState<AssetType>("mods");
-
-  const renderAssetList = () => {
-    if (!selectedVariant) return null;
-
-    switch (assetType) {
-      case "mods":
-        return <ModsList variant={selectedVariant} />;
-      case "soundpacks":
-        return <SoundpacksList variant={selectedVariant} />;
-      case "tilesets":
-        return <TilesetsList variant={selectedVariant} />;
-    }
-  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -46,7 +29,11 @@ function AssetsPage() {
           />
         )}
       </div>
-      {selectedVariant && renderAssetList()}
+      {selectedVariant &&
+        (() => {
+          const Component = ASSET_COMPONENTS[assetType];
+          return <Component variant={selectedVariant} />;
+        })()}
     </div>
   );
 }
