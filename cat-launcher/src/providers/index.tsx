@@ -15,6 +15,7 @@ import CatLauncherVersionTracker from "./CatLauncherVersionTracker";
 import { useFrontendReady } from "./hooks";
 import PostHogProviderWithIdentifiedUser from "./PostHogProviderWithIdentifiedUser";
 import ThemeBootstrapper from "@/theme/ThemeBootstrapper";
+import QuitConfirmationProvider from "./QuitConfirmationProvider";
 
 export interface ProvidersProps {
   children: ReactNode;
@@ -32,11 +33,13 @@ export default function Providers({ children }: ProvidersProps) {
           <CatLauncherVersionTracker>
             <Provider store={store}>
               <TooltipProvider>
-                {children}
-                <Toaster />
-                <AutoUpdateNotifier />
-                <GameSessionMonitor />
-                <PlayTimeMonitor />
+                <QuitConfirmationProvider>
+                  {children}
+                  <Toaster />
+                  <AutoUpdateNotifier />
+                  <GameSessionMonitor />
+                  <PlayTimeMonitor />
+                </QuitConfirmationProvider>
               </TooltipProvider>
             </Provider>
           </CatLauncherVersionTracker>
