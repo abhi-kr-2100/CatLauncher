@@ -28,7 +28,6 @@ use crate::launch_game::repository::{
   BackupRepository, BackupRepositoryError,
 };
 use crate::launch_game::utils::{backup_save_files, BackupError};
-use crate::play_time::repository::PlayTimeRepository;
 use crate::settings::Settings;
 use crate::variants::GameVariant;
 
@@ -273,7 +272,6 @@ pub async fn launch_and_monitor_game<F, Fut>(
   resource_dir: &Path,
   releases_repository: &dyn ReleasesRepository,
   backup_repository: impl BackupRepository + Clone + 'static,
-  play_time_repository: impl PlayTimeRepository + 'static,
   active_release_repository: &dyn ActiveReleaseRepository,
   on_game_event: F,
   settings: &Settings,
@@ -332,20 +330,10 @@ where
 
   let on_game_event_for_error = on_game_event.clone();
 
-  let start_time = std::time::Instant::now();
-
   // It's important to not await the task here, as it be blocking.
   // run_game_and_monitor streams to the frontend.
   tokio::spawn(async move {
     let result = run_game_and_monitor(command, on_game_event).await;
-    let duration = start_time.elapsed();
-    let _ = play_time_repository
-      .log_play_time(
-        &release.variant,
-        &release.version,
-        duration.as_secs() as i64,
-      )
-      .await;
 
     if let Err(e) = result {
       eprintln!("Error running game: {}", e);
