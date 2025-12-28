@@ -42,7 +42,7 @@ use crate::mods::commands::{
   uninstall_third_party_mod_command,
 };
 use crate::play_time::commands::{
-  get_play_time_for_variant, get_play_time_for_version,
+  get_play_time_for_variant, get_play_time_for_version, log_play_time,
 };
 use crate::soundpacks::commands::{
   get_third_party_soundpack_installation_status_command,
@@ -93,6 +93,7 @@ pub fn run() {
       get_tips,
       get_play_time_for_variant,
       get_play_time_for_version,
+      log_play_time,
       update_game_variant_order,
       list_backups_for_variant,
       delete_backup_by_id,
