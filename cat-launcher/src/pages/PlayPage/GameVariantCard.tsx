@@ -63,6 +63,7 @@ export default function GameVariantCard({
         <InteractionButton
           variant={variantInfo.id}
           selectedReleaseId={selectedReleaseId}
+          setSelectedReleaseId={setSelectedReleaseId}
         />
         <PlayTime
           variant={variantInfo.id}
