@@ -61,9 +61,16 @@ use crate::users::commands::get_user_id;
 use crate::utils::{
   autoupdate, manage_downloader, manage_http_client, manage_posthog,
   manage_repositories, manage_settings, migrate_to_local_data_dir,
+  on_quit,
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
+use tauri::{command, AppHandle};
+
+#[command]
+fn confirm_quit(app_handle: AppHandle) {
+  app_handle.exit(0)
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -80,6 +87,7 @@ pub fn run() {
       migrate_to_local_data_dir(app);
 
       autoupdate(app);
+      on_quit(app);
 
       Ok(())
     })
@@ -119,6 +127,7 @@ pub fn run() {
       get_preferred_theme,
       set_preferred_theme,
       get_last_played_world,
+      confirm_quit,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
