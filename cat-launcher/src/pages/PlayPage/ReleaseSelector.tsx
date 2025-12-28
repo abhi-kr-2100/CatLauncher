@@ -1,8 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import {
   VirtualizedCombobox,
   type ComboboxItem,
@@ -14,10 +11,9 @@ import {
   triggerFetchReleasesForVariant,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { cn, toastCL } from "@/lib/utils";
+import { toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
-  FetchStatus,
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
@@ -36,9 +32,6 @@ export default function ReleaseSelector({
 
   const releases = useAppSelector(
     (state) => state.releases.releasesByVariant[variant],
-  );
-  const releasesFetchStatus = useAppSelector(
-    (state) => state.releases.fetchStatusByVariant[variant],
   );
 
   const {
@@ -177,11 +170,6 @@ export default function ReleaseSelector({
     ],
   );
 
-  // Consider isReleaseFetchingComplete even if it completes due to an error
-  const isReleaseFetchingComplete =
-    !isReleasesTriggerLoading &&
-    releasesFetchStatus !== FetchStatus.Fetching;
-
   // Even if isReleasesTriggerLoading is true, releases from previous release
   // events might be available. Consider isReleaseFetchingLoading only when
   // there are no items as well.
@@ -220,19 +208,6 @@ export default function ReleaseSelector({
             disabled={isReleaseFetchingLoading || isInstalling}
           />
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => triggerFetchReleases(variant)}
-          disabled={!isReleaseFetchingComplete || isInstalling}
-        >
-          <RefreshCw
-            className={cn(
-              !isReleaseFetchingComplete && "animate-spin",
-            )}
-            size={16}
-          />
-        </Button>
       </div>
     </div>
   );
