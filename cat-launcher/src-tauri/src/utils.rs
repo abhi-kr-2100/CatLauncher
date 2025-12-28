@@ -3,7 +3,7 @@ use std::io;
 use std::time::Duration;
 
 use r2d2_sqlite::SqliteConnectionManager;
-use tauri::{App, Listener, Manager};
+use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
@@ -253,4 +253,18 @@ pub fn manage_posthog(app: &App) {
       eprintln!("Failed to build PostHog options: {}", e);
     }
   }
+}
+
+pub fn on_quit(app: &App) {
+  let app_handle = app.handle().clone();
+
+  // Let the app crash and quit if webview window could not be gotten when quitting
+  let window = app.get_webview_window("main").unwrap();
+
+  window.on_window_event(move |event| {
+    if let WindowEvent::CloseRequested { api, .. } = event {
+      api.prevent_close();
+      let _ = app_handle.emit("quit-requested", ());
+    }
+  });
 }
