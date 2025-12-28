@@ -19,6 +19,7 @@ import {
   useUninstallThirdPartyMod,
 } from "./hooks";
 import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
+import { PreInstalledButton } from "@/components/PreInstalledButton";
 
 interface ModCardProps {
   variant: GameVariant;
@@ -107,9 +108,9 @@ export default function ModCard({ variant, mod }: ModCardProps) {
           </AlertDescription>
         </Alert>
       </CardContent>
-      {isThirdParty && (
-        <CardFooter className="flex flex-col gap-4 items-stretch">
-          {modInstallationProgress === "Downloading" &&
+      <CardFooter className="flex flex-col gap-4 items-stretch">
+        {isThirdParty ? (
+          modInstallationProgress === "Downloading" &&
           modDownloadProgress ? (
             <DownloadProgress
               downloaded={modDownloadProgress.bytes_downloaded}
@@ -136,9 +137,11 @@ export default function ModCard({ variant, mod }: ModCardProps) {
                   ? "Downloading..."
                   : "Install"}
             </Button>
-          )}
-        </CardFooter>
-      )}
+          )
+        ) : (
+          <PreInstalledButton />
+        )}
+      </CardFooter>
       <ModInstallationConfirmationDialog
         open={confirmationDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
