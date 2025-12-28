@@ -21,6 +21,14 @@ import type { Soundpack } from "@/generated-types/Soundpack";
 import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
+export async function listenToQuitRequested(
+  onQuitRequested: () => void,
+) {
+  return await listen("quit-requested", () => {
+    onQuitRequested();
+  });
+}
+
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
 ) {
@@ -443,4 +451,8 @@ export async function uninstallThirdPartySoundpack(
     id: soundpackId,
     variant: variant,
   });
+}
+
+export async function confirmQuit(): Promise<void> {
+  await invoke("confirm_quit");
 }
