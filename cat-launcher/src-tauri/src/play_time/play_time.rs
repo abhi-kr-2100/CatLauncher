@@ -21,3 +21,14 @@ pub async fn get_play_time_for_version(
     .get_play_time_for_version(game_variant, version)
     .await
 }
+
+pub async fn log_play_time(
+  game_variant: &GameVariant,
+  version: &str,
+  duration_in_seconds: i64,
+  play_time_repository: &impl PlayTimeRepository,
+) -> Result<(), PlayTimeRepositoryError> {
+  play_time_repository
+    .log_play_time(game_variant, version, duration_in_seconds)
+    .await
+}

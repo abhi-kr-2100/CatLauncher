@@ -239,7 +239,12 @@ export function useLaunchGame(
       return launchGame(variant, releaseId, worldName ?? null);
     },
     onSuccess: (_, releaseId) => {
-      dispatch(setCurrentlyPlaying({ variant }));
+      dispatch(
+        setCurrentlyPlaying({
+          variant,
+          version: releaseId!,
+        }),
+      );
       queryClient.setQueryData(
         queryKeys.activeRelease(variant),
         () => releaseId!,

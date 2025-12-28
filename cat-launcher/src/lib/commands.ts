@@ -175,6 +175,18 @@ export async function getPlayTimeForVersion(
   return response;
 }
 
+export async function logPlayTime(
+  variant: GameVariant,
+  version: string,
+  durationInSeconds: number,
+): Promise<void> {
+  await invoke("log_play_time", {
+    variant,
+    version,
+    durationInSeconds,
+  });
+}
+
 export async function getActiveRelease(
   variant: GameVariant,
 ): Promise<string> {
