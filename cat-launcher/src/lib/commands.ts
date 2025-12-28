@@ -432,3 +432,20 @@ export async function uninstallThirdPartySoundpack(
     variant: variant,
   });
 }
+
+export async function upgradeToLatest(
+  variant: GameVariant,
+  onDownloadProgress: (progress: DownloadProgress) => void,
+): Promise<GameRelease> {
+  const channel = new Channel();
+  channel.onmessage = (progress) => {
+    onDownloadProgress(progress as DownloadProgress);
+  };
+
+  const response = await invoke<GameRelease>("upgrade_to_latest", {
+    variant,
+    onDownloadProgress: channel,
+  });
+
+  return response;
+}

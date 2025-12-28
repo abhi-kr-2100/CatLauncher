@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,12 +11,12 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import {
   getActiveRelease,
   triggerFetchReleasesForVariant,
+  upgradeToLatest,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { cn, toastCL } from "@/lib/utils";
+import { toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
-  FetchStatus,
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
@@ -37,9 +36,6 @@ export default function ReleaseSelector({
   const releases = useAppSelector(
     (state) => state.releases.releasesByVariant[variant],
   );
-  const releasesFetchStatus = useAppSelector(
-    (state) => state.releases.fetchStatusByVariant[variant],
-  );
 
   const {
     mutate: triggerFetchReleases,
@@ -56,6 +52,22 @@ export default function ReleaseSelector({
         `Failed to fetch releases for ${variant}.`,
         error,
       );
+    },
+  });
+
+  const {
+    mutate: performUpgradeToLatest,
+    isPending: isUpgradeToLatestLoading,
+  } = useMutation({
+    mutationFn: (var_: GameVariant) =>
+      upgradeToLatest(var_, () => {
+        // Progress updates are handled by release events
+      }),
+    onSuccess: () => {
+      toastCL("success", "Successfully upgraded to latest version.");
+    },
+    onError: (error: unknown) => {
+      toastCL("error", "Failed to upgrade to latest version.", error);
     },
   });
 
@@ -177,11 +189,6 @@ export default function ReleaseSelector({
     ],
   );
 
-  // Consider isReleaseFetchingComplete even if it completes due to an error
-  const isReleaseFetchingComplete =
-    !isReleasesTriggerLoading &&
-    releasesFetchStatus !== FetchStatus.Fetching;
-
   // Even if isReleasesTriggerLoading is true, releases from previous release
   // events might be available. Consider isReleaseFetchingLoading only when
   // there are no items as well.
@@ -221,17 +228,12 @@ export default function ReleaseSelector({
           />
         </div>
         <Button
-          variant="outline"
-          size="icon"
-          onClick={() => triggerFetchReleases(variant)}
-          disabled={!isReleaseFetchingComplete || isInstalling}
+          onClick={() => performUpgradeToLatest(variant)}
+          disabled={isUpgradeToLatestLoading || isInstalling}
         >
-          <RefreshCw
-            className={cn(
-              !isReleaseFetchingComplete && "animate-spin",
-            )}
-            size={16}
-          />
+          {isUpgradeToLatestLoading
+            ? "Upgrading..."
+            : "Upgrade to Latest"}
         </Button>
       </div>
     </div>

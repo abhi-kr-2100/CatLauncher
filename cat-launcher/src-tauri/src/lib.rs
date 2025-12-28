@@ -17,6 +17,7 @@ mod play_time;
 mod soundpacks;
 mod theme;
 mod tilesets;
+mod upgrade_to_latest;
 mod users;
 mod utils;
 mod variants;
@@ -57,6 +58,7 @@ use crate::tilesets::commands::{
   install_third_party_tileset_command, list_all_tilesets_command,
   uninstall_third_party_tileset_command,
 };
+use crate::upgrade_to_latest::commands::upgrade_to_latest;
 use crate::users::commands::get_user_id;
 use crate::utils::{
   autoupdate, manage_downloader, manage_http_client, manage_posthog,
@@ -118,6 +120,7 @@ pub fn run() {
       get_preferred_theme,
       set_preferred_theme,
       get_last_played_world,
+      upgrade_to_latest,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
