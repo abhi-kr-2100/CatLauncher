@@ -1,17 +1,8 @@
 import AboutPage from "@/pages/AboutPage";
+import AssetsPage from "@/pages/AssetsPage";
 import BackupsPage from "@/pages/BackupsPage";
-import ModsPage from "@/pages/ModsPage";
 import PlayPage from "@/pages/PlayPage";
-import TilesetsPage from "@/pages/TilesetsPage";
-import {
-  FileUp,
-  Gamepad2,
-  Info,
-  Package,
-  Palette,
-  Drum,
-} from "lucide-react";
-import SoundpacksPage from "@/pages/SoundpacksPage";
+import { FileUp, Gamepad2, Info, Music } from "lucide-react";
 
 export const routes = [
   {
@@ -27,22 +18,10 @@ export const routes = [
     icon: FileUp,
   },
   {
-    path: "/mods",
-    element: <ModsPage />,
-    label: "Mods",
-    icon: Package,
-  },
-  {
-    path: "/soundpacks",
-    element: <SoundpacksPage />,
-    label: "Soundpacks",
-    icon: Drum,
-  },
-  {
-    path: "/tilesets",
-    element: <TilesetsPage />,
-    label: "Tilesets",
-    icon: Palette,
+    path: "/assets",
+    element: <AssetsPage />,
+    label: "Mods, Music & Tiles",
+    icon: Music,
   },
   {
     path: "/about",
