@@ -15,6 +15,7 @@ import {
   useInstallThirdPartySoundpack,
   useUninstallThirdPartySoundpack,
 } from "./hooks";
+import { PreInstalledButton } from "@/components/PreInstalledButton";
 
 interface SoundpackCardProps {
   variant: GameVariant;
@@ -77,9 +78,9 @@ export default function SoundpackCard({
           </div>
         </div>
       </CardHeader>
-      {isThirdParty && (
-        <CardFooter className="flex flex-col gap-4 items-stretch">
-          {soundpackInstallationProgress === "Downloading" &&
+      <CardFooter className="flex flex-col gap-4 items-stretch">
+        {isThirdParty ? (
+          soundpackInstallationProgress === "Downloading" &&
           soundpackDownloadProgress ? (
             <DownloadProgress
               downloaded={soundpackDownloadProgress.bytes_downloaded}
@@ -108,9 +109,11 @@ export default function SoundpackCard({
                   ? "Downloading..."
                   : "Install"}
             </Button>
-          )}
-        </CardFooter>
-      )}
+          )
+        ) : (
+          <PreInstalledButton />
+        )}
+      </CardFooter>
     </Card>
   );
 }
