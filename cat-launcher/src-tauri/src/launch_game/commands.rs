@@ -11,7 +11,6 @@ use crate::fetch_releases::repository::sqlite_releases_repository::SqliteRelease
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
-use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::Settings;
 use crate::variants::GameVariant;
 
@@ -42,7 +41,6 @@ pub async fn launch_game(
   settings: State<'_, Settings>,
   releases_repository: State<'_, SqliteReleasesRepository>,
   backup_repository: State<'_, SqliteBackupRepository>,
-  play_time_repository: State<'_, SqlitePlayTimeRepository>,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<(), LaunchGameCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
@@ -71,7 +69,6 @@ pub async fn launch_game(
     &resource_dir,
     &*releases_repository,
     backup_repository.inner().clone(),
-    play_time_repository.inner().clone(),
     &*active_release_repository,
     on_game_event,
     &settings,

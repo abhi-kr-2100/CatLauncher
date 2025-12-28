@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 
 import AutoUpdateNotifier from "@/components/AutoUpdateNotifier";
 import GameSessionMonitor from "@/components/GameSessionMonitor";
+import PlayTimeMonitor from "@/components/PlayTimeMonitor";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { store } from "@/store/store";
@@ -35,6 +36,7 @@ export default function Providers({ children }: ProvidersProps) {
                 <Toaster />
                 <AutoUpdateNotifier />
                 <GameSessionMonitor />
+                <PlayTimeMonitor />
               </TooltipProvider>
             </Provider>
           </CatLauncherVersionTracker>
