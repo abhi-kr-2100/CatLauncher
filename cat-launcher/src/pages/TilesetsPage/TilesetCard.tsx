@@ -15,6 +15,7 @@ import {
   useInstallAndMonitorThirdPartyTileset,
   useUninstallThirdPartyTileset,
 } from "./hooks";
+import { PreInstalledButton } from "@/components/PreInstalledButton";
 
 interface TilesetCardProps {
   variant: GameVariant;
@@ -75,9 +76,9 @@ export default function TilesetCard({
           </div>
         </div>
       </CardHeader>
-      {isThirdParty && (
-        <CardFooter className="flex flex-col gap-4 items-stretch">
-          {tilesetInstallationProgress === "Downloading" &&
+      <CardFooter className="flex flex-col gap-4 items-stretch">
+        {isThirdParty ? (
+          tilesetInstallationProgress === "Downloading" &&
           tilesetDownloadProgress ? (
             <DownloadProgress
               downloaded={tilesetDownloadProgress.bytes_downloaded}
@@ -104,9 +105,11 @@ export default function TilesetCard({
                   ? "Downloading..."
                   : "Install"}
             </Button>
-          )}
-        </CardFooter>
-      )}
+          )
+        ) : (
+          <PreInstalledButton />
+        )}
+      </CardFooter>
     </Card>
   );
 }
