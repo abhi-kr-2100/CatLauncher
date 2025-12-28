@@ -27,18 +27,6 @@
   },
 
   "BrightNights": {
-    "otopack": {
-      "id": "otopack",
-      "name": "Otopack",
-      "installation": {
-        "download_url": "https://github.com/Kenan2000/Otopack-Mods-Updates/archive/refs/heads/master.zip",
-        "soundpack": "Otopack-Mods-Updates-master/Otopack+ModsUpdates/soundpack.txt"
-      },
-      "activity": {
-        "activity_type": "github_commit",
-        "github": "https://github.com/Kenan2000/Otopack-Mods-Updates"
-      }
-    },
     "black-edition-soundpack": {
       "id": "black-edition-soundpack",
       "name": "Bl@ck Edition",
