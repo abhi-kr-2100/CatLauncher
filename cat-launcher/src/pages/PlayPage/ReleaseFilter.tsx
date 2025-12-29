@@ -21,32 +21,35 @@ interface ReleaseFilterProps {
 }
 
 function getFilters(variant: GameVariant): Filter[] {
-  const defaultFilters: Filter[] = [
-    {
-      id: "Stable",
-      label: "Stable",
-      apply: (r) => r.release_type === "Stable",
-    },
+  const stableFilter = {
+    id: "Stable",
+    label: "Stable",
+    apply: (r) => r.release_type === "Stable",
+  } satisfies Filter;
 
-    {
-      id: "Experimental",
-      label: "Experimental",
-      apply: (r) => r.release_type === "Experimental",
-    },
-  ];
+  const experimentalFilter = {
+    id: "Experimental",
+    label: "Experimental",
+    apply: (r) => r.release_type === "Experimental",
+  } satisfies Filter;
+
+  const releaseCandidateFilter = {
+    id: "ReleaseCandidate",
+    label: "Release Candidate",
+    apply: (r) => r.release_type === "ReleaseCandidate",
+  } satisfies Filter;
 
   switch (variant) {
     case "DarkDaysAhead":
       return [
-        ...defaultFilters,
-        {
-          id: "ReleaseCandidate",
-          label: "Release Candidate",
-          apply: (r) => r.release_type === "ReleaseCandidate",
-        },
+        stableFilter,
+        experimentalFilter,
+        releaseCandidateFilter,
       ];
-    default:
-      return defaultFilters;
+    case "TheLastGeneration":
+      return [stableFilter];
+    case "BrightNights":
+      return [stableFilter, experimentalFilter];
   }
 }
 
