@@ -3,11 +3,12 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/SearchInput";
 import VariantSelector from "@/components/VariantSelector";
-import { GameVariant } from "@/generated-types/GameVariant";
 import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { useSearch } from "@/hooks/useSearch";
 import { toastCL } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setSelectedVariant } from "@/store/selectedVariantSlice";
 import BackupFilter, { BackupFilterFn } from "./BackupFilter";
 import { BackupsTable } from "./BackupsTable";
 import { DeleteBackupDialog } from "./DeleteBackupDialog";
@@ -31,8 +32,10 @@ function formatTimestampForSearch(timestamp: bigint): string {
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();
-  const [selectedVariant, setSelectedVariant] =
-    useState<GameVariant | null>(null);
+  const selectedVariant = useAppSelector(
+    (state) => state.selectedVariant.variant,
+  );
+  const dispatch = useAppDispatch();
   const [newManualDialogOpen, setNewManualDialogOpen] =
     useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -43,7 +46,7 @@ function BackupsPage() {
     () => (_backup: CombinedBackup) => true,
   );
 
-  const activeVariant = (selectedVariant ?? gameVariants[0]?.id)!;
+  const activeVariant = selectedVariant ?? gameVariants[0].id;
 
   const {
     combinedBackups,
@@ -115,7 +118,9 @@ function BackupsPage() {
         <VariantSelector
           gameVariants={gameVariants}
           selectedVariant={selectedVariant}
-          onVariantChange={setSelectedVariant}
+          onVariantChange={(variant) =>
+            dispatch(setSelectedVariant(variant))
+          }
           isLoading={gameVariantsLoading}
         />
         <Button
