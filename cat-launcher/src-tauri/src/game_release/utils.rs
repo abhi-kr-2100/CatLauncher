@@ -4,9 +4,7 @@ use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::{
   get_default_releases, merge_releases,
 };
-use crate::game_release::game_release::{
-  GameReleaseStatus, ReleaseType,
-};
+use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::GameRelease;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{Arch, OS};
@@ -68,11 +66,10 @@ pub fn gh_release_to_game_release(
   GameRelease {
     variant: *variant,
     version: gh_release.tag_name.clone(),
-    release_type: if gh_release.prerelease {
-      ReleaseType::Experimental
-    } else {
-      ReleaseType::Stable
-    },
+    release_type: variant.determine_release_type(
+      &gh_release.tag_name,
+      gh_release.prerelease,
+    ),
     status: GameReleaseStatus::Unknown,
     created_at: gh_release.created_at,
   }
