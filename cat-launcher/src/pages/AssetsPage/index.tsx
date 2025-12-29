@@ -1,16 +1,19 @@
 import { useState } from "react";
 
 import VariantSelector from "@/components/VariantSelector";
-import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setSelectedVariant } from "@/store/selectedVariantSlice";
 import AssetTypeSelector from "./AssetTypeSelector";
 import { type AssetType, ASSET_COMPONENTS } from "./types";
 
 function AssetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();
-  const [selectedVariant, setSelectedVariant] =
-    useState<GameVariant | null>(null);
+  const selectedVariant = useAppSelector(
+    (state) => state.selectedVariant.variant,
+  );
+  const dispatch = useAppDispatch();
   const [assetType, setAssetType] = useState<AssetType>("mods");
 
   return (
@@ -19,7 +22,9 @@ function AssetsPage() {
         <VariantSelector
           gameVariants={gameVariants}
           selectedVariant={selectedVariant}
-          onVariantChange={setSelectedVariant}
+          onVariantChange={(variant) =>
+            dispatch(setSelectedVariant(variant))
+          }
           isLoading={gameVariantsLoading}
         />
         {selectedVariant && (
