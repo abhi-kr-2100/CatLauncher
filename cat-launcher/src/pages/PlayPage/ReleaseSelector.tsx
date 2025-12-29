@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   VirtualizedCombobox,
   type ComboboxItem,
@@ -88,22 +89,11 @@ export default function ReleaseSelector({
     () => (_r: GameRelease) => true,
   );
 
+  const latestRelease = useMemo(() => {
+    return releases?.[0];
+  }, [releases]);
+
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
-    const latestRelease = releases.reduce(
-      (prev: undefined | GameRelease, curr) => {
-        if (!prev) {
-          return curr;
-        }
-
-        if (curr.created_at > prev.created_at) {
-          return curr;
-        }
-
-        return prev;
-      },
-      undefined,
-    );
-
     return (
       releases.filter(appliedFilter).map((r) => {
         const isActive = r.version === activeRelease;
@@ -122,7 +112,13 @@ export default function ReleaseSelector({
         };
       }) ?? []
     );
-  }, [releases, activeRelease, variant, appliedFilter]);
+  }, [
+    releases,
+    activeRelease,
+    variant,
+    appliedFilter,
+    latestRelease,
+  ]);
 
   useEffect(() => {
     // Selected release may become unavailable after filtering
@@ -157,16 +153,22 @@ export default function ReleaseSelector({
       }
 
       if (activeReleaseError || activeRelease === "") {
-        return items[0];
+        return (
+          items.find((i) => i.value === latestRelease?.version) ??
+          items?.[0]
+        );
       }
 
-      return items.find((i) => i.value === activeRelease) ?? items[0];
+      return (
+        items.find((i) => i.value === activeRelease) ?? items?.[0]
+      );
     },
     [
       activeRelease,
       isActiveReleaseLoading,
       activeReleaseError,
       installationStatusByVersion,
+      latestRelease,
     ],
   );
 
