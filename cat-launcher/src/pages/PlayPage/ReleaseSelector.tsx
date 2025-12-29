@@ -4,6 +4,7 @@ import {
   VirtualizedCombobox,
   type ComboboxItem,
 } from "@/components/virtualized-combobox";
+import { Button } from "@/components/ui/button";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import {
@@ -20,6 +21,7 @@ import {
 import { useReleaseEvents } from "./hooks";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
+import { ReleaseNotesDialog } from "./ReleaseNotesDialog";
 
 export default function ReleaseSelector({
   variant,
@@ -87,6 +89,8 @@ export default function ReleaseSelector({
   const [appliedFilter, setAppliedFilter] = useState<FilterFn>(
     () => (_r: GameRelease) => true,
   );
+
+  const [isReleaseNotesOpen, setIsReleaseNotesOpen] = useState(false);
 
   const comboboxItems = useMemo<ComboboxItem[]>(() => {
     const latestRelease = releases.reduce(
@@ -196,19 +200,42 @@ export default function ReleaseSelector({
           setAppliedFilter((_prev: FilterFn) => filter)
         }
       />
-      <div className="flex items-end gap-2">
-        <div className="grow">
-          <VirtualizedCombobox
-            label="Version"
-            items={comboboxItems}
-            value={selectedReleaseId}
-            onChange={setSelectedReleaseId}
-            autoselect={autoselect}
-            placeholder={placeholderText}
-            disabled={isReleaseFetchingLoading || isInstalling}
-          />
-        </div>
+
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsReleaseNotesOpen(true)}
+          disabled={
+            isReleaseFetchingLoading ||
+            isInstalling ||
+            !selectedReleaseId ||
+            releases.length === 0
+          }
+        >
+          {"What's new?"}
+        </Button>
       </div>
+
+      <ReleaseNotesDialog
+        open={isReleaseNotesOpen}
+        onOpenChange={setIsReleaseNotesOpen}
+        variant={variant}
+        releases={releases}
+        currentActiveRelease={activeRelease}
+        selectedReleaseId={selectedReleaseId}
+        setSelectedReleaseId={setSelectedReleaseId}
+      />
+
+      <VirtualizedCombobox
+        label="Version"
+        items={comboboxItems}
+        value={selectedReleaseId}
+        onChange={setSelectedReleaseId}
+        autoselect={autoselect}
+        placeholder={placeholderText}
+        disabled={isReleaseFetchingLoading || isInstalling}
+      />
     </div>
   );
 }

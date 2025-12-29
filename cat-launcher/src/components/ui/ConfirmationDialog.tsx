@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,8 @@ interface ConfirmationDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
+  confirmDisabled?: boolean;
+  confirmVariant?: ComponentProps<typeof Button>["variant"];
   children?: ReactNode;
 }
 
@@ -30,6 +32,8 @@ export function ConfirmationDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  confirmDisabled = false,
+  confirmVariant = "default",
   children,
 }: ConfirmationDialogProps) {
   return (
@@ -45,7 +49,13 @@ export function ConfirmationDialog({
             <Button variant="outline">{cancelText}</Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button onClick={onConfirm}>{confirmText}</Button>
+            <Button
+              variant={confirmVariant}
+              disabled={confirmDisabled}
+              onClick={onConfirm}
+            >
+              {confirmText}
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

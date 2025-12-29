@@ -13,6 +13,7 @@ import type { Mod } from "@/generated-types/Mod";
 import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { LastModActivity } from "@/generated-types/LastModActivity";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
+import type { ReleaseNotesUpdatePayload } from "@/generated-types/ReleaseNotesUpdatePayload";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
@@ -34,6 +35,17 @@ export async function listenToReleasesUpdate(
 ) {
   return await listen<ReleasesUpdatePayload>(
     "releases-update",
+    (event) => {
+      onUpdate(event.payload);
+    },
+  );
+}
+
+export async function listenToReleaseNotesUpdate(
+  onUpdate: (payload: ReleaseNotesUpdatePayload) => void,
+) {
+  return await listen<ReleaseNotesUpdatePayload>(
+    "release-notes-update",
     (event) => {
       onUpdate(event.payload);
     },
@@ -65,6 +77,18 @@ export async function triggerFetchReleasesForVariant(
 ): Promise<void> {
   await invoke("fetch_releases_for_variant", {
     variant,
+  });
+}
+
+export async function triggerFetchReleaseNotesForVariant(
+  variant: GameVariant,
+  requestId: string,
+  versions: string[],
+): Promise<void> {
+  await invoke("fetch_release_notes_for_variant", {
+    variant,
+    requestId,
+    versions,
   });
 }
 

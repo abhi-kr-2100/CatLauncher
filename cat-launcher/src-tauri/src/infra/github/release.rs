@@ -12,4 +12,6 @@ pub struct GitHubRelease {
   pub assets: Vec<GitHubAsset>,
   #[serde(with = "rfc3339")]
   pub created_at: DateTime<Utc>,
+  #[serde(default)]
+  pub body: Option<String>,
 }

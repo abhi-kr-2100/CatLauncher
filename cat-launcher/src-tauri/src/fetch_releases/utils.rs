@@ -39,6 +39,10 @@ pub fn merge_releases(
     map
       .entry(release.id)
       .and_modify(|existing_release| {
+        if existing_release.body.is_none() {
+          existing_release.body = release.body.clone();
+        }
+
         let assets_capacity =
           existing_release.assets.len() + release.assets.len();
         let mut seen_asset_ids =

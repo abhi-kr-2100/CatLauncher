@@ -5,6 +5,7 @@ use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
 use crate::fetch_releases::repository::{
+  ReleaseNotesRepository, ReleaseNotesRepositoryError,
   ReleasesRepository, ReleasesRepositoryError,
 };
 use crate::infra::github::asset::GitHubAsset;
@@ -13,6 +14,7 @@ use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+#[derive(Clone)]
 pub struct SqliteReleasesRepository {
   pool: Pool,
 }
@@ -37,8 +39,9 @@ impl ReleasesRepository for SqliteReleasesRepository {
 
             let mut stmt = conn
                 .prepare(
-                    "SELECT r.id, r.tag_name, r.prerelease, r.created_at, a.id, a.browser_download_url, a.name, a.digest
+                    "SELECT r.id, r.tag_name, r.prerelease, r.created_at, rn.body, a.id, a.browser_download_url, a.name, a.digest
                      FROM releases r
+                     LEFT JOIN release_notes rn ON r.id = rn.release_id
                      LEFT JOIN assets a ON r.id = a.release_id
                      WHERE r.game_variant = ?1",
                 )
@@ -50,10 +53,11 @@ impl ReleasesRepository for SqliteReleasesRepository {
                     let tag_name: String = row.get(1)?;
                     let prerelease: bool = row.get(2)?;
                     let created_at: String = row.get(3)?;
-                    let asset_id: Option<u64> = row.get(4)?;
-                    let browser_download_url: Option<String> = row.get(5)?;
-                    let name: Option<String> = row.get(6)?;
-                    let digest: Option<String> = row.get(7)?;
+                    let body: Option<String> = row.get(4)?;
+                    let asset_id: Option<u64> = row.get(5)?;
+                    let browser_download_url: Option<String> = row.get(6)?;
+                    let name: Option<String> = row.get(7)?;
+                    let digest: Option<String> = row.get(8)?;
 
                     let asset = asset_id
                         .zip(browser_download_url)
@@ -65,26 +69,34 @@ impl ReleasesRepository for SqliteReleasesRepository {
                             digest,
                         });
 
-                    Ok((release_id, tag_name, prerelease, created_at, asset))
+                    Ok((release_id, tag_name, prerelease, created_at, body, asset))
                 })
                 .map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
             let mut releases_map: HashMap<u64, GitHubRelease> = HashMap::new();
             for row in rows {
-                let (release_id, tag_name, prerelease, created_at_str, asset) =
+                let (release_id, tag_name, prerelease, created_at_str, body, asset) =
                     row.map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
-                if let std::collections::hash_map::Entry::Vacant(e) = releases_map.entry(release_id) {
-                    let created_at = created_at_str.parse().map_err(|e| {
-                        ReleasesRepositoryError::Get(Box::new(e))
-                    })?;
-                    e.insert(GitHubRelease {
+                match releases_map.entry(release_id) {
+                    std::collections::hash_map::Entry::Vacant(e) => {
+                        let created_at = created_at_str.parse().map_err(|e| {
+                            ReleasesRepositoryError::Get(Box::new(e))
+                        })?;
+                        e.insert(GitHubRelease {
                             id: release_id,
                             tag_name,
                             prerelease,
                             assets: Vec::new(),
                             created_at,
+                            body,
                         });
+                    }
+                    std::collections::hash_map::Entry::Occupied(mut e) => {
+                        if e.get().body.is_none() {
+                            e.get_mut().body = body;
+                        }
+                    }
                 }
 
                 if let Some(asset) = asset {
@@ -128,6 +140,14 @@ impl ReleasesRepository for SqliteReleasesRepository {
                 )
                 .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
 
+                if let Some(body) = &release.body {
+                    tx.execute(
+                        "INSERT OR REPLACE INTO release_notes (release_id, body) VALUES (?1, ?2)",
+                        (release.id, body),
+                    )
+                    .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
+                }
+
                 for asset in &release.assets {
                     tx.execute(
                         "INSERT OR REPLACE INTO assets (id, release_id, browser_download_url, name, digest) VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -149,5 +169,65 @@ impl ReleasesRepository for SqliteReleasesRepository {
         })
         .await
         .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?
+  }
+}
+
+#[async_trait]
+impl ReleaseNotesRepository for SqliteReleasesRepository {
+  async fn get_release_notes_by_tag_names(
+    &self,
+    game_variant: &GameVariant,
+    tag_names: &[String],
+  ) -> Result<
+    HashMap<String, Option<String>>,
+    ReleaseNotesRepositoryError,
+  > {
+    if tag_names.is_empty() {
+      return Ok(HashMap::new());
+    }
+
+    let pool = self.pool.clone();
+    let game_variant = *game_variant;
+    let tag_names = tag_names.to_vec();
+
+    task::spawn_blocking(move || {
+      let conn = pool
+        .get()
+        .map_err(|e| ReleaseNotesRepositoryError::Get(Box::new(e)))?;
+
+      let placeholders = std::iter::repeat_n("?", tag_names.len())
+        .collect::<Vec<_>>()
+        .join(", ");
+      let sql = format!(
+        "SELECT r.tag_name, rn.body\n         FROM releases r\n         LEFT JOIN release_notes rn ON r.id = rn.release_id\n         WHERE r.game_variant = ?\n           AND r.tag_name IN ({})",
+        placeholders
+      );
+
+      let mut stmt = conn
+        .prepare(&sql)
+        .map_err(|e| ReleaseNotesRepositoryError::Get(Box::new(e)))?;
+
+      let params = std::iter::once(game_variant.to_string())
+        .chain(tag_names.into_iter());
+
+      let rows = stmt
+        .query_map(rusqlite::params_from_iter(params), |row| {
+          let tag_name: String = row.get(0)?;
+          let body: Option<String> = row.get(1)?;
+          Ok((tag_name, body))
+        })
+        .map_err(|e| ReleaseNotesRepositoryError::Get(Box::new(e)))?;
+
+      let mut map = HashMap::new();
+      for row in rows {
+        let (tag_name, body) =
+          row.map_err(|e| ReleaseNotesRepositoryError::Get(Box::new(e)))?;
+        map.insert(tag_name, body);
+      }
+
+      Ok(map)
+    })
+    .await
+    .map_err(|e| ReleaseNotesRepositoryError::Get(Box::new(e)))?
   }
 }

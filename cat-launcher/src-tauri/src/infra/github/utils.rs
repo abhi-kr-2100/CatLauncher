@@ -75,3 +75,23 @@ pub async fn fetch_github_releases(
 
   Ok(all_releases)
 }
+
+pub async fn fetch_github_release_by_tag(
+  client: &Client,
+  repo: &str,
+  tag: &str,
+) -> Result<GitHubRelease, GitHubReleaseFetchError> {
+  let encoded_tag: String =
+    url::form_urlencoded::byte_serialize(tag.as_bytes()).collect();
+  let url = format!(
+    "https://api.github.com/repos/{}/releases/tags/{}",
+    repo, encoded_tag
+  );
+
+  let response = client.get(&url).send().await?;
+  response.error_for_status_ref()?;
+
+  let response_text = response.text().await?;
+  serde_json::from_str::<GitHubRelease>(&response_text)
+    .map_err(GitHubReleaseFetchError::Parse)
+}
