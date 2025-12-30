@@ -1,5 +1,6 @@
 pub mod archive;
 pub mod autoupdate;
+pub mod database;
 pub mod download;
 pub mod github;
 pub mod http_client;

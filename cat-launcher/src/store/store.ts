@@ -4,6 +4,7 @@ import gameSessionReducer from "./gameSessionSlice";
 import installationProgressReducer from "./installationProgressSlice";
 import releasesReducer from "./releasesSlice";
 import selectedVariantReducer from "./selectedVariantSlice";
+import { settingsReducer } from "./settingsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     releases: releasesReducer,
     installationProgress: installationProgressReducer,
     selectedVariant: selectedVariantReducer,
+    settings: settingsReducer,
   },
 });
 

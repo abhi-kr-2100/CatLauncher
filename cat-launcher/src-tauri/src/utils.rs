@@ -1,26 +1,22 @@
-use std::fs;
 use std::io;
+use std::sync::Mutex;
 use std::time::Duration;
 
-use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::filesystem::paths::{get_db_path, get_schema_file_path};
-use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
+use crate::infra::database::Database;
 use crate::infra::download::Downloader;
 use crate::infra::http_client::create_http_client;
-use crate::infra::repository::db_schema::initialize_schema;
-use crate::infra::repository::db_schema::InitializeSchemaError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::settings::Settings;
+use crate::settings::{Settings, SettingsRepository, SqliteSettingsRepository};
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
@@ -29,31 +25,37 @@ use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 
 #[derive(thiserror::Error, Debug)]
-pub enum SettingsError {
-  #[error("failed to get system directory: {0}")]
-  SystemDir(#[from] tauri::Error),
+pub enum CoreServicesError {
+    #[error(transparent)]
+    Database(#[from] crate::infra::database::DatabaseError),
 
-  #[error("failed to read settings file: {0}")]
-  Read(#[from] io::Error),
-
-  #[error("failed to parse settings file: {0}")]
-  Parse(#[from] serde_json::Error),
+    #[error(transparent)]
+    Settings(#[from] crate::settings::repository::SettingsRepositoryError),
 }
 
-pub fn manage_settings(app: &App) -> Result<(), SettingsError> {
-  let resource_dir = app.path().resource_dir()?;
-  let settings_path = get_settings_path(&resource_dir);
+pub async fn manage_core_services(app: &tauri::AppHandle) -> Result<(), CoreServicesError> {
+    let db = Database::new(app).await?;
+    app.manage(db.clone());
 
-  let settings = match fs::read_to_string(&settings_path) {
-    Ok(contents) => {
-      serde_json::from_str(&contents).unwrap_or_default()
-    }
-    Err(_) => Settings::default(),
-  };
+    let settings_repo = SqliteSettingsRepository::new(db.pool.clone());
+    let settings = settings_repo.get_settings().await?;
 
-  app.manage(settings);
+    app.manage(Mutex::new(settings));
+    app.manage(settings_repo);
 
-  Ok(())
+    app.manage(SqliteReleasesRepository::new(db.pool.clone()));
+    app.manage(SqliteBackupRepository::new(db.pool.clone()));
+    app.manage(SqliteManualBackupRepository::new(db.pool.clone()));
+    app.manage(SqliteActiveReleaseRepository::new(db.pool.clone()));
+    app.manage(SqlitePlayTimeRepository::new(db.pool.clone()));
+    app.manage(SqliteGameVariantOrderRepository::new(db.pool.clone()));
+    app.manage(SqliteThemePreferenceRepository::new(db.pool.clone()));
+    app.manage(SqliteInstalledModsRepository::new(db.pool.clone()));
+    app.manage(SqliteInstalledTilesetsRepository::new(db.pool.clone()));
+    app.manage(SqliteInstalledSoundpacksRepository::new(db.pool.clone()));
+    app.manage(SqliteUsersRepository::new(db.pool));
+
+    Ok(())
 }
 
 pub fn autoupdate(app: &App) {
@@ -65,57 +67,6 @@ pub fn autoupdate(app: &App) {
       run_updater(handle).await;
     });
   });
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum RepositoryError {
-  #[error("failed to get system directory: {0}")]
-  SystemDir(#[from] tauri::Error),
-
-  #[error("failed to initialize database: {0}")]
-  Database(#[from] rusqlite::Error),
-
-  #[error("failed to initialize schema: {0}")]
-  Schema(#[from] InitializeSchemaError),
-
-  #[error("failed to get schema file path: {0}")]
-  SchemaFilePath(#[from] GetSchemaFilePathError),
-
-  #[error("failed to create connection pool: {0}")]
-  ConnectionPool(#[from] r2d2::Error),
-}
-
-pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
-  let data_dir = app.path().app_local_data_dir()?;
-  let db_path = get_db_path(&data_dir);
-
-  let resources_dir = app.path().resource_dir()?;
-  let schema_path = get_schema_file_path(&resources_dir)?;
-
-  let manager =
-    SqliteConnectionManager::file(&db_path).with_init(|conn| {
-      conn.pragma_update(None, "journal_mode", "WAL")?;
-      conn.pragma_update(None, "foreign_keys", "ON")?;
-      conn.busy_timeout(Duration::from_secs(5))
-    });
-  let pool = r2d2::Pool::new(manager)?;
-
-  let conn = pool.get()?;
-  initialize_schema(&conn, &[schema_path])?;
-
-  app.manage(SqliteReleasesRepository::new(pool.clone()));
-  app.manage(SqliteBackupRepository::new(pool.clone()));
-  app.manage(SqliteManualBackupRepository::new(pool.clone()));
-  app.manage(SqliteActiveReleaseRepository::new(pool.clone()));
-  app.manage(SqlitePlayTimeRepository::new(pool.clone()));
-  app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
-  app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
-  app.manage(SqliteInstalledModsRepository::new(pool.clone()));
-  app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
-  app.manage(SqliteInstalledSoundpacksRepository::new(pool.clone()));
-  app.manage(SqliteUsersRepository::new(pool));
-
-  Ok(())
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -173,7 +124,8 @@ async fn migrate_to_local_data_dir_impl(
 }
 
 pub fn manage_downloader(app: &App) {
-  let settings: tauri::State<Settings> = app.state();
+  let settings_mutex: tauri::State<Mutex<Settings>> = app.state();
+  let settings = settings_mutex.lock().unwrap();
   let client: tauri::State<reqwest::Client> = app.state();
   let downloader = Downloader::new(
     client.inner().clone(),
