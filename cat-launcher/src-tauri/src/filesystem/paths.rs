@@ -28,6 +28,10 @@ pub fn get_schema_file_path(
   Ok(schema_dir.join("schema.sql"))
 }
 
+pub fn get_releases_dir(resources_dir: &Path) -> PathBuf {
+  resources_dir.join("releases")
+}
+
 pub fn get_default_releases_file_path(
   variant: &GameVariant,
   resources_dir: &Path,

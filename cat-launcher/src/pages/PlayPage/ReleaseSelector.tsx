@@ -18,14 +18,16 @@ import {
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
-import { useReleaseEvents } from "./hooks";
+import { useReleaseEvents, useInstallAndMonitorRelease } from "./hooks";
+import { Button } from "@/components/ui/button";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
+import { ReleaseNotesDialog } from "./ReleaseNotesDialog";
 
 export default function ReleaseSelector({
   variant,
-  selectedReleaseId,
-  setSelectedReleaseId,
+  selectedReleaseTagName,
+  setSelectedReleaseTagName,
 }: ReleaseSelectorProps) {
   useReleaseEvents();
 
@@ -88,6 +90,32 @@ export default function ReleaseSelector({
   const [appliedFilter, setAppliedFilter] = useState<FilterFn>(
     () => (_r: GameRelease) => true,
   );
+  const [isReleaseNotesOpen, setIsReleaseNotesOpen] = useState(false);
+
+  const { install } = useInstallAndMonitorRelease(
+    variant,
+    selectedReleaseTagName,
+  );
+
+  const confirmButtonText = useMemo(() => {
+    if (!selectedReleaseTagName) {
+      return "Install";
+    }
+
+    if (selectedReleaseTagName > activeRelease) {
+      return "Upgrade";
+    }
+
+    if (selectedReleaseTagName < activeRelease) {
+      return "Downgrade";
+    }
+
+    if (selectedReleaseTagName === activeRelease) {
+      return "Pre-Installed";
+    }
+
+    return "Install";
+  }, [selectedReleaseTagName, activeRelease]);
 
   const latestRelease = useMemo(() => {
     return releases?.[0];
@@ -123,12 +151,12 @@ export default function ReleaseSelector({
   useEffect(() => {
     // Selected release may become unavailable after filtering
     if (
-      selectedReleaseId &&
-      !comboboxItems.find((item) => item.value === selectedReleaseId)
+      selectedReleaseTagName &&
+      !comboboxItems.find((item) => item.value === selectedReleaseTagName)
     ) {
-      setSelectedReleaseId(undefined);
+      setSelectedReleaseTagName(undefined);
     }
-  }, [comboboxItems, selectedReleaseId, setSelectedReleaseId]);
+  }, [comboboxItems, selectedReleaseTagName, setSelectedReleaseTagName]);
 
   const installationStatusByVersion = useAppSelector(
     (state) =>
@@ -203,20 +231,39 @@ export default function ReleaseSelector({
           <VirtualizedCombobox
             label="Version"
             items={comboboxItems}
-            value={selectedReleaseId}
-            onChange={setSelectedReleaseId}
+            value={selectedReleaseTagName}
+            onChange={setSelectedReleaseTagName}
             autoselect={autoselect}
             placeholder={placeholderText}
             disabled={isReleaseFetchingLoading || isInstalling}
           />
         </div>
+        <Button
+          className="min-w-fit"
+          disabled={!selectedReleaseTagName}
+          onClick={() => {
+            setIsReleaseNotesOpen(true);
+          }}
+        >
+          Release Notes
+        </Button>
       </div>
+      {selectedReleaseTagName ? (
+        <ReleaseNotesDialog
+          variant={variant}
+          releaseTagName={selectedReleaseTagName}
+          open={isReleaseNotesOpen}
+          onOpenChange={setIsReleaseNotesOpen}
+          onConfirm={() => install(selectedReleaseTagName)}
+          confirmText={confirmButtonText}
+        />
+      ) : null}
     </div>
   );
 }
 
 interface ReleaseSelectorProps {
   variant: GameVariant;
-  selectedReleaseId: string | undefined;
-  setSelectedReleaseId: (value: string | undefined) => void;
+  selectedReleaseTagName: string | undefined;
+  setSelectedReleaseTagName: (value: string | undefined) => void;
 }

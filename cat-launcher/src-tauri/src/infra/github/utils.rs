@@ -75,3 +75,22 @@ pub async fn fetch_github_releases(
 
   Ok(all_releases)
 }
+
+pub async fn fetch_github_release(
+  client: &Client,
+  repo: &str,
+  tag_name: &str,
+) -> Result<GitHubRelease, GitHubReleaseFetchError> {
+  let url = format!(
+    "https://api.github.com/repos/{}/releases/tags/{}",
+    repo, tag_name
+  );
+
+  let response = client.get(&url).send().await?;
+  response.error_for_status_ref()?;
+
+  let response_text = response.text().await?;
+  let release = serde_json::from_str::<GitHubRelease>(&response_text)?;
+
+  Ok(release)
+}

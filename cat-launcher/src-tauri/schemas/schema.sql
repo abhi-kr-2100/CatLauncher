@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS releases (
     prerelease INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     game_variant TEXT NOT NULL,
+    release_notes TEXT,
     FOREIGN KEY (game_variant) REFERENCES variants (name)
 );
 

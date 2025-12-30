@@ -101,7 +101,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   let pool = r2d2::Pool::new(manager)?;
 
   let conn = pool.get()?;
-  initialize_schema(&conn, &[schema_path])?;
+  initialize_schema(&conn, &schema_path, &resources_dir)?;
 
   app.manage(SqliteReleasesRepository::new(pool.clone()));
   app.manage(SqliteBackupRepository::new(pool.clone()));

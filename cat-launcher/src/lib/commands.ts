@@ -456,3 +456,18 @@ export async function uninstallThirdPartySoundpack(
 export async function confirmQuit(): Promise<void> {
   await invoke("confirm_quit");
 }
+
+export async function fetchReleaseNotes(
+  variant: GameVariant,
+  releaseTagName: string,
+): Promise<string | null> {
+  const response = await invoke<string | null>(
+    "fetch_release_notes",
+    {
+      variant,
+      releaseTagName,
+    },
+  );
+
+  return response;
+}

@@ -24,7 +24,7 @@ export interface GameVariantProps {
 export default function GameVariantCard({
   variantInfo,
 }: GameVariantProps) {
-  const [selectedReleaseId, setSelectedReleaseId] = useState<
+  const [selectedReleaseTagName, setSelectedReleaseTagName] = useState<
     string | undefined
   >();
   const { attributes, listeners, setNodeRef, style } =
@@ -55,19 +55,19 @@ export default function GameVariantCard({
         <TipOfTheDay variant={variantInfo.id} />
         <ReleaseSelector
           variant={variantInfo.id}
-          selectedReleaseId={selectedReleaseId}
-          setSelectedReleaseId={setSelectedReleaseId}
+          selectedReleaseTagName={selectedReleaseTagName}
+          setSelectedReleaseTagName={setSelectedReleaseTagName}
         />
       </CardContent>
       <CardFooter className="flex flex-col gap-4 items-stretch">
         <InteractionButton
           variant={variantInfo.id}
-          selectedReleaseId={selectedReleaseId}
-          setSelectedReleaseId={setSelectedReleaseId}
+          selectedReleaseId={selectedReleaseTagName}
+          setSelectedReleaseId={setSelectedReleaseTagName}
         />
         <PlayTime
           variant={variantInfo.id}
-          releaseId={selectedReleaseId}
+          releaseId={selectedReleaseTagName}
         />
       </CardFooter>
     </Card>

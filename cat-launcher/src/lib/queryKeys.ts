@@ -65,4 +65,7 @@ export const queryKeys = {
 
   lastPlayedWorld: (variant: GameVariant) =>
     ["last_played_world", variant] as const,
+
+  releaseNotes: (variant: GameVariant, releaseTagName: string) =>
+    ["release_notes", variant, releaseTagName] as const,
 };
