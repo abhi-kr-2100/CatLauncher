@@ -4,7 +4,7 @@ use tauri::{command, State};
 use cat_macros::CommandErrorSerialize;
 
 use crate::active_release::active_release::ActiveReleaseError;
-use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+use crate::active_release::repository::active_release_repository::ActiveReleaseRepository;
 use crate::variants::GameVariant;
 
 #[derive(
@@ -21,10 +21,11 @@ pub enum ActiveReleaseCommandError {
 #[command]
 pub async fn get_active_release(
   variant: GameVariant,
-  repository: State<'_, SqliteActiveReleaseRepository>,
+  repository: State<'_, Box<dyn ActiveReleaseRepository>>,
 ) -> Result<Option<String>, ActiveReleaseCommandError> {
+  let repository = repository.inner();
   let active_release =
-    variant.get_active_release(&*repository).await?;
+    variant.get_active_release(&**repository).await?;
 
   Ok(active_release)
 }

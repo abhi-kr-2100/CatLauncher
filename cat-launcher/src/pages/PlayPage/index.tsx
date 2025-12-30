@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import { useGameVariants } from "@/hooks/useGameVariants";
+import { t } from "@/i18n";
 import { toastCL } from "@/lib/utils";
 import GameVariantCard from "./GameVariantCard";
 
@@ -27,7 +28,11 @@ function PlayPage() {
     error: gameVariantsErrorObj,
   } = useGameVariants({
     onOrderUpdateError: (error) => {
-      toastCL("error", "Failed to update game variants order", error);
+      toastCL(
+        "error",
+        t("i18n.error.failedToUpdateGameVariantsOrder"),
+        error,
+      );
     },
   });
 
@@ -55,12 +60,15 @@ function PlayPage() {
   }
 
   if (gameVariantsLoading) {
-    return <p>Loading...</p>;
+    return <p>{t("i18n.loading")}</p>;
   }
 
   if (gameVariantsError) {
     return (
-      <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
+      <p>
+        {t("i18n.error")}:{" "}
+        {gameVariantsErrorObj?.message ?? t("i18n.error.unknown")}
+      </p>
     );
   }
 
