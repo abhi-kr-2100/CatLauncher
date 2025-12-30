@@ -68,10 +68,10 @@ pub async fn get_last_activity_for_third_party_mod(
   let mod_data =
     get_third_party_mod_by_id(mod_id, variant, resource_dir).await?;
 
-  let github_url = mod_data.activity.github;
+  let github_url = &mod_data.activity.github;
 
-  let repo = extract_repo(&github_url)
-    .ok_or(GetLastActivityError::NoGithubActivity)?;
+  let repo =
+    extract_repo(github_url).ok_or(GetLastActivityError::NoGithubActivity)?;
 
   let last_commit = get_last_commit(&repo, client).await?;
   let last_commit_date = last_commit.commit.author.date;

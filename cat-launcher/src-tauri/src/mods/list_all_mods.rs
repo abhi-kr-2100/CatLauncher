@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::io;
 use std::path::Path;
+use std::sync::Mutex;
 
+use once_cell::sync::Lazy;
 use tokio::fs::{read_dir, read_to_string};
 
 use crate::active_release::repository::{
@@ -11,6 +13,7 @@ use crate::infra::utils::{sort_assets, OS};
 use crate::mods::paths::{
   get_mods_resource_path, get_stock_mods_dir, GetStockModsDirError,
 };
+use crate::mods::translators::{self, RemoteMod};
 use crate::mods::types::{Mod, StockMod, ThirdPartyMod};
 use crate::variants::GameVariant;
 
@@ -164,6 +167,10 @@ async fn list_all_stock_mods(
   Ok(mods)
 }
 
+static THIRD_PARTY_MODS_CACHE: Lazy<
+  Mutex<HashMap<GameVariant, Vec<Mod>>>,
+> = Lazy::new(|| Mutex::new(HashMap::new()));
+
 #[derive(thiserror::Error, Debug)]
 pub enum ListThirdPartyModsError {
   #[error("failed to read mods.json: {0}")]
@@ -171,44 +178,59 @@ pub enum ListThirdPartyModsError {
 
   #[error("failed to parse mods.json: {0}")]
   ParseModsJson(#[from] serde_json::Error),
+
+  #[error("failed to fetch remote mods: {0}")]
+  FetchMods(#[from] reqwest::Error),
 }
 
 pub async fn list_all_third_party_mods(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<Mod>, ListThirdPartyModsError> {
-  // Construct the path to mods.json
-  let mods_json_path = get_mods_resource_path(resource_dir);
-
-  // Try to read the mods.json file
-  let content = match read_to_string(&mods_json_path).await {
-    Ok(content) => content,
-    Err(e) => return Err(ListThirdPartyModsError::ReadModsJson(e)),
-  };
-
-  let mods_data: HashMap<
-    GameVariant,
-    HashMap<String, serde_json::Value>,
-  > = serde_json::from_str(&content)?;
-
-  let variant_mods = match mods_data.get(game_variant) {
-    Some(mods) => mods,
-    None => return Ok(Vec::new()),
-  };
-
-  let mut mods = Vec::new();
-  for mod_data in variant_mods.values() {
-    let third_party_mod =
-      serde_json::from_value::<ThirdPartyMod>(mod_data.clone());
-    match third_party_mod {
-      Ok(third_party_mod) => {
-        mods.push(Mod::ThirdParty(third_party_mod))
-      }
-      Err(e) => {
-        return Err(ListThirdPartyModsError::ParseModsJson(e))
-      }
+  {
+    let cache = THIRD_PARTY_MODS_CACHE.lock().unwrap();
+    if let Some(mods) = cache.get(game_variant) {
+      return Ok(mods.clone());
     }
   }
 
+  let mods = if game_variant == &GameVariant::BrightNights {
+    let remote_mods_url =
+      "https://mods.cataclysmbn.org/generated/mods.json";
+    let response = reqwest::get(remote_mods_url).await?;
+    let remote_mods: Vec<RemoteMod> = response.json().await?;
+
+    let mut mods = Vec::new();
+    let translated_mods = translators::translate_mods(remote_mods);
+    for (_, third_party_mod) in translated_mods {
+      mods.push(Mod::ThirdParty(third_party_mod));
+    }
+    mods
+  } else {
+    let mods_json_path = get_mods_resource_path(resource_dir);
+    let content = read_to_string(&mods_json_path).await?;
+    let mods_data: HashMap<
+      GameVariant,
+      HashMap<String, serde_json::Value>,
+    > = serde_json::from_str(&content)?;
+
+    let variant_mods = match mods_data.get(game_variant) {
+      Some(mods) => mods,
+      None => return Ok(Vec::new()),
+    };
+
+    let mut mods = Vec::new();
+    for mod_data in variant_mods.values() {
+      let third_party_mod =
+        serde_json::from_value::<ThirdPartyMod>(mod_data.clone())?;
+      mods.push(Mod::ThirdParty(third_party_mod));
+    }
+    mods
+  };
+
+  {
+    let mut cache = THIRD_PARTY_MODS_CACHE.lock().unwrap();
+    cache.insert(game_variant.clone(), mods.clone());
+  }
   Ok(mods)
 }
