@@ -47,20 +47,11 @@ pub enum ReleasesUpdateStatus {
 }
 
 impl GameVariant {
-  pub async fn fetch_releases<E, F>(
+  pub async fn get_initial_releases_payload<E: Error>(
     &self,
-    client: &Client,
     resources_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
-    on_releases: F,
-  ) -> Result<(), FetchReleasesError<E>>
-  where
-    E: Error,
-    F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
-  {
-    // Both default and cached releases are stored locally, and are quick to fetch.
-    // We fetch them together so that if the last played release was cached, the frontend
-    // can preselect it.
+  ) -> Result<ReleasesUpdatePayload, FetchReleasesError<E>> {
     let default_releases =
       get_default_releases(self, resources_dir).await;
     let cached_releases =
@@ -71,8 +62,14 @@ impl GameVariant {
       &merged,
       ReleasesUpdateStatus::Fetching,
     );
-    on_releases(payload).map_err(FetchReleasesError::Send)?;
+    Ok(payload)
+  }
 
+  pub async fn fetch_releases_from_github<E: Error>(
+    &self,
+    client: &Client,
+    releases_repository: &dyn ReleasesRepository,
+  ) -> Result<ReleasesUpdatePayload, FetchReleasesError<E>> {
     let repo = get_github_repo_for_variant(self);
     // Fetching 100 releases makes it likely that we have the last played release.
     // TODO: Fetch the last played release separately.
@@ -83,12 +80,11 @@ impl GameVariant {
       &fetched_releases,
       ReleasesUpdateStatus::Success,
     );
-    on_releases(payload).map_err(FetchReleasesError::Send)?;
 
     releases_repository
       .update_cached_releases(self, &fetched_releases)
       .await?;
 
-    Ok(())
+    Ok(payload)
   }
 }

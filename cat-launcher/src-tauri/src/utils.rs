@@ -5,7 +5,9 @@ use std::time::Duration;
 use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
+use crate::active_release::repository::active_release_repository::ActiveReleaseRepository;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+use crate::fetch_releases::repository::releases_repository::ReleasesRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
@@ -103,10 +105,13 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   let conn = pool.get()?;
   initialize_schema(&conn, &[schema_path])?;
 
-  app.manage(SqliteReleasesRepository::new(pool.clone()));
+  app.manage(Box::new(SqliteReleasesRepository::new(pool.clone()))
+    as Box<dyn ReleasesRepository>);
   app.manage(SqliteBackupRepository::new(pool.clone()));
   app.manage(SqliteManualBackupRepository::new(pool.clone()));
-  app.manage(SqliteActiveReleaseRepository::new(pool.clone()));
+  app.manage(Box::new(SqliteActiveReleaseRepository::new(
+    pool.clone(),
+  )) as Box<dyn ActiveReleaseRepository>);
   app.manage(SqlitePlayTimeRepository::new(pool.clone()));
   app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
   app.manage(SqliteThemePreferenceRepository::new(pool.clone()));

@@ -4,10 +4,8 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::fetch_releases::fetch_releases::{
-  FetchReleasesError, ReleasesUpdatePayload,
-};
-use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+use crate::fetch_releases::fetch_releases::FetchReleasesError;
+use crate::fetch_releases::repository::releases_repository::ReleasesRepository;
 use crate::variants::GameVariant;
 
 #[derive(
@@ -25,24 +23,25 @@ pub enum FetchReleasesCommandError {
 pub async fn fetch_releases_for_variant(
   app_handle: AppHandle,
   variant: GameVariant,
-  releases_repository: State<'_, SqliteReleasesRepository>,
+  releases_repository: State<'_, Box<dyn ReleasesRepository>>,
   client: State<'_, Client>,
 ) -> Result<(), FetchReleasesCommandError> {
   let resources_dir = app_handle.path().resource_dir()?;
+  let releases_repository = releases_repository.inner();
+  let client = client.inner();
 
-  let on_releases = move |payload: ReleasesUpdatePayload| {
-    app_handle.emit("releases-update", payload)?;
-    Ok(())
-  };
-
-  variant
-    .fetch_releases(
-      &client,
+  let initial_releases = variant
+    .get_initial_releases_payload(
       &resources_dir,
-      &*releases_repository,
-      on_releases,
+      &**releases_repository,
     )
     .await?;
+  app_handle.emit("releases-update", initial_releases)?;
+
+  let releases = variant
+    .fetch_releases_from_github(client, &**releases_repository)
+    .await?;
+  app_handle.emit("releases-update", releases)?;
 
   Ok(())
 }
