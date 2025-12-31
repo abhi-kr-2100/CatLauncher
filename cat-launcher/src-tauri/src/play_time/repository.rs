@@ -1,23 +1,20 @@
 use async_trait::async_trait;
+use r2d2::Error as R2d2Error;
+use rusqlite::Error as RusqliteError;
+use tokio::task::JoinError;
 
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum PlayTimeRepositoryError {
-  #[error("Failed to log play time: {0}")]
-  LogPlayTime(Box<dyn std::error::Error + Send + Sync>),
+  #[error("Database connection error: {0}")]
+  Connection(#[from] R2d2Error),
 
-  #[error("Failed to get play time for version: {0}")]
-  GetPlayTimeForVersion(Box<dyn std::error::Error + Send + Sync>),
-
-  #[error("Failed to get play time for variant: {0}")]
-  GetPlayTimeForVariant(Box<dyn std::error::Error + Send + Sync>),
-
-  #[error("Failed to get total play time: {0}")]
-  GetTotalPlayTime(Box<dyn std::error::Error + Send + Sync>),
+  #[error("Database query error: {0}")]
+  Query(#[from] RusqliteError),
 
   #[error("Task join error: {0}")]
-  JoinError(Box<dyn std::error::Error + Send + Sync>),
+  Join(#[from] JoinError),
 
   #[error("Invalid duration: {0}")]
   InvalidDuration(i64),

@@ -13,6 +13,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
@@ -20,14 +21,25 @@ import GameVariantCard from "./GameVariantCard";
 
 function PlayPage() {
   const {
-    gameVariants: orderedItems,
+    gameVariants: orderedItems = [],
     updateOrder,
     isLoading: gameVariantsLoading,
     isError: gameVariantsError,
     error: gameVariantsErrorObj,
-  } = useGameVariants({
-    onOrderUpdateError: (error) => {
-      toastCL("error", "Failed to update game variants order", error);
+  } = useGameVariants<GameVariantInfo[], Error, GameVariantInfo[]>({
+    mutationOptions: {
+      onError: (error: Error) => {
+        toastCL(
+          "error",
+          "Failed to update game variants order",
+          error,
+        );
+      },
+    },
+    queryOptions: {
+      onError: (error: Error) => {
+        toastCL("error", "Failed to fetch game variants", error);
+      },
     },
   });
 
@@ -43,10 +55,10 @@ function PlayPage() {
 
     if (over && active.id !== over.id) {
       const oldIndex = orderedItems.findIndex(
-        (item) => item.id === active.id,
+        (item: GameVariantInfo) => item.id === active.id,
       );
       const newIndex = orderedItems.findIndex(
-        (item) => item.id === over.id,
+        (item: GameVariantInfo) => item.id === over.id,
       );
 
       const newOrder = arrayMove(orderedItems, oldIndex, newIndex);
@@ -55,12 +67,14 @@ function PlayPage() {
   }
 
   if (gameVariantsLoading) {
-    return <p>Loading...</p>;
+    return <p>{"Loading..."}</p>;
   }
 
   if (gameVariantsError) {
     return (
-      <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
+      <p>
+        {"Error:"} {gameVariantsErrorObj?.message ?? "Unknown error"}
+      </p>
     );
   }
 
@@ -71,11 +85,11 @@ function PlayPage() {
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={orderedItems.map((item) => item.id)}
+        items={orderedItems.map((item: GameVariantInfo) => item.id)}
         strategy={verticalListSortingStrategy}
       >
         <main className="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-2">
-          {orderedItems.map((variantInfo) => (
+          {orderedItems.map((variantInfo: GameVariantInfo) => (
             <GameVariantCard
               key={variantInfo.id}
               variantInfo={variantInfo}

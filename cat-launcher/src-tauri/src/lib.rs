@@ -69,7 +69,7 @@ use tauri::{command, AppHandle};
 
 #[command]
 fn confirm_quit(app_handle: AppHandle) {
-  app_handle.exit(0)
+  app_handle.exit(0);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -45,16 +45,12 @@ pub async fn launch_game(
 ) -> Result<(), LaunchGameCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
-
   let time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
-
   let os = get_os_enum(OS)?;
-
   let emitter = app_handle.clone();
   let on_game_event = move |event: GameEvent| {
     let emitter = emitter.clone();
     async move {
-      // We cannot handle emit errors
       let _ = emitter.emit("game-event", event);
     }
   };
