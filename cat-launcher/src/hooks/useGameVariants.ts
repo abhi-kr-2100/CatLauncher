@@ -1,7 +1,7 @@
 import {
-  useMutation,
-  useQuery,
   useQueryClient,
+  UseMutationOptions,
+  UseQueryOptions,
 } from "@tanstack/react-query";
 
 import { GameVariant } from "@/generated-types/GameVariant";
@@ -11,17 +11,79 @@ import {
   updateGameVariantOrder,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect } from "react";
+import { useApiMutation } from "./useApiMutation";
+import { useApiQuery } from "./useApiQuery";
 
-interface UseGameVariantsOptions {
-  onOrderUpdateError?: (error: unknown) => void;
-  onFetchError?: (error: unknown) => void;
+type GameVariantsQueryOptions<
+  TQueryFnData = GameVariantInfo[],
+  TError = Error,
+  TData = GameVariantInfo[],
+> = Omit<
+  UseQueryOptions<TQueryFnData, TError, TData>,
+  "queryKey" | "queryFn"
+>;
+
+type GameVariantsMutationOptions<
+  TData = void,
+  TError = Error,
+  TVariables = {
+    ids: GameVariant[];
+    newItems: GameVariantInfo[];
+  },
+  TContext = unknown,
+> = Omit<
+  UseMutationOptions<TData, TError, TVariables, TContext>,
+  "mutationFn"
+>;
+
+interface UseGameVariantsOptions<
+  TQueryFnData = GameVariantInfo[],
+  TQueryError = Error,
+  TQueryData = GameVariantInfo[],
+  TMutationData = void,
+  TMutationError = Error,
+  TMutationVariables = {
+    ids: GameVariant[];
+    newItems: GameVariantInfo[];
+  },
+  TMutationContext = { previousGameVariants?: GameVariantInfo[] },
+> {
+  queryOptions?: GameVariantsQueryOptions<
+    TQueryFnData,
+    TQueryError,
+    TQueryData
+  >;
+  mutationOptions?: GameVariantsMutationOptions<
+    TMutationData,
+    TMutationError,
+    TMutationVariables,
+    TMutationContext
+  >;
 }
 
-export function useGameVariants({
-  onOrderUpdateError,
-  onFetchError,
-}: UseGameVariantsOptions = {}) {
+export function useGameVariants<
+  TQueryFnData = GameVariantInfo[],
+  TQueryError = Error,
+  TQueryData = GameVariantInfo[],
+  TMutationData = void,
+  TMutationError = Error,
+  TMutationVariables = {
+    ids: GameVariant[];
+    newItems: GameVariantInfo[];
+  },
+  TMutationContext = { previousGameVariants?: GameVariantInfo[] },
+>({
+  queryOptions,
+  mutationOptions,
+}: UseGameVariantsOptions<
+  TQueryFnData,
+  TQueryError,
+  TQueryData,
+  TMutationData,
+  TMutationError,
+  TMutationVariables,
+  TMutationContext
+> = {}) {
   const queryClient = useQueryClient();
 
   const {
@@ -29,25 +91,25 @@ export function useGameVariants({
     isLoading,
     isError,
     error,
-  } = useQuery<GameVariantInfo[]>({
+  } = useApiQuery<TQueryFnData, TQueryError, TQueryData>({
     queryKey: queryKeys.gameVariantsInfo(),
-    queryFn: fetchGameVariantsInfo,
+    queryFn:
+      fetchGameVariantsInfo as unknown as () => Promise<TQueryFnData>,
+    ...queryOptions,
   });
 
-  useEffect(() => {
-    if (isError) {
-      onFetchError?.(error);
-    }
-  }, [isError, error, onFetchError]);
-
-  const { mutate } = useMutation({
-    mutationFn: ({
-      ids,
-    }: {
-      ids: GameVariant[];
-      newItems: GameVariantInfo[];
-    }) => updateGameVariantOrder(ids),
-    onMutate: async ({ newItems }) => {
+  const { mutate } = useApiMutation<
+    TMutationData,
+    TMutationError,
+    TMutationVariables,
+    TMutationContext
+  >({
+    ...mutationOptions,
+    mutationFn: ({ ids }: { ids: GameVariant[] }) =>
+      updateGameVariantOrder(
+        ids,
+      ) as unknown as Promise<TMutationData>,
+    onMutate: async (variables: TMutationVariables) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.gameVariantsInfo(),
       });
@@ -58,24 +120,36 @@ export function useGameVariants({
 
       queryClient.setQueryData<GameVariantInfo[]>(
         queryKeys.gameVariantsInfo(),
-        newItems,
+        (
+          variables as {
+            newItems: GameVariantInfo[];
+          }
+        ).newItems,
       );
 
-      return { previousGameVariants };
+      const context =
+        (await mutationOptions?.onMutate?.(variables)) || {};
+
+      return { previousGameVariants, ...context } as TMutationContext;
     },
-    onError: (error, _variables, context) => {
-      if (context?.previousGameVariants) {
+    onError: (error, variables, context) => {
+      if (
+        (context as { previousGameVariants?: GameVariantInfo[] })
+          ?.previousGameVariants
+      ) {
         queryClient.setQueryData(
           queryKeys.gameVariantsInfo(),
-          context.previousGameVariants,
+          (context as { previousGameVariants: GameVariantInfo[] })
+            .previousGameVariants,
         );
       }
-      onOrderUpdateError?.(error);
+      mutationOptions?.onError?.(error, variables, context);
     },
-    onSettled: () => {
+    onSettled: (data, error, variables, context) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.gameVariantsInfo(),
       });
+      mutationOptions?.onSettled?.(data, error, variables, context);
     },
   });
 
@@ -83,7 +157,7 @@ export function useGameVariants({
     mutate({
       ids: newOrder.map((item) => item.id),
       newItems: newOrder,
-    });
+    } as TMutationVariables);
   };
 
   return {
