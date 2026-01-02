@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, IntoStaticStr};
 use ts_rs::TS;
 
-use crate::theme::theme_preference_repository::{
+use crate::theme::repository::{
   ThemePreferenceRepository, ThemePreferenceRepositoryError,
 };
 

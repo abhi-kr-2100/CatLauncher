@@ -2,7 +2,7 @@ use cat_macros::CommandErrorSerialize;
 use strum::IntoStaticStr;
 use tauri::State;
 
-use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
+use crate::theme::repository::SqliteThemePreferenceRepository;
 use crate::theme::theme::{
   get_theme_preference, update_theme_preference, GetThemeError,
   Theme, ThemePreference, UpdateThemeError,

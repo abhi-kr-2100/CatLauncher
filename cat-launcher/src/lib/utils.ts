@@ -68,10 +68,6 @@ export function setImmediateInterval(
   return setInterval(callback, timeout);
 }
 
-export function getHumanFriendlyText(text: string): string {
-  return text.replace(/_/g, " ").replace(/\s+/g, " ").trim();
-}
-
 export function formatBytes(bytes: number): [number, string] {
   if (bytes == 0) {
     return [0, "B"];

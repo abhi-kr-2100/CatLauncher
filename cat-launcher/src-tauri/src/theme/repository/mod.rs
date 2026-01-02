@@ -1,6 +1,8 @@
+pub mod sqlite_theme_preference_repository;
 use async_trait::async_trait;
 
 use crate::theme::theme::{Theme, ThemePreference};
+pub use sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ThemePreferenceRepositoryError {
