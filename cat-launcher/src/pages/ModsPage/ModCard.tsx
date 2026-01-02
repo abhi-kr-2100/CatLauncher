@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { GameVariant } from "@/generated-types/GameVariant";
 import type { Mod } from "@/generated-types/Mod";
-import { getHumanFriendlyText, toastCL } from "@/lib/utils";
+import { toastCL } from "@/lib/utils";
 import {
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
@@ -39,7 +39,25 @@ function getModType(mod: Mod): string {
 }
 
 function getModCategory(mod: Mod): string {
-  return getHumanFriendlyText(mod.content.category);
+  const CATEGORY_MAP: Record<string, string> = {
+    graphical: "Graphical",
+    content: "Content",
+    creature: "Creature",
+    "monster-exclude": "Monster Exclude",
+    "no-hope": "No Hope",
+    vehicles: "Vehicles",
+    "vehicle-additions": "Vehicle Additions",
+    rebalance: "Rebalance",
+    "sound-related": "Sound Related",
+    "the-arcana-and-magic-items": "The Arcana and Magic Items",
+    "user-interface": "User Interface",
+    "world-generation": "World Generation",
+    "magical-or-supernatural": "Magical or Supernatural",
+    "magyclism-spells-and-other-magic":
+      "Magyclism Spells and Other Magic",
+  };
+
+  return CATEGORY_MAP[mod.content.category] ?? mod.content.category;
 }
 
 export default function ModCard({ variant, mod }: ModCardProps) {

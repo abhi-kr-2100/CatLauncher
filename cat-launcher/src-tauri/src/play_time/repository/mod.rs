@@ -1,6 +1,8 @@
+pub mod sqlite_play_time_repository;
 use async_trait::async_trait;
 
 use crate::variants::GameVariant;
+pub use sqlite_play_time_repository::SqlitePlayTimeRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum PlayTimeRepositoryError {

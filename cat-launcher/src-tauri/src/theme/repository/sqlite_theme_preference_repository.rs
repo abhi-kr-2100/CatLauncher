@@ -5,10 +5,10 @@ use r2d2_sqlite::SqliteConnectionManager;
 use rusqlite::OptionalExtension;
 use tokio::task;
 
-use crate::theme::theme::{Theme, ThemePreference};
-use crate::theme::theme_preference_repository::{
+use crate::theme::repository::{
   ThemePreferenceRepository, ThemePreferenceRepositoryError,
 };
+use crate::theme::theme::{Theme, ThemePreference};
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 

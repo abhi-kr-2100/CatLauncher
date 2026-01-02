@@ -9,7 +9,7 @@ use crate::play_time::play_time::{
   log_play_time as log_play_time_feature,
 };
 use crate::play_time::repository::PlayTimeRepositoryError;
-use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
+use crate::play_time::repository::SqlitePlayTimeRepository;
 use crate::variants::game_variant::GameVariant;
 
 #[derive(
