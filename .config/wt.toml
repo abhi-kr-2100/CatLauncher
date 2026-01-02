@@ -1,0 +1,3 @@
+[post-create]
+env = "cp .env.example .env && direnv allow"
+install = "pnpm --prefix cat-launcher install"
