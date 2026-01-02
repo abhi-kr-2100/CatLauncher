@@ -30,6 +30,7 @@ You can combine shadcn/ui components to create helper components. Keep these hel
 
 * Raw `useQuery` and `useMutation` hooks are not used. Instead create custom hooks that wrap `useQuery` and `useMutation`.
 * All query keys must be stored in the `cat-launcher/src/lib/queryKeys.ts` file.
+* Communication with the Tauri backend must only happen through the functions defined in the `cat-launcher/src/lib/commands.ts` file.
 
 ## Strings
 
