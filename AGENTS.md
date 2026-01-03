@@ -29,6 +29,23 @@ You can combine shadcn/ui components to create helper components. Keep these hel
 `tanstack-query` is used for data fetching and mutations.
 
 * Raw `useQuery` and `useMutation` hooks are not used. Instead create custom hooks that wrap `useQuery` and `useMutation`.
+* The custom hooks should take one or more callbacks depending on the number of different possible errors.
+
+```typescript
+export default useGames(onGameLoadError?: (error: Error) => void) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: queryKeys.games(),
+    queryFn: getGames,
+  });
+
+  useEffect(() => {
+    if (error && onGameLoadError) {
+      onGameLoadError(error);
+    }
+  }, [error]);
+}
+```
+
 * All query keys must be stored in the `cat-launcher/src/lib/queryKeys.ts` file.
 * Communication with the Tauri backend must only happen through the functions defined in the `cat-launcher/src/lib/commands.ts` file.
 
