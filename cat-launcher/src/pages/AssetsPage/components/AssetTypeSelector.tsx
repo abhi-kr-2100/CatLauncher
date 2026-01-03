@@ -2,7 +2,7 @@ import {
   VirtualizedCombobox,
   type ComboboxItem,
 } from "@/components/virtualized-combobox";
-import type { AssetType } from "./types";
+import type { AssetType } from "../lib/types";
 
 const ASSET_TYPE_LABELS: Record<AssetType, string> = {
   mods: "Mods",

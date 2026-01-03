@@ -3,7 +3,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CombinedBackup } from "./types/backups";
+import { CombinedBackup } from "../lib/types/backups";
 
 type ColumnsFactory = (options: {
   openDeleteDialog: (backup: CombinedBackup) => void;

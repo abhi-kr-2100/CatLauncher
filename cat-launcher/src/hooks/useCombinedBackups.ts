@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
-import { CombinedBackup } from "@/pages/BackupsPage/types/backups";
+import { CombinedBackup } from "@/pages/BackupsPage/lib/types/backups";
 import { useBackups } from "./useBackups";
 import { useManualBackups } from "./useManualBackups";
 import { useDeleteBackup } from "./useDeleteBackup";

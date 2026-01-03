@@ -18,7 +18,7 @@ import {
   onFetchingReleasesFailed,
   startFetchingReleases,
 } from "@/store/releasesSlice";
-import { useReleaseEvents } from "./hooks";
+import { useReleaseEvents } from "../hooks/hooks";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 

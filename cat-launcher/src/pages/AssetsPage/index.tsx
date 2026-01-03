@@ -4,8 +4,8 @@ import VariantSelector from "@/components/VariantSelector";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedVariant } from "@/store/selectedVariantSlice";
-import AssetTypeSelector from "./AssetTypeSelector";
-import { type AssetType, ASSET_COMPONENTS } from "./types";
+import AssetTypeSelector from "./components/AssetTypeSelector";
+import { AssetType, ASSET_COMPONENTS } from "./lib/types";
 
 function AssetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =

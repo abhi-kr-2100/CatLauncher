@@ -1,6 +1,6 @@
-import ModsList from "../ModsPage/ModsList";
-import SoundpacksList from "../SoundpacksPage/SoundpacksList";
-import TilesetsList from "../TilesetsPage/TilesetsList";
+import ModsList from "../../ModsPage/components/ModsList";
+import SoundpacksList from "../../SoundpacksPage/SoundpacksList";
+import TilesetsList from "../../TilesetsPage/TilesetsList";
 
 export type AssetType = "mods" | "soundpacks" | "tilesets";
 

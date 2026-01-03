@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { CombinedBackup } from "./types/backups";
+import { CombinedBackup } from "../lib/types/backups";
 
 export type BackupFilterFn = (backup: CombinedBackup) => boolean;
 
