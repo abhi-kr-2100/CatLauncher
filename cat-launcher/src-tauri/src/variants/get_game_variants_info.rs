@@ -1,6 +1,5 @@
 use strum::IntoEnumIterator;
 
-use crate::settings::Settings;
 use crate::variants::links::Link;
 use crate::variants::repository::game_variant_order_repository::GameVariantOrderRepository;
 use crate::variants::GameVariant;
@@ -15,14 +14,11 @@ pub struct GameVariantInfo {
 }
 
 impl GameVariantInfo {
-  pub fn from_variant(
-    variant: GameVariant,
-    settings: &Settings,
-  ) -> Self {
+  pub fn from_variant(variant: GameVariant) -> Self {
     GameVariantInfo {
       id: variant,
-      name: variant.name(settings).to_string(),
-      links: variant.links(settings).to_vec(),
+      name: variant.name().to_string(),
+      links: variant.links(),
     }
   }
 }
@@ -34,7 +30,6 @@ pub enum GetGameVariantsInfoError {
 }
 
 pub async fn get_game_variants_info(
-  settings: &Settings,
   game_variant_order_repository: &impl GameVariantOrderRepository,
 ) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoError> {
   let ordered_variants =
@@ -48,7 +43,7 @@ pub async fn get_game_variants_info(
 
   let result = variants_to_display
     .into_iter()
-    .map(|variant| GameVariantInfo::from_variant(variant, settings))
+    .map(GameVariantInfo::from_variant)
     .collect();
   Ok(result)
 }
