@@ -1,14 +1,14 @@
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { GameVariant } from "@/generated-types/GameVariant";
-import { useGetLastModActivity } from "./hooks";
 import { toastCL } from "@/lib/utils";
+import { useGetLastModActivity } from "../hooks/hooks";
 import {
   getStabilityRating,
   getStabilityLevelLabel,
   type StabilityRating,
-} from "./lib/stabilityRating";
-import { getRelativeTimeDisplay } from "./lib/timeFormatting";
+} from "../lib/stabilityRating";
+import { getRelativeTimeDisplay } from "../lib/timeFormatting";
 
 interface ModInstallationConfirmationDialogProps {
   open: boolean;
@@ -55,7 +55,7 @@ export function ModInstallationConfirmationDialog({
     open,
     modId,
     variant,
-    (error) =>
+    (error: unknown) =>
       toastCL(
         "error",
         "Failed to fetch mod stability rating.",

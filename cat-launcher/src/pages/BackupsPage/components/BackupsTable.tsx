@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/DataTable";
 import { columns } from "./columns";
-import { CombinedBackup } from "./types/backups";
+import { CombinedBackup } from "../lib/types/backups";
 
 interface BackupsTableProps {
   rows: CombinedBackup[];

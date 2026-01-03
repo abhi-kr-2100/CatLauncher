@@ -9,12 +9,14 @@ import { useSearch } from "@/hooks/useSearch";
 import { toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedVariant } from "@/store/selectedVariantSlice";
-import BackupFilter, { BackupFilterFn } from "./BackupFilter";
-import { BackupsTable } from "./BackupsTable";
-import { DeleteBackupDialog } from "./DeleteBackupDialog";
-import { NewBackupDialog } from "./NewBackupDialog";
-import { RestoreBackupDialog } from "./RestoreBackupDialog";
-import { CombinedBackup } from "./types/backups";
+import { BackupsTable } from "./components/BackupsTable";
+import BackupFilter, {
+  BackupFilterFn,
+} from "./components/BackupFilter";
+import { NewBackupDialog } from "./components/NewBackupDialog";
+import { RestoreBackupDialog } from "./components/RestoreBackupDialog";
+import { DeleteBackupDialog } from "./components/DeleteBackupDialog";
+import { CombinedBackup } from "./lib/types/backups";
 
 function formatTimestampForSearch(timestamp: bigint): string {
   const date = new Date(Number(timestamp) * 1000);

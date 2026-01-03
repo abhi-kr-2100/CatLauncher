@@ -17,7 +17,7 @@ import {
   useGetThirdPartyModInstallationStatus,
   useInstallThirdPartyMod,
   useUninstallThirdPartyMod,
-} from "./hooks";
+} from "../hooks/hooks";
 import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
 import { PreInstalledButton } from "@/components/PreInstalledButton";
 
@@ -68,13 +68,15 @@ export default function ModCard({ variant, mod }: ModCardProps) {
     variant,
     modId,
     () => toastCL("success", "Mod installed successfully."),
-    (error) => toastCL("error", "Failed to install mod.", error),
+    (error: unknown) =>
+      toastCL("error", "Failed to install mod.", error),
   );
 
   const { isUninstalling, uninstall } = useUninstallThirdPartyMod(
     variant,
     () => toastCL("success", "Mod uninstalled successfully."),
-    (error) => toastCL("error", "Failed to uninstall mod.", error),
+    (error: unknown) =>
+      toastCL("error", "Failed to uninstall mod.", error),
   );
 
   const handleInstallClick = () => {

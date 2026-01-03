@@ -16,7 +16,7 @@ import {
 
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
-import GameVariantCard from "./GameVariantCard";
+import GameVariantCard from "./components/GameVariantCard";
 
 function PlayPage() {
   const {

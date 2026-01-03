@@ -20,7 +20,7 @@ import {
   useInstallationStatus,
   usePlayGame,
   useResumeLastWorld,
-} from "./hooks";
+} from "../hooks/hooks";
 
 export default function InteractionButton({
   variant,
