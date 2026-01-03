@@ -44,6 +44,9 @@ use crate::mods::commands::{
 use crate::play_time::commands::{
   get_play_time_for_variant, get_play_time_for_version, log_play_time,
 };
+use crate::settings::commands::{
+  get_fonts, get_settings, update_settings,
+};
 use crate::soundpacks::commands::{
   get_third_party_soundpack_installation_status_command,
   install_third_party_soundpack_command, list_all_soundpacks_command,
@@ -78,10 +81,10 @@ pub fn run() {
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_opener::init())
     .setup(|app| {
-      manage_settings(app)?;
       manage_http_client(app);
-      manage_downloader(app);
       manage_repositories(app)?;
+      manage_settings(app)?;
+      manage_downloader(app);
       manage_posthog(app);
 
       migrate_to_local_data_dir(app);
@@ -127,6 +130,9 @@ pub fn run() {
       get_preferred_theme,
       set_preferred_theme,
       get_last_played_world,
+      get_settings,
+      update_settings,
+      get_fonts,
       confirm_quit,
     ])
     .run(tauri::generate_context!())

@@ -137,3 +137,12 @@ CREATE TABLE IF NOT EXISTS installed_soundpacks (
 );
 
 CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_mods (game_variant);
+
+-- This table stores launcher settings.
+-- The _id column with CHECK(_id = 1) ensures only one row can exist.
+CREATE TABLE IF NOT EXISTS settings (
+    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
+    max_backups INTEGER NOT NULL CHECK(max_backups >= 0 AND max_backups <= 20),
+    parallel_requests INTEGER NOT NULL CHECK(parallel_requests >= 1 AND parallel_requests <= 16),
+    font_path TEXT
+);
