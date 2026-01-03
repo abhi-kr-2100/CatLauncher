@@ -6,11 +6,13 @@ use thiserror::Error;
 use crate::constants::{
   DEFAULT_MAX_BACKUPS, DEFAULT_PARALLEL_REQUESTS,
 };
+use crate::settings::types::Font;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Settings {
   pub max_backups: NonZeroUsize,
   pub parallel_requests: NonZeroU16,
+  pub font: Option<Font>,
 }
 
 #[derive(Debug, Error)]
@@ -28,6 +30,7 @@ impl Default for Settings {
       max_backups: NonZeroUsize::new(DEFAULT_MAX_BACKUPS).unwrap(),
       parallel_requests: NonZeroU16::new(DEFAULT_PARALLEL_REQUESTS)
         .unwrap(),
+      font: None,
     }
   }
 }
