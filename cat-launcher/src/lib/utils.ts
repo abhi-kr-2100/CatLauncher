@@ -1,3 +1,4 @@
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import clsx, { type ClassValue } from "clsx";
 import { toast } from "sonner";
@@ -88,4 +89,33 @@ export function formatBytes(bytes: number): [number, string] {
   const size = sizes[i];
 
   return [number, size];
+}
+
+const loadedFonts = new Set<string>();
+
+/**
+ * Generates a stable, CSS-safe font family name for a given font path.
+ */
+function getFontFamily(path: string) {
+  let hash = 0;
+  for (let i = 0; i < path.length; i++) {
+    hash = (hash << 5) - hash + path.charCodeAt(i);
+    hash |= 0;
+  }
+  return `fp-${Math.abs(hash)}`;
+}
+
+export async function ensureFontLoaded(path: string) {
+  const family = getFontFamily(path);
+  if (loadedFonts.has(family)) {
+    return family;
+  }
+
+  const src = convertFileSrc(path);
+  const fontFace = new FontFace(family, `url("${src}")`);
+  const loaded = await fontFace.load();
+  document.fonts.add(loaded);
+  loadedFonts.add(family);
+
+  return family;
 }
