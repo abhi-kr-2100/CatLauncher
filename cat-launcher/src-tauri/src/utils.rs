@@ -6,6 +6,7 @@ use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+use crate::constants::PARALLEL_REQUESTS;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
 use crate::filesystem::paths::GetSchemaFilePathError;
@@ -23,7 +24,6 @@ use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::repository::settings_repository::SettingsRepository;
 use crate::settings::repository::settings_repository::GetSettingsError;
 use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
-use crate::settings::Settings;
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
@@ -165,12 +165,9 @@ async fn migrate_to_local_data_dir_impl(
 }
 
 pub fn manage_downloader(app: &App) {
-  let settings: tauri::State<Settings> = app.state();
   let client: tauri::State<reqwest::Client> = app.state();
-  let downloader = Downloader::new(
-    client.inner().clone(),
-    settings.parallel_requests,
-  );
+  let downloader =
+    Downloader::new(client.inner().clone(), PARALLEL_REQUESTS);
   app.manage(downloader);
 }
 

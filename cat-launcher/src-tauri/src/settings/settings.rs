@@ -1,19 +1,13 @@
-use std::num::{NonZeroU16, NonZeroUsize};
-
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use ts_rs::TS;
 
-use crate::constants::{
-  DEFAULT_MAX_BACKUPS, DEFAULT_PARALLEL_REQUESTS,
-};
 use crate::settings::types::Font;
 
 #[derive(Debug, Serialize, Deserialize, Clone, TS)]
 #[ts(export)]
+#[derive(Default)]
 pub struct Settings {
-  pub max_backups: NonZeroUsize,
-  pub parallel_requests: NonZeroU16,
   pub font: Option<Font>,
 }
 
@@ -24,15 +18,4 @@ pub enum LoadSettingsError {
 
   #[error("Could not parse settings.json")]
   Parse(#[from] serde_json::Error),
-}
-
-impl Default for Settings {
-  fn default() -> Self {
-    Self {
-      max_backups: NonZeroUsize::new(DEFAULT_MAX_BACKUPS).unwrap(),
-      parallel_requests: NonZeroU16::new(DEFAULT_PARALLEL_REQUESTS)
-        .unwrap(),
-      font: None,
-    }
-  }
 }

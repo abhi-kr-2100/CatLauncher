@@ -141,7 +141,5 @@ CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_mo
 -- This table stores application settings.
 CREATE TABLE IF NOT EXISTS settings (
     _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
-    max_backups INTEGER NOT NULL CHECK (max_backups > 0),
-    parallel_requests INTEGER NOT NULL CHECK (parallel_requests > 0),
     font_path TEXT
 );
