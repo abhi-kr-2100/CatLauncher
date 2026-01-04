@@ -2,7 +2,14 @@ import AboutPage from "@/pages/AboutPage";
 import AssetsPage from "@/pages/AssetsPage";
 import BackupsPage from "@/pages/BackupsPage";
 import PlayPage from "@/pages/PlayPage";
-import { FileUp, Gamepad2, Info, Music } from "lucide-react";
+import SettingsPage from "@/pages/SettingsPage";
+import {
+  FileUp,
+  Gamepad2,
+  Info,
+  Music,
+  Settings,
+} from "lucide-react";
 
 export const routes = [
   {
@@ -22,6 +29,12 @@ export const routes = [
     element: <AssetsPage />,
     label: "Mods, Music & Tiles",
     icon: Music,
+  },
+  {
+    path: "/settings",
+    element: <SettingsPage />,
+    label: "Settings",
+    icon: Settings,
   },
   {
     path: "/about",

@@ -2,7 +2,6 @@ use tauri::{command, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::settings::Settings;
 use crate::variants::get_game_variants_info::{self, GameVariantInfo, GetGameVariantsInfoError};
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 use crate::variants::update_game_variant_order::{self, UpdateGameVariantOrderError};
@@ -43,14 +42,12 @@ pub enum GetGameVariantsInfoCommandError {
 
 #[command]
 pub async fn get_game_variants_info(
-  settings: State<'_, Settings>,
   game_variant_order_repository: State<
     '_,
     SqliteGameVariantOrderRepository,
   >,
 ) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoCommandError> {
   let res = get_game_variants_info::get_game_variants_info(
-    &settings,
     &*game_variant_order_repository,
   )
   .await?;

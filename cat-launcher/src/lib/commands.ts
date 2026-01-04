@@ -2,6 +2,8 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
+import type { Font } from "@/generated-types/Font";
+import type { Settings } from "@/generated-types/Settings";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
@@ -455,4 +457,25 @@ export async function uninstallThirdPartySoundpack(
 
 export async function confirmQuit(): Promise<void> {
   await invoke("confirm_quit");
+}
+
+export async function getFonts(): Promise<Font[]> {
+  const response = await invoke<Font[]>("get_fonts");
+  return response;
+}
+
+export async function getSettings(): Promise<Settings> {
+  const response = await invoke<Settings>("get_settings");
+  return response;
+}
+
+export async function getDefaultSettings(): Promise<Settings> {
+  const response = await invoke<Settings>("get_default_settings");
+  return response;
+}
+
+export async function updateSettings(
+  settings: Settings,
+): Promise<void> {
+  await invoke("update_settings", { settings });
 }
