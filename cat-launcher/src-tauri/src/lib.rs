@@ -78,10 +78,10 @@ pub fn run() {
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_opener::init())
     .setup(|app| {
-      manage_settings(app)?;
       manage_http_client(app);
-      manage_downloader(app);
       manage_repositories(app)?;
+      manage_settings(app)?;
+      manage_downloader(app);
       manage_posthog(app);
 
       migrate_to_local_data_dir(app);

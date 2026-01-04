@@ -45,7 +45,6 @@
     "resources": [
       "releases/*.json",
       "schemas/schema.sql",
-      "settings.json",
       "content/*.json"
     ],
     "createUpdaterArtifacts": true
