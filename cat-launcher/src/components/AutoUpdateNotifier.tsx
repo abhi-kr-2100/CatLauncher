@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +17,7 @@ import {
 import { ExternalLink } from "./ui/ExternalLink";
 
 const AutoUpdateNotifier = () => {
+  const { t } = useTranslation();
   const { autoUpdateStatus, resetAutoUpdateStatus } =
     useAutoUpdateEvents();
 
@@ -26,9 +28,9 @@ const AutoUpdateNotifier = () => {
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Autoupdate Failed</DialogTitle>
+          <DialogTitle>{t("autoUpdateFailed")}</DialogTitle>
           <DialogDescription>
-            Please manually update the app by visiting
+            {t("description")}
             <ExternalLink href={UPDATE_LINK}>
               {UPDATE_LINK}
             </ExternalLink>
@@ -36,7 +38,7 @@ const AutoUpdateNotifier = () => {
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button>Close</Button>
+            <Button>{t("close")}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

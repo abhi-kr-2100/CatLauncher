@@ -7,6 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import {
   Table,
@@ -28,6 +29,7 @@ export function DataTable<TData, TValue>({
   data,
   initialSort = [],
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>(initialSort);
   const table = useReactTable({
     data,
@@ -84,7 +86,7 @@ export function DataTable<TData, TValue>({
                 colSpan={columns.length}
                 className="h-24 text-center"
               >
-                No results.
+                {t("noResults")}
               </TableCell>
             </TableRow>
           )}
