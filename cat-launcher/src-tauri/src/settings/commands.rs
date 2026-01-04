@@ -1,4 +1,4 @@
-use tauri::{command, State};
+use tauri::{command, AppHandle, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -9,6 +9,7 @@ use crate::settings::repository::settings_repository::{
 };
 use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::settings::types::Font;
+use crate::settings::update_settings::{self, UpdateSettingsError};
 use crate::settings::Settings;
 
 #[derive(
@@ -30,8 +31,14 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum SettingsCommandError {
-  #[error("failed to access settings: {0}")]
-  Repository(#[from] SettingsRepositoryError),
+  #[error("failed to get settings: {0}")]
+  Get(#[from] SettingsRepositoryError),
+
+  #[error("failed to update settings: {0}")]
+  Update(#[from] UpdateSettingsError),
+
+  #[error("failed to get app local data directory: {0}")]
+  AppLocalDataDir(#[from] tauri::Error),
 }
 
 #[command]
@@ -44,10 +51,14 @@ pub async fn get_settings(
 
 #[command]
 pub async fn update_settings(
+  app_handle: AppHandle,
   settings: Settings,
   repository: State<'_, SqliteSettingsRepository>,
 ) -> Result<(), SettingsCommandError> {
-  repository.save_settings(&settings).await?;
+  let data_dir = app_handle.path().app_local_data_dir()?;
+
+  update_settings::update_settings(&data_dir, settings, &*repository)
+    .await?;
   Ok(())
 }
 
