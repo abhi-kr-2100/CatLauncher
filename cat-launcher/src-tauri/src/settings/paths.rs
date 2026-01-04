@@ -35,6 +35,9 @@ pub fn get_font_directories(os: &OS) -> Vec<PathBuf> {
 
   match os {
     OS::Linux => {
+      if let Ok(xdg) = std::env::var("XDG_DATA_HOME") {
+        paths.push(PathBuf::from(xdg).join("fonts"));
+      }
       if let Some(h) = &home {
         paths.push(PathBuf::from(h).join(".local/share/fonts"));
         paths.push(PathBuf::from(h).join(".fonts"));
@@ -50,7 +53,10 @@ pub fn get_font_directories(os: &OS) -> Vec<PathBuf> {
       paths.push(PathBuf::from("/System/Library/Fonts"));
     }
     OS::Windows => {
-      paths.push(PathBuf::from("C:\\Windows\\Fonts"));
+      let windir = std::env::var("WINDIR")
+        .or_else(|_| std::env::var("SYSTEMROOT"))
+        .unwrap_or_else(|_| "C:\\Windows".to_string());
+      paths.push(PathBuf::from(windir).join("Fonts"));
       if let Some(h) = &home {
         paths.push(
           PathBuf::from(h)

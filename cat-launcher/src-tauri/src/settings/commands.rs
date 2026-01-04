@@ -62,8 +62,12 @@ pub async fn update_settings(
 ) -> Result<(), UpdateSettingsCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
-  update_settings::update_settings(&data_dir, settings, &*repository)
-    .await?;
+  update_settings::update_settings(
+    &data_dir,
+    &settings,
+    &*repository,
+  )
+  .await?;
   Ok(())
 }
 
