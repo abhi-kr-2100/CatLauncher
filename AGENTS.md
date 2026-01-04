@@ -163,4 +163,32 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 # Agent Responsibility
 
 * At the end of each task, run the Verification commands to ensure correctness.
-* Run `git branch --show-current` to find the current branch name. If current branch is not `main`, `release`, or `gitbutler/workspace`, commit the changes with an appropriate commit message.
+* Only commit changes if asked to.
+* Use the `git commit --signoff` command.
+
+## Commit Guidelines
+
+* A commit message that follows the Conventional Commits format is structured with a header, an optional body, and an optional footer.
+  - **Header**: `type(scope): description`
+    - **Type**: One of `feat`, `fix`, `docs`, `refactor`, `perf`, `style`, `test`, `chore`, `ci`, `revert`, `build`.
+    - **Scope** (optional): The name of the feature or module being modified.
+    - **Description**: A brief summary of the change.
+  - **Body** (optional): A detailed description of the change. Start with the motivation for the change and then list the changes made.
+  - **Footer** (optional): Any additional information about the change, like `BREAKING CHANGE` notices or issue references (e.g., `Closes #123`).
+
+Example:
+
+```
+feat(user): add user authentication
+
+Motivation:
+- To secure user accounts and provide personalized experiences.
+
+Changes:
+- Add a new user model.
+- Add a new user repository.
+- Add a new user service.
+- Add a new user controller.
+
+BREAKING CHANGE: Authentication is now required for all API endpoints.
+```
