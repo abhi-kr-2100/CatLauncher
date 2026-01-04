@@ -8,7 +8,7 @@ use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::filesystem::paths::{get_db_path, get_schema_file_path};
-use crate::filesystem::paths::{get_settings_path, GetSchemaFilePathError};
+use crate::filesystem::paths::GetSchemaFilePathError;
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
@@ -20,6 +20,9 @@ use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupReposi
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
+use crate::settings::repository::settings_repository::SettingsRepository;
+use crate::settings::repository::settings_repository::GetSettingsError;
+use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::settings::Settings;
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
@@ -29,27 +32,15 @@ use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
 
 #[derive(thiserror::Error, Debug)]
-pub enum SettingsError {
-  #[error("failed to get system directory: {0}")]
-  SystemDir(#[from] tauri::Error),
-
-  #[error("failed to read settings file: {0}")]
-  Read(#[from] io::Error),
-
-  #[error("failed to parse settings file: {0}")]
-  Parse(#[from] serde_json::Error),
+pub enum ManageSettingsError {
+  #[error("failed to get settings: {0}")]
+  Get(#[from] GetSettingsError),
 }
 
-pub fn manage_settings(app: &App) -> Result<(), SettingsError> {
-  let resource_dir = app.path().resource_dir()?;
-  let settings_path = get_settings_path(&resource_dir);
-
-  let settings = match fs::read_to_string(&settings_path) {
-    Ok(contents) => {
-      serde_json::from_str(&contents).unwrap_or_default()
-    }
-    Err(_) => Settings::default(),
-  };
+pub fn manage_settings(app: &App) -> Result<(), ManageSettingsError> {
+  let settings_repo = app.state::<SqliteSettingsRepository>();
+  let settings =
+    tauri::async_runtime::block_on(settings_repo.get_settings())?;
 
   app.manage(settings);
 
@@ -110,6 +101,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   app.manage(SqlitePlayTimeRepository::new(pool.clone()));
   app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
   app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
+  app.manage(SqliteSettingsRepository::new(pool.clone()));
   app.manage(SqliteInstalledModsRepository::new(pool.clone()));
   app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
   app.manage(SqliteInstalledSoundpacksRepository::new(pool.clone()));
