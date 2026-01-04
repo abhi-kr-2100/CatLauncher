@@ -9,9 +9,10 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use crate::launch_game::launch_game::{launch_and_monitor_game, GameEvent, LaunchGameError};
+use crate::launch_game::launch_game::{
+  launch_and_monitor_game, GameEvent, LaunchGameError,
+};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
-use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(
@@ -38,7 +39,6 @@ pub async fn launch_game(
   variant: GameVariant,
   release_id: &str,
   world: Option<&str>,
-  settings: State<'_, Settings>,
   releases_repository: State<'_, SqliteReleasesRepository>,
   backup_repository: State<'_, SqliteBackupRepository>,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
@@ -71,7 +71,6 @@ pub async fn launch_game(
     backup_repository.inner().clone(),
     &*active_release_repository,
     on_game_event,
-    &settings,
   )
   .await?;
 

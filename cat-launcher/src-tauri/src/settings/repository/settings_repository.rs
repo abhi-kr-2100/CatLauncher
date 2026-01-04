@@ -8,12 +8,6 @@ use crate::settings::Settings;
 pub enum GetSettingsError {
   #[error("failed to get settings: {0}")]
   Get(#[source] Box<dyn Error + Send + Sync>),
-
-  #[error("max_backups must be non-zero")]
-  InvalidMaxBackups,
-
-  #[error("parallel_requests must be non-zero")]
-  InvalidParallelRequests,
 }
 
 #[derive(thiserror::Error, Debug)]
