@@ -65,4 +65,10 @@ export const queryKeys = {
 
   lastPlayedWorld: (variant: GameVariant) =>
     ["last_played_world", variant] as const,
+
+  fonts: () => ["fonts"] as const,
+
+  settings: () => ["settings"] as const,
+
+  defaultSettings: () => ["default_settings"] as const,
 };

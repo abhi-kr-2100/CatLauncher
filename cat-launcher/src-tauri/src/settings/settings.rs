@@ -2,13 +2,15 @@ use std::num::{NonZeroU16, NonZeroUsize};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use ts_rs::TS;
 
 use crate::constants::{
   DEFAULT_MAX_BACKUPS, DEFAULT_PARALLEL_REQUESTS,
 };
 use crate::settings::types::Font;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, TS)]
+#[ts(export)]
 pub struct Settings {
   pub max_backups: NonZeroUsize,
   pub parallel_requests: NonZeroU16,
