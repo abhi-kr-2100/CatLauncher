@@ -5,7 +5,7 @@ use cat_macros::CommandErrorSerialize;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::settings::fonts::get_all_fonts;
 use crate::settings::repository::settings_repository::{
-  SettingsRepository, SettingsRepositoryError,
+  GetSettingsError, SettingsRepository,
 };
 use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::settings::types::Font;
@@ -30,10 +30,23 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum SettingsCommandError {
+pub enum GetSettingsCommandError {
   #[error("failed to get settings: {0}")]
-  Get(#[from] SettingsRepositoryError),
+  Get(#[from] GetSettingsError),
+}
 
+#[command]
+pub async fn get_settings(
+  repository: State<'_, SqliteSettingsRepository>,
+) -> Result<Settings, GetSettingsCommandError> {
+  let settings = repository.get_settings().await?;
+  Ok(settings)
+}
+
+#[derive(
+  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
+)]
+pub enum UpdateSettingsCommandError {
   #[error("failed to update settings: {0}")]
   Update(#[from] UpdateSettingsError),
 
@@ -42,19 +55,11 @@ pub enum SettingsCommandError {
 }
 
 #[command]
-pub async fn get_settings(
-  repository: State<'_, SqliteSettingsRepository>,
-) -> Result<Settings, SettingsCommandError> {
-  let settings = repository.get_settings().await?;
-  Ok(settings)
-}
-
-#[command]
 pub async fn update_settings(
   app_handle: AppHandle,
   settings: Settings,
   repository: State<'_, SqliteSettingsRepository>,
-) -> Result<(), SettingsCommandError> {
+) -> Result<(), UpdateSettingsCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
   update_settings::update_settings(&data_dir, settings, &*repository)
