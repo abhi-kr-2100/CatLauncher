@@ -160,12 +160,13 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 
 ## Commit Guidelines
 
-* A commit has five parts: type, scope, description, body, and footer.
-* Type: feat, fix, docs, refactor, perf, style, test, chore, ci, revert, build.
-* Scope: The name of the feature or module being modified.
-* Description: A brief description of the change.
-* Body: A detailed description of the change. Start with the motivation for the change and then list the changes made.
-* Footer: Any additional information about the change.
+* A commit message that follows the Conventional Commits format is structured with a header, an optional body, and an optional footer.
+  - **Header**: `type(scope): description`
+    - **Type**: One of `feat`, `fix`, `docs`, `refactor`, `perf`, `style`, `test`, `chore`, `ci`, `revert`, `build`.
+    - **Scope** (optional): The name of the feature or module being modified.
+    - **Description**: A brief summary of the change.
+  - **Body** (optional): A detailed description of the change. Start with the motivation for the change and then list the changes made.
+  - **Footer** (optional): Any additional information about the change, like `BREAKING CHANGE` notices or issue references (e.g., `Closes #123`).
 
 Example:
 
@@ -173,7 +174,7 @@ Example:
 feat(user): add user authentication
 
 Motivation:
-- Add user authentication to the application.
+- To secure user accounts and provide personalized experiences.
 
 Changes:
 - Add a new user model.
@@ -181,5 +182,5 @@ Changes:
 - Add a new user service.
 - Add a new user controller.
 
-BREAKING CHANGE: Use JavaScript features not available in Node 6.
+BREAKING CHANGE: Authentication is now required for all API endpoints.
 ```
