@@ -32,17 +32,25 @@ You can combine shadcn/ui components to create helper components. Keep these hel
 * The custom hooks should take one or more callbacks depending on the number of different possible errors.
 
 ```typescript
-export default useGames(onGameLoadError?: (error: Error) => void) {
+export default function useGames(onGameLoadError?: (error: Error) => void) {
+  const onGameLoadErrorRef = useRef(onGameLoadError);
+
+  useEffect(() => {
+    onGameLoadErrorRef.current = onGameLoadError;
+  }, [onGameLoadError]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.games(),
     queryFn: getGames,
   });
 
   useEffect(() => {
-    if (error && onGameLoadError) {
-      onGameLoadError(error);
+    if (error && onGameLoadErrorRef.current) {
+      onGameLoadErrorRef.current(error);
     }
   }, [error]);
+
+  return { data, isLoading, error };
 }
 ```
 
