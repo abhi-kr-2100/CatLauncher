@@ -155,4 +155,31 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 # Agent Responsibility
 
 * At the end of each task, run the Verification commands to ensure correctness.
-* Run `git branch --show-current` to find the current branch name. If current branch is not `main`, `release`, or `gitbutler/workspace`, commit the changes with an appropriate commit message.
+* Only commit changes if asked to.
+* Use the `git commit --signoff` command.
+
+## Commit Guidelines
+
+* A commit has five parts: type, scope, description, body, and footer.
+* Type: feat, fix, docs, refactor, perf, style, test, chore, ci, revert, build.
+* Scope: The name of the feature or module being modified.
+* Description: A brief description of the change.
+* Body: A detailed description of the change. Start with the motivation for the change and then list the changes made.
+* Footer: Any additional information about the change.
+
+Example:
+
+```
+feat(user): add user authentication
+
+Motivation:
+- Add user authentication to the application.
+
+Changes:
+- Add a new user model.
+- Add a new user repository.
+- Add a new user service.
+- Add a new user controller.
+
+BREAKING CHANGE: Use JavaScript features not available in Node 6.
+```
