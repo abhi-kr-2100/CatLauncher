@@ -1,0 +1,16 @@
+{
+  "autoUpdateFailed": "Autoupdate Failed",
+  "close": "Close",
+  "noResults": "No results.",
+  "downloading": "Downloading...",
+  "gameCrashed": "Game crashed",
+  "gameTerminated": "Game was terminated by an external source",
+  "gameExitedUnexpectedly": "Game exited unexpectedly or failed to start",
+  "diagnoseIssue": "The following information may help you diagnose the issue.",
+  "exitCode": "Exit Code",
+  "unknown": "Unknown",
+  "logs": "Logs",
+  "logsCopied": "Logs copied to clipboard",
+  "errorCopyingLogs": "Error copying logs",
+  "copyLogs": "Copy Logs"
+}

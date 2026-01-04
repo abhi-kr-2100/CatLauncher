@@ -1,4 +1,5 @@
 import { Copy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,16 +15,17 @@ import { copyToClipboard, toastCL } from "@/lib/utils";
 import { GameStatus, useGameSessionEvents } from "@/providers/hooks";
 
 const GameSessionMonitor = () => {
+  const { t } = useTranslation();
   const { gameStatus, logsText, exitCode, resetGameSessionMonitor } =
     useGameSessionEvents();
 
   const title =
     gameStatus === GameStatus.CRASHED
-      ? "Game crashed"
+      ? t("gameCrashed")
       : gameStatus === GameStatus.TERMINATED
-        ? "Game was terminated by an external source"
+        ? t("gameTerminated")
         : gameStatus === GameStatus.ERROR
-          ? "Game exited unexpectedly or failed to start"
+          ? t("gameExitedUnexpectedly")
           : null;
 
   return (
@@ -38,21 +40,19 @@ const GameSessionMonitor = () => {
       <DialogContent className="flex flex-col gap-4 max-h-[90vh]">
         <DialogHeader className="flex flex-col gap-2">
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            The following information may help you diagnose the issue.
-          </DialogDescription>
+          <DialogDescription>{t("diagnoseIssue")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <h3 className="font-semibold">Exit Code</h3>
+          <h3 className="font-semibold">{t("exitCode")}</h3>
           <pre className="text-sm bg-muted p-4 rounded-md">
-            {exitCode ?? "Unknown"}
+            {exitCode ?? t("unknown")}
           </pre>
         </div>
 
         {logsText && (
           <div className="flex flex-col gap-2">
-            <h3 className="font-semibold">Logs</h3>
+            <h3 className="font-semibold">{t("logs")}</h3>
             <pre className="text-sm bg-muted p-4 rounded-md whitespace-pre-wrap h-[30vh] overflow-auto">
               {logsText}
             </pre>
@@ -65,20 +65,20 @@ const GameSessionMonitor = () => {
               onClick={() => {
                 copyToClipboard(logsText)
                   .then(() => {
-                    toastCL("success", "Logs copied to clipboard");
+                    toastCL("success", t("logsCopied"));
                   })
                   .catch((error) => {
-                    toastCL("error", "Error copying logs", error);
+                    toastCL("error", t("errorCopyingLogs"), error);
                   });
               }}
               variant={"ghost"}
             >
               <Copy />
-              Copy Logs
+              {t("copyLogs")}
             </Button>
           )}
           <DialogClose asChild>
-            <Button>Close</Button>
+            <Button>{t("close")}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

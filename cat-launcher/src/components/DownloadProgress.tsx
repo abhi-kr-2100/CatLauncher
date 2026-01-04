@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Progress } from "@/components/ui/progress";
 import { formatBytes } from "@/lib/utils";
 
@@ -10,6 +11,7 @@ export function DownloadProgress({
   downloaded,
   total,
 }: DownloadProgressProps) {
+  const { t } = useTranslation();
   // For some downloads, the total size is not known.
   const isIndeterminate = total === 0 && downloaded > 0;
 
@@ -25,8 +27,8 @@ export function DownloadProgress({
       value={isIndeterminate ? 0 : progress}
     >
       {isIndeterminate
-        ? `Downloading... ${formatBytes(downloaded).join(" ")}`
-        : "Downloading..."}
+        ? `${t("downloading")} ${formatBytes(downloaded).join(" ")}`
+        : t("downloading")}
     </Progress>
   );
 }

@@ -81,8 +81,10 @@
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
     "husky": "^9.1.7",
+    "i18next": "^25.7.3",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
+    "react-i18next": "^16.5.1",
     "typescript": "~5.8.3",
     "vite": "^7.2.7"
   }
