@@ -19,15 +19,19 @@
       }
     ],
     "security": {
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["**"]
+      },
       "csp": {
-        "default-src": "'self'",
+        "default-src": "'self' asset: http://asset.localhost",
         "script-src": "'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
-        "connect-src": "'self' ipc: https://ipc.localhost http://ipc.localhost https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
+        "connect-src": "'self' asset: http://asset.localhost ipc: https://ipc.localhost http://ipc.localhost https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
         "worker-src": "'self' blob: data:",
-        "img-src": "'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
+        "img-src": "'self' asset: http://asset.localhost https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
         "style-src": "'self' 'unsafe-inline' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
-        "font-src": "'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
-        "media-src": "'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
+        "font-src": "'self' asset: http://asset.localhost https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
+        "media-src": "'self' asset: http://asset.localhost https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com",
         "frame-ancestors": "'self' https://us.i.posthog.com https://us-assets.i.posthog.com https://us.posthog.com https://app.posthog.com"
       }
     }
