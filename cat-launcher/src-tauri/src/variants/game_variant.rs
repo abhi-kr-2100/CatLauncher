@@ -108,4 +108,13 @@ impl GameVariant {
       }
     }
   }
+
+  pub fn supported_typeface_categories(&self) -> Vec<&'static str> {
+    let mut categories =
+      vec!["typeface", "map_typeface", "overmap_typeface"];
+    if matches!(self, GameVariant::DarkDaysAhead) {
+      categories.push("gui_typeface");
+    }
+    categories
+  }
 }

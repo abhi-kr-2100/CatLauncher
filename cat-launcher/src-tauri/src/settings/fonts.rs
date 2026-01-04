@@ -63,15 +63,17 @@ async fn get_fonts_in_dir_recursive(dir: PathBuf) -> Vec<Font> {
 
     while let Ok(Some(entry)) = entries.next_entry().await {
       let path = entry.path();
-      if path.is_dir() {
-        dirs.push(path);
-      } else if let Some(ext) =
-        path.extension().and_then(|e| e.to_str())
-      {
-        let ext = ext.to_lowercase();
-        if ext == "ttf" || ext == "otf" {
-          if let Ok(font) = get_font_from_file(&path).await {
-            fonts.push(font);
+      if let Ok(file_type) = entry.file_type().await {
+        if file_type.is_dir() {
+          dirs.push(path);
+        } else if let Some(ext) =
+          path.extension().and_then(|e| e.to_str())
+        {
+          let ext = ext.to_lowercase();
+          if ext == "ttf" || ext == "otf" {
+            if let Ok(font) = get_font_from_file(&path).await {
+              fonts.push(font);
+            }
           }
         }
       }
