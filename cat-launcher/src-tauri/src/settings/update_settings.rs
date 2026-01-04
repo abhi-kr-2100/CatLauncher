@@ -19,10 +19,10 @@ pub enum UpdateSettingsError {
 
 pub async fn update_settings(
   data_dir: &Path,
-  settings: Settings,
+  settings: &Settings,
   repository: &impl SettingsRepository,
 ) -> Result<(), UpdateSettingsError> {
-  update_font_files(data_dir, &settings).await?;
-  repository.save_settings(&settings).await?;
+  update_font_files(data_dir, settings).await?;
+  repository.save_settings(settings).await?;
   Ok(())
 }

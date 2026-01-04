@@ -17,7 +17,17 @@ interface FontSettingsProps {
 }
 
 function FontPreviewLabel({ font }: { font: Font }) {
-  const fontFamily = useFontFamily(font);
+  const onFontLoadError = useCallback(
+    (e: unknown) => {
+      console.warn(
+        `Failed to load font preview for: ${font.name}`,
+        e,
+      );
+    },
+    [font.name],
+  );
+
+  const fontFamily = useFontFamily(font, onFontLoadError);
 
   return (
     <span
