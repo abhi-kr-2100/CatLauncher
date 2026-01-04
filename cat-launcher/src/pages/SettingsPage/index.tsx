@@ -55,7 +55,12 @@ export default function SettingsPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={resetToDefault}
+            onClick={() => {
+              if (!isUpdating) {
+                resetToDefault();
+              }
+            }}
+            disabled={isUpdating}
           >
             Reset to Default
           </Button>
