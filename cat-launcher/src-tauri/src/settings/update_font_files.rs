@@ -13,6 +13,21 @@ use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
+pub enum EnsureFontBlendingError {
+  #[error("failed to read existing options.json: {0}")]
+  ReadOptionsJson(#[source] std::io::Error),
+
+  #[error("failed to serialize JSON: {0}")]
+  Json(#[from] serde_json::Error),
+
+  #[error("failed to write options.json: {0}")]
+  WriteOptionsJson(#[source] std::io::Error),
+
+  #[error("bad options.json file")]
+  BadOptionsJson,
+}
+
+#[derive(thiserror::Error, Debug)]
 pub enum UpdateFontFilesError {
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
@@ -23,11 +38,14 @@ pub enum UpdateFontFilesError {
   #[error("failed to read existing fonts.json: {0}")]
   ReadFontsJson(#[source] std::io::Error),
 
-  #[error("failed to serialize fonts.json: {0}")]
-  SerializeFontsJson(#[from] serde_json::Error),
+  #[error("failed to serialize JSON: {0}")]
+  Json(#[from] serde_json::Error),
 
   #[error("failed to write fonts.json: {0}")]
   WriteFontsJson(#[source] std::io::Error),
+
+  #[error("failed to ensure font blending: {0}")]
+  EnsureFontBlending(#[from] EnsureFontBlendingError),
 }
 
 pub async fn update_font_files(
@@ -39,6 +57,7 @@ pub async fn update_font_files(
   for variant in GameVariant::iter() {
     let config_dir =
       get_or_create_user_config_dir(&variant, data_dir).await?;
+
     let fonts_json_path = config_dir.join("fonts.json");
 
     let mut fonts_map: HashMap<String, Vec<String>> =
@@ -71,6 +90,57 @@ pub async fn update_font_files(
     {
       return Err(UpdateFontFilesError::WriteFontsJson(e));
     }
+
+    ensure_font_blending(&config_dir).await?;
+  }
+
+  Ok(())
+}
+
+async fn ensure_font_blending(
+  config_dir: &Path,
+) -> Result<(), EnsureFontBlendingError> {
+  let options_path = config_dir.join("options.json");
+  let content = match tokio::fs::read_to_string(&options_path).await {
+    Ok(content) => content,
+    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+      return Ok(());
+    }
+    Err(e) => {
+      return Err(EnsureFontBlendingError::ReadOptionsJson(e))
+    }
+  };
+
+  let mut options: serde_json::Value =
+    serde_json::from_str(&content)?;
+
+  let options_array = options
+    .as_array_mut()
+    .ok_or(EnsureFontBlendingError::BadOptionsJson)?;
+
+  let mut modified = false;
+  for entry in options_array {
+    let entry_obj = entry
+      .as_object_mut()
+      .ok_or(EnsureFontBlendingError::BadOptionsJson)?;
+
+    if entry_obj.get("name").and_then(|v| v.as_str())
+      == Some("FONT_BLENDING")
+    {
+      entry_obj.insert(
+        "value".to_string(),
+        serde_json::Value::String("true".to_string()),
+      );
+      modified = true;
+      break;
+    }
+  }
+
+  if modified {
+    let content = serde_json::to_string_pretty(&options)?;
+    tokio::fs::write(&options_path, content)
+      .await
+      .map_err(EnsureFontBlendingError::WriteOptionsJson)?;
   }
 
   Ok(())
