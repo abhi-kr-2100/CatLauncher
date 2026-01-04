@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::settings::repository::settings_repository::{
-  SettingsRepository, SettingsRepositoryError,
+  SaveSettingsError, SettingsRepository,
 };
 use crate::settings::update_font_files::{
   update_font_files, UpdateFontFilesError,
@@ -14,7 +14,7 @@ pub enum UpdateSettingsError {
   UpdateFontFiles(#[from] UpdateFontFilesError),
 
   #[error("failed to update settings in repository: {0}")]
-  Repository(#[from] SettingsRepositoryError),
+  Repository(#[from] SaveSettingsError),
 }
 
 pub async fn update_settings(

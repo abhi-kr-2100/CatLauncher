@@ -1,24 +1,33 @@
+use std::error::Error;
+
 use async_trait::async_trait;
 
 use crate::settings::Settings;
 
 #[derive(thiserror::Error, Debug)]
-pub enum SettingsRepositoryError {
+pub enum GetSettingsError {
   #[error("failed to get settings: {0}")]
-  Get(#[source] Box<dyn std::error::Error + Send + Sync>),
+  Get(#[source] Box<dyn Error + Send + Sync>),
 
+  #[error("max_backups must be non-zero")]
+  InvalidMaxBackups,
+
+  #[error("parallel_requests must be non-zero")]
+  InvalidParallelRequests,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum SaveSettingsError {
   #[error("failed to save settings: {0}")]
-  Save(#[source] Box<dyn std::error::Error + Send + Sync>),
+  Save(#[source] Box<dyn Error + Send + Sync>),
 }
 
 #[async_trait]
 pub trait SettingsRepository: Send + Sync {
-  async fn get_settings(
-    &self,
-  ) -> Result<Settings, SettingsRepositoryError>;
+  async fn get_settings(&self) -> Result<Settings, GetSettingsError>;
 
   async fn save_settings(
     &self,
     settings: &Settings,
-  ) -> Result<(), SettingsRepositoryError>;
+  ) -> Result<(), SaveSettingsError>;
 }
