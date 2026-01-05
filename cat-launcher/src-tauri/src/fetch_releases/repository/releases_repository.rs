@@ -21,6 +21,12 @@ pub trait ReleasesRepository: Send + Sync {
     game_variant: &GameVariant,
   ) -> Result<Vec<GitHubRelease>, ReleasesRepositoryError>;
 
+  async fn get_cached_release_by_tag(
+    &self,
+    game_variant: &GameVariant,
+    tag_name: &str,
+  ) -> Result<Option<GitHubRelease>, ReleasesRepositoryError>;
+
   async fn update_cached_releases(
     &self,
     game_variant: &GameVariant,

@@ -7,7 +7,7 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::fetch_releases::{
-  FetchReleasesError, ReleasesUpdatePayload,
+  FetchReleaseNotesError, FetchReleasesError, ReleasesUpdatePayload,
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{
@@ -61,4 +61,26 @@ pub async fn fetch_releases_for_variant(
     .await?;
 
   Ok(())
+}
+
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
+pub enum FetchReleaseNotesCommandError {
+  #[error("failed to fetch release notes: {0}")]
+  Fetch(#[from] FetchReleaseNotesError),
+}
+
+#[command]
+pub async fn fetch_release_notes(
+  variant: GameVariant,
+  release_id: String,
+  releases_repository: State<'_, SqliteReleasesRepository>,
+  client: State<'_, Client>,
+) -> Result<Option<String>, FetchReleaseNotesCommandError> {
+  let notes = variant
+    .fetch_release_notes(&release_id, &client, &*releases_repository)
+    .await?;
+
+  Ok(notes)
 }

@@ -25,7 +25,9 @@ use crate::active_release::commands::get_active_release;
 use crate::backups::commands::{
   delete_backup_by_id, list_backups_for_variant, restore_backup_by_id,
 };
-use crate::fetch_releases::commands::fetch_releases_for_variant;
+use crate::fetch_releases::commands::{
+  fetch_release_notes, fetch_releases_for_variant,
+};
 use crate::game_tips::commands::get_tips;
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
@@ -97,6 +99,7 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       get_game_variants_info,
       fetch_releases_for_variant,
+      fetch_release_notes,
       install_release,
       launch_game,
       get_active_release,

@@ -21,6 +21,7 @@ import {
 import { useReleaseEvents } from "./hooks";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
+import ReleaseNotesButton from "./ReleaseNotesButton";
 
 export default function ReleaseSelector({
   variant,
@@ -34,6 +35,10 @@ export default function ReleaseSelector({
   const releases = useAppSelector(
     (state) => state.releases.releasesByVariant[variant],
   );
+
+  const selectedRelease = useMemo(() => {
+    return releases.find((r) => r.version === selectedReleaseId);
+  }, [releases, selectedReleaseId]);
 
   const {
     mutate: triggerFetchReleases,
@@ -97,7 +102,6 @@ export default function ReleaseSelector({
     return (
       releases.filter(appliedFilter).map((r) => {
         const isActive = r.version === activeRelease;
-        const isLatest = r.version === latestRelease?.version;
 
         return {
           value: r.version,
@@ -106,19 +110,12 @@ export default function ReleaseSelector({
               variant={variant}
               version={r.version}
               isActive={isActive}
-              isLatest={isLatest}
             />
           ),
         };
       }) ?? []
     );
-  }, [
-    releases,
-    activeRelease,
-    variant,
-    appliedFilter,
-    latestRelease,
-  ]);
+  }, [releases, activeRelease, variant, appliedFilter]);
 
   useEffect(() => {
     // Selected release may become unavailable after filtering
@@ -210,6 +207,9 @@ export default function ReleaseSelector({
             disabled={isReleaseFetchingLoading || isInstalling}
           />
         </div>
+        {selectedRelease && (
+          <ReleaseNotesButton release={selectedRelease} />
+        )}
       </div>
     </div>
   );
