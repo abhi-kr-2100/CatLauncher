@@ -9,6 +9,7 @@ pub struct GitHubRelease {
   pub id: u64,
   pub tag_name: String,
   pub prerelease: bool,
+  pub body: Option<String>,
   pub assets: Vec<GitHubAsset>,
   #[serde(with = "rfc3339")]
   pub created_at: DateTime<Utc>,

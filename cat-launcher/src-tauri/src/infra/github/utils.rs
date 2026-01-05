@@ -75,3 +75,30 @@ pub async fn fetch_github_releases(
 
   Ok(all_releases)
 }
+
+#[derive(thiserror::Error, Debug)]
+pub enum FetchGitHubReleaseByTagError {
+  #[error("failed to fetch from GitHub: {0}")]
+  Fetch(#[from] reqwest::Error),
+
+  #[error("failed to parse GitHub response: {0}")]
+  Parse(#[from] serde_json::Error),
+}
+
+pub async fn fetch_github_release_by_tag(
+  client: &Client,
+  repo: &str,
+  tag: &str,
+) -> Result<GitHubRelease, FetchGitHubReleaseByTagError> {
+  let url = format!(
+    "https://api.github.com/repos/{}/releases/tags/{}",
+    repo,
+    urlencoding::encode(tag)
+  );
+
+  let response = client.get(&url).send().await?;
+  response.error_for_status_ref()?;
+
+  let response_text = response.text().await?;
+  Ok(serde_json::from_str::<GitHubRelease>(&response_text)?)
+}
