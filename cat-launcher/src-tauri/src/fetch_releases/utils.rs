@@ -7,10 +7,12 @@ use crate::fetch_releases::fetch_releases::{
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::get_default_releases_file_path;
 use crate::game_release::game_release::GameRelease;
-use crate::game_release::utils::gh_release_to_game_release;
+use crate::game_release::utils::{
+  get_platform_asset_substrs, gh_release_to_game_release,
+};
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::read_from_file;
+use crate::infra::utils::{read_from_file, Arch, OS};
 use crate::variants::GameVariant;
 
 pub async fn get_default_releases(
@@ -89,14 +91,37 @@ pub async fn get_assets(
   }
 }
 
+pub fn is_installable(
+  variant: &GameVariant,
+  release: &GitHubRelease,
+  os: &OS,
+  arch: &Arch,
+) -> bool {
+  let asset_substrs = get_platform_asset_substrs(variant, os, arch);
+  release.assets.iter().any(|asset| {
+    asset_substrs
+      .iter()
+      .any(|substr| asset.name.contains(substr))
+  })
+}
+
 pub fn get_releases_payload(
   variant: &GameVariant,
   gh_releases: &[GitHubRelease],
   status: ReleasesUpdateStatus,
+  os: &OS,
+  arch: &Arch,
 ) -> ReleasesUpdatePayload {
   let releases: Vec<GameRelease> = gh_releases
     .iter()
-    .map(|r| gh_release_to_game_release(r, variant))
+    .filter_map(|r| {
+      if !is_installable(variant, r, os, arch) {
+        return None;
+      }
+
+      let release = gh_release_to_game_release(r, variant);
+      Some(release)
+    })
     .collect();
 
   ReleasesUpdatePayload {
