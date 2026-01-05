@@ -46,3 +46,28 @@ pub async fn fetch_releases_for_variant(
 
   Ok(())
 }
+
+#[derive(
+  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
+)]
+pub enum FetchReleaseNotesCommandError {
+  #[error("failed to fetch release notes: {0}")]
+  Fetch(
+    #[from]
+    crate::fetch_releases::fetch_releases::FetchReleaseNotesError,
+  ),
+}
+
+#[command]
+pub async fn fetch_release_notes(
+  variant: GameVariant,
+  tag_name: String,
+  releases_repository: State<'_, SqliteReleasesRepository>,
+  client: State<'_, Client>,
+) -> Result<Option<String>, FetchReleaseNotesCommandError> {
+  let notes = variant
+    .fetch_release_notes(&tag_name, &client, &*releases_repository)
+    .await?;
+
+  Ok(notes)
+}

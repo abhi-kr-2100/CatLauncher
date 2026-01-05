@@ -208,6 +208,20 @@ export async function getActiveRelease(
   return response ?? "";
 }
 
+export async function fetchReleaseNotes(
+  variant: GameVariant,
+  tagName: string,
+): Promise<string | null> {
+  const response = await invoke<string | null>(
+    "fetch_release_notes",
+    {
+      variant,
+      tag_name: tagName,
+    },
+  );
+  return response;
+}
+
 export async function installReleaseForVariant(
   releaseId: string,
   variant: GameVariant,

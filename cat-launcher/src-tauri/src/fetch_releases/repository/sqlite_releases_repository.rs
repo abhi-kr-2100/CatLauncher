@@ -37,8 +37,9 @@ impl ReleasesRepository for SqliteReleasesRepository {
 
             let mut stmt = conn
                 .prepare(
-                    "SELECT r.id, r.tag_name, r.prerelease, r.created_at, a.id, a.browser_download_url, a.name, a.digest
+                    "SELECT r.id, r.tag_name, r.prerelease, r.created_at, rn.body, a.id, a.browser_download_url, a.name, a.digest
                      FROM releases r
+                     LEFT JOIN release_notes rn ON r.id = rn.release_id
                      LEFT JOIN assets a ON r.id = a.release_id
                      WHERE r.game_variant = ?1",
                 )
@@ -50,10 +51,11 @@ impl ReleasesRepository for SqliteReleasesRepository {
                     let tag_name: String = row.get(1)?;
                     let prerelease: bool = row.get(2)?;
                     let created_at: String = row.get(3)?;
-                    let asset_id: Option<u64> = row.get(4)?;
-                    let browser_download_url: Option<String> = row.get(5)?;
-                    let name: Option<String> = row.get(6)?;
-                    let digest: Option<String> = row.get(7)?;
+                    let body: Option<String> = row.get(4)?;
+                    let asset_id: Option<u64> = row.get(5)?;
+                    let browser_download_url: Option<String> = row.get(6)?;
+                    let name: Option<String> = row.get(7)?;
+                    let digest: Option<String> = row.get(8)?;
 
                     let asset = asset_id
                         .zip(browser_download_url)
@@ -65,13 +67,13 @@ impl ReleasesRepository for SqliteReleasesRepository {
                             digest,
                         });
 
-                    Ok((release_id, tag_name, prerelease, created_at, asset))
+                    Ok((release_id, tag_name, prerelease, created_at, body, asset))
                 })
                 .map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
             let mut releases_map: HashMap<u64, GitHubRelease> = HashMap::new();
             for row in rows {
-                let (release_id, tag_name, prerelease, created_at_str, asset) =
+                let (release_id, tag_name, prerelease, created_at_str, body, asset) =
                     row.map_err(|e| ReleasesRepositoryError::Get(Box::new(e)))?;
 
                 if let std::collections::hash_map::Entry::Vacant(e) = releases_map.entry(release_id) {
@@ -82,6 +84,7 @@ impl ReleasesRepository for SqliteReleasesRepository {
                             id: release_id,
                             tag_name,
                             prerelease,
+                            body,
                             assets: Vec::new(),
                             created_at,
                         });
@@ -125,6 +128,12 @@ impl ReleasesRepository for SqliteReleasesRepository {
                         release.created_at.to_rfc3339(),
                         game_variant.to_string(),
                     ),
+                )
+                .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
+
+                tx.execute(
+                    "INSERT OR REPLACE INTO release_notes (release_id, body) VALUES (?1, ?2)",
+                    (release.id, &release.body),
                 )
                 .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
 
