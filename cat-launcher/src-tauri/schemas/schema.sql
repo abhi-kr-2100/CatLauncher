@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS installed_tilesets (
     FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_installed_tilesets_game_variant ON installed_mods (game_variant);
+CREATE INDEX IF NOT EXISTS idx_installed_tilesets_game_variant ON installed_tilesets (game_variant);
 
 -- This table stores installed soundpacks for each game variant.
 CREATE TABLE IF NOT EXISTS installed_soundpacks (
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS installed_soundpacks (
     FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_mods (game_variant);
+CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_soundpacks (game_variant);
 
 -- This table stores application settings.
 CREATE TABLE IF NOT EXISTS settings (
