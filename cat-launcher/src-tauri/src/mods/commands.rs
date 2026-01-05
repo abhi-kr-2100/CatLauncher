@@ -4,7 +4,7 @@ use std::sync::Arc;
 use reqwest::Client;
 use strum::IntoStaticStr;
 use tauri::ipc::Channel;
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -13,8 +13,8 @@ use crate::infra::download::Downloader;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::mods::get_last_activity_for_third_party_mod::{
-  get_last_activity_for_third_party_mod, GetLastActivityError,
-  LastModActivity,
+  get_last_activity_for_third_party_mod,
+  GetLastActivityForThirdPartyModError, LastModActivity,
 };
 use crate::mods::get_third_party_mod_installation_status::{
   get_third_party_mod_installation_status,
@@ -23,9 +23,13 @@ use crate::mods::get_third_party_mod_installation_status::{
 use crate::mods::install_third_party_mod::{
   install_third_party_mod, InstallThirdPartyModError,
 };
+use crate::mods::lib::OnlineModRepositoryRegistry;
 use crate::mods::list_all_mods::{list_all_mods, ListAllModsError};
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
-use crate::mods::types::{Mod, ModInstallationStatus};
+use crate::mods::repository::sqlite_mods_repository::SqliteModsRepository;
+use crate::mods::types::{
+  ModInstallationStatus, ModsUpdatePayload,
+};
 use crate::mods::uninstall_third_party_mod::{
   uninstall_third_party_mod, UninstallThirdPartyModError,
 };
@@ -42,30 +46,46 @@ pub enum ListAllModsCommandError {
   OSInfo(#[from] OSNotSupportedError),
 
   #[error("failed to list mods: {0}")]
-  ListMods(#[from] ListAllModsError),
+  ListMods(#[from] ListAllModsError<tauri::Error>),
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
 pub async fn list_all_mods_command(
   variant: GameVariant,
   app: tauri::AppHandle,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<Mod>, ListAllModsCommandError> {
+  mods_repository: State<'_, SqliteModsRepository>,
+  online_mod_repository_registry: State<
+    '_,
+    OnlineModRepositoryRegistry,
+  >,
+  client: State<'_, Client>,
+) -> Result<(), ListAllModsCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
 
   let os = get_os_enum(OS)?;
 
-  let mods = list_all_mods(
+  let on_update = move |payload: ModsUpdatePayload| {
+    app.emit("mods-update", payload)?;
+    Ok(())
+  };
+
+  list_all_mods(
     &variant,
     &data_dir,
     &resource_dir,
     &os,
     active_release_repository.inner(),
+    mods_repository.inner(),
+    online_mod_repository_registry.repositories(),
+    client.inner(),
+    on_update,
   )
   .await?;
 
-  Ok(mods)
+  Ok(())
 }
 
 #[derive(
@@ -89,10 +109,10 @@ pub async fn install_third_party_mod_command(
   channel: Channel,
   app: tauri::AppHandle,
   downloader: State<'_, Downloader>,
-  repository: State<'_, SqliteInstalledModsRepository>,
+  installed_mods_repository: State<'_, SqliteInstalledModsRepository>,
+  mods_repository: State<'_, SqliteModsRepository>,
 ) -> Result<(), InstallThirdPartyModCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
-  let resource_dir = app.path().resource_dir()?;
   let temp_dir = app.path().app_cache_dir()?;
 
   let os = get_os_enum(OS)?;
@@ -103,11 +123,11 @@ pub async fn install_third_party_mod_command(
     &id,
     &variant,
     &data_dir,
-    &resource_dir,
     &temp_dir,
     &os,
     downloader.inner(),
-    repository.inner(),
+    installed_mods_repository.inner(),
+    mods_repository.inner(),
     reporter,
   )
   .await?;
@@ -182,23 +202,21 @@ pub enum GetLastActivityCommandError {
   OSInfo(#[from] OSNotSupportedError),
 
   #[error("failed to get last activity: {0}")]
-  GetActivity(#[from] GetLastActivityError),
+  GetActivity(#[from] GetLastActivityForThirdPartyModError),
 }
 
 #[tauri::command]
 pub async fn get_last_activity_on_third_party_mod_command(
   id: String,
   variant: GameVariant,
-  app: tauri::AppHandle,
   client: State<'_, Client>,
+  mods_repository: State<'_, SqliteModsRepository>,
 ) -> Result<LastModActivity, GetLastActivityCommandError> {
-  let resource_dir = app.path().resource_dir()?;
-
   let last_activity = get_last_activity_for_third_party_mod(
     &id,
     &variant,
-    &resource_dir,
     client.inner(),
+    mods_repository.inner(),
   )
   .await?;
 

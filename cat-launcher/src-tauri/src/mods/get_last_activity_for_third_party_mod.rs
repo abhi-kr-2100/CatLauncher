@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -11,6 +9,8 @@ use crate::infra::github::get_last_commit::{
 use crate::mods::get_third_party_mod_by_id::{
   get_third_party_mod_by_id, GetThirdPartyModByIdError,
 };
+use crate::mods::repository::mods_repository::ModsRepository;
+use crate::mods::types::ModActivity;
 use crate::variants::GameVariant;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -20,7 +20,7 @@ pub struct LastModActivity {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum GetLastActivityError {
+pub enum GetLastActivityForThirdPartyModError {
   #[error("failed to get last commit: {0}")]
   GetLastCommit(#[from] GetLastCommitError),
 
@@ -31,7 +31,7 @@ pub enum GetLastActivityError {
   NoGithubActivity,
 }
 
-fn extract_repo(url_str: &str) -> Option<String> {
+pub fn extract_repo_from_github_url(url_str: &str) -> Option<String> {
   let parsed_url = Url::parse(url_str).ok()?;
 
   let path = parsed_url.path();
@@ -62,20 +62,27 @@ fn extract_repo(url_str: &str) -> Option<String> {
 pub async fn get_last_activity_for_third_party_mod(
   mod_id: &str,
   variant: &GameVariant,
-  resource_dir: &Path,
   client: &Client,
-) -> Result<LastModActivity, GetLastActivityError> {
+  mods_repository: &impl ModsRepository,
+) -> Result<LastModActivity, GetLastActivityForThirdPartyModError> {
   let mod_data =
-    get_third_party_mod_by_id(mod_id, variant, resource_dir).await?;
+    get_third_party_mod_by_id(mod_id, variant, mods_repository)
+      .await?;
 
-  let github_url = mod_data.activity.github;
+  match &mod_data.activity {
+    Some(ModActivity::GithubCommit { github }) => {
+      let repo = extract_repo_from_github_url(github).ok_or(
+        GetLastActivityForThirdPartyModError::NoGithubActivity,
+      )?;
 
-  let repo = extract_repo(&github_url)
-    .ok_or(GetLastActivityError::NoGithubActivity)?;
+      let last_commit = get_last_commit(&repo, client).await?;
+      let last_commit_date = last_commit.commit.author.date;
+      let timestamp = last_commit_date.timestamp_millis();
 
-  let last_commit = get_last_commit(&repo, client).await?;
-  let last_commit_date = last_commit.commit.author.date;
-  let timestamp = last_commit_date.timestamp_millis();
-
-  Ok(LastModActivity { timestamp })
+      Ok(LastModActivity { timestamp })
+    }
+    None => {
+      Err(GetLastActivityForThirdPartyModError::NoGithubActivity)
+    }
+  }
 }

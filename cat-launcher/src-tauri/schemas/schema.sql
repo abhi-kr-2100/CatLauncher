@@ -144,7 +144,32 @@ CREATE TABLE IF NOT EXISTS installed_soundpacks (
     FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_mods (game_variant);
+CREATE INDEX IF NOT EXISTS idx_installed_soundpacks_game_variant ON installed_soundpacks (game_variant);
+
+-- This table stores third-party mod information (both bundled and online).
+CREATE TABLE IF NOT EXISTS mods (
+    id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    category TEXT NOT NULL,
+    download_url TEXT NOT NULL,
+    modinfo_path TEXT NOT NULL,
+    activity_type TEXT NOT NULL,
+    PRIMARY KEY (id, game_variant),
+    FOREIGN KEY (game_variant) REFERENCES variants (name) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_mods_game_variant ON mods (game_variant);
+
+-- This table stores GitHub commit activity specific data for mods.
+CREATE TABLE IF NOT EXISTS github_commit_mod_activity (
+    mod_id TEXT NOT NULL,
+    game_variant TEXT NOT NULL,
+    github_url TEXT NOT NULL,
+    PRIMARY KEY (mod_id, game_variant),
+    FOREIGN KEY (mod_id, game_variant) REFERENCES mods (id, game_variant) ON DELETE CASCADE
+);
 
 -- This table stores application settings.
 CREATE TABLE IF NOT EXISTS settings (

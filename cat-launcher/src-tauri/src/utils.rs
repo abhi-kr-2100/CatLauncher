@@ -19,7 +19,10 @@ use crate::infra::repository::db_schema::InitializeSchemaError;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
+use crate::mods::lib::OnlineModRepositoryRegistry;
+use crate::mods::online::bright_nights::BrightNightsModRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
+use crate::mods::repository::sqlite_mods_repository::SqliteModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::settings::repository::settings_repository::SettingsRepository;
 use crate::settings::repository::settings_repository::GetSettingsError;
@@ -103,11 +106,20 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
   app.manage(SqliteSettingsRepository::new(pool.clone()));
   app.manage(SqliteInstalledModsRepository::new(pool.clone()));
+  app.manage(SqliteModsRepository::new(pool.clone()));
   app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
   app.manage(SqliteInstalledSoundpacksRepository::new(pool.clone()));
   app.manage(SqliteUsersRepository::new(pool));
 
   Ok(())
+}
+
+pub fn manage_online_mod_repository_registry(app: &App) {
+  let mut online_mod_repository_registry =
+    OnlineModRepositoryRegistry::default();
+  online_mod_repository_registry
+    .register(Box::new(BrightNightsModRepository::new()));
+  app.manage(online_mod_repository_registry);
 }
 
 #[derive(thiserror::Error, Debug)]
