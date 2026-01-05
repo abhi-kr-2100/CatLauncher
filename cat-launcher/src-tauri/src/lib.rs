@@ -62,7 +62,8 @@ use crate::tilesets::commands::{
 };
 use crate::users::commands::get_user_id;
 use crate::utils::{
-  autoupdate, manage_downloader, manage_http_client, manage_posthog,
+  autoupdate, manage_downloader, manage_http_client,
+  manage_online_mod_repository_registry, manage_posthog,
   manage_repositories, manage_settings, migrate_to_local_data_dir,
   on_quit,
 };
@@ -84,6 +85,7 @@ pub fn run() {
       manage_http_client(app);
       manage_repositories(app)?;
       manage_settings(app)?;
+      manage_online_mod_repository_registry(app);
       manage_downloader(app);
       manage_posthog(app);
 

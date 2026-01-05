@@ -1,34 +1,33 @@
-import { useQuery } from "@tanstack/react-query";
-
 import { SearchInput } from "@/components/SearchInput";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { listAllMods } from "@/lib/commands";
-import { queryKeys } from "@/lib/queryKeys";
-import ModCard from "./ModCard";
-import { useEffect } from "react";
-import { toastCL } from "@/lib/utils";
+import { getVariantLabel, toastCL } from "@/lib/utils";
 import { useSearch } from "@/hooks/useSearch";
+import { useMods } from "./hooks";
+import ModCard from "./ModCard";
 
 interface ModsListProps {
   variant: GameVariant;
 }
 
 export default function ModsList({ variant }: ModsListProps) {
-  const {
-    data: mods,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: queryKeys.mods.listAll(variant),
-    queryFn: () => listAllMods(variant),
-  });
+  const variantLabel = getVariantLabel(variant);
+  const { mods, isLoading } = useMods(
+    variant,
+    (err) => toastCL("error", "Failed to load mods.", err),
+    (err) =>
+      toastCL(
+        "error",
+        `Failed to fetch mods for ${variantLabel}.`,
+        err,
+      ),
+  );
 
   const {
     searchQuery,
     setSearchQuery,
     filteredItems: filteredMods,
     hasActiveSearch,
-  } = useSearch(mods || [], {
+  } = useSearch(mods, {
     searchFn: (mod, query) => {
       return (
         mod.content.name.toLowerCase().includes(query) ||
@@ -37,12 +36,6 @@ export default function ModsList({ variant }: ModsListProps) {
       );
     },
   });
-
-  useEffect(() => {
-    if (error) {
-      toastCL("error", "Failed to load mods.", error);
-    }
-  }, [error]);
 
   if (isLoading) {
     return <p className="text-muted-foreground">Loading mods...</p>;

@@ -4,7 +4,26 @@ use crate::filesystem::paths::{
   get_game_resources_dir, GetGameExecutableDirError,
 };
 use crate::infra::utils::OS;
+use crate::mods::types::OnlineModRepository;
 use crate::variants::GameVariant;
+
+#[derive(Default)]
+pub struct OnlineModRepositoryRegistry {
+  repositories: Vec<Box<dyn OnlineModRepository>>,
+}
+
+impl OnlineModRepositoryRegistry {
+  pub fn register(
+    &mut self,
+    repository: Box<dyn OnlineModRepository>,
+  ) {
+    self.repositories.push(repository);
+  }
+
+  pub fn repositories(&self) -> &[Box<dyn OnlineModRepository>] {
+    &self.repositories
+  }
+}
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetStockModsDirError {

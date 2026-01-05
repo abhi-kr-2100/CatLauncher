@@ -2,25 +2,25 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
-import type { Font } from "@/generated-types/Font";
-import type { Settings } from "@/generated-types/Settings";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
+import type { Font } from "@/generated-types/Font";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
-import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
-import type { Mod } from "@/generated-types/Mod";
-import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { LastModActivity } from "@/generated-types/LastModActivity";
+import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
+import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
+import type { ModsUpdatePayload } from "@/generated-types/ModsUpdatePayload";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
+import type { Settings } from "@/generated-types/Settings";
+import type { Soundpack } from "@/generated-types/Soundpack";
+import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { Theme } from "@/generated-types/Theme";
 import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
-import type { Soundpack } from "@/generated-types/Soundpack";
-import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
 export async function listenToQuitRequested(
@@ -40,6 +40,14 @@ export async function listenToReleasesUpdate(
       onUpdate(event.payload);
     },
   );
+}
+
+export async function listenToModsUpdate(
+  onUpdate: (payload: ModsUpdatePayload) => void,
+) {
+  return await listen<ModsUpdatePayload>("mods-update", (event) => {
+    onUpdate(event.payload);
+  });
 }
 
 export async function listenToAutoupdateStatus(
@@ -285,13 +293,12 @@ export async function getUserId(): Promise<string> {
   return response;
 }
 
-export async function listAllMods(
+export async function triggerFetchModsForVariant(
   variant: GameVariant,
-): Promise<Mod[]> {
-  const response = await invoke<Mod[]>("list_all_mods_command", {
+): Promise<void> {
+  await invoke("list_all_mods_command", {
     variant,
   });
-  return response;
 }
 
 export async function installThirdPartyMod(

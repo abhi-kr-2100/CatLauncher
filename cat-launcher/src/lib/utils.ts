@@ -4,8 +4,21 @@ import clsx, { type ClassValue } from "clsx";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 
+import type { GameVariant } from "@/generated-types/GameVariant";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function getVariantLabel(variant: GameVariant): string {
+  switch (variant) {
+    case "DarkDaysAhead":
+      return "Dark Days Ahead";
+    case "BrightNights":
+      return "Bright Nights";
+    case "TheLastGeneration":
+      return "The Last Generation";
+  }
 }
 
 export function toastCL(
@@ -32,6 +45,7 @@ export function setupEventListener<T>(
   listenFn: (handler: (payload: T) => void) => Promise<() => void>,
   handler: (payload: T) => void,
   listenErrorMessage: string,
+  onError?: (error: unknown) => void,
 ) {
   let unlisten: (() => void) | undefined;
   let cancelled = false;
@@ -47,6 +61,7 @@ export function setupEventListener<T>(
     .catch((error) => {
       if (!cancelled) {
         toastCL("error", listenErrorMessage, error);
+        onError?.(error);
       }
     });
 
