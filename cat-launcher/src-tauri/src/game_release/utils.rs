@@ -66,6 +66,7 @@ pub fn gh_release_to_game_release(
   GameRelease {
     variant: *variant,
     version: gh_release.tag_name.clone(),
+    body: gh_release.body.clone(),
     release_type: variant.determine_release_type(
       &gh_release.tag_name,
       gh_release.prerelease,

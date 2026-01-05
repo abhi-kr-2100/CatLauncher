@@ -20,6 +20,14 @@ CREATE TABLE IF NOT EXISTS releases (
     FOREIGN KEY (game_variant) REFERENCES variants (name)
 );
 
+-- This table stores release notes for each release.
+-- It is separate from the releases table to avoid altering the existing table schema.
+CREATE TABLE IF NOT EXISTS release_notes (
+    release_id INTEGER PRIMARY KEY,
+    body TEXT,
+    FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE
+);
+
 -- This index speeds up filtering releases by game_variant, which is a common
 -- operation in both get_cached_releases and update_cached_releases.
 CREATE INDEX IF NOT EXISTS idx_releases_game_variant ON releases (game_variant);

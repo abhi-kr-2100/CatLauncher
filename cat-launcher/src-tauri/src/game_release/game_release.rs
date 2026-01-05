@@ -27,6 +27,7 @@ pub enum ReleaseType {
 pub struct GameRelease {
   pub variant: GameVariant,
   pub version: String,
+  pub body: Option<String>,
   pub release_type: ReleaseType,
   pub status: GameReleaseStatus,
   #[ts(type = "string")]

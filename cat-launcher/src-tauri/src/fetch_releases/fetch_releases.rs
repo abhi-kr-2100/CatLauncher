@@ -13,7 +13,8 @@ use crate::fetch_releases::utils::{
 };
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{
-  fetch_github_releases, GitHubReleaseFetchError,
+  fetch_github_release_by_tag, fetch_github_releases,
+  FetchGitHubReleaseByTagError, GitHubReleaseFetchError,
 };
 use crate::infra::utils::get_github_repo_for_variant;
 use crate::variants::GameVariant;
@@ -44,6 +45,15 @@ pub enum ReleasesUpdateStatus {
   Fetching,
   Success,
   Error,
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum FetchReleaseNotesError {
+  #[error("failed to get release from github: {0}")]
+  Fetch(#[from] FetchGitHubReleaseByTagError),
+
+  #[error("failed to access releases cache: {0}")]
+  Repository(#[from] ReleasesRepositoryError),
 }
 
 impl GameVariant {
@@ -90,5 +100,37 @@ impl GameVariant {
       .await?;
 
     Ok(())
+  }
+
+  pub async fn fetch_release_notes(
+    &self,
+    release_id: &str,
+    client: &Client,
+    releases_repository: &dyn ReleasesRepository,
+  ) -> Result<Option<String>, FetchReleaseNotesError> {
+    let cached_release = releases_repository
+      .get_cached_release_by_tag(self, release_id)
+      .await?;
+
+    if let Some(release) = cached_release {
+      if let Some(body) = &release.body {
+        return Ok(Some(body.clone()));
+      }
+    }
+
+    // If not found or body is missing, fetch from GitHub
+    let repo = get_github_repo_for_variant(self);
+    let github_release =
+      fetch_github_release_by_tag(client, repo, release_id).await?;
+
+    // Update cache
+    releases_repository
+      .update_cached_releases(
+        self,
+        std::slice::from_ref(&github_release),
+      )
+      .await?;
+
+    Ok(github_release.body)
   }
 }
