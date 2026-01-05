@@ -15,7 +15,7 @@ use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{
   fetch_github_releases, GitHubReleaseFetchError,
 };
-use crate::infra::utils::get_github_repo_for_variant;
+use crate::infra::utils::{get_github_repo_for_variant, Arch, OS};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -53,6 +53,8 @@ impl GameVariant {
     resources_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     on_releases: F,
+    os: &OS,
+    arch: &Arch,
   ) -> Result<(), FetchReleasesError<E>>
   where
     E: Error,
@@ -70,6 +72,8 @@ impl GameVariant {
       self,
       &merged,
       ReleasesUpdateStatus::Fetching,
+      os,
+      arch,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
@@ -82,6 +86,8 @@ impl GameVariant {
       self,
       &fetched_releases,
       ReleasesUpdateStatus::Success,
+      os,
+      arch,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
