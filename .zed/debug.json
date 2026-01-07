@@ -1,0 +1,25 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Debug Tauri Backend",
+    "adapter": "CodeLLDB",
+    "request": "launch",
+    "program": "$ZED_WORKTREE_ROOT/cat-launcher/src-tauri/target/debug/cat-launcher",
+    "cwd": "$ZED_WORKTREE_ROOT/cat-launcher/src-tauri",
+    "args": [],
+    "env": {
+      "RUST_BACKTRACE": "1",
+      "TAURI_ENV_DEBUG": "true",
+    },
+    "build": {
+      "command": "cargo",
+      "args": [
+        "build",
+        "--manifest-path=$ZED_WORKTREE_ROOT/cat-launcher/src-tauri/Cargo.toml",
+      ],
+    },
+  },
+]
