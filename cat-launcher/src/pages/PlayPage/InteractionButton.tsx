@@ -19,6 +19,7 @@ import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
   usePlayGame,
+  useReleases,
   useResumeLastWorld,
 } from "./hooks";
 
@@ -33,10 +34,8 @@ export default function InteractionButton({
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
-  const latestReleaseId = useAppSelector(
-    (state) =>
-      state.releases.releasesByVariant[variant]?.[0]?.version,
-  );
+  const { releases } = useReleases(variant);
+  const latestReleaseId = releases?.[0]?.version;
 
   const { data: activeRelease } = useQuery<string | undefined>({
     queryKey: queryKeys.activeRelease(variant),
