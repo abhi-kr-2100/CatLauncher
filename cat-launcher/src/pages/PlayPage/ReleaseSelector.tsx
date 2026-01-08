@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -7,18 +7,11 @@ import {
 } from "@/components/virtualized-combobox";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import {
-  getActiveRelease,
-  triggerFetchReleasesForVariant,
-} from "@/lib/commands";
+import { getActiveRelease } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  onFetchingReleasesFailed,
-  startFetchingReleases,
-} from "@/store/releasesSlice";
-import { useReleaseEvents } from "./hooks";
+import { useAppSelector } from "@/store/hooks";
+import { useReleases } from "./hooks";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 import ReleaseNotesButton from "./ReleaseNotesButton";
@@ -28,46 +21,25 @@ export default function ReleaseSelector({
   selectedReleaseId,
   setSelectedReleaseId,
 }: ReleaseSelectorProps) {
-  useReleaseEvents();
-
-  const dispatch = useAppDispatch();
-
-  const releases = useAppSelector(
-    (state) => state.releases.releasesByVariant[variant],
+  const { releases, isLoading: isReleasesLoading } = useReleases(
+    variant,
+    (error) =>
+      toastCL(
+        "error",
+        `Failed to load releases for ${variant}.`,
+        error,
+      ),
+    (error) =>
+      toastCL(
+        "error",
+        `Failed to fetch releases for ${variant}.`,
+        error,
+      ),
   );
 
   const selectedRelease = useMemo(() => {
     return releases.find((r) => r.version === selectedReleaseId);
   }, [releases, selectedReleaseId]);
-
-  const {
-    mutate: triggerFetchReleases,
-    isPending: isReleasesTriggerLoading,
-  } = useMutation({
-    mutationFn: triggerFetchReleasesForVariant,
-    onMutate: (variant: GameVariant) => {
-      dispatch(startFetchingReleases({ variant }));
-    },
-    onError: (error: unknown, variant) => {
-      dispatch(onFetchingReleasesFailed({ variant }));
-      toastCL(
-        "error",
-        `Failed to fetch releases for ${variant}.`,
-        error,
-      );
-    },
-  });
-
-  useEffect(() => {
-    // Fetch only if we don't have releases yet. Don't trigger fetch even if
-    // the fetch failed previously as long as we have releases.
-    // Fetching on failed previous fetches can lead to an infinite fetching cycle.
-    const shouldFetch = releases.length === 0;
-
-    if (shouldFetch) {
-      triggerFetchReleases(variant);
-    }
-  }, [variant, triggerFetchReleases, releases.length]);
 
   const {
     data: activeRelease,
@@ -169,19 +141,13 @@ export default function ReleaseSelector({
     ],
   );
 
-  // Even if isReleasesTriggerLoading is true, releases from previous release
-  // events might be available. Consider isReleaseFetchingLoading only when
-  // there are no items as well.
-  const isReleaseFetchingLoading =
-    isReleasesTriggerLoading && comboboxItems.length === 0;
-
   const isInstalling = Object.values(
     installationStatusByVersion ?? {},
   ).some(
     (status) => status === "Downloading" || status === "Installing",
   );
 
-  const placeholderText = isReleaseFetchingLoading
+  const placeholderText = isReleasesLoading
     ? "Loading..."
     : comboboxItems.length === 0
       ? "No releases available."
@@ -204,7 +170,7 @@ export default function ReleaseSelector({
             onChange={setSelectedReleaseId}
             autoselect={autoselect}
             placeholder={placeholderText}
-            disabled={isReleaseFetchingLoading || isInstalling}
+            disabled={isReleasesLoading || isInstalling}
           />
         </div>
         {selectedRelease && (
