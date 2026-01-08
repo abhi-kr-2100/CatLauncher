@@ -1,0 +1,19 @@
+[project]
+name = "schema-validator"
+version = "0.1.0"
+description = "Verify SQLite schema compatibility between two commits"
+readme = "README.md"
+authors = [
+    { name = "Abhishek Kumar", email = "abhi.kr.2100@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "gitpython>=3.1.0",
+]
+
+[project.scripts]
+verify-schema = "schema_validator.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
