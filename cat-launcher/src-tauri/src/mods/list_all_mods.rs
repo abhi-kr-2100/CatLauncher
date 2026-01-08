@@ -108,7 +108,7 @@ where
   let mut all_mods = Vec::new();
   let mut mod_ids = HashSet::new();
 
-  // First, get cached mods from database
+  // 1. First, get cached mods from database and emit them.
   let cached_mods =
     list_cached_third_party_mods(game_variant, mods_repository)
       .await
@@ -121,7 +121,6 @@ where
 
   sort_assets(&mut all_mods);
 
-  // Emit cached mods
   on_update(ModsUpdatePayload {
     variant: *game_variant,
     mods: all_mods.clone(),
@@ -129,35 +128,7 @@ where
   })
   .map_err(ListAllModsError::Send)?;
 
-  // Add bundled third-party mods
-  let local_third_party_mods =
-    list_all_third_party_mods(game_variant, resource_dir)
-      .await
-      .map_err(ListAllModsError::ListThirdPartyMods)?;
-
-  for tp in local_third_party_mods {
-    if mod_ids.insert(tp.id.clone()) {
-      all_mods.push(Mod::ThirdParty(tp));
-    }
-  }
-
-  // Add stock mods
-  let stock_mods = get_all_stock_mods(
-    game_variant,
-    data_dir,
-    os,
-    active_release_repository,
-  )
-  .await
-  .map_err(|e| ListAllModsError::GetActiveRelease(Box::new(e)))?;
-
-  for sp in stock_mods {
-    all_mods.push(Mod::Stock(sp));
-  }
-
-  sort_assets(&mut all_mods);
-
-  // Fetch online mods from all registries
+  // 2. Fetch online mods from all registries and emit them.
   for repo in online_mod_repositories {
     let online_mods =
       repo.get_mods_for_variant(game_variant, client).await?;
@@ -172,8 +143,42 @@ where
 
     if new_mods_added {
       sort_assets(&mut all_mods);
+
+      on_update(ModsUpdatePayload {
+        variant: *game_variant,
+        mods: all_mods.clone(),
+        status: ModsUpdateStatus::Fetching,
+      })
+      .map_err(ListAllModsError::Send)?;
     }
   }
+
+  // 3. Add bundled third-party mods and stock mods, then emit final success.
+  let local_third_party_mods =
+    list_all_third_party_mods(game_variant, resource_dir)
+      .await
+      .map_err(ListAllModsError::ListThirdPartyMods)?;
+
+  for tp in local_third_party_mods {
+    if mod_ids.insert(tp.id.clone()) {
+      all_mods.push(Mod::ThirdParty(tp));
+    }
+  }
+
+  let stock_mods = get_all_stock_mods(
+    game_variant,
+    data_dir,
+    os,
+    active_release_repository,
+  )
+  .await
+  .map_err(|e| ListAllModsError::GetActiveRelease(Box::new(e)))?;
+
+  for sp in stock_mods {
+    all_mods.push(Mod::Stock(sp));
+  }
+
+  sort_assets(&mut all_mods);
 
   // Save all discovered third-party mods to DB
   mods_repository
