@@ -9,7 +9,7 @@ use crate::fetch_releases::repository::{
   ReleasesRepository, ReleasesRepositoryError,
 };
 use crate::fetch_releases::utils::{
-  get_default_releases, get_releases_payload, merge_releases,
+  get_default_releases, get_releases_payload,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{
@@ -70,40 +70,51 @@ impl GameVariant {
     E: Error,
     F: Fn(ReleasesUpdatePayload) -> Result<(), E>,
   {
-    // Both default and cached releases are stored locally, and are quick to fetch.
-    // We fetch them together so that if the last played release was cached, the frontend
-    // can preselect it.
-    let default_releases =
-      get_default_releases(self, resources_dir).await;
+    // 1. Fetch and emit cached releases.
     let cached_releases =
       releases_repository.get_cached_releases(self).await?;
-    let merged = merge_releases(&default_releases, &cached_releases);
     let payload = get_releases_payload(
       self,
-      &merged,
+      &cached_releases,
       ReleasesUpdateStatus::Fetching,
       os,
       arch,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
-    let repo = get_github_repo_for_variant(self);
+    // 2. Fetch and emit releases from GitHub.
     // Fetching 100 releases makes it likely that we have the last played release.
     // TODO: Fetch the last played release separately.
+    let repo = get_github_repo_for_variant(self);
     let fetched_releases =
       fetch_github_releases(client, repo, Some(100)).await?;
+
+    releases_repository
+      .update_cached_releases(self, &fetched_releases)
+      .await?;
+
     let payload = get_releases_payload(
       self,
       &fetched_releases,
-      ReleasesUpdateStatus::Success,
+      ReleasesUpdateStatus::Fetching,
       os,
       arch,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
-    releases_repository
-      .update_cached_releases(self, &fetched_releases)
-      .await?;
+    // 3. Fetch and emit default releases.
+    // These are only fetched and emitted at the end so that GitHub releases
+    // are displayed first on first launch.
+    let default_releases =
+      get_default_releases(self, resources_dir).await;
+    let payload = get_releases_payload(
+      self,
+      &default_releases,
+      ReleasesUpdateStatus::Success,
+      os,
+      arch,
+    );
+    on_releases(payload).map_err(FetchReleasesError::Send)?;
 
     Ok(())
   }
