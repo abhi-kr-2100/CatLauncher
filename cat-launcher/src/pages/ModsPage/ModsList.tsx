@@ -37,7 +37,8 @@ export default function ModsList({ variant }: ModsListProps) {
     },
   });
 
-  if (isLoading) {
+  // Mods arrive in chunks; show loading message until first chunk arrives.
+  if (isLoading && mods.length === 0) {
     return <p className="text-muted-foreground">Loading mods...</p>;
   }
 
