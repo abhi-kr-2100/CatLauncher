@@ -2,16 +2,6 @@
 
 * Tools: `pnpm`, `shadcn/ui`, `lucide`, `tailwind`, `tanstack-query`, `redux-toolkit`
 
-## Verification
-
-At the end of every task, run the following commands in order:
-
-* `rm -rf cat-launcher/src/generated-types && cargo test --manifest-path cat-launcher/src-tauri/Cargo.toml`: This will generate TypeScript types from Rust types using `ts-rs`.
-* `pnpm --prefix cat-launcher format && pnpm --prefix cat-launcher lint:fix`
-* `pnpm --prefix cat-launcher lint`: To ensure there are no errors.
-
-You should not run any other build, test, or dev commands.
-
 ## UI
 
 `shadcn/ui` is used for UI components. To add a new component, run:
@@ -162,9 +152,33 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 
 # Agent Responsibility
 
+* If you discover a secondary task while working on a given task, track it.
 * At the end of each task, run the Verification commands to ensure correctness.
-* Only commit changes if asked to.
-* Use the `git commit --signoff` command.
+* Use the `git commit --signoff` command to commit changes.
+* Don't commit unless asked by the user.
+
+## Issue Tracking
+
+This project uses **bd (beads)** for issue tracking.
+Run `bd prime` for workflow context, or install hooks (`bd hooks install`) for auto-injection.
+
+**Quick reference:**
+- `bd ready` - Find unblocked work
+- `bd create "Title" --type task --priority 2` - Create issue
+- `bd close <id>` - Complete work
+- `bd sync` - Sync with git (run at session end)
+
+For full workflow details: `bd prime`
+
+## Verification
+
+At the end of every task, run the following commands in order:
+
+* `rm -rf cat-launcher/src/generated-types && cargo test --manifest-path cat-launcher/src-tauri/Cargo.toml`: This will generate TypeScript types from Rust types using `ts-rs`.
+* `pnpm --prefix cat-launcher format && pnpm --prefix cat-launcher lint:fix`
+* `pnpm --prefix cat-launcher lint`: To ensure there are no errors.
+
+You should not run any other build, test, or dev commands.
 
 ## Commit Guidelines
 
