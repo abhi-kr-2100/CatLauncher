@@ -1,4 +1,4 @@
 [post-create]
 env = "cp .env.example .env && direnv allow"
 install = "pnpm --prefix cat-launcher install"
-beads = "cp -r $WT_ROOT/.beads ."
+git-tools = "cp -r $WT_ROOT/.beads . && cp -r $WT_ROOT/.jj ."
