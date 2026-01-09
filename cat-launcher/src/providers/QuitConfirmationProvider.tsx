@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { confirmQuit, listenToQuitRequested } from "@/lib/commands";
@@ -14,6 +15,7 @@ export default function QuitConfirmationProvider({
   const isCurrentlyPlaying = useAppSelector(
     (state) => state.gameSession.currentlyPlaying != null,
   );
+  const posthog = usePostHog();
 
   useEffect(() => {
     const quitHandler = () => {
@@ -33,13 +35,20 @@ export default function QuitConfirmationProvider({
     return cleanup;
   }, [isCurrentlyPlaying]);
 
+  const handleConfirmQuit = async () => {
+    if (posthog) {
+      posthog.capture("quit_confirmed");
+    }
+    await confirmQuit();
+  };
+
   return (
     <>
       {children}
       <ConfirmationDialog
         open={quitDialogOpen}
         onOpenChange={setQuitDialogOpen}
-        onConfirm={confirmQuit}
+        onConfirm={handleConfirmQuit}
         title="Quit CatLauncher?"
         description="If you quit CatLauncher, play time won't be recorded. Additionally, CatLauncher won't be able to save logs in case your game crashes. It's not recommended to quit CatLauncher while a game is running."
         confirmText="Quit"
