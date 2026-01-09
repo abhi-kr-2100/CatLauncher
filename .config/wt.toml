@@ -2,3 +2,4 @@
 env = "cp .env.example .env && direnv allow"
 install = "pnpm --prefix cat-launcher install"
 beads = "cp -r $WT_ROOT/.beads ."
+jj = "cp -r $WT_ROOT/.jj ."
