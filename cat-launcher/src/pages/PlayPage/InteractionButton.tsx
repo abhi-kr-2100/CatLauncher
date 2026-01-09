@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 
 import { DownloadProgress } from "@/components/DownloadProgress";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ export default function InteractionButton({
   selectedReleaseId,
   setSelectedReleaseId,
 }: InteractionButtonProps) {
-  const { t } = useTranslation();
   const currentlyPlaying = useAppSelector(
     (state) => state.gameSession.currentlyPlaying,
   );
@@ -76,7 +74,6 @@ export default function InteractionButton({
     isStartingGameFromPlay || isStartingGameFromResume;
 
   const actionButtonLabel = getActionButtonLabel(
-    t,
     selectedReleaseId,
     isThisVariantRunning || isStartingGame,
     installationStatus,
@@ -123,7 +120,7 @@ export default function InteractionButton({
           onClick={() => resume(selectedReleaseId)}
           disabled={isActionButtonDisabled || !lastPlayedWorld}
         >
-          {t("Resume Last World")}
+          Resume Last World
         </Button>
       )}
       {shouldAllowUpgrading && (
@@ -139,14 +136,12 @@ export default function InteractionButton({
               }}
               disabled={isAnyVariantRunning || isStartingGame}
             >
-              {t("Upgrade")}
+              Upgrade
             </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              {t(
-                "Install and switch to the latest experimental version.",
-              )}
+              Install and switch to the latest experimental version.
             </p>
           </TooltipContent>
         </Tooltip>
@@ -162,9 +157,8 @@ export default function InteractionButton({
         </TooltipTrigger>
         <TooltipContent>
           <p>
-            {t(
-              "This release is not yet available. Try again in a couple of hours.",
-            )}
+            This release is not yet available. Try again in a couple
+            of hours.
           </p>
         </TooltipContent>
       </Tooltip>
@@ -181,39 +175,38 @@ interface InteractionButtonProps {
 }
 
 function getActionButtonLabel(
-  t: (key: string) => string,
   selectedReleaseId: string | undefined,
   isRunning: boolean,
   installationStatus: GameReleaseStatus,
   installationProgressStatus: InstallationProgressStatus | null,
 ) {
   if (!selectedReleaseId) {
-    return t("Select a Release to Play");
+    return "Select a Release to Play";
   }
 
   if (isRunning) {
-    return t("Running...");
+    return "Running...";
   }
 
   if (installationProgressStatus === "Downloading") {
-    return t("Downloading...");
+    return "Downloading...";
   }
 
   if (installationProgressStatus === "Installing") {
-    return t("Installing...");
+    return "Installing...";
   }
 
   if (installationStatus === "Unknown") {
-    return t("Loading...");
+    return "Loading...";
   }
 
   if (installationStatus === "ReadyToPlay") {
-    return t("Play");
+    return "Play";
   }
 
   if (installationStatus === "NotAvailable") {
-    return t("Not Available");
+    return "Not Available";
   }
 
-  return t("Install");
+  return "Install";
 }

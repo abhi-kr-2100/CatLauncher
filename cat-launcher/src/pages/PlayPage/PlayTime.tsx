@@ -1,5 +1,4 @@
 import { HTMLAttributes } from "react";
-import { useTranslation } from "react-i18next";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { cn } from "@/lib/utils";
@@ -10,24 +9,18 @@ interface PlayTimeProps extends HTMLAttributes<HTMLDivElement> {
   releaseId?: string;
 }
 
-function formatPlayTime(
-  t: (
-    key: string,
-    options?: { [key: string]: string | number },
-  ) => string,
-  totalSeconds: number,
-): string {
+function formatPlayTime(totalSeconds: number): string {
   if (totalSeconds === 0) {
-    return t("played_time_in_hours", { hours: 0 });
+    return "0h";
   }
 
   if (totalSeconds < 60) {
-    return t("played_time_in_minutes");
+    return "< 1m";
   }
 
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return t("played_time_in_hours_and_minutes", { hours, minutes });
+  return `${hours}h ${minutes}m`;
 }
 
 export function PlayTime({
@@ -36,14 +29,13 @@ export function PlayTime({
   className,
   ...props
 }: PlayTimeProps) {
-  const { t } = useTranslation();
   const { totalPlayTime, versionPlayTime } = usePlayTime(
     variant,
     releaseId,
   );
 
-  const formattedVersionPlayTime = formatPlayTime(t, versionPlayTime);
-  const formattedTotalPlayTime = formatPlayTime(t, totalPlayTime);
+  const formattedVersionPlayTime = formatPlayTime(versionPlayTime);
+  const formattedTotalPlayTime = formatPlayTime(totalPlayTime);
 
   return (
     <div
@@ -54,11 +46,11 @@ export function PlayTime({
       {...props}
     >
       <div className="flex justify-between">
-        <div>{t("Version playtime")}</div>
+        <div>Version playtime</div>
         <div>{formattedVersionPlayTime}</div>
       </div>
       <div className="flex justify-between">
-        <div>{t("Total playtime")}</div>
+        <div>Total playtime</div>
         <div>{formattedTotalPlayTime}</div>
       </div>
     </div>

@@ -4,7 +4,6 @@ import ReactDOM from "react-dom/client";
 import App from "@/App";
 import "@/styles/global.css";
 import Providers from "@/providers";
-import "@/i18n";
 
 ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
