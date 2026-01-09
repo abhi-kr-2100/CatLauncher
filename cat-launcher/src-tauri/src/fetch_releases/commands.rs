@@ -7,6 +7,7 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::fetch_releases::{
+  fetch_releases_for_variant_and_emit_updates,
   FetchReleaseNotesError, FetchReleasesError, ReleasesUpdatePayload,
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
@@ -24,7 +25,7 @@ pub enum FetchReleasesCommandError {
   SystemDir(#[from] tauri::Error),
 
   #[error("failed to fetch releases: {0}")]
-  Fetch(#[from] FetchReleasesError<tauri::Error>),
+  Fetch(#[from] FetchReleasesError),
 
   #[error("failed to get OS enum: {0}")]
   Os(#[from] OSNotSupportedError),
@@ -49,16 +50,16 @@ pub async fn fetch_releases_for_variant(
     Ok(())
   };
 
-  variant
-    .fetch_releases(
-      &client,
-      &resources_dir,
-      &*releases_repository,
-      on_releases,
-      &os,
-      &arch,
-    )
-    .await?;
+  fetch_releases_for_variant_and_emit_updates(
+    &variant,
+    &client,
+    &resources_dir,
+    &*releases_repository,
+    on_releases,
+    &os,
+    &arch,
+  )
+  .await?;
 
   Ok(())
 }
