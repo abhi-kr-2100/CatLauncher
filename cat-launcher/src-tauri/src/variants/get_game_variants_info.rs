@@ -1,7 +1,7 @@
 use strum::IntoEnumIterator;
 
-use crate::variants::links::Link;
 use crate::variants::repository::game_variant_order_repository::GameVariantOrderRepository;
+
 use crate::variants::GameVariant;
 use ts_rs::TS;
 
@@ -10,7 +10,6 @@ use ts_rs::TS;
 pub struct GameVariantInfo {
   pub id: GameVariant,
   pub name: String,
-  pub links: Vec<Link>,
 }
 
 impl GameVariantInfo {
@@ -18,7 +17,6 @@ impl GameVariantInfo {
     GameVariantInfo {
       id: variant,
       name: variant.name().to_string(),
-      links: variant.links(),
     }
   }
 }
