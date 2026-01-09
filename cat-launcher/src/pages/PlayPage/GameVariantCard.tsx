@@ -4,12 +4,10 @@ import { useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ExternalLink } from "@/components/ui/ExternalLink";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { useSortableItem } from "@/hooks/useSortableItem";
 import InteractionButton from "./InteractionButton";
@@ -34,18 +32,7 @@ export default function GameVariantCard({
     <Card ref={setNodeRef} style={style} {...attributes}>
       <CardHeader>
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{variantInfo.name}</CardTitle>
-            <CardDescription>
-              <div className="flex gap-5">
-                {variantInfo.links.map((link) => (
-                  <ExternalLink key={link.href} href={link.href}>
-                    {link.label}
-                  </ExternalLink>
-                ))}
-              </div>
-            </CardDescription>
-          </div>
+          <CardTitle>{variantInfo.name}</CardTitle>
           <div {...listeners} className="cursor-grab">
             <GripVertical />
           </div>
