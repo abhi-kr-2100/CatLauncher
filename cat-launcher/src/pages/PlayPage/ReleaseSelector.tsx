@@ -15,6 +15,9 @@ import { useReleases } from "./hooks";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 import ReleaseNotesButton from "./ReleaseNotesButton";
+import { Command } from '@tauri-apps/plugin-shell';
+import { join, appLocalDataDir } from '@tauri-apps/api/path';
+import { platform } from '@tauri-apps/plugin-os';
 
 export default function ReleaseSelector({
   variant,
@@ -102,7 +105,7 @@ export default function ReleaseSelector({
   const installationStatusByVersion = useAppSelector(
     (state) =>
       state.installationProgress.installationStatusByVariant.release[
-        variant
+      variant
       ],
   );
 
@@ -173,6 +176,47 @@ export default function ReleaseSelector({
             disabled={isReleasesLoading || isInstalling}
           />
         </div>
+
+        {selectedRelease && (
+          <button
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+            title="Open Installation Folder"
+            onClick={async () => {
+              if (!selectedReleaseId) return;
+
+              try {
+                const baseDir = await appLocalDataDir();
+                const safeVersion = selectedReleaseId.replace(/[.-]/g, '_');
+                const gamePath = await join(baseDir, 'Assets', variant, safeVersion);
+
+                const currentPlatform = platform();
+                let commandName = '';
+
+                if (currentPlatform === 'windows') {
+                  commandName = 'open-win';
+                } else if (currentPlatform === 'macos') {
+                  commandName = 'open-mac';
+                } else if (currentPlatform === 'linux') {
+                  commandName = 'open-linux';
+                } else {
+                  console.warn("Unknown platform:", currentPlatform);
+                  return;
+                }
+
+                console.log(`Opening path on ${currentPlatform}:`, gamePath);
+
+                const command = Command.create(commandName, [gamePath]);
+                await command.execute();
+
+              } catch (e) {
+                console.error("Failed to open folder:", e);
+              }
+            }}
+          >
+            📂
+          </button>
+        )}
+
         {selectedRelease && (
           <ReleaseNotesButton release={selectedRelease} />
         )}

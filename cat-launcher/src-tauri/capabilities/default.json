@@ -2,6 +2,44 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
-  "permissions": ["core:default", "opener:default"]
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "os:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "open-win",
+          "cmd": "explorer",
+          "args": [
+            {
+              "validator": "^.*$"
+            }
+          ]
+        },
+        {
+          "name": "open-mac",
+          "cmd": "open",
+          "args": [
+            {
+              "validator": "^.*$"
+            }
+          ]
+        },
+        {
+          "name": "open-linux",
+          "cmd": "xdg-open",
+          "args": [
+            {
+              "validator": "^.*$"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
