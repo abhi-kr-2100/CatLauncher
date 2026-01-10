@@ -500,3 +500,9 @@ export async function updateSettings(
 ): Promise<void> {
   await invoke("update_settings", { settings });
 }
+
+export async function masterReset(
+  variant: GameVariant,
+): Promise<void> {
+  await invoke("master_reset", { variant });
+}

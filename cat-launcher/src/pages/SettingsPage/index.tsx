@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { toastCL } from "@/lib/utils";
 import { FontSettings } from "./components/FontSettings";
+import { MasterReset } from "./components/MasterReset";
 import { useSettingsForm } from "./hooks";
 
 export default function SettingsPage() {
@@ -47,8 +48,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 max-w-2xl px-4">
+    <div className="container mx-auto max-w-2xl px-4">
       <form onSubmit={apply} className="space-y-8">
+        <MasterReset />
+
         <FontSettings control={form.control} />
 
         <div className="flex justify-end gap-4">
