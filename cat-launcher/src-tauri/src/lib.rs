@@ -12,6 +12,7 @@ mod install_release;
 mod last_played_world;
 mod launch_game;
 mod manual_backups;
+mod master_reset;
 mod mods;
 mod play_time;
 mod soundpacks;
@@ -37,6 +38,7 @@ use crate::manual_backups::commands::{
   create_manual_backup_for_variant, delete_manual_backup_by_id,
   list_manual_backups_for_variant, restore_manual_backup_by_id,
 };
+use crate::master_reset::commands::master_reset;
 use crate::mods::commands::{
   get_last_activity_on_third_party_mod_command,
   get_third_party_mod_installation_status_command,
@@ -140,6 +142,7 @@ pub fn run() {
       update_settings,
       get_default_settings,
       confirm_quit,
+      master_reset,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
