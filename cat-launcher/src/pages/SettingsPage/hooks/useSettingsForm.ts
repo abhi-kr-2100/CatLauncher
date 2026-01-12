@@ -116,6 +116,7 @@ export function useSettingsForm({
   const resetToDefault = () => {
     if (defaultSettings) {
       form.reset(defaultSettings);
+      updateSettingsMutation.mutate(defaultSettings);
     }
   };
 
