@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-
 import { DownloadProgress } from "@/components/DownloadProgress";
+import { DropdownButton } from "@/components/DropdownButton";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,8 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { getActiveRelease } from "@/lib/commands";
-import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 import { InstallationProgressStatus } from "@/store/installationProgressSlice";
@@ -19,8 +15,8 @@ import {
   useInstallAndMonitorRelease,
   useInstallationStatus,
   usePlayGame,
-  useReleases,
   useResumeLastWorld,
+  useUpgradeInfo,
 } from "./hooks";
 
 export default function InteractionButton({
@@ -34,26 +30,19 @@ export default function InteractionButton({
   const isThisVariantRunning = currentlyPlaying === variant;
   const isAnyVariantRunning = currentlyPlaying !== null;
 
-  const { releases } = useReleases(variant);
-  const latestReleaseId = releases?.[0]?.version;
-
-  const { data: activeRelease } = useQuery<string | undefined>({
-    queryKey: queryKeys.activeRelease(variant),
-    queryFn: () => getActiveRelease(variant),
-  });
-
-  const shouldAllowUpgrading = useMemo(() => {
-    return (
-      selectedReleaseId &&
-      activeRelease &&
-      selectedReleaseId === activeRelease &&
-      latestReleaseId &&
-      selectedReleaseId !== latestReleaseId
-    );
-  }, [selectedReleaseId, activeRelease, latestReleaseId]);
-
   const { install, installationProgressStatus, downloadProgress } =
     useInstallAndMonitorRelease(variant, selectedReleaseId);
+
+  const { latestReleaseId, upgradeOptions, shouldAllowUpgrading } =
+    useUpgradeInfo(
+      variant,
+      selectedReleaseId,
+      setSelectedReleaseId,
+      install,
+      (e) => {
+        toastCL("error", "Failed to get active release.", e);
+      },
+    );
 
   const { installationStatus, installationStatusError } =
     useInstallationStatus(variant, selectedReleaseId);
@@ -126,7 +115,7 @@ export default function InteractionButton({
       {shouldAllowUpgrading && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
+            <DropdownButton
               className="grow w-[30%]"
               onClick={() => {
                 if (latestReleaseId) {
@@ -135,14 +124,16 @@ export default function InteractionButton({
                 }
               }}
               disabled={isAnyVariantRunning || isStartingGame}
+              mainButtonDisabled={
+                selectedReleaseId === latestReleaseId
+              }
+              options={upgradeOptions}
             >
               Upgrade
-            </Button>
+            </DropdownButton>
           </TooltipTrigger>
           <TooltipContent>
-            <p>
-              Install and switch to the latest experimental version.
-            </p>
+            <p>Install and switch to the latest version.</p>
           </TooltipContent>
         </Tooltip>
       )}
