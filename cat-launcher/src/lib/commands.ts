@@ -2,6 +2,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
+import type { ColorTheme } from "@/generated-types/ColorTheme";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { Font } from "@/generated-types/Font";
 import type { GameEvent } from "@/generated-types/GameEvent";
@@ -482,6 +483,11 @@ export async function confirmQuit(): Promise<void> {
 
 export async function getFonts(): Promise<Font[]> {
   const response = await invoke<Font[]>("get_fonts");
+  return response;
+}
+
+export async function getColorThemes(): Promise<ColorTheme[]> {
+  const response = await invoke<ColorTheme[]>("get_color_themes");
   return response;
 }
 

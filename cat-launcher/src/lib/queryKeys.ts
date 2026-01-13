@@ -70,7 +70,7 @@ export const queryKeys = {
     ["last_played_world", variant] as const,
 
   fonts: () => ["fonts"] as const,
-
+  colorThemes: () => ["color_themes"] as const,
   settings: () => ["settings"] as const,
 
   defaultSettings: () => ["default_settings"] as const,
