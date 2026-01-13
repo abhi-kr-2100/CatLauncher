@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { toastCL } from "@/lib/utils";
+import { ColorSettings } from "./components/ColorSettings";
 import { FontSettings } from "./components/FontSettings";
 import { MasterReset } from "./components/MasterReset";
 import { SettingsPageFooter } from "./components/SettingsPageFooter";
@@ -51,8 +52,9 @@ export default function SettingsPage() {
     <div className="container mx-auto max-w-2xl px-4 pb-24">
       <form onSubmit={apply} className="space-y-8">
         <MasterReset />
-
         <FontSettings control={form.control} />
+        <ColorSettings control={form.control} />
+
         <SettingsPageFooter
           isDirty={form.formState.isDirty}
           isUpdating={isUpdating}
