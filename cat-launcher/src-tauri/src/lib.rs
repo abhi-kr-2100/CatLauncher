@@ -49,7 +49,8 @@ use crate::play_time::commands::{
   get_play_time_for_variant, get_play_time_for_version, log_play_time,
 };
 use crate::settings::commands::{
-  get_default_settings, get_fonts, get_settings, update_settings,
+  get_color_themes, get_default_settings, get_fonts, get_settings,
+  update_settings,
 };
 use crate::soundpacks::commands::{
   get_third_party_soundpack_installation_status_command,
@@ -138,6 +139,7 @@ pub fn run() {
       set_preferred_theme,
       get_last_played_world,
       get_fonts,
+      get_color_themes,
       get_settings,
       update_settings,
       get_default_settings,
