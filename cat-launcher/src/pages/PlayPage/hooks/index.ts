@@ -8,3 +8,4 @@ export * from "./useLastPlayedWorld";
 export * from "./useResumeLastWorld";
 export * from "./useLaunchGame";
 export * from "./usePlayTime";
+export * from "./useUpgradeInfo";
