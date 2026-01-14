@@ -1,9 +1,11 @@
 import AboutPage from "@/pages/AboutPage";
+import AchievementsPage from "@/pages/AchievementsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import BackupsPage from "@/pages/BackupsPage";
 import PlayPage from "@/pages/PlayPage";
 import SettingsPage from "@/pages/SettingsPage";
 import {
+  Award,
   FileUp,
   Gamepad2,
   Info,
@@ -17,6 +19,12 @@ export const routes = [
     element: <PlayPage />,
     label: "Play",
     icon: Gamepad2,
+  },
+  {
+    path: "/achievements",
+    element: <AchievementsPage />,
+    label: "Achievements",
+    icon: Award,
   },
   {
     path: "/backups",
