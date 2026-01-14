@@ -1,6 +1,8 @@
-import pkg from "../../package.json";
-import { openLink } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
+
 import { Button } from "@/components/ui/button";
+import { openLink } from "@/lib/utils";
 
 const LINKS = [
   {
@@ -21,6 +23,12 @@ const LINKS = [
 ];
 
 export default function AboutPage() {
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getVersion().then(setVersion);
+  }, []);
+
   return (
     <div className="flex flex-col items-center gap-4 py-4 max-w-lg mx-auto">
       <div className="flex flex-col items-center gap-2">
@@ -29,9 +37,7 @@ export default function AboutPage() {
           An opinionated cross-platform launcher for Cataclysm games
           with modern social features.
         </p>
-        <p className="text-muted-foreground text-sm">
-          v{pkg.version}
-        </p>
+        <p className="text-muted-foreground text-sm">v{version}</p>
       </div>
 
       <div className="flex flex-col gap-2">
