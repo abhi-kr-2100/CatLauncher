@@ -32,6 +32,13 @@ export function useUpgradeInfo(
   const latestReleaseId = releases?.[0]?.version;
 
   const latestByReleaseType = useMemo(() => {
+    // The Last Generation has Stable and Experimental releases, but Experimental releases are deprecated.
+    if (variant === "TheLastGeneration" && releases.length > 0) {
+      return {
+        Stable: releases[0],
+      };
+    }
+
     const latest: Partial<Record<ReleaseType, GameRelease>> = {};
     for (const r of releases) {
       if (!latest[r.release_type]) {
@@ -39,7 +46,7 @@ export function useUpgradeInfo(
       }
     }
     return latest;
-  }, [releases]);
+  }, [releases, variant]);
 
   const supportedTypes = useMemo<ReleaseType[]>(() => {
     const presentTypes = Object.keys(
