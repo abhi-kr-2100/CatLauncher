@@ -113,29 +113,20 @@ export default function InteractionButton({
         </Button>
       )}
       {shouldAllowUpgrading && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DropdownButton
-              className="grow w-[30%]"
-              onClick={() => {
-                if (latestReleaseId) {
-                  setSelectedReleaseId(latestReleaseId);
-                  install(latestReleaseId);
-                }
-              }}
-              disabled={isAnyVariantRunning || isStartingGame}
-              mainButtonDisabled={
-                selectedReleaseId === latestReleaseId
-              }
-              options={upgradeOptions}
-            >
-              Upgrade
-            </DropdownButton>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Install and switch to the latest version.</p>
-          </TooltipContent>
-        </Tooltip>
+        <DropdownButton
+          className="grow w-[30%]"
+          onClick={() => {
+            if (latestReleaseId) {
+              setSelectedReleaseId(latestReleaseId);
+              install(latestReleaseId);
+            }
+          }}
+          disabled={isAnyVariantRunning || isStartingGame}
+          mainButtonDisabled={selectedReleaseId === latestReleaseId}
+          options={upgradeOptions}
+        >
+          Upgrade
+        </DropdownButton>
       )}
     </div>
   );
