@@ -61,8 +61,7 @@ export function MasterReset() {
           </p>
           <p>
             Worlds that use custom mods, won't be playable until you
-            reinstall them. Restoring old backups may lead to the game
-            breaking again.
+            reinstall them.
           </p>
         </AlertDescription>
       </Alert>
