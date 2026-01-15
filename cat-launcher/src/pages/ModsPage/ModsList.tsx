@@ -4,6 +4,8 @@ import { getVariantLabel, toastCL } from "@/lib/utils";
 import { useSearch } from "@/hooks/useSearch";
 import { useMods } from "./hooks";
 import ModCard from "./ModCard";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface ModsListProps {
   variant: GameVariant;
@@ -50,6 +52,18 @@ export default function ModsList({ variant }: ModsListProps) {
         placeholder="Search mods..."
         className="mb-4 mt-2"
       />
+
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          <p>Third-party mods can break your game.</p>
+          <p>
+            If your game is broken, master reset it by going to
+            "Settings."
+          </p>
+        </AlertDescription>
+      </Alert>
+
       {!filteredMods || filteredMods.length === 0 ? (
         <p className="text-muted-foreground">
           {hasActiveSearch

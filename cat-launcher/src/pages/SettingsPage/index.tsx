@@ -51,9 +51,9 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto max-w-2xl px-4 pb-24">
       <form onSubmit={apply} className="space-y-8">
-        <MasterReset />
         <FontSettings control={form.control} />
         <ColorSettings control={form.control} />
+        <MasterReset />
 
         <SettingsPageFooter
           isDirty={form.formState.isDirty}
