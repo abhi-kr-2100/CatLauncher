@@ -15,11 +15,11 @@ mod manual_backups;
 mod master_reset;
 mod mods;
 mod play_time;
+mod setup;
 mod soundpacks;
 mod theme;
 mod tilesets;
 mod users;
-mod utils;
 mod variants;
 
 use crate::active_release::commands::get_active_release;
@@ -52,6 +52,14 @@ use crate::settings::commands::{
   get_color_themes, get_default_settings, get_fonts, get_settings,
   update_settings,
 };
+use crate::setup::{
+  autoupdate::autoupdate, commands::on_quit,
+  database::manage_repositories, downloader::manage_downloader,
+  http_client::manage_http_client,
+  migrations::migrate_to_local_data_dir,
+  online_mod_repository_registry::manage_online_mod_repository_registry,
+  posthog::manage_posthog, settings::manage_settings,
+};
 use crate::soundpacks::commands::{
   get_third_party_soundpack_installation_status_command,
   install_third_party_soundpack_command, list_all_soundpacks_command,
@@ -66,12 +74,6 @@ use crate::tilesets::commands::{
   uninstall_third_party_tileset_command,
 };
 use crate::users::commands::get_user_id;
-use crate::utils::{
-  autoupdate, manage_downloader, manage_http_client,
-  manage_online_mod_repository_registry, manage_posthog,
-  manage_repositories, manage_settings, migrate_to_local_data_dir,
-  on_quit,
-};
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
 use tauri::{command, AppHandle};

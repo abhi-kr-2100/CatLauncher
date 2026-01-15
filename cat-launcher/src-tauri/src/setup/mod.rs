@@ -1,0 +1,9 @@
+pub mod autoupdate;
+pub mod commands;
+pub mod database;
+pub mod downloader;
+pub mod http_client;
+pub mod migrations;
+pub mod online_mod_repository_registry;
+pub mod posthog;
+pub mod settings;
