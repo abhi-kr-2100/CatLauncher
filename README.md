@@ -44,7 +44,7 @@ CatLauncher is 100% open-source and the .dmg is built directly from the source c
 
 Downloading the AppImage is the easiest way to install CatLauncher and keep it automatically up-to-date. However, the AppImage may not work on all Linux distros. It's been tested to work on Ubuntu 24.04.
 
-To use the AppImage, download it, and make it executable by running `chmod a+x cat-launcher_0.13.0_amd64.AppImage`, and then run it like you would any other executable.
+To use the AppImage, download it, and make it executable by running `chmod a+x cat-launcher_0.14.0_amd64.AppImage`, and then run it like you would any other executable.
 
 If you encounter issues with the AppImage, you can try installing CatLauncher using the .deb or the .rpm package. It would also help if you can open an issue on GitHub with details of your distro.
 
