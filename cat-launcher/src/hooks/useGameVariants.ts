@@ -3,6 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
@@ -11,11 +12,10 @@ import {
   updateGameVariantOrder,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect } from "react";
 
 interface UseGameVariantsOptions {
-  onOrderUpdateError?: (error: unknown) => void;
-  onFetchError?: (error: unknown) => void;
+  onOrderUpdateError?: (error: Error) => void;
+  onFetchError?: (error: Error) => void;
 }
 
 export function useGameVariants({
@@ -24,29 +24,38 @@ export function useGameVariants({
 }: UseGameVariantsOptions = {}) {
   const queryClient = useQueryClient();
 
+  const onFetchErrorRef = useRef(onFetchError);
+  useEffect(() => {
+    onFetchErrorRef.current = onFetchError;
+  }, [onFetchError]);
+
+  const onOrderUpdateErrorRef = useRef(onOrderUpdateError);
+  useEffect(() => {
+    onOrderUpdateErrorRef.current = onOrderUpdateError;
+  }, [onOrderUpdateError]);
+
   const {
     data: gameVariants = [],
     isLoading,
-    isError,
     error,
-  } = useQuery<GameVariantInfo[]>({
+  } = useQuery<GameVariantInfo[], Error>({
     queryKey: queryKeys.gameVariantsInfo(),
     queryFn: fetchGameVariantsInfo,
   });
 
   useEffect(() => {
-    if (isError) {
-      onFetchError?.(error);
+    if (error) {
+      onFetchErrorRef.current?.(error);
     }
-  }, [isError, error, onFetchError]);
+  }, [error]);
 
-  const { mutate } = useMutation({
-    mutationFn: ({
-      ids,
-    }: {
-      ids: GameVariant[];
-      newItems: GameVariantInfo[];
-    }) => updateGameVariantOrder(ids),
+  const { mutate, error: updateError } = useMutation<
+    void,
+    Error,
+    { ids: GameVariant[]; newItems: GameVariantInfo[] },
+    { previousGameVariants: GameVariantInfo[] | undefined }
+  >({
+    mutationFn: ({ ids }) => updateGameVariantOrder(ids),
     onMutate: async ({ newItems }) => {
       await queryClient.cancelQueries({
         queryKey: queryKeys.gameVariantsInfo(),
@@ -63,14 +72,13 @@ export function useGameVariants({
 
       return { previousGameVariants };
     },
-    onError: (error, _variables, context) => {
+    onError: (_error, _variables, context) => {
       if (context?.previousGameVariants) {
         queryClient.setQueryData(
           queryKeys.gameVariantsInfo(),
           context.previousGameVariants,
         );
       }
-      onOrderUpdateError?.(error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({
@@ -78,6 +86,12 @@ export function useGameVariants({
       });
     },
   });
+
+  useEffect(() => {
+    if (updateError) {
+      onOrderUpdateErrorRef.current?.(updateError);
+    }
+  }, [updateError]);
 
   const updateOrder = (newOrder: GameVariantInfo[]) => {
     mutate({
@@ -90,7 +104,7 @@ export function useGameVariants({
     gameVariants,
     updateOrder,
     isLoading,
-    isError,
+    isError: !!error,
     error,
   };
 }

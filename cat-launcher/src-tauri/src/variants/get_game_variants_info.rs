@@ -21,7 +21,11 @@ impl GameVariantInfo {
   }
 }
 
-#[derive(thiserror::Error, Debug)]
+use cat_macros::CommandErrorSerialize;
+
+#[derive(
+  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
+)]
 pub enum GetGameVariantsInfoError {
   #[error("failed to get game variant order")]
     Get(#[from] crate::variants::repository::game_variant_order_repository::GameVariantOrderRepositoryError),
