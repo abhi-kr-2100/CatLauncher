@@ -14,7 +14,7 @@ use crate::game_release::game_release::{
 };
 use crate::game_release::utils::gh_release_to_game_release;
 use crate::game_tips::types::Tip;
-use crate::infra::utils::OS;
+use crate::infra::utils::{OSNotSupportedError, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
@@ -37,6 +37,12 @@ pub enum GetAllTipsForVariantError {
 
   #[error("failed to get cached releases: {0}")]
   GetCachedReleases(#[from] ReleasesRepositoryError),
+
+  #[error("unsupported OS: {0}")]
+  UnsupportedOS(#[from] OSNotSupportedError),
+
+  #[error("failed to get data directory: {0}")]
+  DataDir(#[from] tauri::Error),
 }
 
 async fn get_tips_from_version(

@@ -1,4 +1,4 @@
-import AboutPage from "@/pages/AboutPage";
+import AboutPage from "@/pages/AboutPage/index";
 import AchievementsPage from "@/pages/AchievementsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import BackupsPage from "@/pages/BackupsPage";
