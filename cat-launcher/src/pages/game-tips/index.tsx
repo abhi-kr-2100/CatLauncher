@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/alert";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { randomInt, setImmediateInterval } from "@/lib/utils";
-import { useGetTips } from "./hooks/useGetTips";
+import useGetTips from "./hooks/useGetTips";
 import { NO_TIPS_AVAILABLE } from "./lib/constants";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
@@ -35,16 +35,18 @@ interface TipOfTheDayProps {
 }
 
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
-  const { data, status } = useGetTips(variant);
+  const { data, isLoading, error } = useGetTips(variant, (error) => {
+    console.error("Failed to get tips", error);
+  });
 
   const [randomIndex, setRandomIndex] = useState(0);
 
   const tips = useMemo(() => {
-    if (status !== "success" || data.length === 0) {
+    if (isLoading || error || !data || data.length === 0) {
       return [];
     }
     return data;
-  }, [data, status]);
+  }, [data, isLoading, error]);
 
   const shuffleTips = useCallback(() => {
     if (tips.length === 0) {
