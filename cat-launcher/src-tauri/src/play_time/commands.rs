@@ -10,7 +10,7 @@ use crate::play_time::play_time::{
 };
 use crate::play_time::repository::PlayTimeRepositoryError;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,

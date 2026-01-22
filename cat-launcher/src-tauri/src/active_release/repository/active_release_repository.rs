@@ -2,7 +2,7 @@ use std::error::Error;
 
 use async_trait::async_trait;
 
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ActiveReleaseRepositoryError {
