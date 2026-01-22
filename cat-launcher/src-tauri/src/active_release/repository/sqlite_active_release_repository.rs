@@ -5,7 +5,7 @@ use tokio::task;
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 

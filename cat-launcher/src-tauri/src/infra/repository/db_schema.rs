@@ -4,7 +4,7 @@ use rusqlite::Connection;
 use strum::IntoEnumIterator;
 
 use crate::theme::theme::Theme;
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum InitializeSchemaError {

@@ -9,7 +9,7 @@ use crate::fetch_releases::repository::{
 };
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
