@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -69,6 +69,12 @@ export function useInstallAndMonitor<T>(
     1000,
   );
 
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
   const {
     mutate,
     isPending: isInstalling,
@@ -109,8 +115,8 @@ export function useInstallAndMonitor<T>(
       );
     },
     onError: (e) => {
-      if (onError) {
-        onError(e);
+      if (onErrorRef.current) {
+        onErrorRef.current(e);
       }
     },
   });
