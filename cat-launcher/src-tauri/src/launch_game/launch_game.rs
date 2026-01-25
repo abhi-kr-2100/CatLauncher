@@ -10,6 +10,7 @@ use tokio::task::JoinError;
 use tokio::task::JoinSet;
 use ts_rs::TS;
 
+use crate::active_release::active_release;
 use crate::active_release::repository::ActiveReleaseRepository;
 use crate::constants::MAX_BACKUPS;
 use crate::fetch_releases::repository::ReleasesRepository;
@@ -289,9 +290,12 @@ where
   .await?;
 
   // Ignore non-critical error where active release could not be set
-  let _ = variant
-    .set_active_release(release_id, active_release_repository)
-    .await;
+  let _ = active_release::set_active_release(
+    variant,
+    release_id,
+    active_release_repository,
+  )
+  .await;
 
   let command = release
     .prepare_launch(
