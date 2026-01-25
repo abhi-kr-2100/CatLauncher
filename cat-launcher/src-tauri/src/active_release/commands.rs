@@ -3,7 +3,7 @@ use tauri::{command, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::active_release::active_release::{self, ActiveReleaseError};
+use crate::active_release::active_release::ActiveReleaseError;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::variants::GameVariant;
 
@@ -24,8 +24,7 @@ pub async fn get_active_release(
   repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Option<String>, ActiveReleaseCommandError> {
   let active_release =
-    active_release::get_active_release(&variant, &*repository)
-      .await?;
+    variant.get_active_release(&*repository).await?;
 
   Ok(active_release)
 }

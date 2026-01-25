@@ -9,18 +9,20 @@ pub enum ActiveReleaseError {
   Repository(#[from] ActiveReleaseRepositoryError),
 }
 
-pub async fn get_active_release(
-  variant: &GameVariant,
-  repository: &dyn ActiveReleaseRepository,
-) -> Result<Option<String>, ActiveReleaseError> {
-  Ok(repository.get_active_release(variant).await?)
-}
+impl GameVariant {
+  pub async fn get_active_release(
+    &self,
+    repository: &dyn ActiveReleaseRepository,
+  ) -> Result<Option<String>, ActiveReleaseError> {
+    Ok(repository.get_active_release(self).await?)
+  }
 
-pub async fn set_active_release(
-  variant: &GameVariant,
-  version: &str,
-  repository: &dyn ActiveReleaseRepository,
-) -> Result<(), ActiveReleaseError> {
-  repository.set_active_release(variant, version).await?;
-  Ok(())
+  pub async fn set_active_release(
+    &self,
+    version: &str,
+    repository: &dyn ActiveReleaseRepository,
+  ) -> Result<(), ActiveReleaseError> {
+    repository.set_active_release(self, version).await?;
+    Ok(())
+  }
 }

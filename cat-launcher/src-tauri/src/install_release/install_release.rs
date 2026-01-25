@@ -4,9 +4,7 @@ use std::sync::Arc;
 use downloader::progress::Reporter;
 use tokio::fs;
 
-use crate::active_release::active_release::{
-  self, ActiveReleaseError,
-};
+use crate::active_release::active_release::ActiveReleaseError;
 use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
@@ -69,12 +67,10 @@ impl GameRelease {
     }
 
     if self.status == GameReleaseStatus::ReadyToPlay {
-      active_release::set_active_release(
-        &self.variant,
-        &self.version,
-        active_release_repository,
-      )
-      .await?;
+      self
+        .variant
+        .set_active_release(&self.version, active_release_repository)
+        .await?;
       return Ok(());
     }
 
@@ -107,12 +103,10 @@ impl GameRelease {
 
     self.status = GameReleaseStatus::ReadyToPlay;
 
-    active_release::set_active_release(
-      &self.variant,
-      &self.version,
-      active_release_repository,
-    )
-    .await?;
+    self
+      .variant
+      .set_active_release(&self.version, active_release_repository)
+      .await?;
 
     // Failure to remove file does not mean failure to install
     let _ = fs::remove_file(&download_filepath).await;
