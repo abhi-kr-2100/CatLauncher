@@ -3,6 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
@@ -11,7 +12,6 @@ import {
   updateGameVariantOrder,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect } from "react";
 
 interface UseGameVariantsOptions {
   onOrderUpdateError?: (error: unknown) => void;
@@ -23,6 +23,11 @@ export function useGameVariants({
   onFetchError,
 }: UseGameVariantsOptions = {}) {
   const queryClient = useQueryClient();
+  const onFetchErrorRef = useRef(onFetchError);
+
+  useEffect(() => {
+    onFetchErrorRef.current = onFetchError;
+  }, [onFetchError]);
 
   const {
     data: gameVariants = [],
@@ -35,10 +40,10 @@ export function useGameVariants({
   });
 
   useEffect(() => {
-    if (isError) {
-      onFetchError?.(error);
+    if (error && onFetchErrorRef.current) {
+      onFetchErrorRef.current(error);
     }
-  }, [isError, error, onFetchError]);
+  }, [error]);
 
   const { mutate } = useMutation({
     mutationFn: ({

@@ -13,17 +13,17 @@ use crate::launch_game::repository::{
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
-pub enum ListBackupsError {
+pub enum ListBackupsForVariantError {
   #[error("failed to get backup entries: {0}")]
   Get(#[from] BackupRepositoryError),
 }
 
-pub async fn list_backups(
+pub async fn list_backups_for_variant(
   game_variant: &GameVariant,
   backup_repository: &impl BackupRepository,
 ) -> Result<
   Vec<crate::launch_game::repository::BackupEntry>,
-  ListBackupsError,
+  ListBackupsForVariantError,
 > {
   let backups = backup_repository
     .get_backups_sorted_by_timestamp(game_variant)
@@ -32,7 +32,7 @@ pub async fn list_backups(
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum DeleteBackupError {
+pub enum DeleteBackupByIdError {
   #[error("failed to get backup entry: {0}")]
   Get(#[from] BackupRepositoryError),
 
@@ -43,11 +43,11 @@ pub enum DeleteBackupError {
   RemoveBackupFile(#[from] std::io::Error),
 }
 
-pub async fn delete_backup(
+pub async fn delete_backup_by_id(
   id: i64,
   data_dir: &Path,
   backup_repository: &impl BackupRepository,
-) -> Result<(), DeleteBackupError> {
+) -> Result<(), DeleteBackupByIdError> {
   let backup = backup_repository.get_backup_entry(id).await?;
   let path = get_or_create_automatic_backup_archive_filepath(
     &backup.game_variant,
@@ -70,14 +70,14 @@ pub async fn delete_backup(
         backup.timestamp,
       )
       .await;
-    return Err(DeleteBackupError::RemoveBackupFile(e));
+    return Err(DeleteBackupByIdError::RemoveBackupFile(e));
   }
 
   Ok(())
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum RestoreBackupError {
+pub enum RestoreBackupByIdError {
   #[error("failed to get backup entry: {0}")]
   Get(#[from] BackupRepositoryError),
 
@@ -91,12 +91,12 @@ pub enum RestoreBackupError {
   Extract(#[from] ExtractionError),
 }
 
-pub async fn restore_backup(
+pub async fn restore_backup_by_id(
   id: i64,
   data_dir: &Path,
   backup_repository: &impl BackupRepository,
   os: &OS,
-) -> Result<(), RestoreBackupError> {
+) -> Result<(), RestoreBackupByIdError> {
   let backup = backup_repository.get_backup_entry(id).await?;
   let archive_path = get_or_create_automatic_backup_archive_filepath(
     &backup.game_variant,

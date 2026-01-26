@@ -3,7 +3,7 @@ use tauri::{command, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::active_release::active_release::ActiveReleaseError;
+use crate::active_release::active_release::GetActiveReleaseError;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::variants::GameVariant;
 
@@ -12,7 +12,7 @@ use crate::variants::GameVariant;
 )]
 pub enum ActiveReleaseCommandError {
   #[error("failed to get active release: {0}")]
-  GetActiveRelease(#[from] ActiveReleaseError),
+  GetActiveRelease(#[from] GetActiveReleaseError),
 
   #[error("failed to get system directory: {0}")]
   SystemDirectory(#[from] tauri::Error),
@@ -24,7 +24,7 @@ pub async fn get_active_release(
   repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Option<String>, ActiveReleaseCommandError> {
   let active_release =
-    variant.get_active_release(&*repository).await?;
+    variant.get_active_release(repository.inner()).await?;
 
   Ok(active_release)
 }

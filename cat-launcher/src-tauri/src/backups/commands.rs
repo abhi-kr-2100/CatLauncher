@@ -3,9 +3,12 @@ use tauri::{Manager, State};
 
 use cat_macros::CommandErrorSerialize;
 
-use crate::backups::backups::{
-  delete_backup, list_backups, restore_backup, DeleteBackupError,
-  ListBackupsError, RestoreBackupError,
+use crate::backups::logic::{
+  delete_backup_by_id as delete_backup_by_id_business,
+  list_backups_for_variant as list_backups_for_variant_business,
+  restore_backup_by_id as restore_backup_by_id_business,
+  DeleteBackupByIdError, ListBackupsForVariantError,
+  RestoreBackupByIdError,
 };
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
@@ -17,7 +20,7 @@ use crate::variants::GameVariant;
 )]
 pub enum ListBackupsCommandError {
   #[error("failed to get backups: {0}")]
-  Get(#[from] ListBackupsError),
+  Get(#[from] ListBackupsForVariantError),
 }
 
 #[tauri::command]
@@ -25,8 +28,11 @@ pub async fn list_backups_for_variant(
   variant: GameVariant,
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<Vec<BackupEntry>, ListBackupsCommandError> {
-  let backups =
-    list_backups(&variant, backup_repository.inner()).await?;
+  let backups = list_backups_for_variant_business(
+    &variant,
+    backup_repository.inner(),
+  )
+  .await?;
   Ok(backups)
 }
 
@@ -35,7 +41,7 @@ pub async fn list_backups_for_variant(
 )]
 pub enum DeleteBackupCommandError {
   #[error("failed to delete backup: {0}")]
-  Delete(#[from] DeleteBackupError),
+  Delete(#[from] DeleteBackupByIdError),
   #[error("failed to get data directory: {0}")]
   DataDir(#[from] tauri::Error),
 }
@@ -47,7 +53,12 @@ pub async fn delete_backup_by_id(
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<(), DeleteBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
-  delete_backup(id, &data_dir, backup_repository.inner()).await?;
+  delete_backup_by_id_business(
+    id,
+    &data_dir,
+    backup_repository.inner(),
+  )
+  .await?;
   Ok(())
 }
 
@@ -56,7 +67,7 @@ pub async fn delete_backup_by_id(
 )]
 pub enum RestoreBackupCommandError {
   #[error("failed to restore backup: {0}")]
-  Restore(#[from] RestoreBackupError),
+  Restore(#[from] RestoreBackupByIdError),
   #[error("failed to get data directory: {0}")]
   DataDir(#[from] tauri::Error),
   #[error("unsupported OS: {0}")]
@@ -71,7 +82,12 @@ pub async fn restore_backup_by_id(
 ) -> Result<(), RestoreBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
-  restore_backup(id, &data_dir, backup_repository.inner(), &os)
-    .await?;
+  restore_backup_by_id_business(
+    id,
+    &data_dir,
+    backup_repository.inner(),
+    &os,
+  )
+  .await?;
   Ok(())
 }
