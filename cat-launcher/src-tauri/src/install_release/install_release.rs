@@ -4,7 +4,7 @@ use std::sync::Arc;
 use downloader::progress::Reporter;
 use tokio::fs;
 
-use crate::active_release::active_release::ActiveReleaseError;
+use crate::active_release::active_release::SetActiveReleaseError;
 use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
@@ -45,7 +45,7 @@ pub enum ReleaseInstallationError {
   ReleaseStatus(#[from] GetInstallationStatusError),
 
   #[error("failed to set active release: {0}")]
-  ActiveRelease(#[from] ActiveReleaseError),
+  ActiveRelease(#[from] SetActiveReleaseError),
 }
 
 impl GameRelease {
