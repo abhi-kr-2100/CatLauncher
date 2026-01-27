@@ -58,10 +58,7 @@ export function useCombinedBackups(
   });
 
   const { createManualBackup, isCreatingManualBackup } =
-    useCreateManualBackup(variant, {
-      onSuccess: onCreateSuccess,
-      onError: onCreateError,
-    });
+    useCreateManualBackup(variant, onCreateSuccess, onCreateError);
 
   const combinedBackups = useMemo(() => {
     if (backupsLoading || manualBackupsLoading) {

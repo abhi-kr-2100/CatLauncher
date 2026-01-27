@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { createManualBackupForVariant } from "@/lib/commands";
@@ -7,12 +8,20 @@ import { queryKeys } from "@/lib/queryKeys";
 
 export function useCreateManualBackup(
   variant: GameVariant,
-  options: {
-    onSuccess?: () => void;
-    onError?: (error: unknown) => void;
-  } = {},
+  onSuccess?: () => void,
+  onError?: (error: unknown) => void,
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: { name: string; notes?: string }) => {
@@ -52,14 +61,16 @@ export function useCreateManualBackup(
         queryKeys.manualBackups(variant),
         context?.previousBackups,
       );
-      options.onError?.(err);
+      onErrorRef.current?.(err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.manualBackups(variant),
       });
     },
-    onSuccess: options.onSuccess,
+    onSuccess: () => {
+      onSuccessRef.current?.();
+    },
   });
 
   return {
