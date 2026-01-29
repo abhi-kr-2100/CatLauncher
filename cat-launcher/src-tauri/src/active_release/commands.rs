@@ -23,8 +23,9 @@ pub async fn get_active_release(
   variant: GameVariant,
   repository: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Option<String>, ActiveReleaseCommandError> {
-  let active_release =
-    variant.get_active_release(&*repository).await?;
+  let repo = repository.inner();
+
+  let active_release = variant.get_active_release(repo).await?;
 
   Ok(active_release)
 }
