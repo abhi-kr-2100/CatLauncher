@@ -14,25 +14,31 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { GameRelease } from "@/generated-types/GameRelease";
-import { openLink, toastCL } from "@/lib/utils";
-import useReleaseNotes from "./hooks/useReleaseNotes";
+import { openLink } from "@/lib/utils";
+import { useReleaseNotesRange } from "./hooks";
+import ReleaseSelectionColumn from "./ReleaseSelectionColumn";
+import { GameVariant } from "@/generated-types/GameVariant";
 
 interface ReleaseNotesButtonProps {
-  release: GameRelease;
+  variant: GameVariant;
 }
 
 export default function ReleaseNotesButton({
-  release,
+  variant,
 }: ReleaseNotesButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { notes, isLoading } = useReleaseNotes(release, (error) => {
-    const errorMessage = `Failed to fetch release notes for ${release.version}.`;
-    toastCL("error", errorMessage, error);
-  });
-
-  const releaseNotes = notes ?? release.body;
+  const {
+    fromId,
+    setFromId,
+    toId,
+    setToId,
+    combinedNotes,
+    isLoading,
+    isReversed,
+    handleSwap,
+    targetVersions,
+  } = useReleaseNotesRange(variant);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -42,17 +48,44 @@ export default function ReleaseNotesButton({
           What's new?
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex max-h-[80vh] max-w-3xl flex-col">
+      <DialogContent className="flex max-h-[80vh] sm:max-w-5xl flex-col">
         <DialogHeader>
           <DialogTitle>Release Notes</DialogTitle>
           <DialogDescription className="sr-only">
-            Release notes for version {release.version}
+            Release notes comparison
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex gap-6 p-1">
+          <ReleaseSelectionColumn
+            label="From"
+            variant={variant}
+            selectedReleaseId={fromId}
+            onSelect={setFromId}
+            targetVersions={targetVersions}
+          />
+          <ReleaseSelectionColumn
+            label="To"
+            variant={variant}
+            selectedReleaseId={toId}
+            onSelect={setToId}
+            targetVersions={targetVersions}
+          />
+        </div>
+
         <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto max-w-none px-1">
-          {isLoading ? (
+          {isReversed ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+              <p className="text-muted-foreground">
+                The "From" version is newer than the "To" version.
+              </p>
+              <Button onClick={handleSwap} variant="outline">
+                Swap versions
+              </Button>
+            </div>
+          ) : isLoading ? (
             "Loading..."
-          ) : releaseNotes ? (
+          ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -69,10 +102,8 @@ export default function ReleaseNotesButton({
                 ),
               }}
             >
-              {releaseNotes}
+              {combinedNotes ?? ""}
             </ReactMarkdown>
-          ) : (
-            "No release notes available."
           )}
         </div>
         <DialogFooter>
