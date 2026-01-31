@@ -9,3 +9,5 @@ export * from "./useResumeLastWorld";
 export * from "./useLaunchGame";
 export * from "./usePlayTime";
 export * from "./useUpgradeInfo";
+export * from "./useReleaseNotesRange";
+export * from "./useActiveRelease";
