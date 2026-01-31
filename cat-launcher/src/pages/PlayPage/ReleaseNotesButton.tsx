@@ -15,8 +15,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { GameRelease } from "@/generated-types/GameRelease";
-import { openLink, toastCL } from "@/lib/utils";
-import useReleaseNotes from "./hooks/useReleaseNotes";
+import type { GameVariant } from "@/generated-types/GameVariant";
+import { openLink } from "@/lib/utils";
+import { useReleaseNotesRange, QuickSelectKey } from "./hooks";
+import ReleaseDropdown from "./ReleaseDropdown";
 
 interface ReleaseNotesButtonProps {
   release: GameRelease;
@@ -26,13 +28,19 @@ export default function ReleaseNotesButton({
   release,
 }: ReleaseNotesButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const variant = release.variant;
 
-  const { notes, isLoading } = useReleaseNotes(release, (error) => {
-    const errorMessage = `Failed to fetch release notes for ${release.version}.`;
-    toastCL("error", errorMessage, error);
-  });
-
-  const releaseNotes = notes ?? release.body;
+  const {
+    fromId,
+    setFromId,
+    toId,
+    setToId,
+    combinedNotes,
+    isLoading,
+    isReversed,
+    handleSwap,
+    targetVersions,
+  } = useReleaseNotesRange(variant, release.version);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -42,17 +50,82 @@ export default function ReleaseNotesButton({
           What's new?
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex max-h-[80vh] max-w-3xl flex-col">
+      <DialogContent className="flex max-h-[80vh] sm:max-w-5xl flex-col">
         <DialogHeader>
           <DialogTitle>Release Notes</DialogTitle>
           <DialogDescription className="sr-only">
-            Release notes for version {release.version}
+            Release notes comparison
           </DialogDescription>
         </DialogHeader>
+
+        <div className="flex gap-6 p-1">
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-sm font-medium">From</span>
+            <ReleaseDropdown
+              variant={variant}
+              selectedReleaseId={fromId}
+              setSelectedReleaseId={setFromId}
+              hideActiveLabel
+            />
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {getQuickSelectButtons(variant).map((btn) => {
+                const version = targetVersions[btn.key];
+                return (
+                  <Button
+                    key={btn.label}
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    disabled={!version}
+                    onClick={() => version && setFromId(version)}
+                  >
+                    {btn.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-sm font-medium">To</span>
+            <ReleaseDropdown
+              variant={variant}
+              selectedReleaseId={toId}
+              setSelectedReleaseId={setToId}
+              hideActiveLabel
+            />
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {getQuickSelectButtons(variant).map((btn) => {
+                const version = targetVersions[btn.key];
+                return (
+                  <Button
+                    key={btn.label}
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    disabled={!version}
+                    onClick={() => version && setToId(version)}
+                  >
+                    {btn.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="prose prose-sm dark:prose-invert flex-1 overflow-y-auto max-w-none px-1">
-          {isLoading ? (
+          {isReversed ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+              <p className="text-muted-foreground">
+                The "From" version is newer than the "To" version.
+              </p>
+              <Button onClick={handleSwap} variant="outline">
+                Swap versions
+              </Button>
+            </div>
+          ) : isLoading ? (
             "Loading..."
-          ) : releaseNotes ? (
+          ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -69,10 +142,8 @@ export default function ReleaseNotesButton({
                 ),
               }}
             >
-              {releaseNotes}
+              {combinedNotes ?? ""}
             </ReactMarkdown>
-          ) : (
-            "No release notes available."
           )}
         </div>
         <DialogFooter>
@@ -83,4 +154,32 @@ export default function ReleaseNotesButton({
       </DialogContent>
     </Dialog>
   );
+}
+
+function getQuickSelectButtons(
+  variant: GameVariant,
+): { label: string; key: QuickSelectKey }[] {
+  switch (variant) {
+    case "DarkDaysAhead":
+      return [
+        { label: "Active", key: "Active" },
+        { label: "Latest Stable", key: "Stable" },
+        {
+          label: "Latest Release Candidate",
+          key: "ReleaseCandidate",
+        },
+        { label: "Latest Experimental", key: "Experimental" },
+      ];
+    case "BrightNights":
+      return [
+        { label: "Active", key: "Active" },
+        { label: "Latest Stable", key: "Stable" },
+        { label: "Latest Experimental", key: "Experimental" },
+      ];
+    case "TheLastGeneration":
+      return [
+        { label: "Active", key: "Active" },
+        { label: "Latest", key: "Latest" },
+      ];
+  }
 }
