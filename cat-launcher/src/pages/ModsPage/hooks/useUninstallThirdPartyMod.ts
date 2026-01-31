@@ -16,9 +16,6 @@ export function useUninstallThirdPartyMod(
       uninstallThirdPartyMod(modId, variant),
     onSuccess: (_data, modId) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.mods.listAll(variant),
-      });
-      queryClient.invalidateQueries({
         queryKey: queryKeys.mods.installationStatus(variant, modId),
       });
       onSuccess?.();
