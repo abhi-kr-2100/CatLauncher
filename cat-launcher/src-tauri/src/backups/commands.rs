@@ -25,8 +25,8 @@ pub async fn list_backups_for_variant(
   variant: GameVariant,
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<Vec<BackupEntry>, ListBackupsCommandError> {
-  let backups =
-    list_backups(&variant, backup_repository.inner()).await?;
+  let repo = backup_repository.inner();
+  let backups = list_backups(&variant, repo).await?;
   Ok(backups)
 }
 
@@ -47,7 +47,9 @@ pub async fn delete_backup_by_id(
   backup_repository: State<'_, SqliteBackupRepository>,
 ) -> Result<(), DeleteBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
-  delete_backup(id, &data_dir, backup_repository.inner()).await?;
+  let repo = backup_repository.inner();
+
+  delete_backup(id, &data_dir, repo).await?;
   Ok(())
 }
 
@@ -71,7 +73,7 @@ pub async fn restore_backup_by_id(
 ) -> Result<(), RestoreBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
-  restore_backup(id, &data_dir, backup_repository.inner(), &os)
-    .await?;
+  let repo = backup_repository.inner();
+  restore_backup(id, &data_dir, repo, &os).await?;
   Ok(())
 }
