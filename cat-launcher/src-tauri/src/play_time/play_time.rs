@@ -1,7 +1,7 @@
 use crate::play_time::repository::{
   PlayTimeRepository, PlayTimeRepositoryError,
 };
-use crate::variants::game_variant::GameVariant;
+use crate::variants::GameVariant;
 
 pub async fn get_play_time_for_variant(
   game_variant: &GameVariant,

@@ -16,7 +16,13 @@ import {
 
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
-import GameVariantCard from "./GameVariantCard";
+import GameVariantCard from "./components/GameVariantCard";
+import {
+  anUnknownErrorOccurred,
+  error as errorStr,
+  failedToUpdateGameVariantsOrder,
+  loading,
+} from "./strings";
 
 function PlayPage() {
   const {
@@ -27,7 +33,7 @@ function PlayPage() {
     error: gameVariantsErrorObj,
   } = useGameVariants({
     onOrderUpdateError: (error) => {
-      toastCL("error", "Failed to update game variants order", error);
+      toastCL("error", failedToUpdateGameVariantsOrder, error);
     },
   });
 
@@ -55,12 +61,15 @@ function PlayPage() {
   }
 
   if (gameVariantsLoading) {
-    return <p>Loading...</p>;
+    return <p>{loading}</p>;
   }
 
   if (gameVariantsError) {
     return (
-      <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
+      <p>
+        {errorStr}:{" "}
+        {gameVariantsErrorObj?.message ?? anUnknownErrorOccurred}
+      </p>
     );
   }
 
