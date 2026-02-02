@@ -53,11 +53,16 @@ pub async fn get_color_themes(
   active_release_repo: State<'_, SqliteActiveReleaseRepository>,
 ) -> Result<Vec<ColorTheme>, GetColorThemesCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
+  let resource_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
 
-  let themes =
-    get_available_color_themes(&data_dir, &active_release_repo, &os)
-      .await?;
+  let themes = get_available_color_themes(
+    &data_dir,
+    &resource_dir,
+    &active_release_repo,
+    &os,
+  )
+  .await?;
   Ok(themes)
 }
 
