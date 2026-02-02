@@ -24,23 +24,18 @@ pub struct ColorTheme {
 
 impl ColorTheme {
   pub fn from_path(path: &Path) -> Option<Self> {
-    let filename = path.file_name().and_then(|n| n.to_str())?;
+    let filename = path.file_name()?.to_str()?;
 
-    if filename.starts_with("base_colors-")
-      && filename.ends_with(".json")
-    {
-      let id = filename
-        .trim_start_matches("base_colors-")
-        .trim_end_matches(".json")
-        .to_string();
+    let id = filename
+      .strip_prefix("base_colors-")
+      .or_else(|| filename.strip_prefix("base_colors_"))?
+      .strip_suffix(".json")?
+      .to_string();
 
-      Some(ColorTheme {
-        id: id.clone(),
-        name: id,
-        path: path.to_string_lossy().into_owned(),
-      })
-    } else {
-      None
-    }
+    Some(ColorTheme {
+      id: id.clone(),
+      name: id,
+      path: path.to_string_lossy().into_owned(),
+    })
   }
 }
