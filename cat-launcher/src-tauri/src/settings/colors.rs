@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use strum::IntoEnumIterator;
@@ -28,9 +29,23 @@ pub enum GetColorThemesError {
 
 pub async fn get_available_color_themes(
   data_dir: &Path,
+  resource_dir: &Path,
   active_release_repo: &SqliteActiveReleaseRepository,
   os: &OS,
 ) -> Result<Vec<ColorTheme>, GetColorThemesError> {
+  let mut themes_map = HashMap::new();
+
+  // 1. Get bundled themes
+  let bundled_themes_dir =
+    resource_dir.join("content").join("themes");
+  if fs::try_exists(&bundled_themes_dir).await.unwrap_or(false) {
+    let bundled_themes =
+      get_themes_from_dir(&bundled_themes_dir).await?;
+    themes_map
+      .extend(bundled_themes.into_iter().map(|t| (t.id.clone(), t)));
+  }
+
+  // 2. Get game themes (prioritize over bundled)
   for variant in GameVariant::iter() {
     let active_release =
       active_release_repo.get_active_release(&variant).await?;
@@ -45,7 +60,11 @@ pub async fn get_available_color_themes(
             .join("raw")
             .join("color_themes");
           if fs::try_exists(&themes_dir).await.unwrap_or(false) {
-            return get_themes_from_dir(&themes_dir).await;
+            let game_themes =
+              get_themes_from_dir(&themes_dir).await?;
+            themes_map.extend(
+              game_themes.into_iter().map(|t| (t.id.clone(), t)),
+            );
           }
         }
         Err(_) => continue,
@@ -53,7 +72,11 @@ pub async fn get_available_color_themes(
     }
   }
 
-  Ok(Vec::new())
+  let mut themes: Vec<ColorTheme> =
+    themes_map.into_values().collect();
+  themes.sort_by(|a, b| a.name.cmp(&b.name));
+
+  Ok(themes)
 }
 
 async fn get_themes_from_dir(
