@@ -26,11 +26,14 @@ export function useReleaseNotesRange(variant: GameVariant) {
     if (activeRelease) {
       setFromId((fromId) => fromId ?? activeRelease);
     }
+  }, [activeRelease]);
 
+  useEffect(() => {
     if (releases.length > 0) {
-      setToId((toId) => toId ?? releases[0].version); // latest
+      // Ignore previously set toId if a newer version is available
+      setToId(releases[0].version);
     }
-  }, [activeRelease, releases]);
+  }, [releases.length, releases[0]?.version]);
 
   const { versionsToShow, isReversed } = useMemo(() => {
     if (!fromId || !toId) {
