@@ -89,6 +89,7 @@ pub async fn create_manual_backup_for_variant(
     &data_dir,
     timestamp,
     backup_repository.inner(),
+    None,
   )
   .await?;
   Ok(id)

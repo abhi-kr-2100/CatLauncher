@@ -525,3 +525,23 @@ export async function getAchievementsForVariant(
   );
   return response;
 }
+
+export async function exportGameData(
+  variant: GameVariant,
+  destinationPath: string,
+): Promise<void> {
+  await invoke("export_game_data_command", {
+    variant,
+    destinationPath,
+  });
+}
+
+export async function importGameData(
+  variant: GameVariant,
+  sourcePath: string,
+): Promise<void> {
+  await invoke("import_game_data_command", {
+    variant,
+    sourcePath,
+  });
+}
