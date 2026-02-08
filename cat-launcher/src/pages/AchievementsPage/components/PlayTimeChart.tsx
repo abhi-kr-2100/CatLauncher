@@ -3,6 +3,7 @@ import {
   Pie,
   Cell,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 
@@ -135,6 +136,7 @@ export default function PlayTimeChart({
             <Tooltip
               content={<PlayTimePieTooltip totalTime={totalTime} />}
             />
+            <Legend />
           </PieChart>
         </ResponsiveContainer>
       </div>
