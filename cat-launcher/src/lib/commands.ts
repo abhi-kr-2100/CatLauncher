@@ -24,6 +24,9 @@ import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
+import type { World } from "@/generated-types/World";
+import type { WorldOption } from "@/generated-types/WorldOption";
+import type { WorldOptionMetadata } from "@/generated-types/WorldOptionMetadata";
 
 export async function listenToQuitRequested(
   onQuitRequested: () => void,
@@ -519,6 +522,50 @@ export async function getAchievementsForVariant(
 ): Promise<CharacterAchievements[]> {
   const response = await invoke<CharacterAchievements[]>(
     "get_achievements_for_variant",
+    {
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function getWorlds(
+  variant: GameVariant,
+): Promise<World[]> {
+  const response = await invoke<World[]>("get_worlds", {
+    variant,
+  });
+  return response;
+}
+
+export async function getWorldOptions(
+  variant: GameVariant,
+  world: string,
+): Promise<WorldOption[]> {
+  const response = await invoke<WorldOption[]>("get_world_options", {
+    variant,
+    world,
+  });
+  return response;
+}
+
+export async function updateWorldOptions(
+  variant: GameVariant,
+  world: string,
+  options: WorldOption[],
+): Promise<void> {
+  await invoke("update_world_options", {
+    variant,
+    world,
+    options,
+  });
+}
+
+export async function getWorldOptionsMetadata(
+  variant: GameVariant,
+): Promise<Record<string, WorldOptionMetadata>> {
+  const response = await invoke<Record<string, WorldOptionMetadata>>(
+    "get_world_options_metadata",
     {
       variant,
     },

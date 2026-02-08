@@ -1,0 +1,151 @@
+{
+  "ITEM_SPAWNRATE": {
+    "id": "ITEM_SPAWNRATE",
+    "name": "Item Spawn Rate",
+    "description": "Configuration for ITEM_SPAWNRATE",
+    "type": "number",
+    "options": null,
+    "min": 0.01,
+    "max": 10.0,
+    "children": null
+  },
+  "SPAWN_DENSITY": {
+    "id": "SPAWN_DENSITY",
+    "name": "Monster Spawn Density",
+    "description": "Configuration for SPAWN_DENSITY",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 50.0,
+    "children": null
+  },
+  "NPC_SPAWNTIME": {
+    "id": "NPC_SPAWNTIME",
+    "name": "NPC Spawn Rate",
+    "description": "Configuration for NPC_SPAWNTIME",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 100.0,
+    "children": null
+  },
+  "BLACK_ROAD": {
+    "id": "BLACK_ROAD",
+    "name": "Black Road",
+    "description": "If true, spawn zombies at shelters. Makes the starting game a lot harder.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "META_PROGRESS": {
+    "id": "META_PROGRESS",
+    "name": "Meta Progression",
+    "description": "Will you need to complete certain achievements to enable certain scenarios and professions? Achievements of saved characters from any world will be checked. Disabling this will spoil factions and situations you may otherwise stumble upon naturally while playing. Some scenarios are frustrating for the uninitiated, and some professions skip portions of the game's content. If new to the game, meta progression will help you be introduced to mechanics at a reasonable pace.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "ETERNAL_SEASON": {
+    "id": "ETERNAL_SEASON",
+    "name": "Eternal Season",
+    "description": "Configuration for ETERNAL_SEASON",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "MONSTER_SPEED": {
+    "id": "MONSTER_SPEED",
+    "name": "Monster Speed",
+    "description": "Configuration for MONSTER_SPEED",
+    "type": "number",
+    "options": null,
+    "min": 1.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "CHARACTER_POINT_POOLS": {
+    "id": "CHARACTER_POINT_POOLS",
+    "name": "Character Point Pools",
+    "description": "Allowed point pools for character generation.",
+    "type": "enum",
+    "options": [
+      { "value": "any", "label": "Any" },
+      { "value": "multi_pool", "label": "Multi Pool" },
+      { "value": "story_teller", "label": "Story Teller" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "ETERNAL_TIME_OF_DAY": {
+    "id": "ETERNAL_TIME_OF_DAY",
+    "name": "Eternal Time of Day",
+    "description": "Configuration for ETERNAL_TIME_OF_DAY",
+    "type": "enum",
+    "options": [{ "value": "normal", "label": "Normal" }],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CITY_SPACING": {
+    "id": "CITY_SPACING",
+    "name": "City Spacing",
+    "description": "Configuration for CITY_SPACING",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 8.0,
+    "children": null
+  },
+  "EVOLUTION_INVERSE_MULTIPLIER": {
+    "id": "EVOLUTION_INVERSE_MULTIPLIER",
+    "name": "Monster Evolution Scaling",
+    "description": "Configuration for EVOLUTION_INVERSE_MULTIPLIER",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 100.0,
+    "children": null
+  },
+  "CITY_SIZE": {
+    "id": "CITY_SIZE",
+    "name": "City Size",
+    "description": "Configuration for CITY_SIZE",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 16.0,
+    "children": null
+  },
+  "MONSTER_RESILIENCE": {
+    "id": "MONSTER_RESILIENCE",
+    "name": "Monster Resilience",
+    "description": "Configuration for MONSTER_RESILIENCE",
+    "type": "number",
+    "options": null,
+    "min": 1.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "WORLD_END": {
+    "id": "WORLD_END",
+    "name": "World End Behavior",
+    "description": "Handling of game world when last character dies.",
+    "type": "enum",
+    "options": [
+      { "value": "reset", "label": "Reset" },
+      { "value": "delete", "label": "Delete" },
+      { "value": "query", "label": "Query" },
+      { "value": "keep", "label": "Keep" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  }
+}

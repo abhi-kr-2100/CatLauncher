@@ -8,7 +8,7 @@ import {
   Wrench,
 } from "lucide-react";
 
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import AboutPage from "@/pages/AboutPage";
@@ -24,6 +24,7 @@ export interface BaseRoute {
   element: ReactNode;
   label: string;
   icon: LucideIcon;
+  customWrapper?: ({ children }: WrapperProps) => JSX.Element;
 }
 
 export const routes: BaseRoute[] = [
@@ -38,12 +39,14 @@ export const routes: BaseRoute[] = [
     element: <AchievementsPage />,
     label: "Achievements",
     icon: Award,
+    customWrapper: SidenavCompatibleWrapper,
   },
   {
     path: "/tools/*",
     element: <ToolsPage />,
     label: "Tools",
     icon: Wrench,
+    customWrapper: SidenavCompatibleWrapper,
   },
   {
     path: "/backups",
@@ -70,3 +73,21 @@ export const routes: BaseRoute[] = [
     icon: Info,
   },
 ];
+
+interface WrapperProps {
+  children: ReactNode;
+}
+
+export function DefaultWrapper({ children }: WrapperProps) {
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <div className="container mx-auto py-6">{children}</div>
+    </div>
+  );
+}
+
+export function SidenavCompatibleWrapper({ children }: WrapperProps) {
+  return (
+    <div className="flex flex-1 overflow-hidden">{children}</div>
+  );
+}

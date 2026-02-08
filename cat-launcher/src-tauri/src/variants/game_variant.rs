@@ -81,4 +81,12 @@ impl GameVariant {
       _ => BASE_CATEGORIES,
     }
   }
+
+  pub fn world_options_filename(&self) -> &'static str {
+    match self {
+      GameVariant::DarkDaysAhead => "world_options_dda.json",
+      GameVariant::BrightNights => "world_options_bn.json",
+      GameVariant::TheLastGeneration => "world_options_tlg.json",
+    }
+  }
 }

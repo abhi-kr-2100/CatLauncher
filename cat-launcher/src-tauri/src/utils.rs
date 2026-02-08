@@ -33,6 +33,7 @@ use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteIns
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
+use crate::world_options::repository::fs_world_options_repository::FsWorldOptionsRepository;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ManageSettingsError {
@@ -110,6 +111,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
   app.manage(SqliteInstalledSoundpacksRepository::new(pool.clone()));
   app.manage(SqliteUsersRepository::new(pool));
+  app.manage(FsWorldOptionsRepository::new(data_dir));
 
   Ok(())
 }
