@@ -8,6 +8,7 @@ mod backups;
 mod fetch_releases;
 mod game_release;
 mod game_tips;
+mod guide;
 mod infra;
 mod install_release;
 mod last_played_world;
@@ -32,6 +33,9 @@ use crate::fetch_releases::commands::{
   fetch_release_notes, fetch_releases_for_variant,
 };
 use crate::game_tips::commands::get_tips;
+use crate::guide::commands::{
+  get_guide_entity_command, search_guide_command,
+};
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
 use crate::last_played_world::commands::get_last_played_world;
@@ -148,6 +152,8 @@ pub fn run() {
       confirm_quit,
       master_reset,
       get_achievements_for_variant,
+      search_guide_command,
+      get_guide_entity_command,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
