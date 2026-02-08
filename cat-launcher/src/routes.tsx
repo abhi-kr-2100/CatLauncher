@@ -34,7 +34,7 @@ export const routes: BaseRoute[] = [
     icon: Gamepad2,
   },
   {
-    path: "/achievements",
+    path: "/achievements/*",
     element: <AchievementsPage />,
     label: "Achievements",
     icon: Award,

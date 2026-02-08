@@ -2,6 +2,7 @@ pub mod constants;
 pub mod filesystem;
 pub mod settings;
 
+mod achievements;
 pub mod active_release;
 mod backups;
 mod fetch_releases;
@@ -22,6 +23,7 @@ mod users;
 mod utils;
 mod variants;
 
+use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
 use crate::backups::commands::{
   delete_backup_by_id, list_backups_for_variant, restore_backup_by_id,
@@ -145,6 +147,7 @@ pub fn run() {
       get_default_settings,
       confirm_quit,
       master_reset,
+      get_achievements_for_variant,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
