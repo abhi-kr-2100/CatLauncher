@@ -74,4 +74,7 @@ export const queryKeys = {
   settings: () => ["settings"] as const,
 
   defaultSettings: () => ["default_settings"] as const,
+
+  achievements: (variant: GameVariant) =>
+    ["achievements", variant] as const,
 };
