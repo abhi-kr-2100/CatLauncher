@@ -1,28 +1,41 @@
-import { useGameVariants } from "@/hooks/useGameVariants";
-import PlayTimeChart from "./components/PlayTimeChart";
+import { useCallback, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import AchievementsSidebar from "./components/AchievementsSidebar";
+import { achievementsRoutes } from "./routes";
 
 function AchievementsPage() {
-  const {
-    gameVariants,
-    isLoading: gameVariantsLoading,
-    isError: gameVariantsError,
-    error: gameVariantsErrorObj,
-  } = useGameVariants();
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
-  if (gameVariantsLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (gameVariantsError) {
-    return (
-      <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
-    );
-  }
+  const onToggleCollapse = useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
 
   return (
-    <main className="p-8">
-      <PlayTimeChart variants={gameVariants} />
-    </main>
+    <div className="flex flex-1 overflow-hidden">
+      <AchievementsSidebar
+        isCollapsed={isCollapsed}
+        onToggleCollapse={onToggleCollapse}
+      />
+
+      <section className="flex-1 overflow-y-auto p-8">
+        <Routes>
+          <Route
+            index
+            element={
+              <Navigate to={achievementsRoutes[0].path} replace />
+            }
+          />
+          {achievementsRoutes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={route.element}
+            />
+          ))}
+        </Routes>
+      </section>
+    </div>
   );
 }
 

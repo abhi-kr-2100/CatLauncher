@@ -2,6 +2,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
+import type { CharacterAchievements } from "@/generated-types/CharacterAchievements";
 import type { ColorTheme } from "@/generated-types/ColorTheme";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { Font } from "@/generated-types/Font";
@@ -511,4 +512,16 @@ export async function masterReset(
   variant: GameVariant,
 ): Promise<void> {
   await invoke("master_reset", { variant });
+}
+
+export async function getAchievementsForVariant(
+  variant: GameVariant,
+): Promise<CharacterAchievements[]> {
+  const response = await invoke<CharacterAchievements[]>(
+    "get_achievements_for_variant",
+    {
+      variant,
+    },
+  );
+  return response;
 }
