@@ -1,0 +1,68 @@
+[
+  {
+    "info": "A multiplier for the time between monster upgrades.  For example a value of 2.00 would cause evolution to occur at half speed.  Set to 0.00 to turn off monster upgrades.",
+    "default": "Default: 1.00 - Min: 0.00, Max: 100.00",
+    "name": "EVOLUTION_INVERSE_MULTIPLIER",
+    "value": "2.00"
+  },
+  {
+    "info": "Day/night cycle settings.  'Normal' sets a normal cycle.  'Eternal Day' sets eternal day.  'Eternal Night' sets eternal night.",
+    "default": "Default: normal - Values: normal, day, night",
+    "name": "ETERNAL_TIME_OF_DAY",
+    "value": "day"
+  },
+  {
+    "info": "If true, emulates zombie hordes.  Zombies can group together into hordes, which can wander around cities and will sometimes move towards noise.  Note: This feature is still in development, but should be mostly bug-free.",
+    "default": "Default: True",
+    "name": "WANDER_SPAWNS",
+    "value": "false"
+  },
+  {
+    "info": "Baseline average number of days between random NPC spawns.  Average duration goes up with the number of NPCs already spawned.  A higher number means fewer NPCs.  Set to 0 days to disable random NPCs.",
+    "default": "Default: 4.00 - Min: 0.00, Max: 100.00",
+    "name": "NPC_SPAWNTIME",
+    "value": "0.20"
+  },
+  {
+    "info": "Handling of game world when last character dies.",
+    "default": "Default: reset - Values: reset, delete, query, keep",
+    "name": "WORLD_END",
+    "value": "reset"
+  },
+  {
+    "info": "A number determining how large cities are.  A higher number means larger cities.  0 disables cities, roads and any scenario requiring a city start.",
+    "default": "Default: 8 - Min: 0, Max: 16",
+    "name": "CITY_SIZE",
+    "value": "5"
+  },
+  {
+    "info": "A scaling factor that determines density of monster spawns.  A higher number means more monsters.",
+    "default": "Default: 1.00 - Min: 0.00, Max: 50.00",
+    "name": "SPAWN_DENSITY",
+    "value": "1.00"
+  },
+  {
+    "info": "If true, keep the initial season forever.  Warning: currently bugged and may not work properly.",
+    "default": "Default: False",
+    "name": "ETERNAL_SEASON",
+    "value": "false"
+  },
+  {
+    "info": "(WIP feature) Determines terrain, shops, plants, and more.",
+    "default": "Default: default - Values: default",
+    "name": "DEFAULT_REGION",
+    "value": "default"
+  },
+  {
+    "info": "A number determining how far apart cities are.  A higher number means cities are further apart.  Warning, small numbers lead to very slow mapgen.",
+    "default": "Default: 4 - Min: 0, Max: 8",
+    "name": "CITY_SPACING",
+    "value": "8"
+  },
+  {
+    "info": "If true, spawn zombies at shelters.  Makes the starting game a lot harder.",
+    "default": "Default: False",
+    "name": "BLACK_ROAD",
+    "value": "false"
+  }
+]
