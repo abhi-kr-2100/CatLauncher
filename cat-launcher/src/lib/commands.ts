@@ -11,6 +11,8 @@ import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
+import type { GuideEntityDetail } from "@/generated-types/guide/GuideEntityDetail";
+import type { GuideEntry } from "@/generated-types/guide/GuideEntry";
 import type { LastModActivity } from "@/generated-types/LastModActivity";
 import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
@@ -520,6 +522,34 @@ export async function getAchievementsForVariant(
   const response = await invoke<CharacterAchievements[]>(
     "get_achievements_for_variant",
     {
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function searchGuide(
+  query: string,
+  variant: GameVariant,
+): Promise<GuideEntry[]> {
+  const response = await invoke<GuideEntry[]>(
+    "search_guide_command",
+    {
+      query,
+      variant,
+    },
+  );
+  return response;
+}
+
+export async function getGuideEntity(
+  id: string,
+  variant: GameVariant,
+): Promise<GuideEntityDetail> {
+  const response = await invoke<GuideEntityDetail>(
+    "get_guide_entity_command",
+    {
+      id,
       variant,
     },
   );

@@ -77,4 +77,11 @@ export const queryKeys = {
 
   achievements: (variant: GameVariant) =>
     ["achievements", variant] as const,
+
+  guide: {
+    search: (variant: GameVariant, query: string) =>
+      ["guide", "search", variant, query] as const,
+    entity: (variant: GameVariant, id: string) =>
+      ["guide", "entity", variant, id] as const,
+  },
 };
