@@ -1,9 +1,3 @@
-import AboutPage from "@/pages/AboutPage";
-import AchievementsPage from "@/pages/AchievementsPage";
-import AssetsPage from "@/pages/AssetsPage";
-import BackupsPage from "@/pages/BackupsPage";
-import PlayPage from "@/pages/PlayPage";
-import SettingsPage from "@/pages/SettingsPage";
 import {
   Award,
   FileUp,
@@ -11,9 +5,28 @@ import {
   Info,
   Music,
   Settings,
+  Wrench,
 } from "lucide-react";
 
-export const routes = [
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+
+import AboutPage from "@/pages/AboutPage";
+import AchievementsPage from "@/pages/AchievementsPage";
+import ToolsPage from "@/pages/ToolsPage";
+import AssetsPage from "@/pages/AssetsPage";
+import BackupsPage from "@/pages/BackupsPage";
+import PlayPage from "@/pages/PlayPage";
+import SettingsPage from "@/pages/SettingsPage";
+
+export interface BaseRoute {
+  path: string;
+  element: ReactNode;
+  label: string;
+  icon: LucideIcon;
+}
+
+export const routes: BaseRoute[] = [
   {
     path: "/",
     element: <PlayPage />,
@@ -25,6 +38,12 @@ export const routes = [
     element: <AchievementsPage />,
     label: "Achievements",
     icon: Award,
+  },
+  {
+    path: "/tools/*",
+    element: <ToolsPage />,
+    label: "Tools",
+    icon: Wrench,
   },
   {
     path: "/backups",
