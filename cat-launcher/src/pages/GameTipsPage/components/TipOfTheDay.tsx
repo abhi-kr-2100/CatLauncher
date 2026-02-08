@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/alert";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { randomInt, setImmediateInterval } from "@/lib/utils";
-import { useGetTips } from "./hooks/useGetTips";
-import { NO_TIPS_AVAILABLE } from "./lib/constants";
+import { useGetTips } from "../hooks/useGetTips";
+import { NO_TIPS_AVAILABLE } from "../lib/constants";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
 interface TipOfTheDayContentProps {
@@ -40,7 +40,7 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
   const [randomIndex, setRandomIndex] = useState(0);
 
   const tips = useMemo(() => {
-    if (status !== "success" || data.length === 0) {
+    if (status !== "success" || !data || data.length === 0) {
       return [];
     }
     return data;
