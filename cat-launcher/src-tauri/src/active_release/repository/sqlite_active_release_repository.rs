@@ -28,27 +28,26 @@ impl ActiveReleaseRepository for SqliteActiveReleaseRepository {
     let pool = self.pool.clone();
     let game_variant = *game_variant;
 
-    task::spawn_blocking(move || {
-            let conn = pool
-                .get()
-                .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?;
-            let mut stmt = conn
-                .prepare("SELECT version FROM active_release WHERE game_variant = ?1")
-                .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?;
+    task::spawn_blocking(
+      move || -> Result<Option<String>, ActiveReleaseRepositoryError> {
+        let conn =
+          pool.get().map_err(ActiveReleaseRepositoryError::GetFromPool)?;
+        let mut stmt = conn
+          .prepare("SELECT version FROM active_release WHERE game_variant = ?1")
+          .map_err(ActiveReleaseRepositoryError::Get)?;
 
-            let mut rows = stmt
-                .query_map([game_variant.to_string()], |row| row.get(0))
-                .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?;
+        let mut rows = stmt
+          .query_map([game_variant.to_string()], |row| row.get(0))
+          .map_err(ActiveReleaseRepositoryError::Get)?;
 
-            if let Some(row) = rows.next() {
-                row.map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))
-                    .map(Some)
-            } else {
-                Ok(None)
-            }
-        })
-        .await
-        .map_err(|e| ActiveReleaseRepositoryError::Get(Box::new(e)))?
+        if let Some(row) = rows.next() {
+          row.map(Some).map_err(ActiveReleaseRepositoryError::Get)
+        } else {
+          Ok(None)
+        }
+      },
+    )
+    .await?
   }
 
   async fn set_active_release(
@@ -60,17 +59,19 @@ impl ActiveReleaseRepository for SqliteActiveReleaseRepository {
     let game_variant = *game_variant;
     let version = version.to_string();
 
-    task::spawn_blocking(move || {
-            let conn = pool.get().map_err(|e| ActiveReleaseRepositoryError::Set(Box::new(e)))?;
-            conn.execute(
-                "INSERT OR REPLACE INTO active_release (game_variant, version) VALUES (?1, ?2)",
-                (game_variant.to_string(), version),
-            )
-            .map_err(|e| ActiveReleaseRepositoryError::Set(Box::new(e)))?;
+    task::spawn_blocking(move || -> Result<(), ActiveReleaseRepositoryError> {
+      let conn =
+        pool.get().map_err(ActiveReleaseRepositoryError::SetFromPool)?;
+      conn
+        .execute(
+          "INSERT OR REPLACE INTO active_release (game_variant, version) VALUES (?1, ?2)",
+          (game_variant.to_string(), version),
+        )
+        .map_err(ActiveReleaseRepositoryError::Set)?;
 
-            Ok(())
-        })
-        .await
-        .map_err(|e| ActiveReleaseRepositoryError::Set(Box::new(e)))?
+      Ok(())
+    })
+    .await??;
+    Ok(())
   }
 }
