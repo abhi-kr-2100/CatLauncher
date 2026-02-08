@@ -54,6 +54,7 @@ pub async fn create_manual_backup(
   data_dir: &Path,
   timestamp: u64,
   backup_repository: &impl ManualBackupRepository,
+  target_dir_names: Option<Vec<String>>,
 ) -> Result<i64, CreateManualBackupError> {
   let id = backup_repository
     .add_manual_backup_entry(name, game_variant, timestamp, notes)
@@ -62,7 +63,12 @@ pub async fn create_manual_backup(
   let user_data_dir =
     get_or_create_user_game_data_dir(game_variant, data_dir).await?;
 
-  let dirs_to_backup = vec![user_data_dir.join("save")];
+  let dirs_to_backup: Vec<PathBuf> = target_dir_names
+    .unwrap_or_else(|| vec!["save".to_string()])
+    .iter()
+    .map(|d| user_data_dir.join(d))
+    .collect();
+
   let archive_path: PathBuf =
     get_or_create_manual_backup_archive_filepath(id, name, data_dir)
       .await?;

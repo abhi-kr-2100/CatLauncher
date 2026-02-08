@@ -8,6 +8,7 @@ mod backups;
 mod fetch_releases;
 mod game_release;
 mod game_tips;
+mod import_export;
 mod infra;
 mod install_release;
 mod last_played_world;
@@ -32,6 +33,9 @@ use crate::fetch_releases::commands::{
   fetch_release_notes, fetch_releases_for_variant,
 };
 use crate::game_tips::commands::get_tips;
+use crate::import_export::commands::{
+  export_game_data_command, import_game_data_command,
+};
 use crate::install_release::commands::install_release;
 use crate::install_release::installation_status::commands::get_installation_status;
 use crate::last_played_world::commands::get_last_played_world;
@@ -88,6 +92,7 @@ pub fn run() {
   tauri::Builder::default()
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_opener::init())
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
       manage_http_client(app);
       manage_repositories(app)?;
@@ -148,6 +153,8 @@ pub fn run() {
       confirm_quit,
       master_reset,
       get_achievements_for_variant,
+      export_game_data_command,
+      import_game_data_command,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
