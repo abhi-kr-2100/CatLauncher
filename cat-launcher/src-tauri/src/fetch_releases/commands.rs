@@ -24,7 +24,7 @@ pub enum FetchReleasesCommandError {
   SystemDir(#[from] tauri::Error),
 
   #[error("failed to fetch releases: {0}")]
-  Fetch(#[from] FetchReleasesError<tauri::Error>),
+  Fetch(#[from] FetchReleasesError),
 
   #[error("failed to get OS enum: {0}")]
   Os(#[from] OSNotSupportedError),
@@ -32,6 +32,8 @@ pub enum FetchReleasesCommandError {
   #[error("failed to get arch enum: {0}")]
   Arch(#[from] ArchNotSupportedError),
 }
+
+use crate::fetch_releases::fetch_releases::ReleasesUpdateStatus;
 
 #[command]
 pub async fn fetch_releases_for_variant(
@@ -43,22 +45,21 @@ pub async fn fetch_releases_for_variant(
   let resources_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
   let arch = get_arch_enum(ARCH)?;
+  let repo = releases_repository.inner();
+  let client = client.inner();
 
-  let on_releases = move |payload: ReleasesUpdatePayload| {
-    app_handle.emit("releases-update", payload)?;
-    Ok(())
-  };
-
-  variant
-    .fetch_releases(
-      &client,
-      &resources_dir,
-      &*releases_repository,
-      on_releases,
-      &os,
-      &arch,
-    )
+  let releases = variant
+    .fetch_releases(client, &resources_dir, repo, &os, &arch)
     .await?;
+
+  app_handle.emit(
+    "releases-update",
+    ReleasesUpdatePayload {
+      variant,
+      releases,
+      status: ReleasesUpdateStatus::Success,
+    },
+  )?;
 
   Ok(())
 }
@@ -78,8 +79,10 @@ pub async fn fetch_release_notes(
   releases_repository: State<'_, SqliteReleasesRepository>,
   client: State<'_, Client>,
 ) -> Result<Option<String>, FetchReleaseNotesCommandError> {
+  let repo = releases_repository.inner();
+  let client = client.inner();
   let notes = variant
-    .fetch_release_notes(&release_id, &client, &*releases_repository)
+    .fetch_release_notes(&release_id, client, repo)
     .await?;
 
   Ok(notes)

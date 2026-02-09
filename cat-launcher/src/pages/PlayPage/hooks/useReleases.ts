@@ -64,8 +64,6 @@ export function useReleases(
 
         if (payload.status === "Success") {
           setFetchStatus("success");
-        } else if (payload.status === "Error") {
-          setFetchStatus("error");
         } else if (payload.status === "Fetching") {
           setFetchStatus("loading");
         }
