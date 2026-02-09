@@ -4,7 +4,13 @@ use crate::active_release::repository::{
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
-pub enum ActiveReleaseError {
+pub enum GetActiveReleaseError {
+  #[error("failed to access active release: {0}")]
+  Repository(#[from] ActiveReleaseRepositoryError),
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum SetActiveReleaseError {
   #[error("failed to access active release: {0}")]
   Repository(#[from] ActiveReleaseRepositoryError),
 }
@@ -13,7 +19,7 @@ impl GameVariant {
   pub async fn get_active_release(
     &self,
     repository: &dyn ActiveReleaseRepository,
-  ) -> Result<Option<String>, ActiveReleaseError> {
+  ) -> Result<Option<String>, GetActiveReleaseError> {
     Ok(repository.get_active_release(self).await?)
   }
 
@@ -21,7 +27,7 @@ impl GameVariant {
     &self,
     version: &str,
     repository: &dyn ActiveReleaseRepository,
-  ) -> Result<(), ActiveReleaseError> {
+  ) -> Result<(), SetActiveReleaseError> {
     repository.set_active_release(self, version).await?;
     Ok(())
   }

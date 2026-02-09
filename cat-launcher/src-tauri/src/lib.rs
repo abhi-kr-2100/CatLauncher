@@ -4,7 +4,7 @@ pub mod settings;
 
 mod achievements;
 pub mod active_release;
-mod backups;
+pub mod backups;
 mod fetch_releases;
 mod game_release;
 mod game_tips;
