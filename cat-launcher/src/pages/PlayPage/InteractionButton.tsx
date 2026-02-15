@@ -91,9 +91,9 @@ export default function InteractionButton({
   }
 
   const button = (
-    <div className="flex gap-1 w-full">
+    <div className="flex flex-col gap-2 w-full">
       <Button
-        className="grow w-[30%]"
+        className="w-full"
         onClick={() =>
           installationStatus === "ReadyToPlay"
             ? play(selectedReleaseId)
@@ -105,7 +105,7 @@ export default function InteractionButton({
       </Button>
       {selectedReleaseId && installationStatus === "ReadyToPlay" && (
         <Button
-          className="grow w-[40%]"
+          className="w-full"
           onClick={() => resume(selectedReleaseId)}
           disabled={isActionButtonDisabled || !lastPlayedWorld}
         >
@@ -114,7 +114,7 @@ export default function InteractionButton({
       )}
       {shouldAllowUpgrading && (
         <DropdownButton
-          className="grow w-[30%]"
+          className="w-full"
           onClick={() => {
             if (latestReleaseId) {
               setSelectedReleaseId(latestReleaseId);

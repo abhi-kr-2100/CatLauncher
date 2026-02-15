@@ -69,7 +69,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "relative flex flex-col border-r bg-muted/30 transition-all duration-300",
+        "relative flex flex-col border-r bg-muted/30 transition-all duration-300 min-h-full",
         isCollapsed ? "w-14" : "w-64",
       )}
     >

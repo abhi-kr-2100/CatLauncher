@@ -22,6 +22,7 @@ mod tilesets;
 mod users;
 mod utils;
 mod variants;
+mod world_options;
 
 use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
@@ -76,6 +77,10 @@ use crate::utils::{
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
+use crate::world_options::commands::{
+  get_world_options, get_world_options_metadata, get_worlds,
+  update_world_options,
+};
 use tauri::{command, AppHandle};
 
 #[command]
@@ -148,6 +153,10 @@ pub fn run() {
       confirm_quit,
       master_reset,
       get_achievements_for_variant,
+      get_worlds,
+      get_world_options,
+      get_world_options_metadata,
+      update_world_options,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

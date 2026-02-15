@@ -49,7 +49,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 pb-24">
+    <div className="max-w-2xl px-4 pb-24">
       <form onSubmit={apply} className="space-y-8">
         <FontSettings control={form.control} />
         <ColorSettings control={form.control} />

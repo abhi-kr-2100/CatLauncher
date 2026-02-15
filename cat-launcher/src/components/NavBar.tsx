@@ -33,7 +33,7 @@ function NavItem({ route }: NavItemProps) {
 
 export default function NavBar() {
   return (
-    <nav className="flex shrink-0 items-center justify-between gap-4 border-b bg-background px-4 py-3">
+    <nav className="sticky top-0 z-50 flex shrink-0 items-center justify-between gap-4 border-b bg-background px-4 py-3">
       <div className="flex flex-1 items-center justify-center gap-4">
         {routes.map((route) => (
           <NavItem key={route.path} route={route} />

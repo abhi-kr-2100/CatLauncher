@@ -1,7 +1,7 @@
 import type { BaseRoute } from "@/routes";
 import { Settings2, BookOpen } from "lucide-react";
 
-import WorldOptions from "./components/WorldOptions";
+import WorldOptions from "./WorldOptions";
 import Guide from "./components/Guide";
 
 export type ToolRoute = BaseRoute;

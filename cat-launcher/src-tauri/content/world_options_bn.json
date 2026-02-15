@@ -1,0 +1,851 @@
+{
+  "spawn_settings": {
+    "id": "spawn_settings",
+    "name": "Spawn Settings",
+    "description": "General settings for monster, item, and NPC spawning.",
+    "type": "group",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": {
+      "ITEM_SPAWNRATE": {
+        "id": "ITEM_SPAWNRATE",
+        "name": "Item Spawn Rate",
+        "description": "A scaling factor that determines density of item spawns. A higher number means more items.",
+        "type": "number",
+        "options": null,
+        "min": 0.01,
+        "max": 10.0,
+        "children": null
+      },
+      "SPAWN_DENSITY": {
+        "id": "SPAWN_DENSITY",
+        "name": "Monster Spawn Density",
+        "description": "A scaling factor that determines density of monster spawns.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 50.0,
+        "children": null
+      },
+      "SPAWN_ANIMAL_DENSITY": {
+        "id": "SPAWN_ANIMAL_DENSITY",
+        "name": "Spawn Animal Density",
+        "description": "A scaling factor that determines density of animal spawns.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 50.0,
+        "children": null
+      },
+      "CARRION_SPAWNRATE": {
+        "id": "CARRION_SPAWNRATE",
+        "name": "Carrion Spawnrate",
+        "description": "A scaling factor that determines how often creatures spawn from rotting material.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 10.0,
+        "children": null
+      },
+      "NPC_DENSITY": {
+        "id": "NPC_DENSITY",
+        "name": "Npc Density",
+        "description": "A scaling factor that determines density of dynamic NPC spawns.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 100.0,
+        "children": null
+      },
+      "NPC_SPAWNTIME": {
+        "id": "NPC_SPAWNTIME",
+        "name": "NPC Spawn Rate",
+        "description": "Average days between random NPC spawns. Higher values mean fewer NPCs. 0 disables random NPCs.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 100.0,
+        "children": null
+      },
+      "SPAWN_DELAY": {
+        "id": "SPAWN_DELAY",
+        "name": "Spawn Delay",
+        "description": "How many days after the cataclysm the player spawns. Day 0 is the day of the cataclysm. Can be overridden by scenarios. Increasing this will cause food rot and monster evolution to advance.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 9999.0,
+        "children": null
+      },
+      "MONSTER_UPGRADE_FACTOR": {
+        "id": "MONSTER_UPGRADE_FACTOR",
+        "name": "Monster Upgrade Factor",
+        "description": "A scaling factor that determines the time between monster upgrades. A higher number means slower evolution. Set to 0.00 to turn off monster upgrades.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 100.0,
+        "children": null
+      },
+      "STARTING_NPC": {
+        "id": "STARTING_NPC",
+        "name": "Starting Npc",
+        "description": "Determines whether starting NPCs should spawn, and if they do, how exactly.",
+        "type": "enum",
+        "options": [
+          { "value": "never", "label": "Never" },
+          { "value": "always", "label": "Always" },
+          { "value": "scenario", "label": "Scenario" }
+        ],
+        "min": null,
+        "max": null,
+        "children": null
+      },
+      "RANDOM_NPC": {
+        "id": "RANDOM_NPC",
+        "name": "Random Npc",
+        "description": "If true, the game will randomly spawn NPCs during gameplay.",
+        "type": "boolean",
+        "options": null,
+        "min": null,
+        "max": null,
+        "children": null
+      },
+      "STATIC_NPC": {
+        "id": "STATIC_NPC",
+        "name": "Static Npc",
+        "description": "If true, static NPCs will spawn at pre-defined locations. Requires world reset.",
+        "type": "boolean",
+        "options": null,
+        "min": null,
+        "max": null,
+        "children": null
+      },
+      "BLACK_ROAD": {
+        "id": "BLACK_ROAD",
+        "name": "Black Road",
+        "description": "If enabled, zombies spawn at shelters, making the start harder.",
+        "type": "boolean",
+        "options": null,
+        "min": null,
+        "max": null,
+        "children": null
+      },
+      "VEHICLE_SPAWNRATE": {
+        "id": "VEHICLE_SPAWNRATE",
+        "name": "Vehicle Spawnrate",
+        "description": "A scaling factor that determines density of vehicle spawns.",
+        "type": "number",
+        "options": null,
+        "min": 0.0,
+        "max": 5.0,
+        "children": null
+      },
+      "WANDER_SPAWNS": {
+        "id": "WANDER_SPAWNS",
+        "name": "Wandering Hordes",
+        "description": "If enabled, zombies group into hordes that wander and move towards noise.",
+        "type": "boolean",
+        "options": null,
+        "min": null,
+        "max": null,
+        "children": null
+      },
+      "item_spawn_rates": {
+        "id": "item_spawn_rates",
+        "name": "Item Spawn Rates",
+        "description": "Spawn rates for specific item categories.",
+        "type": "group",
+        "options": null,
+        "min": null,
+        "max": null,
+        "children": {
+          "SPAWN_RATE_spellbooks": {
+            "id": "SPAWN_RATE_spellbooks",
+            "name": "Spawn Rate Spellbooks",
+            "description": "Spawn rate for items from SPELLBOOKS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_rocks": {
+            "id": "SPAWN_RATE_rocks",
+            "name": "Spawn Rate Rocks",
+            "description": "Spawn rate for items from ROCKS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_mods": {
+            "id": "SPAWN_RATE_mods",
+            "name": "Spawn Rate Mods",
+            "description": "Spawn rate for items from MODS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_magazines": {
+            "id": "SPAWN_RATE_magazines",
+            "name": "Spawn Rate Magazines",
+            "description": "Spawn rate for items from MAGAZINES category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools": {
+            "id": "SPAWN_RATE_tools",
+            "name": "Spawn Rate Tools",
+            "description": "Spawn rate for items from OTHER TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_guns": {
+            "id": "SPAWN_RATE_guns",
+            "name": "Spawn Rate Guns",
+            "description": "Spawn rate for items from GUNS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_glass": {
+            "id": "SPAWN_RATE_scrap_glass",
+            "name": "Spawn Rate Scrap Glass",
+            "description": "Spawn rate for items from GLASS SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_electronics": {
+            "id": "SPAWN_RATE_electronics",
+            "name": "Spawn Rate Electronics",
+            "description": "Spawn rate for items from ELECTRONICS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_electronics": {
+            "id": "SPAWN_RATE_scrap_electronics",
+            "name": "Spawn Rate Scrap Electronics",
+            "description": "Spawn rate for items from ELECTRONIC SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools_cooking": {
+            "id": "SPAWN_RATE_tools_cooking",
+            "name": "Spawn Rate Tools Cooking",
+            "description": "Spawn rate for items from COOKING TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_cooking_ingredients": {
+            "id": "SPAWN_RATE_cooking_ingredients",
+            "name": "Spawn Rate Cooking Ingredients",
+            "description": "Spawn rate for items from COOKING INGREDIENTS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_ceramics": {
+            "id": "SPAWN_RATE_scrap_ceramics",
+            "name": "Spawn Rate Scrap Ceramics",
+            "description": "Spawn rate for items from CERAMIC SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_wood": {
+            "id": "SPAWN_RATE_scrap_wood",
+            "name": "Spawn Rate Scrap Wood",
+            "description": "Spawn rate for items from WOOD SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_rubber": {
+            "id": "SPAWN_RATE_scrap_rubber",
+            "name": "Spawn Rate Scrap Rubber",
+            "description": "Spawn rate for items from RUBBER SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_deployables": {
+            "id": "SPAWN_RATE_deployables",
+            "name": "Spawn Rate Deployables",
+            "description": "Spawn rate for items from DEPLOYABLES category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools_workshop": {
+            "id": "SPAWN_RATE_tools_workshop",
+            "name": "Spawn Rate Tools Workshop",
+            "description": "Spawn rate for items from WORKSHOP TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_veh_parts": {
+            "id": "SPAWN_RATE_veh_parts",
+            "name": "Spawn Rate Veh Parts",
+            "description": "Spawn rate for items from VEHICLE PARTS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_spare_parts": {
+            "id": "SPAWN_RATE_spare_parts",
+            "name": "Spawn Rate Spare Parts",
+            "description": "Spawn rate for items from SPARE PARTS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_fabric": {
+            "id": "SPAWN_RATE_scrap_fabric",
+            "name": "Spawn Rate Scrap Fabric",
+            "description": "Spawn rate for items from FABRICS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_ammo": {
+            "id": "SPAWN_RATE_ammo",
+            "name": "Spawn Rate Ammo",
+            "description": "Spawn rate for items from AMMO category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_clothing": {
+            "id": "SPAWN_RATE_clothing",
+            "name": "Spawn Rate Clothing",
+            "description": "Spawn rate for items from CLOTHING category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_bionics": {
+            "id": "SPAWN_RATE_bionics",
+            "name": "Spawn Rate Bionics",
+            "description": "Spawn rate for items from BIONICS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_plastic": {
+            "id": "SPAWN_RATE_scrap_plastic",
+            "name": "Spawn Rate Scrap Plastic",
+            "description": "Spawn rate for items from PLASTIC SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_leather": {
+            "id": "SPAWN_RATE_scrap_leather",
+            "name": "Spawn Rate Scrap Leather",
+            "description": "Spawn rate for items from LEATHER SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_valuables": {
+            "id": "SPAWN_RATE_valuables",
+            "name": "Spawn Rate Valuables",
+            "description": "Spawn rate for items from VALUABLES category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_perishables": {
+            "id": "SPAWN_RATE_perishables",
+            "name": "Spawn Rate Perishables",
+            "description": "Spawn rate for items from PERISHABLES category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_soil": {
+            "id": "SPAWN_RATE_soil",
+            "name": "Spawn Rate Soil",
+            "description": "Spawn rate for items from SOIL category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_food": {
+            "id": "SPAWN_RATE_food",
+            "name": "Spawn Rate Food",
+            "description": "Spawn rate for items from FOOD category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools_entry": {
+            "id": "SPAWN_RATE_tools_entry",
+            "name": "Spawn Rate Tools Entry",
+            "description": "Spawn rate for items from ENTRY TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_weapons": {
+            "id": "SPAWN_RATE_weapons",
+            "name": "Spawn Rate Weapons",
+            "description": "Spawn rate for items from WEAPONS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_chems": {
+            "id": "SPAWN_RATE_chems",
+            "name": "Spawn Rate Chems",
+            "description": "Spawn rate for items from CHEMICAL STUFF category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_fuel": {
+            "id": "SPAWN_RATE_fuel",
+            "name": "Spawn Rate Fuel",
+            "description": "Spawn rate for items from FUEL category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_perishables_canned": {
+            "id": "SPAWN_RATE_perishables_canned",
+            "name": "Spawn Rate Perishables Canned",
+            "description": "Spawn rate for items from CANNED PERISHABLES category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools_farming": {
+            "id": "SPAWN_RATE_tools_farming",
+            "name": "Spawn Rate Tools Farming",
+            "description": "Spawn rate for items from FARM TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_books": {
+            "id": "SPAWN_RATE_books",
+            "name": "Spawn Rate Books",
+            "description": "Spawn rate for items from BOOKS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_seeds": {
+            "id": "SPAWN_RATE_seeds",
+            "name": "Spawn Rate Seeds",
+            "description": "Spawn rate for items from SEEDS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_other": {
+            "id": "SPAWN_RATE_other",
+            "name": "Spawn Rate Other",
+            "description": "Spawn rate for items from OTHER category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_drugs": {
+            "id": "SPAWN_RATE_drugs",
+            "name": "Spawn Rate Drugs",
+            "description": "Spawn rate for items from DRUGS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_misc": {
+            "id": "SPAWN_RATE_scrap_misc",
+            "name": "Spawn Rate Scrap Misc",
+            "description": "Spawn rate for items from MISC SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_tools_chemistry": {
+            "id": "SPAWN_RATE_tools_chemistry",
+            "name": "Spawn Rate Tools Chemistry",
+            "description": "Spawn rate for items from CHEMISTRY TOOLS category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          },
+          "SPAWN_RATE_scrap_metal": {
+            "id": "SPAWN_RATE_scrap_metal",
+            "name": "Spawn Rate Scrap Metal",
+            "description": "Spawn rate for items from METAL SCRAP category.",
+            "type": "number",
+            "options": null,
+            "min": 0.0,
+            "max": 20.0,
+            "children": null
+          }
+        }
+      }
+    }
+  },
+  "EVOLUTION_INVERSE_MULTIPLIER": {
+    "id": "EVOLUTION_INVERSE_MULTIPLIER",
+    "name": "Monster Evolution Scaling",
+    "description": "Multiplier for the time between monster upgrades. Higher values mean slower evolution. 0.00 disables upgrades.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 100.0,
+    "children": null
+  },
+  "ETERNAL_TIME_OF_DAY": {
+    "id": "ETERNAL_TIME_OF_DAY",
+    "name": "Eternal Time of Day",
+    "description": "Determines if the game world has a normal day/night cycle or is stuck in one state.",
+    "type": "enum",
+    "options": [
+      { "value": "normal", "label": "Normal" },
+      { "value": "day", "label": "Eternal Day" },
+      { "value": "night", "label": "Eternal Night" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "WORLD_END": {
+    "id": "WORLD_END",
+    "name": "World End Behavior",
+    "description": "What happens to the world when the last character dies.",
+    "type": "enum",
+    "options": [
+      { "value": "reset", "label": "Reset" },
+      { "value": "delete", "label": "Delete" },
+      { "value": "query", "label": "Query" },
+      { "value": "keep", "label": "Keep" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CITY_SIZE": {
+    "id": "CITY_SIZE",
+    "name": "City Size",
+    "description": "Determines how large cities are. 0 disables cities.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 16.0,
+    "children": null
+  },
+  "ETERNAL_SEASON": {
+    "id": "ETERNAL_SEASON",
+    "name": "Eternal Season",
+    "description": "If enabled, the initial season lasts forever.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "DEFAULT_REGION": {
+    "id": "DEFAULT_REGION",
+    "name": "Default Region",
+    "description": "Determines terrain, shops, plants, and more.",
+    "type": "enum",
+    "options": [{ "value": "default", "label": "Default" }],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CITY_SPACING": {
+    "id": "CITY_SPACING",
+    "name": "City Spacing",
+    "description": "Determines how far apart cities are.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 8.0,
+    "children": null
+  },
+  "INITIAL_DAY": {
+    "id": "INITIAL_DAY",
+    "name": "Initial Day",
+    "description": "How many days into the year the cataclysm occurred. Day 0 is Spring 1. Day -1 randomizes the start date. Can be overridden by scenarios. This does not advance food rot or monster evolution.",
+    "type": "number",
+    "options": null,
+    "min": -1.0,
+    "max": 999.0,
+    "children": null
+  },
+  "cooking_kcal_buff": {
+    "id": "cooking_kcal_buff",
+    "name": "Cooking Kcal Buff",
+    "description": "Include the scaling calories from cooking buff?",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "MONSTER_RESILIENCE": {
+    "id": "MONSTER_RESILIENCE",
+    "name": "Monster Resilience",
+    "description": "Determines how much damage monsters can take. A higher value makes monsters more resilient and a lower makes them more flimsy. Requires world reset.",
+    "type": "number",
+    "options": null,
+    "min": 1.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "SPECIALS_DENSITY": {
+    "id": "SPECIALS_DENSITY",
+    "name": "Specials Density",
+    "description": "A scaling factor that determines density of overmap specials.",
+    "type": "number",
+    "options": null,
+    "min": 0.01,
+    "max": 10.0,
+    "children": null
+  },
+  "SPECIALS_SPACING": {
+    "id": "SPECIALS_SPACING",
+    "name": "Specials Spacing",
+    "description": "A number determing minimum distance between overmap specials. -1 allows intersections of specials.",
+    "type": "number",
+    "options": null,
+    "min": -1.0,
+    "max": 72.0,
+    "children": null
+  },
+  "CONSTRUCTION_SCALING": {
+    "id": "CONSTRUCTION_SCALING",
+    "name": "Construction Scaling",
+    "description": "Sets the time of construction in percents. '50' is two times faster than default, '200' is two times longer. '0' makes construction instant.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "canmutprofmut": {
+    "id": "canmutprofmut",
+    "name": "Canmutprofmut",
+    "description": "Allow starting traits to be cancelled and effected by purifiers?",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "VEHICLE_DAMAGE": {
+    "id": "VEHICLE_DAMAGE",
+    "name": "Vehicle Damage",
+    "description": "A scaling factor that determines how damaged vehicles are.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 10.0,
+    "children": null
+  },
+  "CRAFTING_SPEED_MULT": {
+    "id": "CRAFTING_SPEED_MULT",
+    "name": "Crafting Speed Mult",
+    "description": "Sets default crafting speed in percents. '50' is two times faster than default, '200' is two times longer. '0' makes crafting instant.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "GROWTH_SCALING": {
+    "id": "GROWTH_SCALING",
+    "name": "Growth Scaling",
+    "description": "Sets the time of crop growth in percents. '50' is two times faster than default, '200' is two times longer. '0' automatically scales growth time to match the world's season length.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "SEASON_LENGTH": {
+    "id": "SEASON_LENGTH",
+    "name": "Season Length",
+    "description": "Season length, in days.",
+    "type": "number",
+    "options": null,
+    "min": 14.0,
+    "max": 127.0,
+    "children": null
+  },
+  "althletics_encumbrance_buff": {
+    "id": "althletics_encumbrance_buff",
+    "name": "Althletics Encumbrance Buff",
+    "description": "Include the reduce all encumbrance per level of althletics buff?",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "MONSTER_SPEED": {
+    "id": "MONSTER_SPEED",
+    "name": "Monster Speed",
+    "description": "Determines the movement rate of monsters. A higher value increases monster speed and a lower reduces it. Requires world reset.",
+    "type": "number",
+    "options": null,
+    "min": 1.0,
+    "max": 1000.0,
+    "children": null
+  },
+  "DISABLE_LIFTING": {
+    "id": "DISABLE_LIFTING",
+    "name": "Disable Lifting",
+    "description": "If true, strength checks and/or lifting qualities no longer need to be met in order to change parts.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "INITIAL_TIME": {
+    "id": "INITIAL_TIME",
+    "name": "Initial Time",
+    "description": "Initial starting time of day on character generation.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 23.0,
+    "children": null
+  },
+  "VEHICLE_LOCKS": {
+    "id": "VEHICLE_LOCKS",
+    "name": "Vehicle Locks",
+    "description": "Determines if new vehicles can spawn with locked doors.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "RAD_MUTATION": {
+    "id": "RAD_MUTATION",
+    "name": "Rad Mutation",
+    "description": "If true, radiation causes the player to mutate.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CHARACTER_POINT_POOLS": {
+    "id": "CHARACTER_POINT_POOLS",
+    "name": "Character Point Pools",
+    "description": "Allowed point pools for character generation.",
+    "type": "enum",
+    "options": [
+      { "value": "any", "label": "Any" },
+      { "value": "multi_pool", "label": "Multi Pool" },
+      { "value": "no_freeform", "label": "No Freeform" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "RESTOCK_DELAY_MULT": {
+    "id": "RESTOCK_DELAY_MULT",
+    "name": "Restock Delay Mult",
+    "description": "A scaling factor that determines restock rate of merchants.",
+    "type": "number",
+    "options": null,
+    "min": 0.01,
+    "max": 10.0,
+    "children": null
+  }
+}

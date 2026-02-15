@@ -1,0 +1,121 @@
+{
+  "WANDER_SPAWNS": {
+    "id": "WANDER_SPAWNS",
+    "name": "Wandering Hordes",
+    "description": "If true, emulates zombie hordes. Zombies can group together into hordes, which can wander around cities and will sometimes move towards noise. Note: This feature is still in development, but should be mostly bug-free.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "NPC_SPAWNTIME": {
+    "id": "NPC_SPAWNTIME",
+    "name": "NPC Spawn Rate",
+    "description": "Baseline average number of days between random NPC spawns. Average duration goes up with the number of NPCs already spawned. A higher number means fewer NPCs. Set to 0 days to disable random NPCs.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 100.0,
+    "children": null
+  },
+  "SPAWN_DENSITY": {
+    "id": "SPAWN_DENSITY",
+    "name": "Monster Spawn Density",
+    "description": "A scaling factor that determines density of monster spawns. A higher number means more monsters.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 50.0,
+    "children": null
+  },
+  "BLACK_ROAD": {
+    "id": "BLACK_ROAD",
+    "name": "Black Road",
+    "description": "If true, spawn zombies at shelters. Makes the starting game a lot harder.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "EVOLUTION_INVERSE_MULTIPLIER": {
+    "id": "EVOLUTION_INVERSE_MULTIPLIER",
+    "name": "Monster Evolution Scaling",
+    "description": "A multiplier for the time between monster upgrades. For example a value of 2.00 would cause evolution to occur at half speed. Set to 0.00 to turn off monster upgrades.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 100.0,
+    "children": null
+  },
+  "ETERNAL_TIME_OF_DAY": {
+    "id": "ETERNAL_TIME_OF_DAY",
+    "name": "Eternal Time of Day",
+    "description": "Day/night cycle settings. 'Normal' sets a normal cycle. 'Eternal Day' sets eternal day. 'Eternal Night' sets eternal night.",
+    "type": "enum",
+    "options": [
+      { "value": "normal", "label": "Normal" },
+      { "value": "day", "label": "Eternal Day" },
+      { "value": "night", "label": "Eternal Night" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "WORLD_END": {
+    "id": "WORLD_END",
+    "name": "World End Behavior",
+    "description": "Handling of game world when last character dies.",
+    "type": "enum",
+    "options": [
+      { "value": "reset", "label": "Reset" },
+      { "value": "delete", "label": "Delete" },
+      { "value": "query", "label": "Query" },
+      { "value": "keep", "label": "Keep" }
+    ],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CITY_SIZE": {
+    "id": "CITY_SIZE",
+    "name": "City Size",
+    "description": "A number determining how large cities are. A higher number means larger cities. 0 disables cities, roads and any scenario requiring a city start.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 16.0,
+    "children": null
+  },
+  "ETERNAL_SEASON": {
+    "id": "ETERNAL_SEASON",
+    "name": "Eternal Season",
+    "description": "If true, keep the initial season forever. Warning: currently bugged and may not work properly.",
+    "type": "boolean",
+    "options": null,
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "DEFAULT_REGION": {
+    "id": "DEFAULT_REGION",
+    "name": "Default Region",
+    "description": "(WIP feature) Determines terrain, shops, plants, and more.",
+    "type": "enum",
+    "options": [{ "value": "default", "label": "Default" }],
+    "min": null,
+    "max": null,
+    "children": null
+  },
+  "CITY_SPACING": {
+    "id": "CITY_SPACING",
+    "name": "City Spacing",
+    "description": "A number determining how far apart cities are. Warning, small numbers lead to very slow mapgen.",
+    "type": "number",
+    "options": null,
+    "min": 0.0,
+    "max": 8.0,
+    "children": null
+  }
+}
