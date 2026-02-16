@@ -1,20 +1,32 @@
-import pkg from "../../package.json";
+import pkg from "../../../package.json";
 import { openLink } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+const TEXT = {
+  title: "CatLauncher",
+  description:
+    "An opinionated cross-platform launcher for Cataclysm games with modern social features.",
+  version: (version: string) => `v${version}`,
+  links: {
+    github: "⭐ Star CatLauncher on GitHub",
+    issue: "🐛 Report an issue",
+    feature: "🚀 Request a new feature",
+  },
+} as const;
+
 const LINKS = [
   {
-    label: "⭐ Star CatLauncher on GitHub",
+    label: TEXT.links.github,
     url: "https://github.com/abhi-kr-2100/CatLauncher",
     variant: "outline" as const,
   },
   {
-    label: "🐛 Report an issue",
+    label: TEXT.links.issue,
     url: "https://github.com/abhi-kr-2100/CatLauncher/issues/new",
     variant: "outline" as const,
   },
   {
-    label: "🚀 Request a new feature",
+    label: TEXT.links.feature,
     url: "https://github.com/abhi-kr-2100/CatLauncher/issues/new",
     variant: "outline" as const,
   },
@@ -24,13 +36,10 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col items-center gap-4 py-4 max-w-lg mx-auto">
       <div className="flex flex-col items-center gap-2">
-        <h1 className="text-2xl font-bold">CatLauncher</h1>
-        <p className="text-center">
-          An opinionated cross-platform launcher for Cataclysm games
-          with modern social features.
-        </p>
+        <h1 className="text-2xl font-bold">{TEXT.title}</h1>
+        <p className="text-center">{TEXT.description}</p>
         <p className="text-muted-foreground text-sm">
-          v{pkg.version}
+          {TEXT.version(pkg.version)}
         </p>
       </div>
 

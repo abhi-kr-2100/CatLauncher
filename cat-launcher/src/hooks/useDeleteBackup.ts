@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { deleteBackupById } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
@@ -15,6 +16,16 @@ export function useDeleteBackup(
   { onSuccess, onError }: UseDeleteBackupOptions = {},
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const { mutate: deleteBackup } = useMutation({
     mutationFn: (id: bigint) => deleteBackupById(id),
@@ -34,7 +45,9 @@ export function useDeleteBackup(
 
       return { previousBackups };
     },
-    onSuccess,
+    onSuccess: () => {
+      onSuccessRef.current?.();
+    },
     onError: (error, _variables, context) => {
       if (context?.previousBackups) {
         queryClient.setQueryData(
@@ -42,7 +55,7 @@ export function useDeleteBackup(
           context.previousBackups,
         );
       }
-      onError?.(error);
+      onErrorRef.current?.(error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({

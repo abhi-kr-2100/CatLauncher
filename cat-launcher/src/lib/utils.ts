@@ -88,6 +88,19 @@ export function getHumanFriendlyText(text: string): string {
   return text.replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
 
+export function formatDate(timestamp: bigint | number): string {
+  const date = new Date(Number(timestamp) * 1000);
+  return new Intl.DateTimeFormat(undefined, {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
 export function formatBytes(bytes: number): [number, string] {
   if (bytes == 0) {
     return [0, "B"];

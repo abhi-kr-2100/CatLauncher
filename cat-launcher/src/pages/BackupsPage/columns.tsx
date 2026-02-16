@@ -3,7 +3,13 @@ import { ArrowUpDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 import { CombinedBackup } from "./types/backups";
+
+const BACKUP_TYPE_LABELS: Record<string, string> = {
+  manual: "Manual",
+  automatic: "Automatic",
+};
 
 type ColumnsFactory = (options: {
   openDeleteDialog: (backup: CombinedBackup) => void;
@@ -35,9 +41,10 @@ export const columns: ColumnsFactory = ({
     accessorKey: "type",
     cell: ({ row }) => {
       const type = row.getValue("type") as string;
+      const label = BACKUP_TYPE_LABELS[type] ?? type;
       return (
         <Badge variant={type === "manual" ? "default" : "outline"}>
-          {type.toUpperCase()}
+          {label}
         </Badge>
       );
     },
@@ -63,16 +70,7 @@ export const columns: ColumnsFactory = ({
     },
     cell: ({ row }) => {
       const timestamp = row.getValue("timestamp") as bigint;
-      const date = new Date(Number(timestamp) * 1000);
-
-      const day = date.getDate().toString().padStart(2, "0");
-      const month = date.toLocaleString("default", { month: "long" });
-      const year = date.getFullYear();
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      const seconds = date.getSeconds().toString().padStart(2, "0");
-
-      const formattedDate = `${day} ${month}, ${year}, ${hours}:${minutes}:${seconds}`;
+      const formattedDate = formatDate(timestamp);
 
       return <div>{formattedDate}</div>;
     },

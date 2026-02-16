@@ -6,7 +6,7 @@ import VariantSelector from "@/components/VariantSelector";
 import { useCombinedBackups } from "@/hooks/useCombinedBackups";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { useSearch } from "@/hooks/useSearch";
-import { toastCL } from "@/lib/utils";
+import { formatDate, toastCL } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedVariant } from "@/store/selectedVariantSlice";
 import BackupFilter, { BackupFilterFn } from "./BackupFilter";
@@ -15,19 +15,6 @@ import { DeleteBackupDialog } from "./DeleteBackupDialog";
 import { NewBackupDialog } from "./NewBackupDialog";
 import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { CombinedBackup } from "./types/backups";
-
-function formatTimestampForSearch(timestamp: bigint): string {
-  const date = new Date(Number(timestamp) * 1000);
-
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = date.toLocaleString("default", { month: "long" });
-  const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
-  const minutes = date.getMinutes().toString().padStart(2, "0");
-  const seconds = date.getSeconds().toString().padStart(2, "0");
-
-  return `${day} ${month}, ${year}, ${hours}:${minutes}:${seconds}`;
-}
 
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
@@ -80,9 +67,7 @@ function BackupsPage() {
     filteredItems: searchedBackups,
   } = useSearch(combinedBackups, {
     searchFn: (backup, query) => {
-      const formattedTimestamp = formatTimestampForSearch(
-        backup.timestamp,
-      );
+      const formattedTimestamp = formatDate(backup.timestamp);
       return (
         backup.name.toLowerCase().includes(query) ||
         backup.notes?.toLowerCase().includes(query) ||

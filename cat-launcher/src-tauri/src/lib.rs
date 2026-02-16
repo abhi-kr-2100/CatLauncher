@@ -4,6 +4,7 @@ pub mod settings;
 
 mod achievements;
 pub mod active_release;
+mod app;
 mod backups;
 mod fetch_releases;
 mod game_release;
@@ -25,6 +26,7 @@ mod variants;
 
 use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
+use crate::app::commands::confirm_quit;
 use crate::backups::commands::{
   delete_backup_by_id, list_backups_for_variant, restore_backup_by_id,
 };
@@ -76,12 +78,6 @@ use crate::utils::{
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
-use tauri::{command, AppHandle};
-
-#[command]
-fn confirm_quit(app_handle: AppHandle) {
-  app_handle.exit(0)
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

@@ -8,9 +8,13 @@ import {
 } from "@/components/ui/alert";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { randomInt, setImmediateInterval } from "@/lib/utils";
-import { useGetTips } from "./hooks/useGetTips";
-import { NO_TIPS_AVAILABLE } from "./lib/constants";
+import { useGetTips } from "../hooks/useGetTips";
+import { NO_TIPS_AVAILABLE } from "../lib/constants";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
+
+const TEXT = {
+  title: "Tip of the Day",
+} as const;
 
 interface TipOfTheDayContentProps {
   tip: string;
@@ -21,7 +25,7 @@ function TipOfTheDayContent({ tip }: TipOfTheDayContentProps) {
     <Alert className="flex flex-col bg-secondary text-secondary-foreground">
       <AlertTitle className="flex items-center gap-2">
         <Lightbulb />
-        Tip of the Day
+        {TEXT.title}
       </AlertTitle>
       <AlertDescription className="h-20 overflow-y-auto flex-grow items-center text-secondary-foreground">
         {tip}
