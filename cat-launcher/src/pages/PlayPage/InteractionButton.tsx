@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import { DownloadProgress } from "@/components/DownloadProgress";
 import { DropdownButton } from "@/components/DropdownButton";
 import { Button } from "@/components/ui/button";
@@ -44,8 +46,23 @@ export default function InteractionButton({
       },
     );
 
+  const onInstallationStatusError = useCallback(
+    (e: unknown) => {
+      toastCL(
+        "error",
+        `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
+        e,
+      );
+    },
+    [variant, selectedReleaseId],
+  );
+
   const { installationStatus, installationStatusError } =
-    useInstallationStatus(variant, selectedReleaseId);
+    useInstallationStatus(
+      variant,
+      selectedReleaseId,
+      onInstallationStatusError,
+    );
 
   const { play, isStartingGame: isStartingGameFromPlay } =
     usePlayGame(variant);

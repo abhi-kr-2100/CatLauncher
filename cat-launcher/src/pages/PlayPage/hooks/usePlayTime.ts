@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -9,13 +9,26 @@ import {
   listenToGameEvent,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { setupEventListener, toastCL } from "@/lib/utils";
+import { setupEventListener } from "@/lib/utils";
 
 export function usePlayTime(
   variant: GameVariant,
   releaseId?: string,
+  onTotalPlayTimeError?: (error: unknown) => void,
+  onVersionPlayTimeError?: (error: unknown) => void,
 ) {
   const queryClient = useQueryClient();
+  const onTotalPlayTimeErrorRef = useRef(onTotalPlayTimeError);
+  const onVersionPlayTimeErrorRef = useRef(onVersionPlayTimeError);
+
+  useEffect(() => {
+    onTotalPlayTimeErrorRef.current = onTotalPlayTimeError;
+  }, [onTotalPlayTimeError]);
+
+  useEffect(() => {
+    onVersionPlayTimeErrorRef.current = onVersionPlayTimeError;
+  }, [onVersionPlayTimeError]);
+
   const { data: totalPlayTime, error: totalPlayTimeError } = useQuery(
     {
       queryKey: queryKeys.playTimeForVariant(variant),
@@ -38,24 +51,16 @@ export function usePlayTime(
     });
 
   useEffect(() => {
-    if (totalPlayTimeError) {
-      toastCL(
-        "error",
-        `Failed to get total play time for ${variant}.`,
-        totalPlayTimeError,
-      );
+    if (totalPlayTimeError && onTotalPlayTimeErrorRef.current) {
+      onTotalPlayTimeErrorRef.current(totalPlayTimeError);
     }
-  }, [totalPlayTimeError, variant]);
+  }, [totalPlayTimeError]);
 
   useEffect(() => {
-    if (versionPlayTimeError) {
-      toastCL(
-        "error",
-        `Failed to get version play time for ${variant}.`,
-        versionPlayTimeError,
-      );
+    if (versionPlayTimeError && onVersionPlayTimeErrorRef.current) {
+      onVersionPlayTimeErrorRef.current(versionPlayTimeError);
     }
-  }, [versionPlayTimeError, variant]);
+  }, [versionPlayTimeError]);
 
   useEffect(() => {
     const gameEventHandler = (event: GameEvent) => {

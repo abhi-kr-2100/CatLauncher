@@ -1,7 +1,7 @@
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useCallback } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { cn } from "@/lib/utils";
+import { cn, toastCL } from "@/lib/utils";
 import { usePlayTime } from "./hooks";
 
 interface PlayTimeProps extends HTMLAttributes<HTMLDivElement> {
@@ -29,9 +29,31 @@ export function PlayTime({
   className,
   ...props
 }: PlayTimeProps) {
+  const onTotalPlayTimeError = useCallback(
+    (e: unknown) =>
+      toastCL(
+        "error",
+        `Failed to get total play time for ${variant}.`,
+        e,
+      ),
+    [variant],
+  );
+
+  const onVersionPlayTimeError = useCallback(
+    (e: unknown) =>
+      toastCL(
+        "error",
+        `Failed to get version play time for ${variant}.`,
+        e,
+      ),
+    [variant],
+  );
+
   const { totalPlayTime, versionPlayTime } = usePlayTime(
     variant,
     releaseId,
+    onTotalPlayTimeError,
+    onVersionPlayTimeError,
   );
 
   const formattedVersionPlayTime = formatPlayTime(versionPlayTime);

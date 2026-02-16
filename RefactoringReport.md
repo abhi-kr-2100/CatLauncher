@@ -40,5 +40,5 @@ This report identifies inconsistencies in the codebase according to the coding s
 
 - [x] Fix Frontend Directory Structure
 - [x] Improve Frontend i18n Readiness
-- [x] Standardize Frontend Hooks
+- [x] Standardize Frontend Hooks (Updated: refactored remaining hooks to follow useRef + useEffect pattern)
 - [x] Fix Backend Command and Error Handling
