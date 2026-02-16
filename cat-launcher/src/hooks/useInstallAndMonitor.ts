@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -28,6 +28,16 @@ export function useInstallAndMonitor<T>(
   onError?: (error: Error) => void,
 ) {
   const dispatch = useAppDispatch();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const downloadProgress = useAppSelector((state) => {
     if (!id) {
@@ -93,7 +103,7 @@ export function useInstallAndMonitor<T>(
       );
     },
     onSuccess: (_data, itemId) => {
-      onSuccess?.(itemId);
+      onSuccessRef.current?.(itemId);
     },
     onSettled: (_data, _error, itemId) => {
       // Cancel any pending throttled dispatches to prevent setting progress
@@ -109,9 +119,7 @@ export function useInstallAndMonitor<T>(
       );
     },
     onError: (e) => {
-      if (onError) {
-        onError(e);
-      }
+      onErrorRef.current?.(e);
     },
   });
 

@@ -46,16 +46,9 @@ export default function InteractionButton({
       },
     );
 
-  const onInstallationStatusError = useCallback(
-    (e: unknown) => {
-      toastCL(
-        "error",
-        `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
-        e,
-      );
-    },
-    [variant, selectedReleaseId],
-  );
+  const onInstallationStatusError = useCallback((e: unknown) => {
+    toastCL("error", "Failed to get installation status.", e);
+  }, []);
 
   const { installationStatus, installationStatusError } =
     useInstallationStatus(

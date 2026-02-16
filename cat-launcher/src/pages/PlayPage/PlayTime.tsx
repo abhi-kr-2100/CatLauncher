@@ -31,22 +31,14 @@ export function PlayTime({
 }: PlayTimeProps) {
   const onTotalPlayTimeError = useCallback(
     (e: unknown) =>
-      toastCL(
-        "error",
-        `Failed to get total play time for ${variant}.`,
-        e,
-      ),
-    [variant],
+      toastCL("error", "Failed to get total play time.", e),
+    [],
   );
 
   const onVersionPlayTimeError = useCallback(
     (e: unknown) =>
-      toastCL(
-        "error",
-        `Failed to get version play time for ${variant}.`,
-        e,
-      ),
-    [variant],
+      toastCL("error", "Failed to get version play time.", e),
+    [],
   );
 
   const { totalPlayTime, versionPlayTime } = usePlayTime(

@@ -14,9 +14,11 @@ This report identifies inconsistencies in the codebase according to the coding s
 
 #### 2. Internationalization (i18n) Readiness
 - **Violation:** Manual string construction for dates in `cat-launcher/src/pages/BackupsPage/index.tsx` and `columns.tsx`.
-  - **Suggested Fix:** Use `Intl.DateTimeFormat`.
+  - **Suggested Fix:** Use `Intl.DateTimeFormat`. (Fixed)
 - **Violation:** String manipulation (`toUpperCase`) for display labels in `cat-launcher/src/pages/BackupsPage/columns.tsx`.
-  - **Suggested Fix:** Use a mapping function or constant.
+  - **Suggested Fix:** Use a mapping function or constant. (Fixed)
+- **Violation:** String construction in parts for labels and error messages (e.g., `Latest ${type}`, `Failed to load font: ${name}`).
+  - **Suggested Fix:** Use mapping constants for combined labels and avoid variable interpolation in user-visible error strings where possible, or use a translation-friendly pattern.
 - **Violation:** Hardcoded strings in multiple pages.
   - **Suggested Fix:** While no i18n framework is present, strings should be prepared for it by avoiding construction in parts and using constants/mappings where appropriate.
 

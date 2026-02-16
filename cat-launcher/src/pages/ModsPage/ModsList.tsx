@@ -1,6 +1,6 @@
 import { SearchInput } from "@/components/SearchInput";
 import type { GameVariant } from "@/generated-types/GameVariant";
-import { getVariantLabel, toastCL } from "@/lib/utils";
+import { toastCL } from "@/lib/utils";
 import { useSearch } from "@/hooks/useSearch";
 import { useMods } from "./hooks";
 import ModCard from "./ModCard";
@@ -12,16 +12,10 @@ interface ModsListProps {
 }
 
 export default function ModsList({ variant }: ModsListProps) {
-  const variantLabel = getVariantLabel(variant);
   const { mods, isLoading } = useMods(
     variant,
     (err) => toastCL("error", "Failed to load mods.", err),
-    (err) =>
-      toastCL(
-        "error",
-        `Failed to fetch mods for ${variantLabel}.`,
-        err,
-      ),
+    (err) => toastCL("error", "Failed to fetch mods.", err),
   );
 
   const {

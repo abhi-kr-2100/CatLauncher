@@ -98,16 +98,9 @@ function FontSelector({
 }
 
 function FontPreview({ selectedFont }: { selectedFont: Font }) {
-  const onFontLoadError = useCallback(
-    (e: unknown) => {
-      toastCL(
-        "error",
-        `Failed to load font: ${selectedFont.name}`,
-        e,
-      );
-    },
-    [selectedFont.name],
-  );
+  const onFontLoadError = useCallback((e: unknown) => {
+    toastCL("error", "Failed to load the selected font.", e);
+  }, []);
 
   const fontFamily = useFontFamily(selectedFont, onFontLoadError);
 

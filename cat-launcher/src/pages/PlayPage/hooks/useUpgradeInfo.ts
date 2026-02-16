@@ -5,8 +5,13 @@ import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import type { ReleaseType } from "@/generated-types/ReleaseType";
 import { getActiveRelease } from "@/lib/commands";
-import { RELEASE_TYPE_LABELS } from "@/lib/constants";
 import { queryKeys } from "@/lib/queryKeys";
+
+const UPGRADE_LABEL_MAP: Record<ReleaseType, string> = {
+  Stable: "Latest Stable",
+  ReleaseCandidate: "Latest Release Candidate",
+  Experimental: "Latest Experimental",
+};
 import { useReleases } from "./useReleases";
 
 const RELEASE_TYPE_ORDER: ReleaseType[] = [
@@ -68,7 +73,7 @@ export function useUpgradeInfo(
 
         return {
           id: type,
-          label: `Latest ${RELEASE_TYPE_LABELS[type]}`,
+          label: UPGRADE_LABEL_MAP[type],
           onClick: () => {
             setSelectedReleaseId(latest.version);
             install(latest.version);
