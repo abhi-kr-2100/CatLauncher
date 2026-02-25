@@ -9,3 +9,4 @@ Cargo.lock
 *.min.js
 .next
 out
+src/generated-types

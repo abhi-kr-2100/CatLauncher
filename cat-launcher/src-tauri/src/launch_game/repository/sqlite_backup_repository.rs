@@ -38,7 +38,7 @@ impl BackupRepository for SqliteBackupRepository {
             let conn = pool.get().map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
             let id = conn.query_row(
                 "INSERT INTO backups (game_variant, release_version, timestamp) VALUES (?1, ?2, ?3) RETURNING id",
-                rusqlite::params![game_variant, release_version, timestamp],
+                rusqlite::params![game_variant, release_version, timestamp as i64],
                 |row| row.get(0),
             ).map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
             Ok(id)
@@ -65,11 +65,12 @@ impl BackupRepository for SqliteBackupRepository {
                     let game_variant_str: String = row.get(1)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp: i64 = row.get(3)?;
                     Ok(BackupEntry {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp: timestamp as u64,
                     })
                 })
                 .map_err(|e| BackupRepositoryError::Get(Box::new(e)))?
@@ -98,11 +99,12 @@ impl BackupRepository for SqliteBackupRepository {
                     let game_variant_str: String = row.get(1)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp: i64 = row.get(3)?;
                     Ok(BackupEntry {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp: timestamp as u64,
                     })
                 });
 

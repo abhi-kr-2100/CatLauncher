@@ -40,7 +40,7 @@ impl ManualBackupRepository for SqliteManualBackupRepository {
             let conn = pool.get().map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?;
             let id = conn.query_row(
                 "INSERT INTO manual_backups (name, game_variant, timestamp, notes) VALUES (?1, ?2, ?3, ?4) RETURNING id",
-                rusqlite::params![name, game_variant, timestamp, notes],
+                rusqlite::params![name, game_variant, timestamp as i64, notes],
                 |row| row.get(0),
             ).map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?;
             Ok(id)
@@ -68,11 +68,12 @@ impl ManualBackupRepository for SqliteManualBackupRepository {
                     let game_variant_str: String = row.get(2)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp: i64 = row.get(3)?;
                     Ok(ManualBackupEntry {
                         id,
                         name,
                         game_variant,
-                        timestamp: row.get(3)?,
+                        timestamp: timestamp as u64,
                         notes: row.get(4)?,
                     })
                 })
@@ -103,11 +104,12 @@ impl ManualBackupRepository for SqliteManualBackupRepository {
                     let game_variant_str: String = row.get(2)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp: i64 = row.get(3)?;
                     Ok(ManualBackupEntry {
                         id,
                         name,
                         game_variant,
-                        timestamp: row.get(3)?,
+                        timestamp: timestamp as u64,
                         notes: row.get(4)?,
                     })
                 });
