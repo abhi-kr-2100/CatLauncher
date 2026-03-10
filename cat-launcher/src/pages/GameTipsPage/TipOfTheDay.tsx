@@ -1,5 +1,5 @@
 import { Lightbulb } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   Alert,
@@ -35,16 +35,9 @@ interface TipOfTheDayProps {
 }
 
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
-  const { data, status } = useGetTips(variant);
+  const { data: tips = [] } = useGetTips(variant);
 
   const [randomIndex, setRandomIndex] = useState(0);
-
-  const tips = useMemo(() => {
-    if (status !== "success" || data.length === 0) {
-      return [];
-    }
-    return data;
-  }, [data, status]);
 
   const shuffleTips = useCallback(() => {
     if (tips.length === 0) {

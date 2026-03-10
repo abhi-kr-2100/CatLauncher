@@ -16,9 +16,7 @@ export function useAchievements(
   }, [onAchievementsError]);
 
   const query = useQuery({
-    queryKey: variant
-      ? queryKeys.achievements(variant)
-      : ["achievements", null],
+    queryKey: queryKeys.achievements(variant),
     queryFn: () =>
       variant
         ? getAchievementsForVariant(variant)

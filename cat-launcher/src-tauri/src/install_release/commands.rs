@@ -10,7 +10,7 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameRelease;
-use crate::game_release::utils::{get_release_by_id, GetReleaseError};
+use crate::game_release::utils::GetReleaseError;
 use crate::infra::download::Downloader;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
@@ -50,31 +50,20 @@ pub async fn install_release(
 ) -> Result<GameRelease, InstallReleaseCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
-
   let os = get_os_enum(OS)?;
   let arch = get_arch_enum(std::env::consts::ARCH)?;
-
-  let mut release = get_release_by_id(
-    &variant,
-    release_id,
-    &os,
-    &data_dir,
-    &resource_dir,
-    &*releases_repository,
-  )
-  .await?;
-
   let progress = Arc::new(ChannelReporter::new(on_download_progress));
 
-  release
-    .install_release(
-      &downloader,
+  let release = variant
+    .install_release_by_id(
+      release_id,
       &os,
       &arch,
       &data_dir,
       &resource_dir,
       &*releases_repository,
       &*active_release_repository,
+      &downloader,
       progress,
     )
     .await?;

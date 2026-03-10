@@ -15,11 +15,15 @@ use crate::filesystem::paths::{
 use crate::game_release::game_release::{
   GameRelease, GameReleaseStatus,
 };
+use crate::game_release::utils::{
+  get_release_by_id, GetReleaseError,
+};
 use crate::infra::archive::{extract_archive, ExtractionError};
 use crate::infra::download::Downloader;
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
+use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError {
@@ -46,6 +50,50 @@ pub enum ReleaseInstallationError {
 
   #[error("failed to set active release: {0}")]
   ActiveRelease(#[from] ActiveReleaseError),
+
+  #[error("failed to get release: {0}")]
+  GetRelease(#[from] GetReleaseError),
+}
+
+impl GameVariant {
+  #[allow(clippy::too_many_arguments)]
+  pub async fn install_release_by_id(
+    &self,
+    release_id: &str,
+    os: &OS,
+    arch: &Arch,
+    data_dir: &Path,
+    resource_dir: &Path,
+    releases_repository: &dyn ReleasesRepository,
+    active_release_repository: &dyn ActiveReleaseRepository,
+    downloader: &Downloader,
+    progress: Arc<dyn Reporter + Send + Sync>,
+  ) -> Result<GameRelease, ReleaseInstallationError> {
+    let mut release = get_release_by_id(
+      self,
+      release_id,
+      os,
+      data_dir,
+      resource_dir,
+      releases_repository,
+    )
+    .await?;
+
+    release
+      .install_release(
+        downloader,
+        os,
+        arch,
+        data_dir,
+        resource_dir,
+        releases_repository,
+        active_release_repository,
+        progress,
+      )
+      .await?;
+
+    Ok(release)
+  }
 }
 
 impl GameRelease {
