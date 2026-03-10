@@ -9,28 +9,29 @@ export function useGetLastModActivity(
   enabled: boolean,
   modId: string,
   variant: GameVariant,
-  onError?: (error: unknown) => void,
+  onActivityError?: (error: Error) => void,
 ) {
-  const onErrorRef = useRef(onError);
+  const onActivityErrorRef = useRef(onActivityError);
 
   useEffect(() => {
-    onErrorRef.current = onError;
-  }, [onError]);
+    onActivityErrorRef.current = onActivityError;
+  }, [onActivityError]);
 
-  const query = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.mods.lastActivity(variant, modId),
     queryFn: () => getLastModActivity(modId, variant),
     enabled,
   });
 
   useEffect(() => {
-    if (query.error && onErrorRef.current) {
-      onErrorRef.current(query.error);
+    if (error && onActivityErrorRef.current) {
+      onActivityErrorRef.current(error as Error);
     }
-  }, [query.error]);
+  }, [error]);
 
   return {
-    lastActivity: query.data,
-    isLoading: query.isLoading,
+    lastActivity: data,
+    isLoading,
+    error,
   };
 }

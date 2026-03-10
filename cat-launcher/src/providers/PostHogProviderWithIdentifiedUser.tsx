@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { PostHogProvider } from "posthog-js/react";
 import { ReactNode } from "react";
 
-import { useUserId } from "@/hooks/useUserId";
+import { queryKeys } from "@/lib/queryKeys";
+import { getUserId } from "@/lib/commands";
 
 const posthogOptions = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -16,7 +18,10 @@ export interface PostHogProviderWithIdentifiedUserProps {
 export default function PostHogProviderWithIdentifiedUser({
   children,
 }: PostHogProviderWithIdentifiedUserProps) {
-  const { userId } = useUserId();
+  const { data: userId } = useQuery({
+    queryKey: queryKeys.userId(),
+    queryFn: getUserId,
+  });
 
   if (!userId) {
     return null;

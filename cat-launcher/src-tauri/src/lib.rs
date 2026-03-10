@@ -76,21 +76,11 @@ use crate::utils::{
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
-use cat_macros::CommandErrorSerialize;
 use tauri::{command, AppHandle};
 
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
-pub enum ConfirmQuitCommandError {
-  #[error("failed to exit: {0}")]
-  Exit(#[from] tauri::Error),
-}
-
 #[command]
-fn confirm_quit(app_handle: AppHandle) -> Result<(), ConfirmQuitCommandError> {
-  app_handle.exit(0);
-  Ok(())
+fn confirm_quit(app_handle: AppHandle) {
+  app_handle.exit(0)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

@@ -50,8 +50,10 @@ pub async fn install_release(
 ) -> Result<GameRelease, InstallReleaseCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
+
   let os = get_os_enum(OS)?;
   let arch = get_arch_enum(std::env::consts::ARCH)?;
+
   let progress = Arc::new(ChannelReporter::new(on_download_progress));
 
   let release = variant
