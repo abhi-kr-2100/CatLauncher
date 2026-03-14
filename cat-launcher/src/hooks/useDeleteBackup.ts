@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { deleteBackupById } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
@@ -15,8 +16,19 @@ export function useDeleteBackup(
   { onSuccess, onError }: UseDeleteBackupOptions = {},
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
 
-  const { mutate: deleteBackup } = useMutation({
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
+
+  const {
+    mutate: deleteBackup,
+    error,
+    isSuccess,
+  } = useMutation({
     mutationFn: (id: bigint) => deleteBackupById(id),
     onMutate: async (id: bigint) => {
       await queryClient.cancelQueries({
@@ -34,15 +46,16 @@ export function useDeleteBackup(
 
       return { previousBackups };
     },
-    onSuccess,
-    onError: (error, _variables, context) => {
+    onSuccess: () => {
+      onSuccessRef.current?.();
+    },
+    onError: (_error, _variables, context) => {
       if (context?.previousBackups) {
         queryClient.setQueryData(
           queryKeys.backups(variant),
           context.previousBackups,
         );
       }
-      onError?.(error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({
@@ -51,5 +64,11 @@ export function useDeleteBackup(
     },
   });
 
-  return { deleteBackup };
+  useEffect(() => {
+    if (error && onErrorRef.current) {
+      onErrorRef.current(error);
+    }
+  }, [error]);
+
+  return { deleteBackup, isSuccess, error };
 }

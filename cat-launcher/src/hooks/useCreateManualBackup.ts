@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { createManualBackupForVariant } from "@/lib/commands";
@@ -13,8 +14,15 @@ export function useCreateManualBackup(
   } = {},
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(options.onSuccess);
+  const onErrorRef = useRef(options.onError);
 
-  const { mutate, isPending } = useMutation({
+  useEffect(() => {
+    onSuccessRef.current = options.onSuccess;
+    onErrorRef.current = options.onError;
+  }, [options.onSuccess, options.onError]);
+
+  const { mutate, isPending, error } = useMutation({
     mutationFn: async (values: { name: string; notes?: string }) => {
       await createManualBackupForVariant(
         variant,
@@ -47,20 +55,27 @@ export function useCreateManualBackup(
 
       return { previousBackups };
     },
-    onError: (err, _newBackup, context) => {
+    onError: (_err, _newBackup, context) => {
       queryClient.setQueryData(
         queryKeys.manualBackups(variant),
         context?.previousBackups,
       );
-      options.onError?.(err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.manualBackups(variant),
       });
     },
-    onSuccess: options.onSuccess,
+    onSuccess: () => {
+      onSuccessRef.current?.();
+    },
   });
+
+  useEffect(() => {
+    if (error && onErrorRef.current) {
+      onErrorRef.current(error);
+    }
+  }, [error]);
 
   return {
     createManualBackup: mutate,

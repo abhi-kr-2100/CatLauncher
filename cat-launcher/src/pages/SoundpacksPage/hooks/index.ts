@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -56,7 +57,14 @@ export function useInstallThirdPartySoundpack(
 export function useGetThirdPartySoundpackInstallationStatus(
   soundpackId: string,
   variant: GameVariant,
+  onStatusError?: (error: Error) => void,
 ) {
+  const onStatusErrorRef = useRef(onStatusError);
+
+  useEffect(() => {
+    onStatusErrorRef.current = onStatusError;
+  }, [onStatusError]);
+
   const query = useQuery({
     queryKey: queryKeys.soundpacks.installationStatus(
       variant,
@@ -65,6 +73,12 @@ export function useGetThirdPartySoundpackInstallationStatus(
     queryFn: () =>
       getThirdPartySoundpackInstallationStatus(soundpackId, variant),
   });
+
+  useEffect(() => {
+    if (query.error && onStatusErrorRef.current) {
+      onStatusErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
 
   return {
     installationStatus: query.data,
@@ -78,6 +92,13 @@ export function useUninstallThirdPartySoundpack(
   onError?: (error: unknown) => void,
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
 
   const mutation = useMutation({
     mutationFn: (soundpackId: string) =>
@@ -92,10 +113,15 @@ export function useUninstallThirdPartySoundpack(
           soundpackId,
         ),
       });
-      onSuccess?.();
+      onSuccessRef.current?.();
     },
-    onError,
   });
+
+  useEffect(() => {
+    if (mutation.error && onErrorRef.current) {
+      onErrorRef.current(mutation.error);
+    }
+  }, [mutation.error]);
 
   return {
     isUninstalling: mutation.isPending,
@@ -103,11 +129,26 @@ export function useUninstallThirdPartySoundpack(
   };
 }
 
-export function useListAllSoundpacks(variant: GameVariant) {
+export function useListAllSoundpacks(
+  variant: GameVariant,
+  onListError?: (error: Error) => void,
+) {
+  const onListErrorRef = useRef(onListError);
+
+  useEffect(() => {
+    onListErrorRef.current = onListError;
+  }, [onListError]);
+
   const query = useQuery({
     queryKey: queryKeys.soundpacks.listAll(variant),
     queryFn: () => listAllSoundpacks(variant),
   });
+
+  useEffect(() => {
+    if (query.error && onListErrorRef.current) {
+      onListErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
 
   return {
     soundpacks: query.data,

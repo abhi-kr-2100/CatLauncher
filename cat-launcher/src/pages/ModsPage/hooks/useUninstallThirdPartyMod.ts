@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { uninstallThirdPartyMod } from "@/lib/commands";
@@ -10,6 +11,13 @@ export function useUninstallThirdPartyMod(
   onError?: (error: unknown) => void,
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
 
   const mutation = useMutation({
     mutationFn: (modId: string) =>
@@ -18,10 +26,15 @@ export function useUninstallThirdPartyMod(
       queryClient.invalidateQueries({
         queryKey: queryKeys.mods.installationStatus(variant, modId),
       });
-      onSuccess?.();
+      onSuccessRef.current?.();
     },
-    onError,
   });
+
+  useEffect(() => {
+    if (mutation.error && onErrorRef.current) {
+      onErrorRef.current(mutation.error);
+    }
+  }, [mutation.error]);
 
   return {
     isUninstalling: mutation.isPending,

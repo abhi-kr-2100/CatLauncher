@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { launchGame } from "@/lib/commands";
@@ -19,8 +20,17 @@ export function useLaunchGame(
 ) {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
+  const onErrorRef = useRef(onError);
 
-  const { mutate: launch, isPending: isStartingGame } = useMutation({
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
+  const {
+    mutate: launch,
+    isPending: isStartingGame,
+    error,
+  } = useMutation({
     mutationFn: (releaseId: string | undefined) => {
       if (!releaseId) {
         throw new Error("No release selected");
@@ -39,14 +49,17 @@ export function useLaunchGame(
         () => releaseId!,
       );
     },
-    onError: (e) => {
-      if (onError) {
-        onError(e as Error);
-      } else {
-        toastCL("error", "Failed to launch game.", e);
-      }
-    },
   });
+
+  useEffect(() => {
+    if (error) {
+      if (onErrorRef.current) {
+        onErrorRef.current(error as Error);
+      } else {
+        toastCL("error", "Failed to launch game.", error);
+      }
+    }
+  }, [error]);
 
   return { launch, isStartingGame };
 }
