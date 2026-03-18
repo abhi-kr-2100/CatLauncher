@@ -38,7 +38,7 @@ impl BackupRepository for SqliteBackupRepository {
             let conn = pool.get().map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
             let id = conn.query_row(
                 "INSERT INTO backups (game_variant, release_version, timestamp) VALUES (?1, ?2, ?3) RETURNING id",
-                rusqlite::params![game_variant, release_version, timestamp],
+                rusqlite::params![game_variant, release_version, timestamp as i64],
                 |row| row.get(0),
             ).map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
             Ok(id)
@@ -69,7 +69,7 @@ impl BackupRepository for SqliteBackupRepository {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp: row.get::<_, i64>(3)? as u64,
                     })
                 })
                 .map_err(|e| BackupRepositoryError::Get(Box::new(e)))?
@@ -102,7 +102,7 @@ impl BackupRepository for SqliteBackupRepository {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp: row.get::<_, i64>(3)? as u64,
                     })
                 });
 

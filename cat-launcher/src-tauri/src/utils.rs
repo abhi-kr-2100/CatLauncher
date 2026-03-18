@@ -206,7 +206,7 @@ pub fn manage_posthog(app: &App) {
 
   let options = posthog_rs::ClientOptionsBuilder::default()
     .api_key(api_key.to_string())
-    .api_endpoint(api_endpoint)
+    .host(api_endpoint)
     .build();
 
   match options {
