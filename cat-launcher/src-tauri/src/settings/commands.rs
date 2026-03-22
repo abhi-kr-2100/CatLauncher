@@ -7,15 +7,15 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::settings::colors::{
-  get_available_color_themes, GetColorThemesError,
+  get_available_color_themes, GetColorThemesError as GetColorThemesBusinessError,
 };
 use crate::settings::fonts::get_all_fonts;
 use crate::settings::repository::settings_repository::{
-  GetSettingsError, SettingsRepository,
+  GetSettingsError as GetSettingsBusinessError, SettingsRepository,
 };
 use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::settings::types::{ColorTheme, Font};
-use crate::settings::update_settings::{self, UpdateSettingsError};
+use crate::settings::update_settings::{self, UpdateSettingsError as UpdateSettingsBusinessError};
 use crate::settings::Settings;
 
 #[derive(
@@ -38,7 +38,7 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
 )]
 pub enum GetColorThemesError {
   #[error("failed to get color themes: {0}")]
-  Get(#[from] GetColorThemesError),
+  Get(#[from] GetColorThemesBusinessError),
 
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),
@@ -71,7 +71,7 @@ pub async fn get_color_themes(
 )]
 pub enum GetSettingsError {
   #[error("failed to get settings: {0}")]
-  Get(#[from] GetSettingsError),
+  Get(#[from] GetSettingsBusinessError),
 }
 
 #[command]
@@ -87,7 +87,7 @@ pub async fn get_settings(
 )]
 pub enum UpdateSettingsError {
   #[error("failed to update settings: {0}")]
-  Update(#[from] UpdateSettingsError),
+  Update(#[from] UpdateSettingsBusinessError),
 
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),

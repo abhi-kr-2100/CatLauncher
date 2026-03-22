@@ -19,7 +19,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum FetchReleasesCommandError {
+pub enum FetchReleasesError {
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
 
@@ -39,7 +39,7 @@ pub async fn fetch_releases_for_variant(
   variant: GameVariant,
   releases_repository: State<'_, SqliteReleasesRepository>,
   client: State<'_, Client>,
-) -> Result<(), FetchReleasesCommandError> {
+) -> Result<(), FetchReleasesError> {
   let resources_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
   let arch = get_arch_enum(ARCH)?;

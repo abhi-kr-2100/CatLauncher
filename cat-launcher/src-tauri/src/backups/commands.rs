@@ -15,7 +15,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum ListBackupsCommandError {
+pub enum ListBackupsError {
   #[error("failed to get backups: {0}")]
   Get(#[from] ListBackupsError),
 }
@@ -24,7 +24,7 @@ pub enum ListBackupsCommandError {
 pub async fn list_backups_for_variant(
   variant: GameVariant,
   backup_repository: State<'_, SqliteBackupRepository>,
-) -> Result<Vec<BackupEntry>, ListBackupsCommandError> {
+) -> Result<Vec<BackupEntry>, ListBackupsError> {
   let backups =
     list_backups(&variant, backup_repository.inner()).await?;
   Ok(backups)
@@ -33,7 +33,7 @@ pub async fn list_backups_for_variant(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum DeleteBackupCommandError {
+pub enum DeleteBackupError {
   #[error("failed to delete backup: {0}")]
   Delete(#[from] DeleteBackupError),
   #[error("failed to get data directory: {0}")]
@@ -45,7 +45,7 @@ pub async fn delete_backup_by_id(
   id: i64,
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteBackupRepository>,
-) -> Result<(), DeleteBackupCommandError> {
+) -> Result<(), DeleteBackupError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   delete_backup(id, &data_dir, backup_repository.inner()).await?;
   Ok(())
@@ -54,7 +54,7 @@ pub async fn delete_backup_by_id(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum RestoreBackupCommandError {
+pub enum RestoreBackupError {
   #[error("failed to restore backup: {0}")]
   Restore(#[from] RestoreBackupError),
   #[error("failed to get data directory: {0}")]
@@ -68,7 +68,7 @@ pub async fn restore_backup_by_id(
   id: i64,
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteBackupRepository>,
-) -> Result<(), RestoreBackupCommandError> {
+) -> Result<(), RestoreBackupError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
   restore_backup(id, &data_dir, backup_repository.inner(), &os)
