@@ -11,7 +11,7 @@ use crate::users::service::{
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetUserIdCommandError {
+pub enum GetUserIdError {
   #[error("failed to get or create user id: {0}")]
   GetOrCreateUserId(#[from] GetOrCreateUserIdError),
 }
@@ -19,7 +19,7 @@ pub enum GetUserIdCommandError {
 #[tauri::command]
 pub async fn get_user_id(
   repo: State<'_, SqliteUsersRepository>,
-) -> Result<String, GetUserIdCommandError> {
+) -> Result<String, GetUserIdError> {
   let user_id = get_or_create_user_id(repo.inner()).await?;
   Ok(user_id)
 }

@@ -21,7 +21,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum InstallReleaseCommandError {
+pub enum InstallReleaseError {
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
 
@@ -47,7 +47,7 @@ pub async fn install_release(
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
   downloader: State<'_, Downloader>,
   on_download_progress: Channel,
-) -> Result<GameRelease, InstallReleaseCommandError> {
+) -> Result<GameRelease, InstallReleaseError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
 

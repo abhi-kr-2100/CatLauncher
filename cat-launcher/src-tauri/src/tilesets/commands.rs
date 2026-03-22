@@ -28,7 +28,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum ListAllTilesetsCommandError {
+pub enum ListAllTilesetsError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -44,7 +44,7 @@ pub async fn list_all_tilesets_command(
   variant: GameVariant,
   app: tauri::AppHandle,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<Tileset>, ListAllTilesetsCommandError> {
+) -> Result<Vec<Tileset>, ListAllTilesetsError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
 
@@ -65,7 +65,7 @@ pub async fn list_all_tilesets_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum InstallThirdPartyTilesetCommandError {
+pub enum InstallThirdPartyTilesetError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -84,7 +84,7 @@ pub async fn install_third_party_tileset_command(
   app: tauri::AppHandle,
   downloader: State<'_, Downloader>,
   repository: State<'_, SqliteInstalledTilesetsRepository>,
-) -> Result<(), InstallThirdPartyTilesetCommandError> {
+) -> Result<(), InstallThirdPartyTilesetError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
   let temp_dir = app.path().app_cache_dir()?;
@@ -112,7 +112,7 @@ pub async fn install_third_party_tileset_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UninstallThirdPartyTilesetCommandError {
+pub enum UninstallThirdPartyTilesetError {
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
 
@@ -126,7 +126,7 @@ pub async fn uninstall_third_party_tileset_command(
   variant: GameVariant,
   app: tauri::AppHandle,
   repository: State<'_, SqliteInstalledTilesetsRepository>,
-) -> Result<(), UninstallThirdPartyTilesetCommandError> {
+) -> Result<(), UninstallThirdPartyTilesetError> {
   let data_dir = app.path().app_local_data_dir()?;
 
   uninstall_third_party_tileset(
@@ -142,7 +142,7 @@ pub async fn uninstall_third_party_tileset_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetThirdPartyTilesetInstallationStatusCommandError {
+pub enum GetThirdPartyTilesetInstallationStatusError {
   #[error("failed to get tileset installation status: {0}")]
   GetStatus(#[from] GetThirdPartyTilesetInstallationStatusError),
 }
@@ -154,7 +154,7 @@ pub async fn get_third_party_tileset_installation_status_command(
   repository: State<'_, SqliteInstalledTilesetsRepository>,
 ) -> Result<
   TilesetInstallationStatus,
-  GetThirdPartyTilesetInstallationStatusCommandError,
+  GetThirdPartyTilesetInstallationStatusError,
 > {
   let status = get_third_party_tileset_installation_status(
     &id,
