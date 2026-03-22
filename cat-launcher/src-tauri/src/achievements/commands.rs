@@ -11,7 +11,7 @@ use super::types::CharacterAchievements;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetAchievementsForVariantError {
+pub enum GetAchievementsForVariantCommandError {
   #[error("failed to get achievements: {0}")]
   GetAchievements(#[from] GetAchievementsError),
   #[error("failed to get data directory: {0}")]
@@ -23,8 +23,10 @@ pub async fn get_achievements_for_variant(
   variant: GameVariant,
   app_handle: AppHandle,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<CharacterAchievements>, GetAchievementsForVariantError>
-{
+) -> Result<
+  Vec<CharacterAchievements>,
+  GetAchievementsForVariantCommandError,
+> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let achievements = get_achievements(
     &variant,

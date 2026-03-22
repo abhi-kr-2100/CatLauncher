@@ -11,7 +11,7 @@ use cat_macros::CommandErrorSerialize;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetLastPlayedWorldError {
+pub enum GetLastPlayedWorldCommandError {
   #[error("failed to get last played world: {0}")]
   GetLastPlayedWorld(#[from] GetLastPlayedWorldError),
 
@@ -23,7 +23,7 @@ pub enum GetLastPlayedWorldError {
 pub async fn get_last_played_world(
   app_handle: AppHandle,
   variant: GameVariant,
-) -> Result<Option<String>, GetLastPlayedWorldError> {
+) -> Result<Option<String>, GetLastPlayedWorldCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let last_played_world =
     get_last_played_world_impl(&data_dir, &variant).await?;

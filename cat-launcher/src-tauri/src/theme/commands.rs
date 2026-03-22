@@ -11,7 +11,7 @@ use crate::theme::theme::{
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetPreferredThemeError {
+pub enum GetPreferredThemeCommandError {
   #[error("failed to load theme preference: {0}")]
   Get(#[from] GetThemeError),
 }
@@ -19,14 +19,14 @@ pub enum GetPreferredThemeError {
 #[tauri::command]
 pub async fn get_preferred_theme(
   repository: State<'_, SqliteThemePreferenceRepository>,
-) -> Result<ThemePreference, GetPreferredThemeError> {
+) -> Result<ThemePreference, GetPreferredThemeCommandError> {
   Ok(get_theme_preference(repository.inner()).await?)
 }
 
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum SetPreferredThemeError {
+pub enum SetPreferredThemeCommandError {
   #[error("failed to update theme preference: {0}")]
   Update(#[from] UpdateThemeError),
 }
@@ -35,6 +35,6 @@ pub enum SetPreferredThemeError {
 pub async fn set_preferred_theme(
   theme: Theme,
   repository: State<'_, SqliteThemePreferenceRepository>,
-) -> Result<(), SetPreferredThemeError> {
+) -> Result<(), SetPreferredThemeCommandError> {
   Ok(update_theme_preference(theme, repository.inner()).await?)
 }

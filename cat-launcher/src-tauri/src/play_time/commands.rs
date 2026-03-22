@@ -15,7 +15,7 @@ use crate::variants::game_variant::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetPlayTimeError {
+pub enum GetPlayTimeCommandError {
   #[error("Failed to get play time: {0}")]
   Repository(#[from] PlayTimeRepositoryError),
 }
@@ -23,7 +23,7 @@ pub enum GetPlayTimeError {
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum LogPlayTimeError {
+pub enum LogPlayTimeCommandError {
   #[error("Failed to log play time: {0}")]
   Repository(#[from] PlayTimeRepositoryError),
 }
@@ -32,7 +32,7 @@ pub enum LogPlayTimeError {
 pub async fn get_play_time_for_variant(
   variant: GameVariant,
   repository: State<'_, SqlitePlayTimeRepository>,
-) -> Result<i64, GetPlayTimeError> {
+) -> Result<i64, GetPlayTimeCommandError> {
   let result =
     get_play_time_for_variant_feature(&variant, &*repository).await?;
   Ok(result)
@@ -43,7 +43,7 @@ pub async fn get_play_time_for_version(
   variant: GameVariant,
   version: String,
   repository: State<'_, SqlitePlayTimeRepository>,
-) -> Result<i64, GetPlayTimeError> {
+) -> Result<i64, GetPlayTimeCommandError> {
   let result = get_play_time_for_version_feature(
     &variant,
     &version,
@@ -59,7 +59,7 @@ pub async fn log_play_time(
   version: String,
   duration_in_seconds: i64,
   repository: State<'_, SqlitePlayTimeRepository>,
-) -> Result<(), LogPlayTimeError> {
+) -> Result<(), LogPlayTimeCommandError> {
   log_play_time_feature(
     &variant,
     &version,

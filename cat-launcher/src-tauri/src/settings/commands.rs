@@ -7,15 +7,15 @@ use cat_macros::CommandErrorSerialize;
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::settings::colors::{
-  get_available_color_themes, GetColorThemesError as GetColorThemesBusinessError,
+  get_available_color_themes, GetColorThemesError,
 };
 use crate::settings::fonts::get_all_fonts;
 use crate::settings::repository::settings_repository::{
-  GetSettingsError as GetSettingsBusinessError, SettingsRepository,
+  GetSettingsError, SettingsRepository,
 };
 use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::settings::types::{ColorTheme, Font};
-use crate::settings::update_settings::{self, UpdateSettingsError as UpdateSettingsBusinessError};
+use crate::settings::update_settings::{self, UpdateSettingsError};
 use crate::settings::Settings;
 
 #[derive(
@@ -36,9 +36,9 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetColorThemesError {
+pub enum GetColorThemesCommandError {
   #[error("failed to get color themes: {0}")]
-  Get(#[from] GetColorThemesBusinessError),
+  Get(#[from] GetColorThemesError),
 
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),
@@ -51,7 +51,7 @@ pub enum GetColorThemesError {
 pub async fn get_color_themes(
   app_handle: AppHandle,
   active_release_repo: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<ColorTheme>, GetColorThemesError> {
+) -> Result<Vec<ColorTheme>, GetColorThemesCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
@@ -69,15 +69,15 @@ pub async fn get_color_themes(
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetSettingsError {
+pub enum GetSettingsCommandError {
   #[error("failed to get settings: {0}")]
-  Get(#[from] GetSettingsBusinessError),
+  Get(#[from] GetSettingsError),
 }
 
 #[command]
 pub async fn get_settings(
   repository: State<'_, SqliteSettingsRepository>,
-) -> Result<Settings, GetSettingsError> {
+) -> Result<Settings, GetSettingsCommandError> {
   let settings = repository.get_settings().await?;
   Ok(settings)
 }
@@ -85,9 +85,9 @@ pub async fn get_settings(
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UpdateSettingsError {
+pub enum UpdateSettingsCommandError {
   #[error("failed to update settings: {0}")]
-  Update(#[from] UpdateSettingsBusinessError),
+  Update(#[from] UpdateSettingsError),
 
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),
@@ -98,7 +98,7 @@ pub async fn update_settings(
   app_handle: AppHandle,
   settings: Settings,
   repository: State<'_, SqliteSettingsRepository>,
-) -> Result<(), UpdateSettingsError> {
+) -> Result<(), UpdateSettingsCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
   update_settings::update_settings(

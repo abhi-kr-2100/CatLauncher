@@ -8,7 +8,7 @@ use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPla
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
-pub enum LastPlayedError {
+pub enum LastPlayedCommandError {
     #[error("failed to get last played version: {0}")]
     GetLastPlayedVersion(#[from] LastPlayedError),
 
@@ -20,7 +20,7 @@ pub enum LastPlayedError {
 pub async fn get_last_played_version(
     variant: GameVariant,
     repository: State<'_, SqliteLastPlayedVersionRepository>,
-) -> Result<Option<String>, LastPlayedError> {
+) -> Result<Option<String>, LastPlayedCommandError> {
     let last_played_version = variant.get_last_played_version(&*repository).await?;
 
     Ok(last_played_version)

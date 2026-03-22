@@ -15,18 +15,18 @@ use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteMa
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum ListManualBackupsError {
+pub enum ListManualBackupsCommandError {
   #[error("failed to get backups: {0}")]
   Get(#[from] ListManualBackupsError),
 }
 
-impl Serialize for ListManualBackupsError {
+impl Serialize for ListManualBackupsCommandError {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: serde::Serializer,
   {
-    let mut state =
-      serializer.serialize_struct("ListManualBackupsError", 2)?;
+    let mut state = serializer
+      .serialize_struct("ListManualBackupsCommandError", 2)?;
     let error_type: &str = self.into();
     state.serialize_field("type", error_type)?;
     state.serialize_field("message", &self.to_string())?;
@@ -38,14 +38,14 @@ impl Serialize for ListManualBackupsError {
 pub async fn list_manual_backups_for_variant(
   variant: GameVariant,
   backup_repository: State<'_, SqliteManualBackupRepository>,
-) -> Result<Vec<ManualBackupEntry>, ListManualBackupsError> {
+) -> Result<Vec<ManualBackupEntry>, ListManualBackupsCommandError> {
   let backups =
     list_manual_backups(&variant, backup_repository.inner()).await?;
   Ok(backups)
 }
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum CreateManualBackupError {
+pub enum CreateManualBackupCommandError {
   #[error("failed to create backup: {0}")]
   Create(#[from] CreateManualBackupError),
   #[error("failed to get data directory: {0}")]
@@ -56,13 +56,13 @@ pub enum CreateManualBackupError {
   SystemTime(#[from] SystemTimeError),
 }
 
-impl Serialize for CreateManualBackupError {
+impl Serialize for CreateManualBackupCommandError {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: serde::Serializer,
   {
-    let mut state =
-      serializer.serialize_struct("CreateManualBackupError", 2)?;
+    let mut state = serializer
+      .serialize_struct("CreateManualBackupCommandError", 2)?;
     let error_type: &str = self.into();
     state.serialize_field("type", error_type)?;
     state.serialize_field("message", &self.to_string())?;
@@ -77,7 +77,7 @@ pub async fn create_manual_backup_for_variant(
   notes: Option<String>,
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
-) -> Result<i64, CreateManualBackupError> {
+) -> Result<i64, CreateManualBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let timestamp = std::time::SystemTime::now()
     .duration_since(std::time::UNIX_EPOCH)?
@@ -95,20 +95,20 @@ pub async fn create_manual_backup_for_variant(
 }
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum DeleteManualBackupError {
+pub enum DeleteManualBackupCommandError {
   #[error("failed to delete backup: {0}")]
   Delete(#[from] DeleteManualBackupError),
   #[error("failed to get data directory: {0}")]
   DataDir(#[from] tauri::Error),
 }
 
-impl Serialize for DeleteManualBackupError {
+impl Serialize for DeleteManualBackupCommandError {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: serde::Serializer,
   {
-    let mut state =
-      serializer.serialize_struct("DeleteManualBackupError", 2)?;
+    let mut state = serializer
+      .serialize_struct("DeleteManualBackupCommandError", 2)?;
     let error_type: &str = self.into();
     state.serialize_field("type", error_type)?;
     state.serialize_field("message", &self.to_string())?;
@@ -121,7 +121,7 @@ pub async fn delete_manual_backup_by_id(
   id: i64,
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
-) -> Result<(), DeleteManualBackupError> {
+) -> Result<(), DeleteManualBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   delete_manual_backup(id, &data_dir, backup_repository.inner())
     .await?;
@@ -129,7 +129,7 @@ pub async fn delete_manual_backup_by_id(
 }
 
 #[derive(thiserror::Error, Debug, IntoStaticStr)]
-pub enum RestoreManualBackupError {
+pub enum RestoreManualBackupCommandError {
   #[error("failed to restore backup: {0}")]
   Restore(#[from] RestoreManualBackupError),
   #[error("failed to get data directory: {0}")]
@@ -138,13 +138,13 @@ pub enum RestoreManualBackupError {
   UnsupportedOS(#[from] OSNotSupportedError),
 }
 
-impl Serialize for RestoreManualBackupError {
+impl Serialize for RestoreManualBackupCommandError {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: serde::Serializer,
   {
-    let mut state =
-      serializer.serialize_struct("RestoreManualBackupError", 2)?;
+    let mut state = serializer
+      .serialize_struct("RestoreManualBackupCommandError", 2)?;
     let error_type: &str = self.into();
     state.serialize_field("type", error_type)?;
     state.serialize_field("message", &self.to_string())?;
@@ -157,7 +157,7 @@ pub async fn restore_manual_backup_by_id(
   id: i64,
   app_handle: tauri::AppHandle,
   backup_repository: State<'_, SqliteManualBackupRepository>,
-) -> Result<(), RestoreManualBackupError> {
+) -> Result<(), RestoreManualBackupCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
   restore_manual_backup(
