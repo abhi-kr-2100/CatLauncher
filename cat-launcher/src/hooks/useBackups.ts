@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { listBackupsForVariant } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect, useRef } from "react";
 
 export function useBackups(
   variant: GameVariant,

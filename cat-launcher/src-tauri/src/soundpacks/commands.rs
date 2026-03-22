@@ -28,7 +28,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum ListAllSoundpacksError {
+pub enum ListAllSoundpacksCommandError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -44,7 +44,7 @@ pub async fn list_all_soundpacks_command(
   variant: GameVariant,
   app: tauri::AppHandle,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<Soundpack>, ListAllSoundpacksError> {
+) -> Result<Vec<Soundpack>, ListAllSoundpacksCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
 
@@ -65,7 +65,7 @@ pub async fn list_all_soundpacks_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum InstallThirdPartySoundpackError {
+pub enum InstallThirdPartySoundpackCommandError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -84,7 +84,7 @@ pub async fn install_third_party_soundpack_command(
   app: tauri::AppHandle,
   downloader: State<'_, Downloader>,
   repository: State<'_, SqliteInstalledSoundpacksRepository>,
-) -> Result<(), InstallThirdPartySoundpackError> {
+) -> Result<(), InstallThirdPartySoundpackCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
   let temp_dir = app.path().app_cache_dir()?;
@@ -112,7 +112,7 @@ pub async fn install_third_party_soundpack_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UninstallThirdPartySoundpackError {
+pub enum UninstallThirdPartySoundpackCommandError {
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
 
@@ -126,7 +126,7 @@ pub async fn uninstall_third_party_soundpack_command(
   variant: GameVariant,
   app: tauri::AppHandle,
   repository: State<'_, SqliteInstalledSoundpacksRepository>,
-) -> Result<(), UninstallThirdPartySoundpackError> {
+) -> Result<(), UninstallThirdPartySoundpackCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
 
   uninstall_third_party_soundpack(
@@ -142,7 +142,7 @@ pub async fn uninstall_third_party_soundpack_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetThirdPartySoundpackInstallationStatusError {
+pub enum GetThirdPartySoundpackInstallationStatusCommandError {
   #[error("failed to get soundpack installation status: {0}")]
   GetStatus(#[from] GetThirdPartySoundpackInstallationStatusError),
 }
@@ -154,7 +154,7 @@ pub async fn get_third_party_soundpack_installation_status_command(
   repository: State<'_, SqliteInstalledSoundpacksRepository>,
 ) -> Result<
   SoundpackInstallationStatus,
-  GetThirdPartySoundpackInstallationStatusError,
+  GetThirdPartySoundpackInstallationStatusCommandError,
 > {
   let status = get_third_party_soundpack_installation_status(
     &id,

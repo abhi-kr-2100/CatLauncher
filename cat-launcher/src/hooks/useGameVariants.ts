@@ -3,6 +3,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
@@ -11,7 +12,6 @@ import {
   updateGameVariantOrder,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect, useRef } from "react";
 
 interface UseGameVariantsOptions {
   onOrderUpdateError?: (error: unknown) => void;
