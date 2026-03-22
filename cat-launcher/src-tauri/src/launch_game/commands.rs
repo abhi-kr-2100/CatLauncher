@@ -18,7 +18,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum LaunchGameCommandError {
+pub enum LaunchGameError {
   #[error("failed to launch game: {0}")]
   LaunchGame(#[from] LaunchGameError),
 
@@ -42,7 +42,7 @@ pub async fn launch_game(
   releases_repository: State<'_, SqliteReleasesRepository>,
   backup_repository: State<'_, SqliteBackupRepository>,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<(), LaunchGameCommandError> {
+) -> Result<(), LaunchGameError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
 

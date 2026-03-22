@@ -66,7 +66,7 @@ pub async fn fetch_releases_for_variant(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum FetchReleaseNotesCommandError {
+pub enum FetchReleaseNotesError {
   #[error("failed to fetch release notes: {0}")]
   Fetch(#[from] FetchReleaseNotesError),
 }
@@ -77,7 +77,7 @@ pub async fn fetch_release_notes(
   release_id: String,
   releases_repository: State<'_, SqliteReleasesRepository>,
   client: State<'_, Client>,
-) -> Result<Option<String>, FetchReleaseNotesCommandError> {
+) -> Result<Option<String>, FetchReleaseNotesError> {
   let notes = variant
     .fetch_release_notes(&release_id, &client, &*releases_repository)
     .await?;

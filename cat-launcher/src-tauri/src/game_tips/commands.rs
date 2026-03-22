@@ -13,7 +13,7 @@ use crate::active_release::repository::sqlite_active_release_repository::SqliteA
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetTipsCommandError {
+pub enum GetTipsError {
   #[error("failed to get data directory: {0}")]
   DataDir(#[from] tauri::Error),
 
@@ -30,7 +30,7 @@ pub async fn get_tips(
   variant: GameVariant,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
   releases_repository: State<'_, SqliteReleasesRepository>,
-) -> Result<Vec<String>, GetTipsCommandError> {
+) -> Result<Vec<String>, GetTipsError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let os = get_os_enum(std::env::consts::OS)?;
 

@@ -23,7 +23,7 @@ pub enum GetPlayTimeCommandError {
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum LogPlayTimeCommandError {
+pub enum LogPlayTimeError {
   #[error("Failed to log play time: {0}")]
   Repository(#[from] PlayTimeRepositoryError),
 }
@@ -59,7 +59,7 @@ pub async fn log_play_time(
   version: String,
   duration_in_seconds: i64,
   repository: State<'_, SqlitePlayTimeRepository>,
-) -> Result<(), LogPlayTimeCommandError> {
+) -> Result<(), LogPlayTimeError> {
   log_play_time_feature(
     &variant,
     &version,

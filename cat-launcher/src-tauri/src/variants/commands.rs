@@ -10,7 +10,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UpdateGameVariantOrderCommandError {
+pub enum UpdateGameVariantOrderError {
   #[error("failed to update game variant order: {0}")]
   Update(#[from] UpdateGameVariantOrderError),
 }
@@ -22,7 +22,7 @@ pub async fn update_game_variant_order(
     '_,
     SqliteGameVariantOrderRepository,
   >,
-) -> Result<(), UpdateGameVariantOrderCommandError> {
+) -> Result<(), UpdateGameVariantOrderError> {
   update_game_variant_order::update_game_variant_order(
     &variants,
     &*game_variant_order_repository,
@@ -35,7 +35,7 @@ pub async fn update_game_variant_order(
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetGameVariantsInfoCommandError {
+pub enum GetGameVariantsInfoError {
   #[error("failed to get game variant order: {0}")]
   Get(#[from] GetGameVariantsInfoError),
 }
@@ -46,7 +46,7 @@ pub async fn get_game_variants_info(
     '_,
     SqliteGameVariantOrderRepository,
   >,
-) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoCommandError> {
+) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoError> {
   let res = get_game_variants_info::get_game_variants_info(
     &*game_variant_order_repository,
   )

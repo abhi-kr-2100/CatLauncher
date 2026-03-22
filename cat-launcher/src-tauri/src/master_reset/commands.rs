@@ -15,7 +15,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum MasterResetCommandError {
+pub enum MasterResetError {
   #[error("failed to reset: {0}")]
   Reset(#[from] MasterResetError),
 
@@ -37,7 +37,7 @@ pub async fn master_reset(
     SqliteInstalledTilesetsRepository,
   >,
   settings_repository: State<'_, SqliteSettingsRepository>,
-) -> Result<(), MasterResetCommandError> {
+) -> Result<(), MasterResetError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
   master_reset_fn(

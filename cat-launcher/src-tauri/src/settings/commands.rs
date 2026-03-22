@@ -36,7 +36,7 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetColorThemesCommandError {
+pub enum GetColorThemesError {
   #[error("failed to get color themes: {0}")]
   Get(#[from] GetColorThemesError),
 
@@ -51,7 +51,7 @@ pub enum GetColorThemesCommandError {
 pub async fn get_color_themes(
   app_handle: AppHandle,
   active_release_repo: State<'_, SqliteActiveReleaseRepository>,
-) -> Result<Vec<ColorTheme>, GetColorThemesCommandError> {
+) -> Result<Vec<ColorTheme>, GetColorThemesError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
@@ -69,7 +69,7 @@ pub async fn get_color_themes(
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetSettingsCommandError {
+pub enum GetSettingsError {
   #[error("failed to get settings: {0}")]
   Get(#[from] GetSettingsError),
 }
@@ -77,7 +77,7 @@ pub enum GetSettingsCommandError {
 #[command]
 pub async fn get_settings(
   repository: State<'_, SqliteSettingsRepository>,
-) -> Result<Settings, GetSettingsCommandError> {
+) -> Result<Settings, GetSettingsError> {
   let settings = repository.get_settings().await?;
   Ok(settings)
 }
@@ -85,7 +85,7 @@ pub async fn get_settings(
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UpdateSettingsCommandError {
+pub enum UpdateSettingsError {
   #[error("failed to update settings: {0}")]
   Update(#[from] UpdateSettingsError),
 
@@ -98,7 +98,7 @@ pub async fn update_settings(
   app_handle: AppHandle,
   settings: Settings,
   repository: State<'_, SqliteSettingsRepository>,
-) -> Result<(), UpdateSettingsCommandError> {
+) -> Result<(), UpdateSettingsError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
   update_settings::update_settings(
