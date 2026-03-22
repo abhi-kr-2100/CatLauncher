@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { GameVariant } from "@/generated-types/GameVariant";
 import { deleteManualBackupById } from "@/lib/commands";
@@ -9,10 +10,17 @@ export function useDeleteManualBackup(
   variant: GameVariant,
   options: {
     onSuccess?: () => void;
-    onError?: (error: unknown) => void;
+    onError?: (error: Error) => void;
   } = {},
 ) {
   const queryClient = useQueryClient();
+  const onSuccessRef = useRef(options.onSuccess);
+  const onErrorRef = useRef(options.onError);
+
+  useEffect(() => {
+    onSuccessRef.current = options.onSuccess;
+    onErrorRef.current = options.onError;
+  }, [options.onSuccess, options.onError]);
 
   const { mutate } = useMutation({
     mutationFn: async (id: bigint) => {
@@ -39,14 +47,16 @@ export function useDeleteManualBackup(
         queryKeys.manualBackups(variant),
         context?.previousBackups,
       );
-      options.onError?.(err);
+      onErrorRef.current?.(err as Error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.manualBackups(variant),
       });
     },
-    onSuccess: options.onSuccess,
+    onSuccess: () => {
+      onSuccessRef.current?.();
+    },
   });
 
   return { deleteManualBackup: mutate };

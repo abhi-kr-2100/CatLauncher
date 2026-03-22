@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { getLastPlayedWorld } from "@/lib/commands";
@@ -13,6 +13,12 @@ export function useLastPlayedWorld(
     onError: (error: Error) => void;
   },
 ) {
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
   const { data: lastPlayedWorld, error: lastPlayedWorldError } =
     useQuery<string | null>({
       queryKey: queryKeys.lastPlayedWorld(variant),
@@ -21,10 +27,10 @@ export function useLastPlayedWorld(
     });
 
   useEffect(() => {
-    if (lastPlayedWorldError) {
-      onError(lastPlayedWorldError as Error);
+    if (lastPlayedWorldError && onErrorRef.current) {
+      onErrorRef.current(lastPlayedWorldError as Error);
     }
-  }, [lastPlayedWorldError, onError]);
+  }, [lastPlayedWorldError]);
 
   return { lastPlayedWorld };
 }

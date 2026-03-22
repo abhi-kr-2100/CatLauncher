@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { launchGame } from "@/lib/commands";
@@ -19,6 +20,11 @@ export function useLaunchGame(
 ) {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const { mutate: launch, isPending: isStartingGame } = useMutation({
     mutationFn: (releaseId: string | undefined) => {
@@ -40,8 +46,8 @@ export function useLaunchGame(
       );
     },
     onError: (e) => {
-      if (onError) {
-        onError(e as Error);
+      if (onErrorRef.current) {
+        onErrorRef.current(e as Error);
       } else {
         toastCL("error", "Failed to launch game.", e);
       }

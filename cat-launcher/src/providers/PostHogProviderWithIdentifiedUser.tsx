@@ -21,6 +21,7 @@ export default function PostHogProviderWithIdentifiedUser({
   const { data: userId } = useQuery({
     queryKey: queryKeys.userId(),
     queryFn: getUserId,
+    staleTime: Infinity,
   });
 
   if (!userId) {

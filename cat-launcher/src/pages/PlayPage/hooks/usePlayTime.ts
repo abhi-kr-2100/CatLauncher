@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -14,8 +14,15 @@ import { setupEventListener, toastCL } from "@/lib/utils";
 export function usePlayTime(
   variant: GameVariant,
   releaseId?: string,
+  onPlayTimeError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
+  const onPlayTimeErrorRef = useRef(onPlayTimeError);
+
+  useEffect(() => {
+    onPlayTimeErrorRef.current = onPlayTimeError;
+  }, [onPlayTimeError]);
+
   const { data: totalPlayTime, error: totalPlayTimeError } = useQuery(
     {
       queryKey: queryKeys.playTimeForVariant(variant),
@@ -39,21 +46,29 @@ export function usePlayTime(
 
   useEffect(() => {
     if (totalPlayTimeError) {
-      toastCL(
-        "error",
-        `Failed to get total play time for ${variant}.`,
-        totalPlayTimeError,
-      );
+      if (onPlayTimeErrorRef.current) {
+        onPlayTimeErrorRef.current(totalPlayTimeError as Error);
+      } else {
+        toastCL(
+          "error",
+          `Failed to get total play time for ${variant}.`,
+          totalPlayTimeError,
+        );
+      }
     }
   }, [totalPlayTimeError, variant]);
 
   useEffect(() => {
     if (versionPlayTimeError) {
-      toastCL(
-        "error",
-        `Failed to get version play time for ${variant}.`,
-        versionPlayTimeError,
-      );
+      if (onPlayTimeErrorRef.current) {
+        onPlayTimeErrorRef.current(versionPlayTimeError as Error);
+      } else {
+        toastCL(
+          "error",
+          `Failed to get version play time for ${variant}.`,
+          versionPlayTimeError,
+        );
+      }
     }
   }, [versionPlayTimeError, variant]);
 

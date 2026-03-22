@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   useMutation,
   useQuery,
@@ -28,6 +28,11 @@ export function applyThemeToDom(theme: Theme): void {
 
 export function useTheme(onError?: (error: unknown) => void) {
   const queryClient = useQueryClient();
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const { data: themePreference, error: fetchError } = useQuery({
     queryKey: queryKeys.themePreference(),
@@ -49,10 +54,10 @@ export function useTheme(onError?: (error: unknown) => void) {
   );
 
   useEffect(() => {
-    if (fetchError && onError) {
-      onError(fetchError);
+    if (fetchError && onErrorRef.current) {
+      onErrorRef.current(fetchError);
     }
-  }, [fetchError, onError]);
+  }, [fetchError]);
 
   useEffect(() => {
     applyThemeToDom(currentTheme);
@@ -74,8 +79,8 @@ export function useTheme(onError?: (error: unknown) => void) {
       // Don't revert the theme change even if the update fails.
       // Just call the error handler if provided
 
-      if (onError) {
-        onError(error);
+      if (onErrorRef.current) {
+        onErrorRef.current(error);
       }
     },
   });

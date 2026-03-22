@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -11,8 +12,14 @@ import { toastCL } from "@/lib/utils";
 export function useInstallAndMonitorRelease(
   variant: GameVariant,
   selectedReleaseId: string | undefined,
+  onInstallationError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
+  const onInstallationErrorRef = useRef(onInstallationError);
+
+  useEffect(() => {
+    onInstallationErrorRef.current = onInstallationError;
+  }, [onInstallationError]);
 
   const {
     install,
@@ -50,7 +57,11 @@ export function useInstallAndMonitorRelease(
       });
     },
     (e) => {
-      toastCL("error", "Failed to install release.", e);
+      if (onInstallationErrorRef.current) {
+        onInstallationErrorRef.current(e);
+      } else {
+        toastCL("error", "Failed to install release.", e);
+      }
     },
   );
 
