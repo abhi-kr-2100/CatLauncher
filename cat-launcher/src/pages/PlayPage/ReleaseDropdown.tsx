@@ -29,25 +29,27 @@ export default function ReleaseDropdown({
 }: ReleaseDropdownProps) {
   const { releases, isLoading: isReleasesLoading } = useReleases(
     variant,
-    (error) =>
-      toastCL(
-        "error",
-        `Failed to load releases for ${variant}.`,
-        error,
-      ),
-    (error) =>
-      toastCL(
-        "error",
-        `Failed to fetch releases for ${variant}.`,
-        error,
-      ),
+    {
+      onReleasesLoadError: (error: unknown) =>
+        toastCL(
+          "error",
+          `Failed to load releases for ${variant}.`,
+          error,
+        ),
+      onReleasesTriggerError: (error: unknown) =>
+        toastCL(
+          "error",
+          `Failed to fetch releases for ${variant}.`,
+          error,
+        ),
+    },
   );
 
   const {
     activeRelease,
     isActiveReleaseLoading,
     activeReleaseError,
-  } = useActiveRelease(variant, (error) => {
+  } = useActiveRelease(variant, (error: unknown) => {
     toastCL(
       "warning",
       `Failed to get active release of ${variant}.`,

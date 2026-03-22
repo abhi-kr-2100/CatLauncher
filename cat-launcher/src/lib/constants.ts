@@ -10,3 +10,16 @@ export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {
   ReleaseCandidate: "Release Candidate",
   Experimental: "Experimental",
 };
+
+/**
+ * UI strings that should be internationalized in the future.
+ */
+export const UI_STRINGS = {
+  VARIANT_SELECTOR: {
+    PLACEHOLDER: "Select a game variant",
+    LOADING: "Loading...",
+  },
+  SEARCH_INPUT: {
+    PLACEHOLDER: "Search...",
+  },
+} as const;

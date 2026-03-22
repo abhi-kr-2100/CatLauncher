@@ -42,10 +42,9 @@ use crate::manual_backups::commands::{
 };
 use crate::master_reset::commands::master_reset;
 use crate::mods::commands::{
-  get_last_activity_on_third_party_mod_command,
-  get_third_party_mod_installation_status_command,
-  install_third_party_mod_command, list_all_mods_command,
-  uninstall_third_party_mod_command,
+  get_last_activity_on_third_party_mod,
+  get_third_party_mod_installation_status, install_third_party_mod,
+  trigger_fetch_mods_for_variant, uninstall_third_party_mod,
 };
 use crate::play_time::commands::{
   get_play_time_for_variant, get_play_time_for_version, log_play_time,
@@ -55,17 +54,17 @@ use crate::settings::commands::{
   update_settings,
 };
 use crate::soundpacks::commands::{
-  get_third_party_soundpack_installation_status_command,
-  install_third_party_soundpack_command, list_all_soundpacks_command,
-  uninstall_third_party_soundpack_command,
+  get_third_party_soundpack_installation_status,
+  install_third_party_soundpack, list_all_soundpacks,
+  uninstall_third_party_soundpack,
 };
 use crate::theme::commands::{
   get_preferred_theme, set_preferred_theme,
 };
 use crate::tilesets::commands::{
-  get_third_party_tileset_installation_status_command,
-  install_third_party_tileset_command, list_all_tilesets_command,
-  uninstall_third_party_tileset_command,
+  get_third_party_tileset_installation_status,
+  install_third_party_tileset, list_all_tilesets,
+  uninstall_third_party_tileset,
 };
 use crate::users::commands::get_user_id;
 use crate::utils::{
@@ -123,19 +122,19 @@ pub fn run() {
       create_manual_backup_for_variant,
       delete_manual_backup_by_id,
       restore_manual_backup_by_id,
-      list_all_mods_command,
-      install_third_party_mod_command,
-      uninstall_third_party_mod_command,
-      get_third_party_mod_installation_status_command,
-      get_last_activity_on_third_party_mod_command,
-      list_all_tilesets_command,
-      install_third_party_tileset_command,
-      uninstall_third_party_tileset_command,
-      get_third_party_tileset_installation_status_command,
-      list_all_soundpacks_command,
-      install_third_party_soundpack_command,
-      uninstall_third_party_soundpack_command,
-      get_third_party_soundpack_installation_status_command,
+      trigger_fetch_mods_for_variant,
+      install_third_party_mod,
+      uninstall_third_party_mod,
+      get_third_party_mod_installation_status,
+      get_last_activity_on_third_party_mod,
+      list_all_tilesets,
+      install_third_party_tileset,
+      uninstall_third_party_tileset,
+      get_third_party_tileset_installation_status,
+      list_all_soundpacks,
+      install_third_party_soundpack,
+      uninstall_third_party_soundpack,
+      get_third_party_soundpack_installation_status,
       get_user_id,
       get_preferred_theme,
       set_preferred_theme,

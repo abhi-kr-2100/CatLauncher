@@ -13,16 +13,16 @@ interface ModsListProps {
 
 export default function ModsList({ variant }: ModsListProps) {
   const variantLabel = getVariantLabel(variant);
-  const { mods, isLoading } = useMods(
-    variant,
-    (err) => toastCL("error", "Failed to load mods.", err),
-    (err) =>
+  const { mods, isLoading } = useMods(variant, {
+    onModsLoadError: (err) =>
+      toastCL("error", "Failed to load mods.", err),
+    onModsTriggerError: (err) =>
       toastCL(
         "error",
         `Failed to fetch mods for ${variantLabel}.`,
         err,
       ),
-  );
+  });
 
   const {
     searchQuery,

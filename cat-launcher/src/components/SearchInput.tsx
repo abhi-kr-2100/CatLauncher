@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { UI_STRINGS } from "@/lib/constants";
 
 export interface SearchInputProps {
   value: string;
@@ -14,7 +15,7 @@ export interface SearchInputProps {
 export function SearchInput({
   value,
   onChange,
-  placeholder = "Search...",
+  placeholder = UI_STRINGS.SEARCH_INPUT.PLACEHOLDER,
   className,
   disabled,
 }: SearchInputProps) {

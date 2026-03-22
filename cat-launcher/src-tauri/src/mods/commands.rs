@@ -13,32 +13,32 @@ use crate::infra::download::Downloader;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::mods::get_last_activity_for_third_party_mod::{
-  get_last_activity_for_third_party_mod,
-  GetLastActivityForThirdPartyModError, LastModActivity,
+  get_last_activity_for_third_party_mod as get_last_activity_for_third_party_mod_impl,
+  GetLastActivityForThirdPartyModError as GetLastActivityForThirdPartyModBusinessError, LastModActivity,
 };
 use crate::mods::get_third_party_mod_installation_status::{
-  get_third_party_mod_installation_status,
-  GetThirdPartyModInstallationStatusError,
+  get_third_party_mod_installation_status as get_third_party_mod_installation_status_impl,
+  GetThirdPartyModInstallationStatusError as GetThirdPartyModInstallationStatusBusinessError,
 };
 use crate::mods::install_third_party_mod::{
-  install_third_party_mod, InstallThirdPartyModError,
+  install_third_party_mod as install_third_party_mod_impl, InstallThirdPartyModError as InstallThirdPartyModBusinessError,
 };
 use crate::mods::lib::OnlineModRepositoryRegistry;
-use crate::mods::list_all_mods::{list_all_mods, ListAllModsError};
+use crate::mods::list_all_mods::{list_all_mods as list_all_mods_impl, ListAllModsError as ListAllModsBusinessError};
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::mods::repository::sqlite_mods_repository::SqliteModsRepository;
 use crate::mods::types::{
   ModInstallationStatus, ModsUpdatePayload,
 };
 use crate::mods::uninstall_third_party_mod::{
-  uninstall_third_party_mod, UninstallThirdPartyModError,
+  uninstall_third_party_mod as uninstall_third_party_mod_impl, UninstallThirdPartyModError as UninstallThirdPartyModBusinessError,
 };
 use crate::variants::GameVariant;
 
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum ListAllModsCommandError {
+pub enum TriggerFetchModsForVariantError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -46,12 +46,12 @@ pub enum ListAllModsCommandError {
   OSInfo(#[from] OSNotSupportedError),
 
   #[error("failed to list mods: {0}")]
-  ListMods(#[from] ListAllModsError<tauri::Error>),
+  ListMods(#[from] ListAllModsBusinessError<tauri::Error>),
 }
 
 #[allow(clippy::too_many_arguments)]
 #[tauri::command]
-pub async fn list_all_mods_command(
+pub async fn trigger_fetch_mods_for_variant(
   variant: GameVariant,
   app: tauri::AppHandle,
   active_release_repository: State<'_, SqliteActiveReleaseRepository>,
@@ -61,7 +61,7 @@ pub async fn list_all_mods_command(
     OnlineModRepositoryRegistry,
   >,
   client: State<'_, Client>,
-) -> Result<(), ListAllModsCommandError> {
+) -> Result<(), TriggerFetchModsForVariantError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
 
@@ -72,7 +72,7 @@ pub async fn list_all_mods_command(
     Ok(())
   };
 
-  list_all_mods(
+  list_all_mods_impl(
     &variant,
     &data_dir,
     &resource_dir,
@@ -91,7 +91,7 @@ pub async fn list_all_mods_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum InstallThirdPartyModCommandError {
+pub enum InstallThirdPartyModError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -99,11 +99,11 @@ pub enum InstallThirdPartyModCommandError {
   OSInfo(#[from] OSNotSupportedError),
 
   #[error("failed to install mod: {0}")]
-  Install(#[from] InstallThirdPartyModError),
+  Install(#[from] InstallThirdPartyModBusinessError),
 }
 
 #[tauri::command]
-pub async fn install_third_party_mod_command(
+pub async fn install_third_party_mod(
   id: String,
   variant: GameVariant,
   channel: Channel,
@@ -111,7 +111,7 @@ pub async fn install_third_party_mod_command(
   downloader: State<'_, Downloader>,
   installed_mods_repository: State<'_, SqliteInstalledModsRepository>,
   mods_repository: State<'_, SqliteModsRepository>,
-) -> Result<(), InstallThirdPartyModCommandError> {
+) -> Result<(), InstallThirdPartyModError> {
   let data_dir = app.path().app_local_data_dir()?;
   let temp_dir = app.path().app_cache_dir()?;
 
@@ -119,7 +119,7 @@ pub async fn install_third_party_mod_command(
 
   let reporter = Arc::new(ChannelReporter::new(channel));
 
-  install_third_party_mod(
+  install_third_party_mod_impl(
     &id,
     &variant,
     &data_dir,
@@ -138,24 +138,24 @@ pub async fn install_third_party_mod_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum UninstallThirdPartyModCommandError {
+pub enum UninstallThirdPartyModError {
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
 
   #[error("failed to uninstall mod: {0}")]
-  Uninstall(#[from] UninstallThirdPartyModError),
+  Uninstall(#[from] UninstallThirdPartyModBusinessError),
 }
 
 #[tauri::command]
-pub async fn uninstall_third_party_mod_command(
+pub async fn uninstall_third_party_mod(
   id: String,
   variant: GameVariant,
   app: tauri::AppHandle,
   repository: State<'_, SqliteInstalledModsRepository>,
-) -> Result<(), UninstallThirdPartyModCommandError> {
+) -> Result<(), UninstallThirdPartyModError> {
   let data_dir = app.path().app_local_data_dir()?;
 
-  uninstall_third_party_mod(
+  uninstall_third_party_mod_impl(
     &id,
     &variant,
     &data_dir,
@@ -168,21 +168,21 @@ pub async fn uninstall_third_party_mod_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetThirdPartyModInstallationStatusCommandError {
+pub enum GetThirdPartyModInstallationStatusError {
   #[error("failed to get mod installation status: {0}")]
-  GetStatus(#[from] GetThirdPartyModInstallationStatusError),
+  GetStatus(#[from] GetThirdPartyModInstallationStatusBusinessError),
 }
 
 #[tauri::command]
-pub async fn get_third_party_mod_installation_status_command(
+pub async fn get_third_party_mod_installation_status(
   id: String,
   variant: GameVariant,
   repository: State<'_, SqliteInstalledModsRepository>,
 ) -> Result<
   ModInstallationStatus,
-  GetThirdPartyModInstallationStatusCommandError,
+  GetThirdPartyModInstallationStatusError,
 > {
-  let status = get_third_party_mod_installation_status(
+  let status = get_third_party_mod_installation_status_impl(
     &id,
     &variant,
     repository.inner(),
@@ -194,7 +194,7 @@ pub async fn get_third_party_mod_installation_status_command(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum GetLastActivityCommandError {
+pub enum GetLastActivityOnThirdPartyModError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
@@ -202,17 +202,17 @@ pub enum GetLastActivityCommandError {
   OSInfo(#[from] OSNotSupportedError),
 
   #[error("failed to get last activity: {0}")]
-  GetActivity(#[from] GetLastActivityForThirdPartyModError),
+  GetActivity(#[from] GetLastActivityForThirdPartyModBusinessError),
 }
 
 #[tauri::command]
-pub async fn get_last_activity_on_third_party_mod_command(
+pub async fn get_last_activity_on_third_party_mod(
   id: String,
   variant: GameVariant,
   client: State<'_, Client>,
   mods_repository: State<'_, SqliteModsRepository>,
-) -> Result<LastModActivity, GetLastActivityCommandError> {
-  let last_activity = get_last_activity_for_third_party_mod(
+) -> Result<LastModActivity, GetLastActivityOnThirdPartyModError> {
+  let last_activity = get_last_activity_for_third_party_mod_impl(
     &id,
     &variant,
     client.inner(),

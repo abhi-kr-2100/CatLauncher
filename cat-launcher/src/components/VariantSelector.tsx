@@ -4,6 +4,7 @@ import {
 } from "@/components/virtualized-combobox";
 import { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { GameVariant } from "@/generated-types/GameVariant";
+import { UI_STRINGS } from "@/lib/constants";
 
 interface VariantSelectorProps {
   gameVariants: GameVariantInfo[];
@@ -34,7 +35,9 @@ export default function VariantSelector({
       onChange={(value) => onVariantChange(value as GameVariant)}
       placeholder={
         placeholder ??
-        (isLoading ? "Loading..." : "Select a game variant")
+        (isLoading
+          ? UI_STRINGS.VARIANT_SELECTOR.LOADING
+          : UI_STRINGS.VARIANT_SELECTOR.PLACEHOLDER)
       }
       disabled={disabled || isLoading}
       autoselect={true}

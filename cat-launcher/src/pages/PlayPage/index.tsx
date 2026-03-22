@@ -29,6 +29,9 @@ function PlayPage() {
     onOrderUpdateError: (error) => {
       toastCL("error", "Failed to update game variants order", error);
     },
+    onFetchError: (error) => {
+      toastCL("error", "Failed to fetch game variants", error);
+    },
   });
 
   const sensors = useSensors(
@@ -54,11 +57,11 @@ function PlayPage() {
     }
   }
 
-  if (gameVariantsLoading) {
+  if (gameVariantsLoading && orderedItems.length === 0) {
     return <p>Loading...</p>;
   }
 
-  if (gameVariantsError) {
+  if (gameVariantsError && orderedItems.length === 0) {
     return (
       <p>Error: {gameVariantsErrorObj?.message ?? "Unknown error"}</p>
     );

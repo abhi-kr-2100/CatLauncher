@@ -90,19 +90,17 @@ const VirtualizedCommand = ({
       />
       <CommandList
         ref={parentRef}
+        className="w-full overflow-auto"
         style={{
           height: height,
-          width: "100%",
-          overflow: "auto",
         }}
       >
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
           <div
+            className="w-full relative"
             style={{
               height: `${virtualizer.getTotalSize()}px`,
-              width: "100%",
-              position: "relative",
             }}
           >
             {virtualOptions.map((virtualOption) => (

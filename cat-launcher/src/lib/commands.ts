@@ -312,7 +312,7 @@ export async function getUserId(): Promise<string> {
 export async function triggerFetchModsForVariant(
   variant: GameVariant,
 ): Promise<void> {
-  await invoke("list_all_mods_command", {
+  await invoke("trigger_fetch_mods_for_variant", {
     variant,
   });
 }
@@ -327,7 +327,7 @@ export async function installThirdPartyMod(
     onDownloadProgress(progress as DownloadProgress);
   };
 
-  await invoke("install_third_party_mod_command", {
+  await invoke("install_third_party_mod", {
     id: modId,
     variant,
     channel,
@@ -339,7 +339,7 @@ export async function getThirdPartyModInstallationStatus(
   variant: GameVariant,
 ): Promise<ModInstallationStatus> {
   const response = await invoke<ModInstallationStatus>(
-    "get_third_party_mod_installation_status_command",
+    "get_third_party_mod_installation_status",
     {
       id: modId,
       variant,
@@ -352,7 +352,7 @@ export async function uninstallThirdPartyMod(
   modId: string,
   variant: GameVariant,
 ): Promise<void> {
-  await invoke("uninstall_third_party_mod_command", {
+  await invoke("uninstall_third_party_mod", {
     id: modId,
     variant: variant,
   });
@@ -363,7 +363,7 @@ export async function getLastModActivity(
   variant: GameVariant,
 ): Promise<LastModActivity> {
   const response = await invoke<LastModActivity>(
-    "get_last_activity_on_third_party_mod_command",
+    "get_last_activity_on_third_party_mod",
     {
       id: modId,
       variant,
@@ -375,12 +375,9 @@ export async function getLastModActivity(
 export async function listAllTilesets(
   variant: GameVariant,
 ): Promise<Tileset[]> {
-  const response = await invoke<Tileset[]>(
-    "list_all_tilesets_command",
-    {
-      variant,
-    },
-  );
+  const response = await invoke<Tileset[]>("list_all_tilesets", {
+    variant,
+  });
   return response;
 }
 
@@ -394,7 +391,7 @@ export async function installThirdPartyTileset(
     onDownloadProgress(progress as DownloadProgress);
   };
 
-  await invoke("install_third_party_tileset_command", {
+  await invoke("install_third_party_tileset", {
     id: tilesetId,
     variant,
     channel,
@@ -406,7 +403,7 @@ export async function getThirdPartyTilesetInstallationStatus(
   variant: GameVariant,
 ): Promise<TilesetInstallationStatus> {
   const response = await invoke<TilesetInstallationStatus>(
-    "get_third_party_tileset_installation_status_command",
+    "get_third_party_tileset_installation_status",
     {
       id: tilesetId,
       variant,
@@ -419,7 +416,7 @@ export async function uninstallThirdPartyTileset(
   tilesetId: string,
   variant: GameVariant,
 ): Promise<void> {
-  await invoke("uninstall_third_party_tileset_command", {
+  await invoke("uninstall_third_party_tileset", {
     id: tilesetId,
     variant: variant,
   });
@@ -428,12 +425,9 @@ export async function uninstallThirdPartyTileset(
 export async function listAllSoundpacks(
   variant: GameVariant,
 ): Promise<Soundpack[]> {
-  const response = await invoke<Soundpack[]>(
-    "list_all_soundpacks_command",
-    {
-      variant,
-    },
-  );
+  const response = await invoke<Soundpack[]>("list_all_soundpacks", {
+    variant,
+  });
   return response;
 }
 
@@ -447,7 +441,7 @@ export async function installThirdPartySoundpack(
     onDownloadProgress(progress as DownloadProgress);
   };
 
-  await invoke("install_third_party_soundpack_command", {
+  await invoke("install_third_party_soundpack", {
     id: soundpackId,
     variant,
     channel,
@@ -459,7 +453,7 @@ export async function getThirdPartySoundpackInstallationStatus(
   variant: GameVariant,
 ): Promise<SoundpackInstallationStatus> {
   const response = await invoke<SoundpackInstallationStatus>(
-    "get_third_party_soundpack_installation_status_command",
+    "get_third_party_soundpack_installation_status",
     {
       id: soundpackId,
       variant,
@@ -472,7 +466,7 @@ export async function uninstallThirdPartySoundpack(
   soundpackId: string,
   variant: GameVariant,
 ): Promise<void> {
-  await invoke("uninstall_third_party_soundpack_command", {
+  await invoke("uninstall_third_party_soundpack", {
     id: soundpackId,
     variant: variant,
   });

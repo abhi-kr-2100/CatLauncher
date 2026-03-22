@@ -17,10 +17,14 @@ import { setupEventListener } from "@/lib/utils";
 
 export type ModFetchStatus = "idle" | "loading" | "success" | "error";
 
+export interface UseModsOptions {
+  onModsLoadError?: (error: unknown) => void;
+  onModsTriggerError?: (error: unknown) => void;
+}
+
 export function useMods(
   variant: GameVariant,
-  onModsLoadError?: (error: unknown) => void,
-  onModsTriggerError?: (error: unknown) => void,
+  { onModsLoadError, onModsTriggerError }: UseModsOptions = {},
 ) {
   const queryClient = useQueryClient();
   const onModsLoadErrorRef = useRef(onModsLoadError);
@@ -30,11 +34,8 @@ export function useMods(
 
   useEffect(() => {
     onModsLoadErrorRef.current = onModsLoadError;
-  }, [onModsLoadError]);
-
-  useEffect(() => {
     onModsTriggerErrorRef.current = onModsTriggerError;
-  }, [onModsTriggerError]);
+  }, [onModsLoadError, onModsTriggerError]);
 
   useEffect(() => {
     const modsUpdateHandler = (payload: ModsUpdatePayload) => {
@@ -93,9 +94,7 @@ export function useMods(
     },
     onError: (error: unknown) => {
       setFetchStatus("error");
-      if (onModsTriggerErrorRef.current) {
-        onModsTriggerErrorRef.current(error);
-      }
+      onModsTriggerErrorRef.current?.(error);
     },
   });
 
@@ -112,5 +111,6 @@ export function useMods(
     isLoading:
       (fetchStatus === "loading" || isModsTriggerLoading) &&
       mods.length === 0,
+    error: modsError,
   };
 }

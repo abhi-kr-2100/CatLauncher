@@ -21,10 +21,17 @@ export type ReleaseFetchStatus =
   | "success"
   | "error";
 
+export interface UseReleasesOptions {
+  onReleasesLoadError?: (error: unknown) => void;
+  onReleasesTriggerError?: (error: unknown) => void;
+}
+
 export function useReleases(
   variant: GameVariant,
-  onReleasesLoadError?: (error: unknown) => void,
-  onReleasesTriggerError?: (error: unknown) => void,
+  {
+    onReleasesLoadError,
+    onReleasesTriggerError,
+  }: UseReleasesOptions = {},
 ) {
   const queryClient = useQueryClient();
   const onReleasesLoadErrorRef = useRef(onReleasesLoadError);
@@ -34,11 +41,8 @@ export function useReleases(
 
   useEffect(() => {
     onReleasesLoadErrorRef.current = onReleasesLoadError;
-  }, [onReleasesLoadError]);
-
-  useEffect(() => {
     onReleasesTriggerErrorRef.current = onReleasesTriggerError;
-  }, [onReleasesTriggerError]);
+  }, [onReleasesLoadError, onReleasesTriggerError]);
 
   useEffect(() => {
     const releasesUpdateHandler = (
@@ -112,9 +116,7 @@ export function useReleases(
     },
     onError: (error: unknown) => {
       setFetchStatus("error");
-      if (onReleasesTriggerErrorRef.current) {
-        onReleasesTriggerErrorRef.current(error);
-      }
+      onReleasesTriggerErrorRef.current?.(error);
     },
   });
 
@@ -132,5 +134,6 @@ export function useReleases(
     isLoading:
       (fetchStatus === "loading" || isReleasesTriggerLoading) &&
       releases.length === 0,
+    error: releasesError,
   };
 }
