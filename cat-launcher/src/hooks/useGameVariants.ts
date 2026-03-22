@@ -11,7 +11,7 @@ import {
   updateGameVariantOrder,
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface UseGameVariantsOptions {
   onOrderUpdateError?: (error: unknown) => void;
@@ -23,6 +23,16 @@ export function useGameVariants({
   onFetchError,
 }: UseGameVariantsOptions = {}) {
   const queryClient = useQueryClient();
+  const onFetchErrorRef = useRef(onFetchError);
+  const onOrderUpdateErrorRef = useRef(onOrderUpdateError);
+
+  useEffect(() => {
+    onFetchErrorRef.current = onFetchError;
+  }, [onFetchError]);
+
+  useEffect(() => {
+    onOrderUpdateErrorRef.current = onOrderUpdateError;
+  }, [onOrderUpdateError]);
 
   const {
     data: gameVariants = [],
@@ -35,10 +45,10 @@ export function useGameVariants({
   });
 
   useEffect(() => {
-    if (isError) {
-      onFetchError?.(error);
+    if (isError && onFetchErrorRef.current) {
+      onFetchErrorRef.current(error);
     }
-  }, [isError, error, onFetchError]);
+  }, [isError, error]);
 
   const { mutate } = useMutation({
     mutationFn: ({
@@ -70,7 +80,7 @@ export function useGameVariants({
           context.previousGameVariants,
         );
       }
-      onOrderUpdateError?.(error);
+      onOrderUpdateErrorRef.current?.(error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({

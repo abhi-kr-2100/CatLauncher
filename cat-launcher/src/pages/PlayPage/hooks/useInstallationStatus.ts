@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -10,7 +10,16 @@ import { toastCL } from "@/lib/utils";
 export function useInstallationStatus(
   variant: GameVariant,
   selectedReleaseId: string | undefined,
+  onInstallationStatusError?: (error: unknown) => void,
 ) {
+  const onInstallationStatusErrorRef = useRef(
+    onInstallationStatusError,
+  );
+
+  useEffect(() => {
+    onInstallationStatusErrorRef.current = onInstallationStatusError;
+  }, [onInstallationStatusError]);
+
   const { data: installationStatus, error: installationStatusError } =
     useQuery<GameReleaseStatus>({
       queryKey: queryKeys.installationStatus(
@@ -24,15 +33,17 @@ export function useInstallationStatus(
     });
 
   useEffect(() => {
-    if (!installationStatusError) {
-      return;
+    if (installationStatusError) {
+      if (onInstallationStatusErrorRef.current) {
+        onInstallationStatusErrorRef.current(installationStatusError);
+      } else {
+        toastCL(
+          "error",
+          `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
+          installationStatusError,
+        );
+      }
     }
-
-    toastCL(
-      "error",
-      `Failed to get installation status of ${variant} ${selectedReleaseId}.`,
-      installationStatusError,
-    );
   }, [installationStatusError, variant, selectedReleaseId]);
 
   return {

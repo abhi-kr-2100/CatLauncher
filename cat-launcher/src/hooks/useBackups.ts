@@ -3,8 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { GameVariant } from "@/generated-types/GameVariant";
 import { listBackupsForVariant } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
+import { useEffect, useRef } from "react";
 
-export function useBackups(variant: GameVariant) {
+export function useBackups(
+  variant: GameVariant,
+  onBackupsLoadError?: (error: unknown) => void,
+) {
+  const onBackupsLoadErrorRef = useRef(onBackupsLoadError);
+
+  useEffect(() => {
+    onBackupsLoadErrorRef.current = onBackupsLoadError;
+  }, [onBackupsLoadError]);
+
   const {
     data: backups = [],
     isLoading,
@@ -14,6 +24,12 @@ export function useBackups(variant: GameVariant) {
     queryKey: queryKeys.backups(variant),
     queryFn: () => listBackupsForVariant(variant),
   });
+
+  useEffect(() => {
+    if (isError && onBackupsLoadErrorRef.current) {
+      onBackupsLoadErrorRef.current(error);
+    }
+  }, [isError, error]);
 
   return {
     backups,
