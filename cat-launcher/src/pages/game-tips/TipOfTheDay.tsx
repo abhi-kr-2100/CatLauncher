@@ -35,24 +35,24 @@ interface TipOfTheDayProps {
 }
 
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
-  const { data, status } = useGetTips(variant);
+  const { tips, isLoading } = useGetTips(variant);
 
   const [randomIndex, setRandomIndex] = useState(0);
 
-  const tips = useMemo(() => {
-    if (status !== "success" || data.length === 0) {
+  const displayTips = useMemo(() => {
+    if (isLoading || tips.length === 0) {
       return [];
     }
-    return data;
-  }, [data, status]);
+    return tips;
+  }, [tips, isLoading]);
 
   const shuffleTips = useCallback(() => {
-    if (tips.length === 0) {
+    if (displayTips.length === 0) {
       return;
     }
 
-    setRandomIndex(randomInt(tips.length));
-  }, [tips]);
+    setRandomIndex(randomInt(displayTips.length));
+  }, [displayTips]);
 
   useEffect(() => {
     // auto shuffle every 10 seconds
@@ -67,7 +67,11 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
 
   return (
     <TipOfTheDayContent
-      tip={tips.length === 0 ? NO_TIPS_AVAILABLE : tips[randomIndex]}
+      tip={
+        displayTips.length === 0
+          ? NO_TIPS_AVAILABLE
+          : displayTips[randomIndex]
+      }
     />
   );
 }
