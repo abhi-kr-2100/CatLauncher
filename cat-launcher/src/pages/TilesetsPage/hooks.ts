@@ -14,7 +14,6 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
-import { useEffect, useRef } from "react";
 
 export function useInstallAndMonitorThirdPartyTileset(
   variant: GameVariant,
@@ -23,16 +22,6 @@ export function useInstallAndMonitorThirdPartyTileset(
   onError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
-  const onSuccessRef = useRef(onSuccess);
-  const onErrorRef = useRef(onError);
-
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-  }, [onSuccess]);
-
-  useEffect(() => {
-    onErrorRef.current = onError;
-  }, [onError]);
 
   const {
     install,
@@ -49,10 +38,10 @@ export function useInstallAndMonitorThirdPartyTileset(
         queryKeys.tilesets.installationStatus(variant, id),
         "Installed",
       );
-      onSuccessRef.current?.();
+      onSuccess?.();
     },
     (error: Error) => {
-      onErrorRef.current?.(error);
+      onError?.(error);
     },
   );
 
@@ -67,16 +56,7 @@ export function useInstallAndMonitorThirdPartyTileset(
 export function useGetThirdPartyTilesetInstallationStatus(
   tilesetId: string,
   variant: GameVariant,
-  onInstallationStatusError?: (error: unknown) => void,
 ) {
-  const onInstallationStatusErrorRef = useRef(
-    onInstallationStatusError,
-  );
-
-  useEffect(() => {
-    onInstallationStatusErrorRef.current = onInstallationStatusError;
-  }, [onInstallationStatusError]);
-
   const query = useQuery({
     queryKey: queryKeys.tilesets.installationStatus(
       variant,
@@ -85,12 +65,6 @@ export function useGetThirdPartyTilesetInstallationStatus(
     queryFn: () =>
       getThirdPartyTilesetInstallationStatus(tilesetId, variant),
   });
-
-  useEffect(() => {
-    if (query.error && onInstallationStatusErrorRef.current) {
-      onInstallationStatusErrorRef.current(query.error);
-    }
-  }, [query.error]);
 
   return {
     installationStatus: query.data,
@@ -104,16 +78,6 @@ export function useUninstallThirdPartyTileset(
   onError?: (error: unknown) => void,
 ) {
   const queryClient = useQueryClient();
-  const onSuccessRef = useRef(onSuccess);
-  const onErrorRef = useRef(onError);
-
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-  }, [onSuccess]);
-
-  useEffect(() => {
-    onErrorRef.current = onError;
-  }, [onError]);
 
   const mutation = useMutation({
     mutationFn: (tilesetId: string) =>
@@ -128,11 +92,9 @@ export function useUninstallThirdPartyTileset(
           tilesetId,
         ),
       });
-      onSuccessRef.current?.();
+      onSuccess?.();
     },
-    onError: (error) => {
-      onErrorRef.current?.(error);
-    },
+    onError,
   });
 
   return {
@@ -141,26 +103,11 @@ export function useUninstallThirdPartyTileset(
   };
 }
 
-export function useListAllTilesets(
-  variant: GameVariant,
-  onTilesetsLoadError?: (error: unknown) => void,
-) {
-  const onTilesetsLoadErrorRef = useRef(onTilesetsLoadError);
-
-  useEffect(() => {
-    onTilesetsLoadErrorRef.current = onTilesetsLoadError;
-  }, [onTilesetsLoadError]);
-
+export function useListAllTilesets(variant: GameVariant) {
   const query = useQuery({
     queryKey: queryKeys.tilesets.listAll(variant),
     queryFn: () => listAllTilesets(variant),
   });
-
-  useEffect(() => {
-    if (query.error && onTilesetsLoadErrorRef.current) {
-      onTilesetsLoadErrorRef.current(query.error);
-    }
-  }, [query.error]);
 
   return {
     tilesets: query.data,

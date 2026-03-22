@@ -24,7 +24,7 @@ export function useColorThemes(
 
   useEffect(() => {
     if (error && onThemesErrorRef.current) {
-      onThemesErrorRef.current(error);
+      onThemesErrorRef.current(error as Error);
     }
   }, [error]);
 
