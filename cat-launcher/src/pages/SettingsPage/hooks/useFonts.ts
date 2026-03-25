@@ -22,7 +22,7 @@ export function useFonts(onFontsError?: (error: Error) => void) {
 
   useEffect(() => {
     if (error && onFontsErrorRef.current) {
-      onFontsErrorRef.current(error);
+      onFontsErrorRef.current(error as Error);
     }
   }, [error]);
 

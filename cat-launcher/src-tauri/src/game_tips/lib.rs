@@ -1,3 +1,4 @@
+use tauri::Manager;
 use thiserror::Error;
 
 use crate::active_release::repository::{
@@ -14,7 +15,7 @@ use crate::game_release::game_release::{
 };
 use crate::game_release::utils::gh_release_to_game_release;
 use crate::game_tips::types::Tip;
-use crate::infra::utils::OS;
+use crate::infra::utils::{get_os_enum, OSNotSupportedError, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
@@ -37,6 +38,12 @@ pub enum GetAllTipsForVariantError {
 
   #[error("failed to get cached releases: {0}")]
   GetCachedReleases(#[from] ReleasesRepositoryError),
+
+  #[error("unsupported OS: {0}")]
+  UnsupportedOS(#[from] OSNotSupportedError),
+
+  #[error("failed to get data directory: {0}")]
+  DataDir(#[from] tauri::Error),
 }
 
 async fn get_tips_from_version(
@@ -69,20 +76,22 @@ async fn get_tips_from_version(
 }
 
 pub async fn get_all_tips_for_variant(
+  app_handle: &tauri::AppHandle,
   variant: &GameVariant,
-  data_dir: &std::path::Path,
-  os: &OS,
   active_release_repository: &(dyn ActiveReleaseRepository
       + Send
       + Sync),
   releases_repository: &(dyn ReleasesRepository + Send + Sync),
 ) -> Result<Vec<String>, GetAllTipsForVariantError> {
+  let data_dir = app_handle.path().app_local_data_dir()?;
+  let os = get_os_enum(std::env::consts::OS)?;
+
   if let Some(active_release) = active_release_repository
     .get_active_release(variant)
     .await?
   {
     let tips =
-      get_tips_from_version(variant, &active_release, data_dir, os)
+      get_tips_from_version(variant, &active_release, &data_dir, &os)
         .await?;
     return Ok(tips);
   }
@@ -95,14 +104,14 @@ pub async fn get_all_tips_for_variant(
     .collect();
 
   for release in releases {
-    if release.get_installation_status(os, data_dir).await?
+    if release.get_installation_status(&os, &data_dir).await?
       == GameReleaseStatus::ReadyToPlay
     {
       let tips = get_tips_from_version(
         variant,
         &release.version,
-        data_dir,
-        os,
+        &data_dir,
+        &os,
       )
       .await?;
       return Ok(tips);

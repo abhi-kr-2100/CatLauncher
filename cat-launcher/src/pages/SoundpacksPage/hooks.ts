@@ -3,6 +3,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -56,7 +57,14 @@ export function useInstallThirdPartySoundpack(
 export function useGetThirdPartySoundpackInstallationStatus(
   soundpackId: string,
   variant: GameVariant,
+  onLoadError?: (error: Error) => void,
 ) {
+  const onLoadErrorRef = useRef(onLoadError);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
+
   const query = useQuery({
     queryKey: queryKeys.soundpacks.installationStatus(
       variant,
@@ -66,18 +74,29 @@ export function useGetThirdPartySoundpackInstallationStatus(
       getThirdPartySoundpackInstallationStatus(soundpackId, variant),
   });
 
+  useEffect(() => {
+    if (query.error && onLoadErrorRef.current) {
+      onLoadErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
+
   return {
+    ...query,
     installationStatus: query.data,
-    isLoading: query.isLoading,
   };
 }
 
 export function useUninstallThirdPartySoundpack(
   variant: GameVariant,
   onSuccess?: () => void,
-  onError?: (error: unknown) => void,
+  onError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const mutation = useMutation({
     mutationFn: (soundpackId: string) =>
@@ -94,7 +113,11 @@ export function useUninstallThirdPartySoundpack(
       });
       onSuccess?.();
     },
-    onError,
+    onError: (error) => {
+      if (onErrorRef.current) {
+        onErrorRef.current(error as Error);
+      }
+    },
   });
 
   return {
@@ -103,15 +126,29 @@ export function useUninstallThirdPartySoundpack(
   };
 }
 
-export function useListAllSoundpacks(variant: GameVariant) {
+export function useListAllSoundpacks(
+  variant: GameVariant,
+  onLoadError?: (error: Error) => void,
+) {
+  const onLoadErrorRef = useRef(onLoadError);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
+
   const query = useQuery({
     queryKey: queryKeys.soundpacks.listAll(variant),
     queryFn: () => listAllSoundpacks(variant),
   });
 
+  useEffect(() => {
+    if (query.error && onLoadErrorRef.current) {
+      onLoadErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
+
   return {
+    ...query,
     soundpacks: query.data,
-    isLoading: query.isLoading,
-    error: query.error,
   };
 }

@@ -3,6 +3,7 @@ import {
   useQueryClient,
   useMutation,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
 import { useInstallAndMonitor } from "@/hooks/useInstallAndMonitor";
 import type { GameVariant } from "@/generated-types/GameVariant";
@@ -56,7 +57,14 @@ export function useInstallAndMonitorThirdPartyTileset(
 export function useGetThirdPartyTilesetInstallationStatus(
   tilesetId: string,
   variant: GameVariant,
+  onLoadError?: (error: Error) => void,
 ) {
+  const onLoadErrorRef = useRef(onLoadError);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
+
   const query = useQuery({
     queryKey: queryKeys.tilesets.installationStatus(
       variant,
@@ -66,18 +74,29 @@ export function useGetThirdPartyTilesetInstallationStatus(
       getThirdPartyTilesetInstallationStatus(tilesetId, variant),
   });
 
+  useEffect(() => {
+    if (query.error && onLoadErrorRef.current) {
+      onLoadErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
+
   return {
+    ...query,
     installationStatus: query.data,
-    isLoading: query.isLoading,
   };
 }
 
 export function useUninstallThirdPartyTileset(
   variant: GameVariant,
   onSuccess?: () => void,
-  onError?: (error: unknown) => void,
+  onError?: (error: Error) => void,
 ) {
   const queryClient = useQueryClient();
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   const mutation = useMutation({
     mutationFn: (tilesetId: string) =>
@@ -94,7 +113,11 @@ export function useUninstallThirdPartyTileset(
       });
       onSuccess?.();
     },
-    onError,
+    onError: (error) => {
+      if (onErrorRef.current) {
+        onErrorRef.current(error as Error);
+      }
+    },
   });
 
   return {
@@ -103,15 +126,29 @@ export function useUninstallThirdPartyTileset(
   };
 }
 
-export function useListAllTilesets(variant: GameVariant) {
+export function useListAllTilesets(
+  variant: GameVariant,
+  onLoadError?: (error: Error) => void,
+) {
+  const onLoadErrorRef = useRef(onLoadError);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
+
   const query = useQuery({
     queryKey: queryKeys.tilesets.listAll(variant),
     queryFn: () => listAllTilesets(variant),
   });
 
+  useEffect(() => {
+    if (query.error && onLoadErrorRef.current) {
+      onLoadErrorRef.current(query.error as Error);
+    }
+  }, [query.error]);
+
   return {
+    ...query,
     tilesets: query.data,
-    isLoading: query.isLoading,
-    error: query.error,
   };
 }

@@ -7,7 +7,8 @@ use tauri::{command, AppHandle, Emitter, Manager, State};
 use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::fetch_releases::{
-  FetchReleaseNotesError, FetchReleasesError, ReleasesUpdatePayload,
+  FetchReleaseNotesInternalError, FetchReleasesError,
+  ReleasesUpdatePayload,
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{
@@ -19,7 +20,7 @@ use crate::variants::GameVariant;
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum FetchReleasesCommandError {
+pub enum FetchReleasesForVariantError {
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
 
@@ -39,7 +40,7 @@ pub async fn fetch_releases_for_variant(
   variant: GameVariant,
   releases_repository: State<'_, SqliteReleasesRepository>,
   client: State<'_, Client>,
-) -> Result<(), FetchReleasesCommandError> {
+) -> Result<(), FetchReleasesForVariantError> {
   let resources_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
   let arch = get_arch_enum(ARCH)?;
@@ -66,9 +67,9 @@ pub async fn fetch_releases_for_variant(
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
-pub enum FetchReleaseNotesCommandError {
+pub enum FetchReleaseNotesError {
   #[error("failed to fetch release notes: {0}")]
-  Fetch(#[from] FetchReleaseNotesError),
+  Fetch(#[from] FetchReleaseNotesInternalError),
 }
 
 #[command]
@@ -77,7 +78,7 @@ pub async fn fetch_release_notes(
   release_id: String,
   releases_repository: State<'_, SqliteReleasesRepository>,
   client: State<'_, Client>,
-) -> Result<Option<String>, FetchReleaseNotesCommandError> {
+) -> Result<Option<String>, FetchReleaseNotesError> {
   let notes = variant
     .fetch_release_notes(&release_id, &client, &*releases_repository)
     .await?;

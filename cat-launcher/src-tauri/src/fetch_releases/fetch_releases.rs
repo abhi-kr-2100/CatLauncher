@@ -48,7 +48,7 @@ pub enum ReleasesUpdateStatus {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum FetchReleaseNotesError {
+pub enum FetchReleaseNotesInternalError {
   #[error("failed to get release from github: {0}")]
   Fetch(#[from] FetchGitHubReleaseByTagError),
 
@@ -124,7 +124,7 @@ impl GameVariant {
     release_id: &str,
     client: &Client,
     releases_repository: &dyn ReleasesRepository,
-  ) -> Result<Option<String>, FetchReleaseNotesError> {
+  ) -> Result<Option<String>, FetchReleaseNotesInternalError> {
     let cached_release = releases_repository
       .get_cached_release_by_tag(self, release_id)
       .await?;

@@ -35,16 +35,16 @@ interface TipOfTheDayProps {
 }
 
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
-  const { data, status } = useGetTips(variant);
+  const { data, error, status } = useGetTips(variant);
 
   const [randomIndex, setRandomIndex] = useState(0);
 
   const tips = useMemo(() => {
-    if (status !== "success" || data.length === 0) {
+    if (error || status !== "success" || !data || data.length === 0) {
       return [];
     }
     return data;
-  }, [data, status]);
+  }, [data, error, status]);
 
   const shuffleTips = useCallback(() => {
     if (tips.length === 0) {

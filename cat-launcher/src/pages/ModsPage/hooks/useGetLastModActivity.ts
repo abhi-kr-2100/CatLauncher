@@ -9,7 +9,7 @@ export function useGetLastModActivity(
   enabled: boolean,
   modId: string,
   variant: GameVariant,
-  onError?: (error: unknown) => void,
+  onError?: (error: Error) => void,
 ) {
   const onErrorRef = useRef(onError);
 
@@ -25,7 +25,7 @@ export function useGetLastModActivity(
 
   useEffect(() => {
     if (query.error && onErrorRef.current) {
-      onErrorRef.current(query.error);
+      onErrorRef.current(query.error as Error);
     }
   }, [query.error]);
 
