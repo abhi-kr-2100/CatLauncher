@@ -25,6 +25,7 @@ export interface BaseRoute {
   label: string;
   icon: LucideIcon;
   layout?: "sidebar" | "default";
+  hidden?: boolean;
 }
 
 export const routes: BaseRoute[] = [
@@ -47,6 +48,7 @@ export const routes: BaseRoute[] = [
     label: "Tools",
     icon: Wrench,
     layout: "sidebar",
+    hidden: true,
   },
   {
     path: "/backups",

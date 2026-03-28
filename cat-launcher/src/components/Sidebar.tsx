@@ -9,6 +9,7 @@ export interface SidebarItem {
   path: string;
   label: string;
   icon: LucideIcon;
+  hidden?: boolean;
 }
 
 export interface SidebarProps {
@@ -91,14 +92,16 @@ export function Sidebar({
 
       <nav className="flex-1 overflow-y-auto p-2">
         <div className="flex flex-col gap-2">
-          {items.map((item) => (
-            <SidebarNavItem
-              key={item.path}
-              item={item}
-              isCollapsed={isCollapsed}
-              basePath={basePath}
-            />
-          ))}
+          {items
+            .filter((item) => !item.hidden)
+            .map((item) => (
+              <SidebarNavItem
+                key={item.path}
+                item={item}
+                isCollapsed={isCollapsed}
+                basePath={basePath}
+              />
+            ))}
         </div>
       </nav>
     </aside>
