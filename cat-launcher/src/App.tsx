@@ -14,7 +14,15 @@ function App() {
               <Route
                 key={route.path}
                 path={route.path}
-                element={route.element}
+                element={
+                  route.layout === "sidebar" ? (
+                    route.element
+                  ) : (
+                    <div className="flex-1 overflow-y-auto p-2 flex flex-col">
+                      {route.element}
+                    </div>
+                  )
+                }
               />
             ))}
           </Routes>
