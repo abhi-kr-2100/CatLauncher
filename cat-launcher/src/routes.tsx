@@ -24,6 +24,7 @@ export interface BaseRoute {
   element: ReactNode;
   label: string;
   icon: LucideIcon;
+  layout?: "sidebar" | "default";
 }
 
 export const routes: BaseRoute[] = [
@@ -38,12 +39,14 @@ export const routes: BaseRoute[] = [
     element: <AchievementsPage />,
     label: "Achievements",
     icon: Award,
+    layout: "sidebar",
   },
   {
     path: "/tools/*",
     element: <ToolsPage />,
     label: "Tools",
     icon: Wrench,
+    layout: "sidebar",
   },
   {
     path: "/backups",
