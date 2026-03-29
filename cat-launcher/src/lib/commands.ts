@@ -24,6 +24,8 @@ import type { ThemePreference } from "@/generated-types/ThemePreference";
 import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
+import type { World } from "@/generated-types/World";
+import type { WorldOption } from "@/generated-types/WorldOption";
 
 export async function listenToQuitRequested(
   onQuitRequested: () => void,
@@ -87,6 +89,38 @@ export async function fetchGameVariantsInfo(): Promise<
     "get_game_variants_info",
   );
   return response;
+}
+
+export async function listWorlds(
+  variant: GameVariant,
+): Promise<World[]> {
+  const response = await invoke<World[]>("list_worlds", {
+    variant,
+  });
+  return response;
+}
+
+export async function getWorldOptions(
+  variant: GameVariant,
+  worldName: string,
+): Promise<WorldOption[]> {
+  const response = await invoke<WorldOption[]>("get_world_options", {
+    variant,
+    worldName,
+  });
+  return response;
+}
+
+export async function updateWorldOptions(
+  variant: GameVariant,
+  worldName: string,
+  options: WorldOption[],
+): Promise<void> {
+  await invoke("update_world_options", {
+    variant,
+    worldName,
+    options,
+  });
 }
 
 export async function deleteBackupById(id: bigint): Promise<void> {

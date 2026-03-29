@@ -77,4 +77,9 @@ export const queryKeys = {
 
   achievements: (variant: GameVariant) =>
     ["achievements", variant] as const,
+
+  worlds: (variant: GameVariant) => ["worlds", variant] as const,
+
+  worldOptions: (variant: GameVariant, worldName: string) =>
+    ["world_options", variant, worldName] as const,
 };
