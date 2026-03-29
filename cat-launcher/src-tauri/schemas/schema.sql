@@ -177,6 +177,20 @@ CREATE TABLE IF NOT EXISTS settings (
     font_path TEXT
 );
 
+-- This table stores font size settings to avoid migration conflicts
+CREATE TABLE IF NOT EXISTS font_size_settings (
+    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
+    font_size INTEGER NOT NULL DEFAULT 16,
+    font_width INTEGER NOT NULL DEFAULT 8,
+    font_height INTEGER NOT NULL DEFAULT 16,
+    map_font_size INTEGER NOT NULL DEFAULT 16,
+    map_font_width INTEGER NOT NULL DEFAULT 16,
+    map_font_height INTEGER NOT NULL DEFAULT 16,
+    overmap_font_size INTEGER NOT NULL DEFAULT 16,
+    overmap_font_width INTEGER NOT NULL DEFAULT 16,
+    overmap_font_height INTEGER NOT NULL DEFAULT 16
+);
+
 -- This table stores the persisted color theme preference for the launcher.
 CREATE TABLE IF NOT EXISTS color_settings (
     _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),

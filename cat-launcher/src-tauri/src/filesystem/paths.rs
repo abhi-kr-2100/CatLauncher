@@ -11,10 +11,6 @@ pub fn get_db_path(data_dir: &Path) -> PathBuf {
   data_dir.join("cat-launcher.db")
 }
 
-pub fn get_settings_path(resource_dir: &Path) -> PathBuf {
-  resource_dir.join("settings.json")
-}
-
 #[derive(thiserror::Error, Debug)]
 pub enum GetSchemaFilePathError {
   #[error("failed to get resource directory: {0}")]

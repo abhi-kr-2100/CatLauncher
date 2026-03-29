@@ -2,10 +2,17 @@ import { useCallback, useMemo } from "react";
 import { Control, Controller, useWatch } from "react-hook-form";
 
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Field,
   FieldContent,
   FieldLabel,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { VirtualizedCombobox } from "@/components/virtualized-combobox";
 import { Font } from "@/generated-types/Font";
 import { Settings } from "@/generated-types/Settings";
@@ -97,6 +104,219 @@ function FontSelector({
   );
 }
 
+function FontSizeSettings({
+  control,
+}: {
+  control: Control<Settings>;
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-sm font-medium mb-3">UI Font Settings</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <Field>
+            <FieldLabel className="text-sm">Font Size</FieldLabel>
+            <FieldContent>
+              <Controller
+                name="font_size"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">Font Width</FieldLabel>
+            <FieldContent>
+              <Controller
+                name="font_width"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">Font Height</FieldLabel>
+            <FieldContent>
+              <Controller
+                name="font_height"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-3">
+          Map Font Settings
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <Field>
+            <FieldLabel className="text-sm">Map Font Size</FieldLabel>
+            <FieldContent>
+              <Controller
+                name="map_font_size"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">
+              Map Font Width
+            </FieldLabel>
+            <FieldContent>
+              <Controller
+                name="map_font_width"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">
+              Map Font Height
+            </FieldLabel>
+            <FieldContent>
+              <Controller
+                name="map_font_height"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium mb-3">
+          Overmap Font Settings
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <Field>
+            <FieldLabel className="text-sm">
+              Overmap Font Size
+            </FieldLabel>
+            <FieldContent>
+              <Controller
+                name="overmap_font_size"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">
+              Overmap Font Width
+            </FieldLabel>
+            <FieldContent>
+              <Controller
+                name="overmap_font_width"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+          <Field>
+            <FieldLabel className="text-sm">
+              Overmap Font Height
+            </FieldLabel>
+            <FieldContent>
+              <Controller
+                name="overmap_font_height"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      field.onChange(isNaN(val) ? 0 : val);
+                    }}
+                  />
+                )}
+              />
+            </FieldContent>
+          </Field>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FontPreview({ selectedFont }: { selectedFont: Font }) {
   const onFontLoadError = useCallback(
     (e: unknown) => {
@@ -152,13 +372,32 @@ export function FontSettings({ control }: FontSettingsProps) {
   });
 
   return (
-    <>
+    <div className="space-y-6">
       <FontSelector
         control={control}
         fonts={fonts}
         isLoading={isLoading}
       />
+
       {selectedFont && <FontPreview selectedFont={selectedFont} />}
-    </>
+
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        defaultValue="font-size"
+      >
+        <AccordionItem value="font-size" className="border-none">
+          <AccordionTrigger className="py-2 hover:no-underline">
+            <span className="text-sm font-medium">
+              Font size options
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="pt-4 pb-2">
+            <FontSizeSettings control={control} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 }
