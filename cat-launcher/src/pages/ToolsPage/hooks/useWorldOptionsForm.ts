@@ -59,6 +59,7 @@ export function useWorldOptionsForm({
   }, [error]);
 
   const form = useForm<WorldOptionsFormData>({
+    mode: "onChange",
     defaultValues: {
       options: options ?? [],
     },

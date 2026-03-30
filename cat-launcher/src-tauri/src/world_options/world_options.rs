@@ -107,7 +107,7 @@ pub enum UpdateWorldOptionsError {
   #[error("failed to serialize world options: {0}")]
   Serialize(#[from] serde_json::Error),
 
-  #[error("validation failed for option '{name}': {message}")]
+  #[error("invalid value for option '{name}': {message}")]
   Validation { name: String, message: String },
 }
 
@@ -128,7 +128,7 @@ pub async fn update_world_options(
           if option.value != "true" && option.value != "false" {
             return Err(UpdateWorldOptionsError::Validation {
               name: option.name.clone(),
-              message: "must be 'true' or 'false'".to_string(),
+              message: "Value must be 'true' or 'false'".to_string(),
             });
           }
         }
@@ -139,13 +139,15 @@ pub async fn update_world_options(
             .parse::<f64>()
             .map_err(|_| UpdateWorldOptionsError::Validation {
               name: option.name.clone(),
-              message: "must be an integer".to_string(),
+              message:
+                "Value must be a valid integer (optionally with %)"
+                  .to_string(),
             })?;
           if let Some(min) = schema.min {
             if val < min {
               return Err(UpdateWorldOptionsError::Validation {
                 name: option.name.clone(),
-                message: format!("must be at least {}", min),
+                message: format!("Value must be at least {}", min),
               });
             }
           }
@@ -153,7 +155,7 @@ pub async fn update_world_options(
             if val > max {
               return Err(UpdateWorldOptionsError::Validation {
                 name: option.name.clone(),
-                message: format!("must be at most {}", max),
+                message: format!("Value must be at most {}", max),
               });
             }
           }
@@ -162,14 +164,14 @@ pub async fn update_world_options(
           let val = option.value.parse::<f64>().map_err(|_| {
             UpdateWorldOptionsError::Validation {
               name: option.name.clone(),
-              message: "must be a float".to_string(),
+              message: "Value must be a valid number".to_string(),
             }
           })?;
           if let Some(min) = schema.min {
             if val < min {
               return Err(UpdateWorldOptionsError::Validation {
                 name: option.name.clone(),
-                message: format!("must be at least {}", min),
+                message: format!("Value must be at least {}", min),
               });
             }
           }
@@ -177,7 +179,7 @@ pub async fn update_world_options(
             if val > max {
               return Err(UpdateWorldOptionsError::Validation {
                 name: option.name.clone(),
-                message: format!("must be at most {}", max),
+                message: format!("Value must be at most {}", max),
               });
             }
           }
@@ -187,7 +189,7 @@ pub async fn update_world_options(
             return Err(UpdateWorldOptionsError::Validation {
               name: option.name.clone(),
               message: format!(
-                "must be one of: {}",
+                "Value must be one of: {}",
                 values.join(", ")
               ),
             });
@@ -200,13 +202,14 @@ pub async fn update_world_options(
       let val = option.value.parse::<f64>().map_err(|_| {
         UpdateWorldOptionsError::Validation {
           name: option.name.clone(),
-          message: "must be a float".to_string(),
+          message: "Spawn rate must be a valid number".to_string(),
         }
       })?;
       if !(0.0..=20.0).contains(&val) {
         return Err(UpdateWorldOptionsError::Validation {
           name: option.name.clone(),
-          message: "must be between 0.0 and 20.0".to_string(),
+          message: "Spawn rate must be between 0.0 and 20.0"
+            .to_string(),
         });
       }
     }

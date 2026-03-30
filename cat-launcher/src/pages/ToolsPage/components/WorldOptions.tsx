@@ -1,14 +1,8 @@
 import { useMemo, useState } from "react";
 import { Controller, useFieldArray } from "react-hook-form";
-import { AlertTriangle, Save, X } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +12,7 @@ import { toastCL } from "@/lib/utils";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import { useWorlds } from "../hooks/useWorlds";
 import { useWorldOptionsForm } from "../hooks/useWorldOptionsForm";
+import { WorldOptionsFooter } from "./WorldOptionsFooter";
 
 type OptionType = "Boolean" | "Integer" | "Float" | "String" | "Enum";
 
@@ -114,6 +109,62 @@ const SCHEMA: OptionSchema[] = [
   { name: "RESTOCK_DELAY_MULT", type: "Float", min: 0.01, max: 10.0 },
 ];
 
+const OPTION_NAME_MAPPING: Record<string, string> = {
+  BLACK_ROAD: "Black Road",
+  ETERNAL_SEASON: "Eternal Season",
+  CONSTRUCTION_SCALING: "Construction Scaling",
+  SEASON_LENGTH: "Season Length",
+  WORLD_END: "World End Handling",
+  ITEM_SPAWNRATE: "Item Spawn Rate",
+  SPAWN_DENSITY: "Monster Spawn Density",
+  EVOLUTION_INVERSE_MULTIPLIER: "Monster Evolution Multiplier",
+  ETERNAL_TIME_OF_DAY: "Eternal Time of Day",
+  NPC_SPAWNTIME: "NPC Spawn Delay",
+  MONSTER_RESILIENCE: "Monster Resilience",
+  META_PROGRESS: "Meta Progression",
+  MONSTER_SPEED: "Monster Speed",
+  INITIAL_DAY: "Initial Day",
+  VEHICLE_SPAWNRATE: "Vehicle Spawn Density",
+  CARRION_SPAWNRATE: "Carrion Spawn Density",
+  SPECIALS_DENSITY: "Overmap Specials Density",
+  SPAWN_DELAY: "Spawn Delay",
+  SPAWN_ANIMAL_DENSITY: "Animal Spawn Density",
+  CITY_SIZE: "City Size",
+  MONSTER_UPGRADE_FACTOR: "Monster Upgrade Factor",
+  STARTING_NPC: "Starting NPC Spawn",
+  SPECIALS_SPACING: "Overmap Specials Spacing",
+  CITY_SPACING: "City Spacing",
+  WANDER_SPAWNS: "Wander Spawns (Hordes)",
+  VEHICLE_DAMAGE: "Vehicle Damage Multiplier",
+  CRAFTING_SPEED_MULT: "Crafting Speed Multiplier",
+  GROWTH_SCALING: "Crop Growth Scaling",
+  DEFAULT_REGION: "Default Region",
+  RANDOM_NPC: "Random NPC Spawns",
+  INITIAL_TIME: "Initial Time of Day",
+  VEHICLE_LOCKS: "Vehicle Door Locks",
+  RAD_MUTATION: "Radiation Mutations",
+  NPC_DENSITY: "Dynamic NPC Density",
+  CHARACTER_POINT_POOLS: "Character Point Pools",
+  RESTOCK_DELAY_MULT: "Merchant Restock Delay",
+};
+
+const ENUM_VALUE_MAPPING: Record<string, string> = {
+  reset: "Reset World",
+  delete: "Delete World",
+  query: "Query User",
+  keep: "Keep World",
+  never: "Never",
+  always: "Always",
+  scenario: "Based on Scenario",
+  normal: "Normal Cycle",
+  day: "Eternal Day",
+  night: "Eternal Night",
+  any: "Any Pool",
+  multi_pool: "Multiple Pools",
+  no_freeform: "No Freeform",
+  default: "Default Region",
+};
+
 export default function WorldOptions() {
   const [selectedVariant, setSelectedVariant] =
     useState<string>("DarkDaysAhead");
@@ -156,8 +207,25 @@ export default function WorldOptions() {
 
   const isDirty = form.formState.isDirty;
 
+  const getFriendlyName = (name: string) => {
+    if (OPTION_NAME_MAPPING[name]) {
+      return OPTION_NAME_MAPPING[name];
+    }
+    if (name.startsWith("SPAWN_RATE_")) {
+      const category = name
+        .replace("SPAWN_RATE_", "")
+        .replace(/_/g, " ");
+      return `Spawn Rate: ${category.charAt(0).toUpperCase() + category.slice(1)}`;
+    }
+    return name;
+  };
+
+  const getFriendlyEnumValue = (value: string) => {
+    return ENUM_VALUE_MAPPING[value] || value;
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
         <div className="w-full md:w-64">
           <Label className="mb-2 block text-sm font-medium">
@@ -191,31 +259,7 @@ export default function WorldOptions() {
 
       {selectedWorldName ? (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-xl font-bold">
-              Options for {selectedWorldName}
-            </CardTitle>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={cancel}
-                disabled={!isDirty || isUpdating}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={apply}
-                disabled={!isDirty || isUpdating}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isUpdating ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {isLoading ? (
               <div className="py-8 text-center text-muted-foreground">
                 Loading options...
@@ -250,9 +294,16 @@ export default function WorldOptions() {
                       className="space-y-2 rounded-lg border p-4 shadow-sm"
                     >
                       <div className="flex items-start justify-between">
-                        <Label className="text-base font-semibold">
-                          {option.name}
-                        </Label>
+                        <div className="flex flex-col">
+                          <Label className="text-base font-semibold">
+                            {getFriendlyName(option.name)}
+                          </Label>
+                          {isKnown && (
+                            <span className="text-[10px] text-muted-foreground font-mono uppercase">
+                              {option.name}
+                            </span>
+                          )}
+                        </div>
                         {!isKnown && (
                           <div
                             className="flex items-center gap-1 text-xs text-amber-500"
@@ -308,7 +359,7 @@ export default function WorldOptions() {
                                 items={
                                   schema?.values?.map((v) => ({
                                     value: v,
-                                    label: v,
+                                    label: getFriendlyEnumValue(v),
                                   })) ?? []
                                 }
                                 value={field.value}
@@ -368,11 +419,7 @@ export default function WorldOptions() {
                                 },
                               },
                             )}
-                            type={
-                              type === "Integer" || type === "Float"
-                                ? "text"
-                                : "text"
-                            }
+                            type="text"
                             placeholder="Value"
                           />
                         )}
@@ -403,6 +450,15 @@ export default function WorldOptions() {
         <div className="rounded-lg border border-dashed p-12 text-center text-muted-foreground">
           Select a variant and a world to manage its options.
         </div>
+      )}
+
+      {selectedWorldName && (
+        <WorldOptionsFooter
+          isDirty={isDirty}
+          isUpdating={isUpdating}
+          apply={apply}
+          cancel={cancel}
+        />
       )}
     </div>
   );
