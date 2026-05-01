@@ -1,4 +1,5 @@
 .env
+.direnv/
 
 # Generated types
 cat-launcher/src/generated-types/*
