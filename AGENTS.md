@@ -155,6 +155,7 @@ pub fn get_all_tips() -> Result<(), GetAllTipsError> {
 * If you discover a secondary task while working on a given task, track it.
 * At the end of each task, run the Verification commands to ensure correctness.
 * Use `jj describe -m` to commit changes. Do not use `git`. Follow the commit guidelines below.
+* Run `jj` commands with the `--no-pager` flag to get the entire output without pagination.
 * At the end of every commit, append `Signed-off-by: Abhishek Kumar <abhi.kr.2100@gmail.com>`.
 * Don't commit unless asked by the user.
 
