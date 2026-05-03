@@ -4,12 +4,12 @@ use std::path::Path;
 use strum::IntoEnumIterator;
 
 use crate::filesystem::paths::GetUserGameDataDirError;
+use crate::settings::Settings;
 use crate::settings::consts::FALLBACK_FONTS;
 use crate::settings::paths::{
-  get_or_create_user_config_dir, GetOrCreateUserConfigDirError,
+  GetOrCreateUserConfigDirError, get_or_create_user_config_dir,
 };
 use crate::settings::types::Font;
-use crate::settings::Settings;
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -107,7 +107,7 @@ async fn ensure_font_blending(
       return Ok(());
     }
     Err(e) => {
-      return Err(EnsureFontBlendingError::ReadOptionsJson(e))
+      return Err(EnsureFontBlendingError::ReadOptionsJson(e));
     }
   };
 

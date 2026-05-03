@@ -3,8 +3,8 @@ use std::path::Path;
 use tokio::fs;
 
 use crate::filesystem::paths::{
-  get_game_executable_filepath, AssetDownloadDirError,
-  AssetExtractionDirError, GetExecutablePathError,
+  AssetDownloadDirError, AssetExtractionDirError,
+  GetExecutablePathError, get_game_executable_filepath,
 };
 use crate::game_release::game_release::{
   GameRelease, GameReleaseStatus,
@@ -39,10 +39,10 @@ impl GameRelease {
     {
       Ok(path) => path,
       Err(GetExecutablePathError::DoesNotExist) => {
-        return Ok(GameReleaseStatus::NotDownloaded)
+        return Ok(GameReleaseStatus::NotDownloaded);
       }
       Err(e) => {
-        return Err(GetInstallationStatusError::Executable(e))
+        return Err(GetInstallationStatusError::Executable(e));
       }
     };
 

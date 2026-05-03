@@ -13,10 +13,10 @@ use crate::fetch_releases::utils::{
 };
 use crate::game_release::game_release::GameRelease;
 use crate::infra::github::utils::{
-  fetch_github_release_by_tag, fetch_github_releases,
   FetchGitHubReleaseByTagError, GitHubReleaseFetchError,
+  fetch_github_release_by_tag, fetch_github_releases,
 };
-use crate::infra::utils::{get_github_repo_for_variant, Arch, OS};
+use crate::infra::utils::{Arch, OS, get_github_repo_for_variant};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -129,11 +129,10 @@ impl GameVariant {
       .get_cached_release_by_tag(self, release_id)
       .await?;
 
-    if let Some(release) = cached_release {
-      if let Some(body) = &release.body {
+    if let Some(release) = cached_release
+      && let Some(body) = &release.body {
         return Ok(Some(body.clone()));
       }
-    }
 
     // If not found or body is missing, fetch from GitHub
     let repo = get_github_repo_for_variant(self);

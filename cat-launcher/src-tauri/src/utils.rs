@@ -222,9 +222,9 @@ pub fn manage_posthog(app: &App) {
           Ok(id) => id,
           Err(e) => {
             eprintln!(
-                            "Failed to get or create user for PostHog identification: {}",
-                            e
-                        );
+              "Failed to get or create user for PostHog identification: {}",
+              e
+            );
             return;
           }
         };

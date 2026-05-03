@@ -4,8 +4,8 @@ use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::{
   get_default_releases, merge_releases,
 };
-use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::GameRelease;
+use crate::game_release::game_release::GameReleaseStatus;
 use crate::infra::github::release::GitHubRelease;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
@@ -88,8 +88,8 @@ pub async fn get_release_by_id(
     .get_cached_releases(variant)
     .await
     .unwrap_or_default(); // It's okay if getting cached releases fails.
-                          // If the release is not found, this function
-                          // will return an error.
+  // If the release is not found, this function
+  // will return an error.
 
   let default_releases =
     get_default_releases(variant, resources_dir).await;

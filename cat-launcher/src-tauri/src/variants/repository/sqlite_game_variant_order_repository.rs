@@ -3,11 +3,11 @@ use r2d2_sqlite::SqliteConnectionManager;
 use std::str::FromStr;
 use tokio::task;
 
+use crate::variants::GameVariant;
 use crate::variants::repository::game_variant_order_repository::{
   GameVariantOrderRepository, GameVariantOrderRepositoryError,
   GetGameVariantOrderError, UpdateGameVariantOrderError,
 };
-use crate::variants::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 

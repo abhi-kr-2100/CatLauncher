@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::filesystem::paths::{
-  get_game_resources_dir, GetGameExecutableDirError,
+  GetGameExecutableDirError, get_game_resources_dir,
 };
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;

@@ -2,7 +2,7 @@ use std::env::consts::OS;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
 use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
 

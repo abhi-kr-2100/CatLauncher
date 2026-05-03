@@ -1,8 +1,8 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use reqwest::header::LINK;
 use reqwest::Client;
+use reqwest::header::LINK;
 
 use crate::infra::github::release::GitHubRelease;
 
