@@ -80,9 +80,12 @@ impl GameVariantOrderRepository for SqliteGameVariantOrderRepository {
                 .map_err(|e| UpdateGameVariantOrderError::Update(Box::new(e)))?;
 
             for (i, variant) in variants.iter().enumerate() {
+                let sort_order: i64 = i.try_into().map_err(|e| {
+                    UpdateGameVariantOrderError::Update(Box::new(e))
+                })?;
                 tx.execute(
                     "INSERT INTO game_variant_order (game_variant, sort_order) VALUES (?1, ?2)",
-                    rusqlite::params![variant.to_string(), i],
+                    rusqlite::params![variant.to_string(), sort_order],
                 )
                 .map_err(|e| UpdateGameVariantOrderError::Update(Box::new(e)))?;
             }

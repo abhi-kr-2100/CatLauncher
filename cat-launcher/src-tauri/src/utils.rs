@@ -201,12 +201,9 @@ pub fn manage_posthog(app: &App) {
     return;
   }
 
-  let api_endpoint =
-    format!("{}/capture/", host.trim_end_matches('/'));
-
   let options = posthog_rs::ClientOptionsBuilder::default()
     .api_key(api_key.to_string())
-    .api_endpoint(api_endpoint)
+    .host(host.to_string())
     .build();
 
   match options {
