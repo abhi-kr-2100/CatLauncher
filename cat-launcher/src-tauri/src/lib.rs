@@ -76,7 +76,7 @@ use crate::utils::{
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
-use tauri::{command, AppHandle};
+use tauri::{AppHandle, command};
 
 #[command]
 fn confirm_quit(app_handle: AppHandle) {

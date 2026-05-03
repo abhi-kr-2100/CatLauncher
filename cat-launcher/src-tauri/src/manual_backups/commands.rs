@@ -1,5 +1,5 @@
-use serde::ser::SerializeStruct;
 use serde::Serialize;
+use serde::ser::SerializeStruct;
 use std::time::SystemTimeError;
 use strum::IntoStaticStr;
 use tauri::{Manager, State};

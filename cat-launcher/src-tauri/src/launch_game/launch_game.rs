@@ -14,21 +14,21 @@ use crate::active_release::repository::ActiveReleaseRepository;
 use crate::constants::MAX_BACKUPS;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
-  get_game_executable_filepath,
+  AssetDownloadDirError, AssetExtractionDirError,
+  GetAutomaticBackupArchivePathError, GetExecutablePathError,
+  GetUserGameDataDirError, get_game_executable_filepath,
   get_or_create_automatic_backup_archive_filepath,
-  get_or_create_user_game_data_dir, AssetDownloadDirError,
-  AssetExtractionDirError, GetAutomaticBackupArchivePathError,
-  GetExecutablePathError, GetUserGameDataDirError,
+  get_or_create_user_game_data_dir,
 };
 use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{
-  get_release_by_id, GetReleaseError,
+  GetReleaseError, get_release_by_id,
 };
 use crate::infra::utils::OS;
 use crate::launch_game::repository::{
   BackupRepository, BackupRepositoryError,
 };
-use crate::launch_game::utils::{backup_save_files, BackupError};
+use crate::launch_game::utils::{BackupError, backup_save_files};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -246,12 +246,10 @@ async fn cleanup_old_backups(
         .delete_backup_entry(backup.id)
         .await
         .is_ok()
-      {
-        if let Ok(path) = path_res {
+        && let Ok(path) = path_res {
           // file deletion fails is ignored.
           let _ = tokio::fs::remove_file(&path).await;
         }
-      }
     });
   }
 

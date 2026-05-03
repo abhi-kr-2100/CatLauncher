@@ -1,5 +1,5 @@
 use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
 

@@ -229,10 +229,10 @@ pub async fn get_game_executable_filepath(
   {
     Ok(dir) => dir,
     Err(GetGameExecutableDirError::NoInstallation) => {
-      return Err(GetExecutablePathError::DoesNotExist)
+      return Err(GetExecutablePathError::DoesNotExist);
     }
     Err(err) => {
-      return Err(GetExecutablePathError::LauncherDirectory(err))
+      return Err(GetExecutablePathError::LauncherDirectory(err));
     }
   };
 

@@ -5,7 +5,7 @@ use cat_macros::CommandErrorSerialize;
 
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
 use crate::users::service::{
-  get_or_create_user_id, GetOrCreateUserIdError,
+  GetOrCreateUserIdError, get_or_create_user_id,
 };
 
 #[derive(

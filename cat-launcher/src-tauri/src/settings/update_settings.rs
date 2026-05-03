@@ -1,15 +1,15 @@
 use std::path::Path;
 
+use crate::settings::Settings;
 use crate::settings::repository::settings_repository::{
   SaveSettingsError, SettingsRepository,
 };
 use crate::settings::update_color_files::{
-  update_color_files, UpdateColorFilesError,
+  UpdateColorFilesError, update_color_files,
 };
 use crate::settings::update_font_files::{
-  update_font_files, UpdateFontFilesError,
+  UpdateFontFilesError, update_font_files,
 };
-use crate::settings::Settings;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UpdateSettingsError {

@@ -1,11 +1,11 @@
 use std::env;
 
-use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION};
 use reqwest::Client;
+use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
 
 fn create_github_pat_headers() -> Option<HeaderMap> {
-  if let Ok(github_pat) = env::var("GITHUB_PAT") {
-    if !github_pat.is_empty() {
+  if let Ok(github_pat) = env::var("GITHUB_PAT")
+    && !github_pat.is_empty() {
       let authorization = format!("Bearer {}", github_pat);
       if let Ok(header_value) = HeaderValue::from_str(&authorization)
       {
@@ -14,7 +14,6 @@ fn create_github_pat_headers() -> Option<HeaderMap> {
         return Some(headers);
       }
     }
-  }
   None
 }
 

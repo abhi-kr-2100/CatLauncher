@@ -108,11 +108,10 @@ impl ReleasesRepository for SqliteReleasesRepository {
                         });
                 }
 
-                if let Some(asset) = asset {
-                    if let Some(release) = releases_map.get_mut(&release_id) {
+                if let Some(asset) = asset
+                    && let Some(release) = releases_map.get_mut(&release_id) {
                         release.assets.push(asset);
                     }
-                }
             }
 
             Ok(releases_map.into_values().collect())
@@ -206,11 +205,10 @@ impl ReleasesRepository for SqliteReleasesRepository {
                         });
                 }
 
-                if let Some(asset) = asset {
-                    if let Some(release) = releases_map.get_mut(&release_id) {
+                if let Some(asset) = asset
+                    && let Some(release) = releases_map.get_mut(&release_id) {
                         release.assets.push(asset);
                     }
-                }
             }
 
             Ok(releases_map.into_values().next())

@@ -6,9 +6,9 @@ use std::path::Path;
 use tokio::fs::{read_dir, read_to_string};
 
 use crate::active_release::repository::ActiveReleaseRepository;
-use crate::infra::utils::{sort_assets, OS};
+use crate::infra::utils::{OS, sort_assets};
 use crate::mods::lib::{
-  get_mods_resource_path, get_stock_mods_dir, GetStockModsDirError,
+  GetStockModsDirError, get_mods_resource_path, get_stock_mods_dir,
 };
 use crate::mods::online::types::OnlineModRepository;
 use crate::mods::repository::mods_repository::{
@@ -346,7 +346,7 @@ pub async fn list_all_third_party_mods(
     match third_party_mod {
       Ok(third_party_mod) => mods.push(third_party_mod),
       Err(e) => {
-        return Err(ListThirdPartyModsError::ParseModsJson(e))
+        return Err(ListThirdPartyModsError::ParseModsJson(e));
       }
     }
   }
