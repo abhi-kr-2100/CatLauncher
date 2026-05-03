@@ -36,9 +36,12 @@ impl BackupRepository for SqliteBackupRepository {
 
     task::spawn_blocking(move || {
             let conn = pool.get().map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
+            let timestamp_i64: i64 = timestamp.try_into().map_err(|e| {
+                BackupRepositoryError::Add(Box::new(e))
+            })?;
             let id = conn.query_row(
                 "INSERT INTO backups (game_variant, release_version, timestamp) VALUES (?1, ?2, ?3) RETURNING id",
-                rusqlite::params![game_variant, release_version, timestamp],
+                rusqlite::params![game_variant, release_version, timestamp_i64],
                 |row| row.get(0),
             ).map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
             Ok(id)
@@ -65,11 +68,19 @@ impl BackupRepository for SqliteBackupRepository {
                     let game_variant_str: String = row.get(1)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp_i64: i64 = row.get(3)?;
+                    let timestamp: u64 = timestamp_i64.try_into().map_err(|e| {
+                        rusqlite::Error::FromSqlConversionFailure(
+                            3,
+                            rusqlite::types::Type::Integer,
+                            Box::new(e),
+                        )
+                    })?;
                     Ok(BackupEntry {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp,
                     })
                 })
                 .map_err(|e| BackupRepositoryError::Get(Box::new(e)))?
@@ -98,11 +109,19 @@ impl BackupRepository for SqliteBackupRepository {
                     let game_variant_str: String = row.get(1)?;
                     let game_variant = GameVariant::from_str(&game_variant_str)
                         .map_err(|e| rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e)))?;
+                    let timestamp_i64: i64 = row.get(3)?;
+                    let timestamp: u64 = timestamp_i64.try_into().map_err(|e| {
+                        rusqlite::Error::FromSqlConversionFailure(
+                            3,
+                            rusqlite::types::Type::Integer,
+                            Box::new(e),
+                        )
+                    })?;
                     Ok(BackupEntry {
                         id,
                         game_variant,
                         release_version: row.get(2)?,
-                        timestamp: row.get(3)?,
+                        timestamp,
                     })
                 });
 

@@ -94,6 +94,7 @@
             packages =
               (with pkgs; [
                 cargo
+                cargo-edit
                 clippy
                 curl
                 file
