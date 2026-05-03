@@ -21,9 +21,8 @@
     "noFallthroughCasesInSwitch": true,
 
     /* For shadcn UI */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],
