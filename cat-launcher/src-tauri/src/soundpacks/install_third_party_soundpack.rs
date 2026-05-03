@@ -8,11 +8,11 @@ use tokio::fs::{create_dir_all, read_to_string};
 use downloader::progress::Reporter;
 
 use crate::filesystem::paths::{
-  get_or_create_directory, get_or_create_user_game_data_dir,
   GetOrCreateDirectoryError, GetUserGameDataDirError,
+  get_or_create_directory, get_or_create_user_game_data_dir,
 };
-use crate::filesystem::utils::{copy_dir_all, CopyDirError};
-use crate::infra::archive::{extract_archive, ExtractionError};
+use crate::filesystem::utils::{CopyDirError, copy_dir_all};
+use crate::infra::archive::{ExtractionError, extract_archive};
 use crate::infra::download::{DownloadFileError, Downloader};
 
 use crate::infra::utils::OS;

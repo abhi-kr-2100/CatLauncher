@@ -91,7 +91,7 @@ impl BrightNightsOnlineMod {
           IntoThirdPartyModError::FailedToExtractRepoFromGithubUrl(
             self.source.url.clone(),
           ),
-        )
+        );
       }
     };
 
@@ -119,7 +119,7 @@ impl BrightNightsOnlineMod {
           IntoThirdPartyModError::FailedToExtractArchiveFilename(
             self.source.url.clone(),
           ),
-        )
+        );
       }
     };
 

@@ -1,6 +1,6 @@
+use crate::variants::GameVariant;
 use crate::variants::repository::game_variant_order_repository::GameVariantOrderRepository;
 use crate::variants::repository::game_variant_order_repository::GameVariantOrderRepositoryError;
-use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UpdateGameVariantOrderError {

@@ -2,7 +2,7 @@ use std::io;
 use std::path::Path;
 
 use crate::filesystem::paths::{
-  get_or_create_user_game_data_dir, GetUserGameDataDirError,
+  GetUserGameDataDirError, get_or_create_user_game_data_dir,
 };
 use crate::mods::repository::installed_mods_repository::{
   InstalledModsRepository, InstalledModsRepositoryError,

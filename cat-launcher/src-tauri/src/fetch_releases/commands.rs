@@ -2,7 +2,7 @@ use std::env::consts::{ARCH, OS};
 
 use reqwest::Client;
 use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Emitter, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
 
@@ -11,8 +11,8 @@ use crate::fetch_releases::fetch_releases::{
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::utils::{
-  get_arch_enum, get_os_enum, ArchNotSupportedError,
-  OSNotSupportedError,
+  ArchNotSupportedError, OSNotSupportedError, get_arch_enum,
+  get_os_enum,
 };
 use crate::variants::GameVariant;
 

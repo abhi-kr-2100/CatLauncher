@@ -8,14 +8,14 @@ use crate::active_release::active_release::ActiveReleaseError;
 use crate::active_release::repository::ActiveReleaseRepository;
 use crate::fetch_releases::repository::ReleasesRepository;
 use crate::filesystem::paths::{
+  AssetDownloadDirError, AssetExtractionDirError,
   get_or_create_asset_download_dir,
-  get_or_create_asset_installation_dir, AssetDownloadDirError,
-  AssetExtractionDirError,
+  get_or_create_asset_installation_dir,
 };
 use crate::game_release::game_release::{
   GameRelease, GameReleaseStatus,
 };
-use crate::infra::archive::{extract_archive, ExtractionError};
+use crate::infra::archive::{ExtractionError, extract_archive};
 use crate::infra::download::Downloader;
 use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::utils::{Arch, OS};

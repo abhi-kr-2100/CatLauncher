@@ -1,16 +1,16 @@
 use std::env::consts::OS;
 
 use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
 
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::game_release::utils::{
-  get_release_by_id, GetReleaseError,
+  GetReleaseError, get_release_by_id,
 };
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::infra::utils::{OSNotSupportedError, get_os_enum};
 use crate::variants::GameVariant;
 
 #[derive(

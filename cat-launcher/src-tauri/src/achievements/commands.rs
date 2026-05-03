@@ -5,7 +5,7 @@ use tauri::{AppHandle, Manager, State};
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::variants::GameVariant;
 
-use super::achievements::{get_achievements, GetAchievementsError};
+use super::achievements::{GetAchievementsError, get_achievements};
 use super::types::CharacterAchievements;
 
 #[derive(

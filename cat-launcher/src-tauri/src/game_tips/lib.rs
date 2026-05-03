@@ -7,7 +7,7 @@ use crate::fetch_releases::repository::{
   ReleasesRepository, ReleasesRepositoryError,
 };
 use crate::filesystem::paths::{
-  get_tip_file_paths, GetTipFilePathsError,
+  GetTipFilePathsError, get_tip_file_paths,
 };
 use crate::game_release::game_release::{
   GameRelease, GameReleaseStatus,
@@ -72,9 +72,9 @@ pub async fn get_all_tips_for_variant(
   variant: &GameVariant,
   data_dir: &std::path::Path,
   os: &OS,
-  active_release_repository: &(dyn ActiveReleaseRepository
-      + Send
-      + Sync),
+  active_release_repository: &(
+     dyn ActiveReleaseRepository + Send + Sync
+   ),
   releases_repository: &(dyn ReleasesRepository + Send + Sync),
 ) -> Result<Vec<String>, GetAllTipsForVariantError> {
   if let Some(active_release) = active_release_repository

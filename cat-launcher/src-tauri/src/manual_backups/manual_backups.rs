@@ -1,13 +1,13 @@
 use std::path::{Path, PathBuf};
 
 use crate::filesystem::paths::{
+  GetManualBackupArchivePathError, GetUserGameDataDirError,
   get_or_create_manual_backup_archive_filepath,
-  get_or_create_user_game_data_dir, GetManualBackupArchivePathError,
-  GetUserGameDataDirError,
+  get_or_create_user_game_data_dir,
 };
 use crate::infra::archive::{
-  create_zip_archive, extract_archive, ArchiveCreationError,
-  ExtractionError,
+  ArchiveCreationError, ExtractionError, create_zip_archive,
+  extract_archive,
 };
 use crate::infra::utils::OS;
 use crate::manual_backups::repository::manual_backup_repository::{

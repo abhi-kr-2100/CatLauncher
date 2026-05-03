@@ -1,4 +1,4 @@
-use tauri::{command, State};
+use tauri::{State, command};
 
 use cat_macros::CommandErrorSerialize;
 

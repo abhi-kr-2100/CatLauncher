@@ -12,7 +12,7 @@ use crate::game_release::utils::{
 };
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::{read_from_file, Arch, OS};
+use crate::infra::utils::{Arch, OS, read_from_file};
 use crate::variants::GameVariant;
 
 pub async fn get_default_releases(

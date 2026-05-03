@@ -2,7 +2,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::filesystem::paths::{
-  get_or_create_user_game_data_dir, GetUserGameDataDirError,
+  GetUserGameDataDirError, get_or_create_user_game_data_dir,
 };
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;

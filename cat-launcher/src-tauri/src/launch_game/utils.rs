@@ -1,12 +1,12 @@
 use std::path::Path;
 
 use crate::filesystem::paths::{
+  GetAutomaticBackupArchivePathError, GetUserGameDataDirError,
   get_or_create_automatic_backup_archive_filepath,
   get_or_create_user_game_data_dir,
-  GetAutomaticBackupArchivePathError, GetUserGameDataDirError,
 };
 use crate::infra::archive::{
-  create_zip_archive, ArchiveCreationError,
+  ArchiveCreationError, create_zip_archive,
 };
 use crate::variants::GameVariant;
 

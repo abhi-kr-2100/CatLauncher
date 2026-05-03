@@ -9,10 +9,10 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::infra::utils::{sort_assets, OS};
+use crate::infra::utils::{OS, sort_assets};
 use crate::tilesets::paths::{
-  get_stock_tilesets_dir, get_tilesets_resource_path,
-  GetStockTilesetsDirError,
+  GetStockTilesetsDirError, get_stock_tilesets_dir,
+  get_tilesets_resource_path,
 };
 use crate::tilesets::types::{
   StockTileset, ThirdPartyTileset, Tileset,
@@ -178,7 +178,7 @@ async fn list_all_third_party_tilesets(
   let content = match read_to_string(&tilesets_json_path).await {
     Ok(content) => content,
     Err(e) => {
-      return Err(ListThirdPartyTilesetsError::ReadTilesetsJson(e))
+      return Err(ListThirdPartyTilesetsError::ReadTilesetsJson(e));
     }
   };
 
@@ -202,7 +202,7 @@ async fn list_all_third_party_tilesets(
         tilesets.push(Tileset::ThirdParty(third_party_tileset))
       }
       Err(e) => {
-        return Err(ListThirdPartyTilesetsError::ParseTilesetsJson(e))
+        return Err(ListThirdPartyTilesetsError::ParseTilesetsJson(e));
       }
     }
   }

@@ -1,9 +1,9 @@
 use strum::IntoStaticStr;
-use tauri::{command, AppHandle, Manager};
+use tauri::{AppHandle, Manager, command};
 
 use crate::last_played_world::last_played_world::{
-  get_last_played_world as get_last_played_world_impl,
   GetLastPlayedWorldError,
+  get_last_played_world as get_last_played_world_impl,
 };
 use crate::variants::GameVariant;
 use cat_macros::CommandErrorSerialize;

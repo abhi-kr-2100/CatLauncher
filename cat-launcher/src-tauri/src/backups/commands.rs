@@ -4,12 +4,12 @@ use tauri::{Manager, State};
 use cat_macros::CommandErrorSerialize;
 
 use crate::backups::backups::{
-  delete_backup, list_backups, restore_backup, DeleteBackupError,
-  ListBackupsError, RestoreBackupError,
+  DeleteBackupError, ListBackupsError, RestoreBackupError,
+  delete_backup, list_backups, restore_backup,
 };
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
-use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
+use crate::infra::utils::{OSNotSupportedError, get_os_enum};
 use crate::launch_game::repository::BackupEntry;
+use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::variants::GameVariant;
 
 #[derive(

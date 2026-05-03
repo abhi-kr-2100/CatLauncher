@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use strum::IntoStaticStr;
 use tauri::ipc::Channel;
-use tauri::{command, AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
 

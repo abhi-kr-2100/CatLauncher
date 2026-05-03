@@ -9,10 +9,10 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use crate::active_release::repository::{
   ActiveReleaseRepository, ActiveReleaseRepositoryError,
 };
-use crate::infra::utils::{sort_assets, OS};
+use crate::infra::utils::{OS, sort_assets};
 use crate::soundpacks::paths::{
-  get_soundpacks_resource_path, get_stock_soundpacks_dir,
-  GetStockSoundpacksDirError,
+  GetStockSoundpacksDirError, get_soundpacks_resource_path,
+  get_stock_soundpacks_dir,
 };
 use crate::soundpacks::types::{
   Soundpack, StockSoundpack, ThirdPartySoundpack,
@@ -184,7 +184,7 @@ async fn list_all_third_party_soundpacks(
     Err(e) => {
       return Err(ListThirdPartySoundpacksError::ReadSoundpacksJson(
         e,
-      ))
+      ));
     }
   };
 
@@ -210,7 +210,7 @@ async fn list_all_third_party_soundpacks(
       Err(e) => {
         return Err(
           ListThirdPartySoundpacksError::ParseSoundpacksJson(e),
-        )
+        );
       }
     }
   }

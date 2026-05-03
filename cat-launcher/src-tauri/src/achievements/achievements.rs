@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::active_release::repository::ActiveReleaseRepository;
 use crate::filesystem::paths::{
-  get_game_resources_dir, get_or_create_user_game_data_dir,
   GetGameExecutableDirError, GetUserGameDataDirError,
+  get_game_resources_dir, get_or_create_user_game_data_dir,
 };
-use crate::infra::utils::{get_os_enum, OSNotSupportedError};
+use crate::infra::utils::{OSNotSupportedError, get_os_enum};
 use crate::variants::GameVariant;
 
 use super::types::{Achievement, CharacterAchievements};

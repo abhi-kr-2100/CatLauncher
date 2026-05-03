@@ -3,10 +3,10 @@ use std::path::Path;
 use strum::IntoEnumIterator;
 
 use crate::filesystem::paths::GetUserGameDataDirError;
-use crate::settings::paths::{
-  get_or_create_user_config_dir, GetOrCreateUserConfigDirError,
-};
 use crate::settings::Settings;
+use crate::settings::paths::{
+  GetOrCreateUserConfigDirError, get_or_create_user_config_dir,
+};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]

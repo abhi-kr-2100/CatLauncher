@@ -1,11 +1,11 @@
 use std::path::Path;
 
 use crate::filesystem::paths::{
+  GetAutomaticBackupArchivePathError, GetUserGameDataDirError,
   get_or_create_automatic_backup_archive_filepath,
   get_or_create_user_game_data_dir,
-  GetAutomaticBackupArchivePathError, GetUserGameDataDirError,
 };
-use crate::infra::archive::{extract_archive, ExtractionError};
+use crate::infra::archive::{ExtractionError, extract_archive};
 use crate::infra::utils::OS;
 use crate::launch_game::repository::{
   BackupRepository, BackupRepositoryError,

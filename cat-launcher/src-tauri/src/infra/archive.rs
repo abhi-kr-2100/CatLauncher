@@ -1,4 +1,4 @@
-use std::fs::{read_dir, File};
+use std::fs::{File, read_dir};
 use std::io;
 use std::path::{Path, PathBuf};
 
@@ -8,12 +8,12 @@ use tar::Archive;
 use tokio::fs;
 use tokio::task::JoinError;
 use unrar::error::UnrarError;
-use zip::result::ZipError;
-use zip::write::FileOptions;
 use zip::CompressionMethod::Deflated;
 use zip::ZipWriter;
+use zip::result::ZipError;
+use zip::write::FileOptions;
 
-use crate::filesystem::utils::{copy_dir_all, CopyDirError};
+use crate::filesystem::utils::{CopyDirError, copy_dir_all};
 use crate::infra::utils::OS;
 
 #[derive(thiserror::Error, Debug)]
@@ -138,11 +138,10 @@ pub async fn create_zip_archive(
   let source_dir = source_dir.to_owned();
   let archive_path = archive_path.to_owned();
 
-  if let Ok(metadata) = fs::metadata(&archive_path).await {
-    if metadata.is_dir() {
+  if let Ok(metadata) = fs::metadata(&archive_path).await
+    && metadata.is_dir() {
       return Err(ArchiveCreationError::DestinationIsDirectory);
     }
-  }
 
   match fs::metadata(&source_dir).await {
     Ok(metadata) => {
@@ -153,7 +152,7 @@ pub async fn create_zip_archive(
       }
     }
     Err(_) => {
-      return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir)
+      return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir);
     }
   }
 

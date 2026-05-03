@@ -5,12 +5,12 @@ use async_trait::async_trait;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
+use crate::settings::Settings;
 use crate::settings::fonts::get_font_from_file;
 use crate::settings::repository::settings_repository::{
   GetSettingsError, SaveSettingsError, SettingsRepository,
 };
 use crate::settings::types::ColorTheme;
-use crate::settings::Settings;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 

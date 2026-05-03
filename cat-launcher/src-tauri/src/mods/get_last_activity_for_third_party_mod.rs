@@ -4,10 +4,10 @@ use ts_rs::TS;
 use url::Url;
 
 use crate::infra::github::get_last_commit::{
-  get_last_commit, GetLastCommitError,
+  GetLastCommitError, get_last_commit,
 };
 use crate::mods::get_third_party_mod_by_id::{
-  get_third_party_mod_by_id, GetThirdPartyModByIdError,
+  GetThirdPartyModByIdError, get_third_party_mod_by_id,
 };
 use crate::mods::repository::mods_repository::ModsRepository;
 use crate::mods::types::ModActivity;
