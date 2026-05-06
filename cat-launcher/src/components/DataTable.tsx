@@ -17,12 +17,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+/**
+ * Properties for the {@link DataTable} component.
+ *
+ * @typeParam TData - The type of data being displayed in the table.
+ * @typeParam TValue - The type of values within the data.
+ *
+ * @public
+ */
 interface DataTableProps<TData, TValue> {
+  /** The column definitions for the table. */
   columns: ColumnDef<TData, TValue>[];
+  /** The data to be displayed in the table. */
   data: TData[];
+  /** The initial sorting state for the table. */
   initialSort?: SortingState;
 }
 
+/**
+ * A reusable data table component built on top of `@tanstack/react-table`.
+ * Supports sorting and flexible column rendering.
+ *
+ * @param props - The properties for the data table.
+ * @returns A React element representing the data table.
+ *
+ * @public
+ */
 export function DataTable<TData, TValue>({
   columns,
   data,

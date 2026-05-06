@@ -3,12 +3,25 @@ import { Badge } from "@/components/ui/badge";
 import type { GameVariant } from "@/generated-types/GameVariant";
 import { useMemo } from "react";
 
+/**
+ * Props for the {@link ReleaseLabel} component.
+ */
 interface ReleaseLabelProps {
+  /** The game variant the release belongs to. */
   variant: GameVariant;
+  /** The version string of the release. */
   version: string;
+  /** Whether this release is currently active. */
   isActive: boolean;
 }
 
+/**
+ * Formats a full version string into a shorter, more readable format for display.
+ *
+ * @param variant - The game variant.
+ * @param version - The full version string.
+ * @returns A shortened version string.
+ */
 function getShortReleaseName(
   variant: GameVariant,
   version: string,
@@ -35,6 +48,12 @@ function getShortReleaseName(
   }
 }
 
+/**
+ * Displays a release version name with an optional "Active" badge.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the release label.
+ */
 export default function ReleaseLabel({
   variant,
   version,

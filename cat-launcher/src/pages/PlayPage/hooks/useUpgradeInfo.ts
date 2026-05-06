@@ -15,6 +15,16 @@ const RELEASE_TYPE_ORDER: ReleaseType[] = [
   "Experimental",
 ];
 
+/**
+ * Custom hook to provide information and options for upgrading a game variant to newer versions.
+ *
+ * @param variant - The game variant.
+ * @param selectedReleaseId - The currently selected release version ID.
+ * @param setSelectedReleaseId - Callback to update the selected release ID.
+ * @param install - Function to trigger the installation of a release.
+ * @param onActiveReleaseError - Optional callback triggered if the active release fails to load.
+ * @returns An object containing the latest release ID, available upgrade options, and whether an upgrade is allowed.
+ */
 export function useUpgradeInfo(
   variant: GameVariant,
   selectedReleaseId: string | undefined,

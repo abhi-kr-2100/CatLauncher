@@ -20,19 +20,44 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+/**
+ * Represents an individual item in the combobox.
+ *
+ * @public
+ */
 export interface ComboboxItem {
+  /** The internal value of the item. */
   value: string;
+  /** The display label of the item, which can be a React node. */
   label: ReactNode;
 }
 
+/**
+ * Properties for the internal {@link VirtualizedCommand} component.
+ *
+ * @internal
+ */
 interface VirtualizedCommandProps {
+  /** The height of the virtualized list. */
   height: string;
+  /** The list of items to display. */
   items: ComboboxItem[];
+  /** Placeholder text for the search input. */
   placeholder: string;
+  /** The currently selected value. */
   value?: string;
+  /** Callback function triggered when an item is selected. */
   onSelect?: (_value: string) => void;
 }
 
+/**
+ * A virtualized command component for efficient rendering of large lists within a command palette.
+ *
+ * @param props - The properties for the virtualized command component.
+ * @returns A React element representing the virtualized command.
+ *
+ * @internal
+ */
 const VirtualizedCommand = ({
   height,
   items,
@@ -134,19 +159,44 @@ const VirtualizedCommand = ({
   );
 };
 
+/**
+ * Properties for the {@link VirtualizedCombobox} component.
+ *
+ * @public
+ */
 interface ComboboxProps {
+  /** The list of items to display in the combobox. */
   items: ComboboxItem[];
+  /** The currently selected value. */
   value?: string;
+  /** An optional label to display above the combobox. */
   label?: string;
+  /** Callback function triggered when the selection changes. */
   onChange: (value: string) => void;
+  /** Placeholder text when no item is selected. */
   placeholder?: string;
+  /** Whether the combobox is disabled. */
   disabled?: boolean;
+  /**
+   * Whether to automatically select an item.
+   * Can be a boolean or a function that returns the item to select.
+   */
   autoselect?:
     | boolean
     | ((items: ComboboxItem[]) => ComboboxItem | undefined);
+  /** Additional CSS class names for the container. */
   className?: string;
 }
 
+/**
+ * A virtualized combobox component for selecting an item from a potentially large list.
+ * Combines a button trigger with a popover containing a virtualized list.
+ *
+ * @param props - The properties for the virtualized combobox.
+ * @returns A React element representing the virtualized combobox.
+ *
+ * @public
+ */
 export function VirtualizedCombobox({
   items,
   value,

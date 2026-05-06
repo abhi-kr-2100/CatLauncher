@@ -4,6 +4,12 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import AchievementsSidebar from "./components/AchievementsSidebar";
 import { achievementsRoutes } from "./routes";
 
+/**
+ * The main page component for the Achievements section.
+ * Manages the layout with a sidebar and a content area for different achievement-related views.
+ *
+ * @returns A React element representing the achievements page.
+ */
 function AchievementsPage() {
   const [isCollapsed, setIsCollapsed] = useState(true);
 

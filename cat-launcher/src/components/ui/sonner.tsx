@@ -2,6 +2,13 @@ import { CSSProperties } from "react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, ToasterProps } from "sonner";
 
+/**
+ * A toast notification component that integrates with the application's theme.
+ *
+ * @param props - Component props extending {@link ToasterProps} from the sonner library.
+ * @returns A React element representing the toast notification provider.
+ * @public
+ */
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 

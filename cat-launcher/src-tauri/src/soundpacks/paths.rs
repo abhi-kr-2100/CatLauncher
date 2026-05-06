@@ -6,12 +6,15 @@ use crate::filesystem::paths::{
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when determining the stock soundpacks directory.
 #[derive(thiserror::Error, Debug)]
 pub enum GetStockSoundpacksDirError {
+  /// An error occurred while determining the game resources directory.
   #[error("failed to get game resources directory: {0}")]
   GameResourcesDir(#[from] GetGameExecutableDirError),
 }
 
+/// Returns the absolute path to the stock soundpacks directory for a given game variant and version.
 pub async fn get_stock_soundpacks_dir(
   variant: &GameVariant,
   release_version: &str,
@@ -25,6 +28,7 @@ pub async fn get_stock_soundpacks_dir(
   Ok(game_resources_dir.join("data").join("sound"))
 }
 
+/// Returns the path to the soundpacks metadata resource file.
 pub fn get_soundpacks_resource_path(resource_dir: &Path) -> PathBuf {
   resource_dir.join("content").join("soundpacks.json")
 }

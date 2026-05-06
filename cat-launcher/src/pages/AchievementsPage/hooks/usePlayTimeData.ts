@@ -6,11 +6,27 @@ import { getPlayTimeForVariant } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 
+/**
+ * Represents a data point for play time visualization.
+ */
 interface PlayTimeDataPoint {
+  /**
+   * The name of the game variant.
+   */
   name: string;
+  /**
+   * The play time in hours.
+   */
   playTime: number;
 }
 
+/**
+ * A custom hook to fetch and process play time data for a list of game variants.
+ *
+ * @param variants - An array of game variant information to fetch play time for.
+ * @param onError - An optional callback function to handle errors.
+ * @returns An object containing the processed play time data and loading state.
+ */
 export function usePlayTimeData(
   variants: GameVariantInfo[],
   onError?: (error: unknown) => void,

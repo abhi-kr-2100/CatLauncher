@@ -15,6 +15,15 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 
+/**
+ * A custom hook that handles the installation and monitoring of a third-party tileset.
+ *
+ * @param variant - The game variant to install the tileset for.
+ * @param tilesetId - The unique identifier of the tileset.
+ * @param onSuccess - Optional callback fired when installation is successful.
+ * @param onError - Optional callback fired if installation fails.
+ * @returns An object containing installation methods and status.
+ */
 export function useInstallAndMonitorThirdPartyTileset(
   variant: GameVariant,
   tilesetId: string | undefined,
@@ -53,6 +62,13 @@ export function useInstallAndMonitorThirdPartyTileset(
   };
 }
 
+/**
+ * A custom hook that fetches the installation status of a third-party tileset.
+ *
+ * @param tilesetId - The unique identifier of the tileset.
+ * @param variant - The game variant.
+ * @returns An object containing the installation status and loading state.
+ */
 export function useGetThirdPartyTilesetInstallationStatus(
   tilesetId: string,
   variant: GameVariant,
@@ -72,6 +88,14 @@ export function useGetThirdPartyTilesetInstallationStatus(
   };
 }
 
+/**
+ * A custom hook that provides a mutation for uninstalling a third-party tileset.
+ *
+ * @param variant - The game variant to uninstall the tileset from.
+ * @param onSuccess - Optional callback fired when uninstallation is successful.
+ * @param onError - Optional callback fired if uninstallation fails.
+ * @returns An object containing the `uninstall` function and `isUninstalling` status.
+ */
 export function useUninstallThirdPartyTileset(
   variant: GameVariant,
   onSuccess?: () => void,
@@ -103,6 +127,12 @@ export function useUninstallThirdPartyTileset(
   };
 }
 
+/**
+ * A custom hook that fetches all available tilesets for a game variant.
+ *
+ * @param variant - The game variant to list tilesets for.
+ * @returns An object containing the list of tilesets, loading status, and any error.
+ */
 export function useListAllTilesets(variant: GameVariant) {
   const query = useQuery({
     queryKey: queryKeys.tilesets.listAll(variant),

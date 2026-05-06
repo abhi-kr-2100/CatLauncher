@@ -12,10 +12,21 @@ import { Settings } from "@/generated-types/Settings";
 import { toastCL } from "@/lib/utils";
 import { useFontFamily, useFonts } from "../hooks";
 
+/**
+ * Props for the {@link FontSettings} component.
+ */
 interface FontSettingsProps {
+  /** The form control for settings. */
   control: Control<Settings>;
 }
 
+/**
+ * A label component that previews a font in its own typeface.
+ *
+ * @param props - The component props.
+ * @param props.font - The font to preview.
+ * @returns A span displaying the font name in the corresponding typeface.
+ */
 function FontPreviewLabel({ font }: { font: Font }) {
   const onFontLoadError = useCallback(
     (e: unknown) => {
@@ -43,6 +54,15 @@ function FontPreviewLabel({ font }: { font: Font }) {
   );
 }
 
+/**
+ * A component that allows selecting a font from a list of available fonts.
+ *
+ * @param props - The component props.
+ * @param props.control - The form control for settings.
+ * @param props.fonts - The list of available fonts.
+ * @param props.isLoading - Whether the fonts are still loading.
+ * @returns A field containing a font selector.
+ */
 function FontSelector({
   control,
   fonts,
@@ -97,6 +117,13 @@ function FontSelector({
   );
 }
 
+/**
+ * A component that displays a larger preview of a selected font with sample text.
+ *
+ * @param props - The component props.
+ * @param props.selectedFont - The font to preview.
+ * @returns A preview section showing sample text in the selected font.
+ */
 function FontPreview({ selectedFont }: { selectedFont: Font }) {
   const onFontLoadError = useCallback(
     (e: unknown) => {
@@ -139,6 +166,12 @@ function FontPreview({ selectedFont }: { selectedFont: Font }) {
   );
 }
 
+/**
+ * The font settings section, allowing users to choose and preview fonts for the game.
+ *
+ * @param props - The component props.
+ * @returns The font settings UI.
+ */
 export function FontSettings({ control }: FontSettingsProps) {
   const onFontsError = useCallback(
     (e: Error) => toastCL("error", "Failed to load fonts.", e),

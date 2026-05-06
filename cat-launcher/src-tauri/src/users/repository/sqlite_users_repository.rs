@@ -8,12 +8,14 @@ use super::users_repository::{
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+/// A SQLite implementation of the `UsersRepository`.
 #[derive(Clone)]
 pub struct SqliteUsersRepository {
   pool: Pool,
 }
 
 impl SqliteUsersRepository {
+  /// Creates a new `SqliteUsersRepository` with the provided connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

@@ -5,6 +5,15 @@ import { confirmQuit, listenToQuitRequested } from "@/lib/commands";
 import { setupEventListener } from "@/lib/utils";
 import { useAppSelector } from "@/store/hooks";
 
+/**
+ * A provider component that intercepts the application's quit request.
+ * If a game is currently running, it displays a confirmation dialog to warn the user
+ * about the consequences of quitting (e.g., play time not recorded, logs not saved).
+ * If no game is running, it allows the application to quit immediately.
+ *
+ * @param props - The component props containing children to be rendered.
+ * @returns A React component that wraps its children and handles quit confirmation.
+ */
 export default function QuitConfirmationProvider({
   children,
 }: {

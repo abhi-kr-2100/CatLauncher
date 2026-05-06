@@ -18,14 +18,17 @@ use crate::settings::types::{ColorTheme, Font};
 use crate::settings::update_settings::{self, UpdateSettingsError};
 use crate::settings::Settings;
 
+/// Errors that can occur when retrieving available fonts.
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetFontsError {
+  /// The current operating system is not supported.
   #[error("failed to get fonts: {0}")]
   OS(#[from] OSNotSupportedError),
 }
 
+/// Retrieves a list of all monospaced fonts available on the system.
 #[command]
 pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
   let os_str = std::env::consts::OS;
@@ -33,20 +36,25 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
   Ok(get_all_fonts(os).await)
 }
 
+/// Errors that can occur when retrieving color themes.
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetColorThemesCommandError {
+  /// An error occurred while retrieving color themes from the filesystem.
   #[error("failed to get color themes: {0}")]
   Get(#[from] GetColorThemesError),
 
+  /// An error occurred while determining the app local data directory.
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),
 
+  /// The current operating system is not supported.
   #[error("failed to get os: {0}")]
   OS(#[from] OSNotSupportedError),
 }
 
+/// Retrieves all available color themes, including bundled and game-specific ones.
 #[command]
 pub async fn get_color_themes(
   app_handle: AppHandle,
@@ -66,14 +74,17 @@ pub async fn get_color_themes(
   Ok(themes)
 }
 
+/// Errors that can occur when retrieving application settings.
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetSettingsCommandError {
+  /// An error occurred while retrieving settings from the repository.
   #[error("failed to get settings: {0}")]
   Get(#[from] GetSettingsError),
 }
 
+/// Retrieves the current application settings.
 #[command]
 pub async fn get_settings(
   repository: State<'_, SqliteSettingsRepository>,
@@ -82,17 +93,21 @@ pub async fn get_settings(
   Ok(settings)
 }
 
+/// Errors that can occur when updating application settings.
 #[derive(
   thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum UpdateSettingsCommandError {
+  /// An error occurred while updating settings.
   #[error("failed to update settings: {0}")]
   Update(#[from] UpdateSettingsError),
 
+  /// An error occurred while determining the app local data directory.
   #[error("failed to get app local data directory: {0}")]
   AppLocalDataDir(#[from] tauri::Error),
 }
 
+/// Updates the application settings and synchronizes them with the game configurations.
 #[command]
 pub async fn update_settings(
   app_handle: AppHandle,
@@ -110,6 +125,7 @@ pub async fn update_settings(
   Ok(())
 }
 
+/// Returns the default application settings.
 #[command]
 pub fn get_default_settings() -> Settings {
   Settings::default()

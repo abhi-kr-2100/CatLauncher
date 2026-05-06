@@ -12,10 +12,23 @@ import { Settings } from "@/generated-types/Settings";
 import { toastCL } from "@/lib/utils";
 import { useColorThemes } from "../hooks";
 
+/**
+ * Props for the {@link ColorSettings} component.
+ */
 interface ColorSettingsProps {
+  /** The form control for settings. */
   control: Control<Settings>;
 }
 
+/**
+ * A component that allows selecting a color theme from a list of available themes.
+ *
+ * @param props - The component props.
+ * @param props.control - The form control for settings.
+ * @param props.themes - The list of available color themes.
+ * @param props.isLoading - Whether the themes are still loading.
+ * @returns A field containing a color theme selector.
+ */
 function ColorSelector({
   control,
   themes,
@@ -68,6 +81,12 @@ function ColorSelector({
   );
 }
 
+/**
+ * The color settings section, allowing users to choose color themes for the game.
+ *
+ * @param props - The component props.
+ * @returns The color settings UI.
+ */
 export function ColorSettings({ control }: ColorSettingsProps) {
   const onThemesError = useCallback(
     (e: Error) => toastCL("error", "Failed to load color themes.", e),

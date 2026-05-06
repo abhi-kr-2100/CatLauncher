@@ -4,6 +4,7 @@ use ts_rs::TS;
 #[derive(Serialize, Clone, TS)]
 #[ts(export)]
 #[serde(tag = "type", content = "payload")]
+/// Represents the current status of the auto-update process.
 pub enum UpdateStatus {
   Checking,
   Downloading,

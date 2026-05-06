@@ -1,5 +1,14 @@
+/**
+ * Represents a relative duration of time with a value and a unit.
+ */
 export interface RelativeTime {
+  /**
+   * The numerical value of the duration.
+   */
   value: number;
+  /**
+   * The unit of time.
+   */
   unit:
     | "seconds"
     | "minutes"
@@ -10,6 +19,12 @@ export interface RelativeTime {
     | "years";
 }
 
+/**
+ * Calculates the relative time from a given timestamp to now.
+ *
+ * @param timestamp - The timestamp as a bigint.
+ * @returns A {@link RelativeTime} object.
+ */
 export const calculateRelativeTime = (
   timestamp: bigint,
 ): RelativeTime => {
@@ -34,6 +49,13 @@ export const calculateRelativeTime = (
   return { value: years, unit: "years" };
 };
 
+/**
+ * Returns the appropriate singular or plural label for a time unit.
+ *
+ * @param unit - The time unit.
+ * @param value - The value to determine plurality.
+ * @returns The unit label string.
+ */
 const getUnitLabel = (
   unit: RelativeTime["unit"],
   value: number,
@@ -54,6 +76,12 @@ const getUnitLabel = (
   return value === 1 ? labels[unit].singular : labels[unit].plural;
 };
 
+/**
+ * Formats a {@link RelativeTime} object into a human-readable string.
+ *
+ * @param relativeTime - The relative time object.
+ * @returns A formatted string (e.g., "5 days ago").
+ */
 export const formatRelativeTime = (
   relativeTime: RelativeTime,
 ): string => {
@@ -63,6 +91,12 @@ export const formatRelativeTime = (
   return `${relativeTime.value} ${getUnitLabel(relativeTime.unit, relativeTime.value)} ago`;
 };
 
+/**
+ * Gets a human-readable relative time display string for a given timestamp.
+ *
+ * @param timestamp - The timestamp as a bigint.
+ * @returns The relative time display string.
+ */
 export const getRelativeTimeDisplay = (timestamp: bigint): string => {
   const relativeTime = calculateRelativeTime(timestamp);
   return formatRelativeTime(relativeTime);

@@ -10,18 +10,26 @@ use crate::infra::archive::{
 };
 use crate::variants::GameVariant;
 
+/// Errors that can occur during the backup of game save files.
 #[derive(thiserror::Error, Debug)]
 pub enum BackupError {
+  /// Failed to determine the path for the backup archive.
   #[error("failed to get backup archive path: {0}")]
   BackupArchivePath(#[from] GetAutomaticBackupArchivePathError),
 
+  /// Failed to create the zip archive for the backup.
   #[error("failed to create archive: {0}")]
   ArchiveCreation(#[from] ArchiveCreationError),
 
+  /// Failed to locate or create the user's game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
 }
 
+/// Backs up game save files for a specific game variant.
+///
+/// This function creates a zip archive containing the 'save' directory
+/// from the user's game data folder.
 pub async fn backup_save_files(
   variant: &GameVariant,
   id: i64,

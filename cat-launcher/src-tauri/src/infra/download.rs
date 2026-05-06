@@ -6,6 +6,7 @@ use downloader::progress::Reporter;
 use reqwest::Client;
 use thiserror::Error;
 
+/// Represents errors that can occur during file download.
 #[derive(Error, Debug)]
 pub enum DownloadFileError {
   #[error("downloader creation failed: {0}")]
@@ -15,12 +16,14 @@ pub enum DownloadFileError {
   NoDownloadResult,
 }
 
+/// A struct for managing file downloads using a shared `reqwest::Client`.
 pub struct Downloader {
   client: Client,
   parallel_requests: NonZeroU16,
 }
 
 impl Downloader {
+  /// Creates a new `Downloader` with the given client and max parallel requests.
   pub fn new(client: Client, parallel_requests: NonZeroU16) -> Self {
     Self {
       client,
@@ -28,6 +31,7 @@ impl Downloader {
     }
   }
 
+  /// Downloads a file from the given `url` to the `download_dir` and reports progress.
   pub async fn download_file(
     &self,
     url: &str,

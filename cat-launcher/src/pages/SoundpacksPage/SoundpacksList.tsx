@@ -7,10 +7,24 @@ import SoundpackCard from "./SoundpackCard";
 import { useListAllSoundpacks } from "./hooks";
 import { useSearch } from "@/hooks/useSearch";
 
+/**
+ * Props for the SoundpacksList component.
+ */
 interface SoundpacksListProps {
+  /**
+   * The game variant for which to display soundpacks.
+   */
   variant: GameVariant;
 }
 
+/**
+ * The SoundpacksList component renders a searchable grid of soundpacks available
+ * for a specific game variant. It handles fetching the soundpacks, filtering
+ * based on user input, and displaying loading or empty states.
+ *
+ * @param props - The component props.
+ * @returns A React component that renders the list of soundpacks and a search input.
+ */
 export default function SoundpacksList({
   variant,
 }: SoundpacksListProps) {

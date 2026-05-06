@@ -7,15 +7,19 @@ use crate::filesystem::paths::{
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when retrieving or creating the user configuration directory.
 #[derive(Debug, thiserror::Error)]
 pub enum GetOrCreateUserConfigDirError {
+  /// An error occurred while retrieving the user game data directory.
   #[error("Failed to get or create user game data directory")]
   GameDataDir(#[from] GetUserGameDataDirError),
 
+  /// An error occurred while creating the configuration directory.
   #[error("Failed to create config directory: {0}")]
   CreateDirFailed(#[from] io::Error),
 }
 
+/// Retrieves the path to the user's configuration directory for a specific game variant, creating it if it doesn't exist.
 pub async fn get_or_create_user_config_dir(
   variant: &GameVariant,
   data_dir: &Path,
@@ -27,6 +31,7 @@ pub async fn get_or_create_user_config_dir(
   Ok(config_dir)
 }
 
+/// Returns a list of standard directories where fonts are typically stored on the given operating system.
 pub fn get_font_directories(os: &OS) -> Vec<PathBuf> {
   let mut paths = Vec::new();
   let home = std::env::var("HOME")

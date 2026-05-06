@@ -25,20 +25,25 @@ use crate::soundpacks::uninstall_third_party_soundpack::{
 };
 use crate::variants::GameVariant;
 
+/// Errors that can occur when listing all soundpacks via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum ListAllSoundpacksCommandError {
+  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
+  /// An error occurred while retrieving OS information.
   #[error("failed to get OS information")]
   OSInfo(#[from] OSNotSupportedError),
 
+  /// An error occurred while listing the soundpacks.
   #[error("failed to list soundpacks: {0}")]
   ListSoundpacks(#[from] ListAllSoundpacksError),
 }
 
+/// Lists all available soundpacks (both stock and third-party) for a game variant.
 #[tauri::command]
 pub async fn list_all_soundpacks_command(
   variant: GameVariant,
@@ -62,20 +67,25 @@ pub async fn list_all_soundpacks_command(
   Ok(soundpacks)
 }
 
+/// Errors that can occur when installing a third-party soundpack via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum InstallThirdPartySoundpackCommandError {
+  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
+  /// An error occurred while retrieving OS information.
   #[error("failed to get OS information")]
   OSInfo(#[from] OSNotSupportedError),
 
+  /// An error occurred while installing the soundpack.
   #[error("failed to install soundpack: {0}")]
   Install(#[from] InstallThirdPartySoundpackError),
 }
 
+/// Installs a third-party soundpack for a game variant.
 #[tauri::command]
 pub async fn install_third_party_soundpack_command(
   id: String,
@@ -109,17 +119,21 @@ pub async fn install_third_party_soundpack_command(
   Ok(())
 }
 
+/// Errors that can occur when uninstalling a third-party soundpack via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum UninstallThirdPartySoundpackCommandError {
+  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
 
+  /// An error occurred while uninstalling the soundpack.
   #[error("failed to uninstall soundpack: {0}")]
   Uninstall(#[from] UninstallThirdPartySoundpackError),
 }
 
+/// Uninstalls a previously installed third-party soundpack.
 #[tauri::command]
 pub async fn uninstall_third_party_soundpack_command(
   id: String,
@@ -139,14 +153,17 @@ pub async fn uninstall_third_party_soundpack_command(
   Ok(())
 }
 
+/// Errors that can occur when retrieving the installation status of a third-party soundpack via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetThirdPartySoundpackInstallationStatusCommandError {
+  /// An error occurred while getting the installation status.
   #[error("failed to get soundpack installation status: {0}")]
   GetStatus(#[from] GetThirdPartySoundpackInstallationStatusError),
 }
 
+/// Retrieves the current installation status of a third-party soundpack.
 #[tauri::command]
 pub async fn get_third_party_soundpack_installation_status_command(
   id: String,

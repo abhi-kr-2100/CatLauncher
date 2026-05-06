@@ -6,6 +6,8 @@ use tokio::process::Command;
 
 use crate::infra::utils::OS;
 
+/// Returns a filesystem-safe version of the given name by replacing non-alphanumeric
+/// characters with underscores.
 pub fn get_safe_filename(name: &str) -> String {
   name
     .chars()
@@ -13,12 +15,17 @@ pub fn get_safe_filename(name: &str) -> String {
     .collect()
 }
 
+/// Errors that can occur when copying a directory.
 #[derive(thiserror::Error, Debug)]
 pub enum CopyDirError {
+  /// General IO error encountered during copy.
   #[error("IO error: {0}")]
   Io(#[from] io::Error),
 }
 
+/// Recursively copies a directory from source to destination.
+///
+/// Uses platform-specific utilities (like `ditto` on macOS) to handle edge cases.
 pub async fn copy_dir_all(
   src: &Path,
   dst: &Path,

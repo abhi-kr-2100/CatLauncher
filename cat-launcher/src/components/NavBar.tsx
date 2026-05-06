@@ -4,10 +4,22 @@ import ThemeToggle from "@/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { BaseRoute, routes } from "@/routes";
 
+/**
+ * Props for the {@link NavItem} component.
+ */
 interface NavItemProps {
+  /**
+   * The route object to render.
+   */
   route: BaseRoute;
 }
 
+/**
+ * A single navigation item in the navigation bar.
+ *
+ * @param props - The component props.
+ * @returns A React component that renders a navigation link.
+ */
 function NavItem({ route }: NavItemProps) {
   const Icon = route.icon;
   const targetPath = route.path.replace("/*", "");
@@ -31,6 +43,11 @@ function NavItem({ route }: NavItemProps) {
   );
 }
 
+/**
+ * The main navigation bar component, displaying links to visible routes and a theme toggle.
+ *
+ * @returns A React component that renders the navigation bar.
+ */
 export default function NavBar() {
   const visibleRoutes = routes.filter((route) => !route.hidden);
 

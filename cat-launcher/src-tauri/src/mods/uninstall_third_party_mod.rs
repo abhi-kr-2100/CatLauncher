@@ -9,16 +9,24 @@ use crate::mods::repository::installed_mods_repository::{
 };
 use crate::variants::GameVariant;
 
+/// Errors that can occur when uninstalling a third-party mod.
 #[derive(thiserror::Error, Debug)]
 pub enum UninstallThirdPartyModError {
+  /// Error while interacting with the installed mods repository.
   #[error("failed to remove installed mod from repository: {0}")]
   Repository(#[from] InstalledModsRepositoryError),
+  /// Error related to the user's game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
+  /// Failed to delete the mod's directory from the filesystem.
   #[error("failed to delete mod directory: {0}")]
   DeleteModDirectory(#[from] io::Error),
 }
 
+/// Uninstalls a third-party mod for a specific game variant.
+///
+/// This involves removing the mod's record from the repository and
+/// deleting its corresponding directory in the game's data folder.
 pub async fn uninstall_third_party_mod(
   mod_id: &str,
   game_variant: &GameVariant,

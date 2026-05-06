@@ -7,11 +7,13 @@ use crate::tilesets::repository::installed_tilesets_repository::{
 };
 use crate::variants::GameVariant;
 
+/// A SQLite implementation of the `InstalledTilesetsRepository`.
 pub struct SqliteInstalledTilesetsRepository {
   pool: r2d2::Pool<SqliteConnectionManager>,
 }
 
 impl SqliteInstalledTilesetsRepository {
+  /// Creates a new `SqliteInstalledTilesetsRepository` with the provided connection pool.
   pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
     Self { pool }
   }

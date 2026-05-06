@@ -7,6 +7,14 @@ import { MasterReset } from "./components/MasterReset";
 import { SettingsPageFooter } from "./components/SettingsPageFooter";
 import { useSettingsForm } from "./hooks";
 
+/**
+ * The SettingsPage component provides a comprehensive interface for users to
+ * modify application settings, such as fonts, colors, and performing a master reset.
+ * It manages the settings form, including loading initial values, updating settings,
+ * and handling errors or success notifications.
+ *
+ * @returns A React component that renders the settings form and footer actions.
+ */
 export default function SettingsPage() {
   const onSettingsError = useCallback(
     (e: Error) => toastCL("error", "Failed to load settings.", e),

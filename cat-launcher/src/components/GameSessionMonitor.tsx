@@ -13,6 +13,13 @@ import {
 import { copyToClipboard, toastCL } from "@/lib/utils";
 import { GameStatus, useGameSessionEvents } from "@/providers/hooks";
 
+/**
+ * A component that monitors the game session and displays a dialog when the game crashes,
+ * terminates unexpectedly, or fails to start. It provides the exit code and logs
+ * to help the user diagnose the issue.
+ *
+ * @returns A React component that renders the game session monitor dialog.
+ */
 const GameSessionMonitor = () => {
   const { gameStatus, logsText, exitCode, resetGameSessionMonitor } =
     useGameSessionEvents();

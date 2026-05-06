@@ -7,10 +7,23 @@ import {
 } from "@/components/ui/card";
 import type { CharacterAchievements } from "@/generated-types/CharacterAchievements";
 
+/**
+ * Props for the {@link AchievementsList} component.
+ */
 interface AchievementsListProps {
+  /**
+   * An array of achievement data grouped by character.
+   */
   achievements: CharacterAchievements[];
 }
 
+/**
+ * A component that renders a list of achievements for multiple characters.
+ * Each character's achievements are displayed in a card.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the list of achievements.
+ */
 export default function AchievementsList({
   achievements,
 }: AchievementsListProps) {

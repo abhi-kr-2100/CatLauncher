@@ -10,16 +10,37 @@ import {
 import type { GameVariantInfo } from "@/generated-types/GameVariantInfo";
 import { usePlayTimeData } from "../hooks/usePlayTimeData";
 
+/**
+ * Props for the {@link PlayTimeChart} component.
+ */
 interface PlayTimeChartProps {
+  /**
+   * Information about the game variants to include in the chart.
+   */
   variants: GameVariantInfo[];
 }
 
+/**
+ * Represents an item in the pie chart data.
+ */
 interface PieDataItem {
+  /**
+   * The name of the game variant.
+   */
   name: string;
+  /**
+   * The total play time in hours.
+   */
   playTime: number;
+  /**
+   * Additional properties allowed by the charting library.
+   */
   [key: string]: string | number;
 }
 
+/**
+ * A predefined set of colors for the pie chart slices.
+ */
 const COLORS = [
   "#8884d8",
   "#82ca9d",
@@ -31,16 +52,34 @@ const COLORS = [
   "#ffa58f",
 ];
 
+/**
+ * Props for the {@link PlayTimePieTooltip} component.
+ */
 interface PlayTimePieTooltipProps {
+  /**
+   * Whether the tooltip is currently active (visible).
+   */
   active?: boolean;
+  /**
+   * The data payload for the currently hovered slice.
+   */
   payload?: Array<{
     name: string;
     value: number;
     payload: { name: string };
   }>;
+  /**
+   * The total play time across all variants, used for percentage calculation.
+   */
   totalTime: number;
 }
 
+/**
+ * A custom tooltip component for the play time pie chart.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the tooltip, or null if not active.
+ */
 function PlayTimePieTooltip({
   active,
   payload,
@@ -63,6 +102,12 @@ function PlayTimePieTooltip({
   return null;
 }
 
+/**
+ * A component that renders a pie chart showing play time distribution across game variants.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the play time pie chart.
+ */
 export default function PlayTimeChart({
   variants,
 }: PlayTimeChartProps) {

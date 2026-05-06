@@ -6,12 +6,16 @@ use tokio::fs;
 
 use crate::variants::GameVariant;
 
+/// A trait for assets in the launcher.
 pub trait Asset {
+  /// Returns `true` if the asset is third-party.
   fn is_third_party(&self) -> bool;
 
+  /// Returns the ID of the asset.
   fn id(&self) -> &str;
 }
 
+/// Returns the GitHub repository string for a given game variant.
 pub fn get_github_repo_for_variant(
   variant: &GameVariant,
 ) -> &'static str {
@@ -22,6 +26,7 @@ pub fn get_github_repo_for_variant(
   }
 }
 
+/// Represents errors that can occur while reading and deserializing data from a file.
 #[derive(thiserror::Error, Debug)]
 pub enum ReadFromFileError {
   #[error("failed to read from file: {0}")]
@@ -31,6 +36,7 @@ pub enum ReadFromFileError {
   Deserialize(#[from] serde_json::Error),
 }
 
+/// Reads the content of a file at the given path and deserializes it to type `T`.
 pub async fn read_from_file<T: DeserializeOwned>(
   path: &Path,
 ) -> Result<T, ReadFromFileError> {

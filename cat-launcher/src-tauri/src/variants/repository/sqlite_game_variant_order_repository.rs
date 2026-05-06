@@ -11,12 +11,14 @@ use crate::variants::repository::game_variant_order_repository::{
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+/// A SQLite-backed implementation of the `GameVariantOrderRepository`.
 #[derive(Clone)]
 pub struct SqliteGameVariantOrderRepository {
   pool: Pool,
 }
 
 impl SqliteGameVariantOrderRepository {
+  /// Creates a new `SqliteGameVariantOrderRepository` with the given connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

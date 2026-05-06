@@ -15,24 +15,46 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+/**
+ * Props for the {@link DropdownButton} component.
+ * @public
+ */
 interface DropdownButtonProps extends React.ComponentProps<
   typeof Button
 > {
+  /**
+   * List of options to be displayed in the dropdown menu.
+   */
   options: {
+    /** Unique identifier for the option. */
     id: string;
 
+    /** Display label for the option. */
     label: string;
 
+    /** Callback function to execute when the option is clicked. */
     onClick: () => void;
 
+    /** Whether the individual option is disabled. */
     disabled?: boolean;
 
+    /** Optional tooltip text to display on hover for this option. */
     tooltip?: string;
   }[];
 
+  /**
+   * Whether the main button (left part) is disabled, independent of the dropdown trigger.
+   */
   mainButtonDisabled?: boolean;
 }
 
+/**
+ * A split button component that features a main action and a dropdown for additional options.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the dropdown button.
+ * @public
+ */
 export function DropdownButton({
   children,
 

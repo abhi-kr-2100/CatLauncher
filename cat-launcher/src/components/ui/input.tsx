@@ -2,6 +2,14 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A standard input component for user text entry.
+ *
+ * @param props - The properties for the input component, extending standard HTML input attributes.
+ * @returns A React element representing the input.
+ *
+ * @public
+ */
 function Input({
   className,
   type,

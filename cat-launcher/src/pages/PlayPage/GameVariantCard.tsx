@@ -15,10 +15,22 @@ import { PlayTime } from "./PlayTime";
 import ReleaseSelector from "./ReleaseSelector";
 import { TipOfTheDay } from "../game-tips/TipOfTheDay";
 
+/**
+ * Props for the {@link GameVariantCard} component.
+ */
 export interface GameVariantProps {
+  /** Information about the game variant to display. */
   variantInfo: GameVariantInfo;
 }
 
+/**
+ * A card component that displays information about a specific game variant.
+ * It includes a draggable handle, a tip of the day, a release selector,
+ * an interaction button (e.g., Play/Install), and playtime statistics.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the game variant card.
+ */
 export default function GameVariantCard({
   variantInfo,
 }: GameVariantProps) {

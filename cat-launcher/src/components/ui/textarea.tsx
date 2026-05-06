@@ -2,6 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A multi-line text input component.
+ *
+ * @param props - Textarea element props.
+ * @returns A React element representing the textarea.
+ * @public
+ */
 function Textarea({
   className,
   ...props

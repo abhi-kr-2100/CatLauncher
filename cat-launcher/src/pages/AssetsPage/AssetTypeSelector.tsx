@@ -10,11 +10,22 @@ const ASSET_TYPE_LABELS: Record<AssetType, string> = {
   tilesets: "Tilesets",
 };
 
+/**
+ * Props for the {@link AssetTypeSelector} component.
+ */
 interface AssetTypeSelectorProps {
+  /** The currently selected asset type. */
   selectedAssetType: AssetType;
+  /** Callback triggered when the asset type selection changes. */
   onAssetTypeChange: (assetType: AssetType) => void;
 }
 
+/**
+ * A dropdown component that allows the user to select the type of game assets to display.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the asset type selector.
+ */
 export default function AssetTypeSelector({
   selectedAssetType,
   onAssetTypeChange,

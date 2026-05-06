@@ -7,10 +7,22 @@ import TilesetCard from "./TilesetCard";
 import { useListAllTilesets } from "./hooks";
 import { useSearch } from "@/hooks/useSearch";
 
+/**
+ * Props for the {@link TilesetsList} component.
+ */
 interface TilesetsListProps {
+  /**
+   * The game variant for which to list tilesets.
+   */
   variant: GameVariant;
 }
 
+/**
+ * A component that displays a searchable list of tilesets for a specific game variant.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the tilesets list.
+ */
 export default function TilesetsList({ variant }: TilesetsListProps) {
   const { tilesets, isLoading, error } = useListAllTilesets(variant);
 

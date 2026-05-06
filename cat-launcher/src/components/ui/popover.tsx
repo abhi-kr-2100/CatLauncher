@@ -3,12 +3,29 @@ import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * The root component of a popover, which manages its open/closed state.
+ * Built on top of Radix UI's Popover primitive.
+ *
+ * @param props - The properties for the popover root component.
+ * @returns A React element representing the popover root.
+ *
+ * @public
+ */
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
+/**
+ * The trigger element that opens the popover when interacted with.
+ *
+ * @param props - The properties for the popover trigger component.
+ * @returns A React element representing the popover trigger.
+ *
+ * @public
+ */
 function PopoverTrigger({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
@@ -20,6 +37,14 @@ function PopoverTrigger({
   );
 }
 
+/**
+ * The content that is displayed inside the popover when it is open.
+ *
+ * @param props - The properties for the popover content component, including alignment and side offset.
+ * @returns A React element representing the popover content.
+ *
+ * @public
+ */
 function PopoverContent({
   className,
   align = "center",
@@ -42,6 +67,14 @@ function PopoverContent({
   );
 }
 
+/**
+ * An optional anchor element that the popover will position itself relative to.
+ *
+ * @param props - The properties for the popover anchor component.
+ * @returns A React element representing the popover anchor.
+ *
+ * @public
+ */
 function PopoverAnchor({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {

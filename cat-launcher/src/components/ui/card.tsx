@@ -2,6 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A container component for grouping related content and actions.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card.
+ * @public
+ */
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -15,6 +22,13 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+/**
+ * Header section of a {@link Card}, typically containing {@link CardTitle} and {@link CardDescription}.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card header.
+ * @public
+ */
 function CardHeader({
   className,
   ...props
@@ -31,6 +45,13 @@ function CardHeader({
   );
 }
 
+/**
+ * The title component for a {@link Card}.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card title.
+ * @public
+ */
 function CardTitle({
   className,
   ...props
@@ -44,6 +65,13 @@ function CardTitle({
   );
 }
 
+/**
+ * The description component for a {@link Card}, providing additional details.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card description.
+ * @public
+ */
 function CardDescription({
   className,
   ...props
@@ -57,6 +85,13 @@ function CardDescription({
   );
 }
 
+/**
+ * An optional action area within the {@link CardHeader}, positioned to the right of the title.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card action.
+ * @public
+ */
 function CardAction({
   className,
   ...props
@@ -73,6 +108,13 @@ function CardAction({
   );
 }
 
+/**
+ * The main content area of a {@link Card}.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card content.
+ * @public
+ */
 function CardContent({
   className,
   ...props
@@ -86,6 +128,13 @@ function CardContent({
   );
 }
 
+/**
+ * The footer section of a {@link Card}, typically used for secondary actions.
+ *
+ * @param props - Div element props.
+ * @returns A React element representing the card footer.
+ * @public
+ */
 function CardFooter({
   className,
   ...props

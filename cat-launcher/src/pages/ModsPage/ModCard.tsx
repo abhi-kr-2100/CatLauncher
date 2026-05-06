@@ -22,27 +22,67 @@ import {
 import { ModInstallationConfirmationDialog } from "./ModInstallationConfirmationDialog";
 import { PreInstalledButton } from "@/components/PreInstalledButton";
 
+/**
+ * Props for the {@link ModCard} component.
+ */
 interface ModCardProps {
+  /**
+   * The game variant associated with the mod.
+   */
   variant: GameVariant;
+  /**
+   * The mod data to display.
+   */
   mod: Mod;
 }
 
+/**
+ * Extracts the display name from a mod.
+ *
+ * @param mod - The mod object.
+ * @returns The name of the mod.
+ */
 function getModName(mod: Mod): string {
   return mod.content.name;
 }
 
+/**
+ * Extracts the description from a mod.
+ *
+ * @param mod - The mod object.
+ * @returns The description of the mod.
+ */
 function getModDescription(mod: Mod): string {
   return mod.content.description;
 }
 
+/**
+ * Determines the display type of a mod (Pre-Installed or Third-Party).
+ *
+ * @param mod - The mod object.
+ * @returns A string representing the mod type.
+ */
 function getModType(mod: Mod): string {
   return mod.type === "Stock" ? "Pre-Installed" : "Third-Party";
 }
 
+/**
+ * Extracts and formats the category of a mod.
+ *
+ * @param mod - The mod object.
+ * @returns A human-friendly category string.
+ */
 function getModCategory(mod: Mod): string {
   return getHumanFriendlyText(mod.content.category);
 }
 
+/**
+ * A card component that displays information about a single mod and provides installation/uninstallation controls.
+ * For third-party mods, it includes a confirmation dialog before installation.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the mod card.
+ */
 export default function ModCard({ variant, mod }: ModCardProps) {
   const [confirmationDialogOpen, setConfirmationDialogOpen] =
     useState(false);

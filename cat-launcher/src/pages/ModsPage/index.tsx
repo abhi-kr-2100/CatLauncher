@@ -5,6 +5,12 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import ModsList from "./ModsList";
 
+/**
+ * The main page component for the Mods section.
+ * Provides a variant selector and displays a list of mods for the selected variant.
+ *
+ * @returns A React element representing the mods page.
+ */
 function ModsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();

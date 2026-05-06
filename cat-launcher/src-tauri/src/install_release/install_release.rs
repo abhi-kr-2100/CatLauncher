@@ -21,34 +21,51 @@ use crate::infra::github::asset::AssetDownloadError;
 use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 
+/// Errors that can occur during the release installation process.
 #[derive(thiserror::Error, Debug)]
 pub enum ReleaseInstallationError {
+  /// Failed to determine or create the download directory.
   #[error("failed to get download directory: {0}")]
   DownloadDir(#[from] AssetDownloadDirError),
 
+  /// Failed to determine or create the extraction directory.
   #[error("failed to get extraction directory: {0}")]
   ExtractionDir(#[from] AssetExtractionDirError),
 
+  /// An error occurred with the underlying downloader.
   #[error("failed to create downloader: {0}")]
   Downloader(#[from] downloader::Error),
 
+  /// No compatible asset (OS/Arch) was found for this release.
   #[error("no compatible asset found")]
   NoCompatibleAsset,
 
+  /// Failed to download the release asset.
   #[error("failed to download asset: {0}")]
   Download(#[from] AssetDownloadError),
 
+  /// Failed to extract the downloaded archive.
   #[error("failed to extract asset: {0}")]
   Extract(#[from] ExtractionError),
 
+  /// Failed to determine the release status during or after installation.
   #[error("failed to get release status: {0}")]
   ReleaseStatus(#[from] GetInstallationStatusError),
 
+  /// Failed to update the active release in the repository.
   #[error("failed to set active release: {0}")]
   ActiveRelease(#[from] ActiveReleaseError),
 }
 
 impl GameRelease {
+  /// Installs the game release.
+  ///
+  /// This process involves:
+  /// 1. Checking the current status.
+  /// 2. Downloading the appropriate asset if not already downloaded.
+  /// 3. Extracting the asset to the installation directory.
+  /// 4. Setting this release as the active one.
+  /// 5. Cleaning up the downloaded archive and other old installations.
   #[allow(clippy::too_many_arguments)]
   pub async fn install_release(
     &mut self,
