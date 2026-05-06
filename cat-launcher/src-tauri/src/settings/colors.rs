@@ -13,20 +13,25 @@ use crate::infra::utils::OS;
 use crate::settings::types::ColorTheme;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when retrieving available color themes.
 #[derive(thiserror::Error, Debug)]
 pub enum GetColorThemesError {
+  /// An error occurred while determining the game resources directory.
   #[error("failed to get game resources directory: {0}")]
   ResourcesDir(
     #[from] crate::filesystem::paths::GetGameExecutableDirError,
   ),
 
+  /// An error occurred while reading a directory.
   #[error("failed to read directory: {0}")]
   ReadDir(#[from] std::io::Error),
 
+  /// An error occurred while retrieving the active release.
   #[error("failed to get active release: {0}")]
   ActiveRelease(#[from] ActiveReleaseRepositoryError),
 }
 
+/// Retrieves all available color themes, including bundled and game-specific ones.
 pub async fn get_available_color_themes(
   data_dir: &Path,
   resource_dir: &Path,

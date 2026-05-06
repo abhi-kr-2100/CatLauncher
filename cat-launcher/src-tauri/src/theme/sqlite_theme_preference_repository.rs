@@ -12,12 +12,14 @@ use crate::theme::theme_preference_repository::{
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+/// A SQLite-backed implementation of the `ThemePreferenceRepository`.
 #[derive(Clone)]
 pub struct SqliteThemePreferenceRepository {
   pool: Pool,
 }
 
 impl SqliteThemePreferenceRepository {
+  /// Creates a new `SqliteThemePreferenceRepository` with the given connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

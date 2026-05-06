@@ -7,6 +7,13 @@ import { getInstallationStatus } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { useReleases } from "./useReleases";
 
+/**
+ * Custom hook to retrieve the installation status for all releases of a specific game variant.
+ * It caches the statuses and provides them as a record mapping release IDs to statuses.
+ *
+ * @param variant - The game variant.
+ * @returns A record where keys are version strings and values are installation statuses.
+ */
 export function useAllReleasesInstallationStatuses(
   variant: GameVariant,
 ) {

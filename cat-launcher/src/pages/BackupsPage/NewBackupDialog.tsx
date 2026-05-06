@@ -27,14 +27,29 @@ const formSchema = z.object({
   notes: z.string().optional(),
 });
 
+/**
+ * Props for the {@link NewBackupDialog} component.
+ */
 interface NewBackupDialogProps {
+  /** Whether the dialog is currently open. */
   open: boolean;
+  /** Callback triggered when the dialog's open state changes. */
   onOpenChange: (open: boolean) => void;
+  /** Callback triggered when the form is submitted successfully. */
   onSave: (values: z.infer<typeof formSchema>) => void;
+  /** The game variant for which the backup is being created. */
   variant: GameVariant;
+  /** Whether the backup creation process is currently in progress. */
   isCreating: boolean;
 }
 
+/**
+ * A dialog component for creating a new manual backup.
+ * Provides a form for entering a name and optional notes.
+ *
+ * @param props - Component properties.
+ * @returns A React element rendering the creation dialog and form.
+ */
 export function NewBackupDialog({
   open,
   onOpenChange,

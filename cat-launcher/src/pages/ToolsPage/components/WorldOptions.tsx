@@ -1,3 +1,8 @@
+/**
+ * A component for configuring world-specific options (Coming soon).
+ *
+ * @returns A React element representing the world options view.
+ */
 export default function WorldOptions() {
   return (
     <div className="space-y-4">

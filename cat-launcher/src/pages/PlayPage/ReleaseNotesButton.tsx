@@ -19,10 +19,21 @@ import { useReleaseNotesRange } from "./hooks";
 import ReleaseSelectionColumn from "./ReleaseSelectionColumn";
 import { GameVariant } from "@/generated-types/GameVariant";
 
+/**
+ * Props for the {@link ReleaseNotesButton} component.
+ */
 interface ReleaseNotesButtonProps {
+  /** The game variant to fetch and display release notes for. */
   variant: GameVariant;
 }
 
+/**
+ * Component that renders a button to open a dialog showing release notes.
+ * Allows users to compare notes between different versions of the game.
+ *
+ * @param props - Component properties.
+ * @returns A React element rendering the release notes button and dialog.
+ */
 export default function ReleaseNotesButton({
   variant,
 }: ReleaseNotesButtonProps) {

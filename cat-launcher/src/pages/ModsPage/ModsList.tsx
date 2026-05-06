@@ -7,10 +7,23 @@ import ModCard from "./ModCard";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 
+/**
+ * Props for the {@link ModsList} component.
+ */
 interface ModsListProps {
+  /**
+   * The game variant for which to list mods.
+   */
   variant: GameVariant;
 }
 
+/**
+ * A component that displays a searchable list of mods for a specific game variant.
+ * Includes a warning about third-party mods and handles search functionality.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the mods list.
+ */
 export default function ModsList({ variant }: ModsListProps) {
   const variantLabel = getVariantLabel(variant);
   const { mods, isLoading } = useMods(

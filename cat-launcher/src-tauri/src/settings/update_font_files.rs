@@ -12,42 +12,55 @@ use crate::settings::paths::{
 use crate::settings::types::Font;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when ensuring font blending is enabled in the game options.
 #[derive(thiserror::Error, Debug)]
 pub enum EnsureFontBlendingError {
+  /// An error occurred while reading `options.json`.
   #[error("failed to read existing options.json: {0}")]
   ReadOptionsJson(#[source] std::io::Error),
 
+  /// An error occurred while parsing or serializing JSON data.
   #[error("failed to serialize JSON: {0}")]
   Json(#[from] serde_json::Error),
 
+  /// An error occurred while writing `options.json`.
   #[error("failed to write options.json: {0}")]
   WriteOptionsJson(#[source] std::io::Error),
 
+  /// The `options.json` file has an invalid format.
   #[error("bad options.json file")]
   BadOptionsJson,
 }
 
+/// Errors that can occur when updating font configuration files.
 #[derive(thiserror::Error, Debug)]
 pub enum UpdateFontFilesError {
+  /// An error occurred while retrieving the user game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
 
+  /// An error occurred while retrieving or creating the user config directory.
   #[error("failed to get or create user config directory: {0}")]
   GetOrCreateUserConfigDir(#[from] GetOrCreateUserConfigDirError),
 
+  /// An error occurred while reading `fonts.json`.
   #[error("failed to read existing fonts.json: {0}")]
   ReadFontsJson(#[source] std::io::Error),
 
+  /// An error occurred while parsing or serializing JSON data.
   #[error("failed to serialize JSON: {0}")]
   Json(#[from] serde_json::Error),
 
+  /// An error occurred while writing `fonts.json`.
   #[error("failed to write fonts.json: {0}")]
   WriteFontsJson(#[source] std::io::Error),
 
+  /// An error occurred while ensuring font blending is enabled.
   #[error("failed to ensure font blending: {0}")]
   EnsureFontBlending(#[from] EnsureFontBlendingError),
 }
 
+/// Synchronizes the selected font with the game's `fonts.json` configuration file.
 pub async fn update_font_files(
   data_dir: &Path,
   settings: &Settings,

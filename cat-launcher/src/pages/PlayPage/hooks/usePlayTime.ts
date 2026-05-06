@@ -11,6 +11,14 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener, toastCL } from "@/lib/utils";
 
+/**
+ * Custom hook to track and retrieve playtime statistics for a specific game variant and release.
+ * It updates the statistics in real-time by listening for game exit events.
+ *
+ * @param variant - The game variant.
+ * @param releaseId - Optional release version ID.
+ * @returns An object containing the total playtime for the variant and playtime for the specific version.
+ */
 export function usePlayTime(
   variant: GameVariant,
   releaseId?: string,

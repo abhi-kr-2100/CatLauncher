@@ -7,11 +7,13 @@ use crate::soundpacks::repository::installed_soundpacks_repository::{
 };
 use crate::variants::GameVariant;
 
+/// A SQLite implementation of the `InstalledSoundpacksRepository`.
 pub struct SqliteInstalledSoundpacksRepository {
   pool: r2d2::Pool<SqliteConnectionManager>,
 }
 
 impl SqliteInstalledSoundpacksRepository {
+  /// Creates a new `SqliteInstalledSoundpacksRepository` with the provided connection pool.
   pub fn new(pool: r2d2::Pool<SqliteConnectionManager>) -> Self {
     Self { pool }
   }

@@ -8,16 +8,37 @@ from typing import Optional
 
 from git import Repo
 
+"""Command-line interface for validating SQLite schema compatibility."""
+
 SCHEMA_PATH = "cat-launcher/src-tauri/schemas/schema.sql"
+"""str: The relative path to the SQLite schema file in the repository."""
 
 
 def get_schema_at_commit(repo: Repo, commit_sha: str) -> str:
+    """Retrieves the schema file content at a specific git commit.
+
+    Args:
+        repo: The git repository object.
+        commit_sha: The SHA-1 hash of the commit to retrieve the schema from.
+
+    Returns:
+        The content of the schema file as a string.
+    """
     commit = repo.commit(commit_sha)
     blob = commit.tree / SCHEMA_PATH
     return blob.data_stream.read().decode("utf-8")
 
 
 def execute_schema(conn: sqlite3.Connection, schema: str) -> bool:
+    """Executes a SQL schema script on a database connection.
+
+    Args:
+        conn: The SQLite database connection.
+        schema: The SQL script to execute.
+
+    Returns:
+        True if the schema was executed successfully, False otherwise.
+    """
     try:
         cursor = conn.cursor()
         cursor.executescript(schema)
@@ -28,6 +49,14 @@ def execute_schema(conn: sqlite3.Connection, schema: str) -> bool:
 
 
 def main(args: Optional[list[str]] = None) -> None:
+    """Main entry point for the schema validation script.
+
+    Compares the SQLite schema between two commits to ensure that the current
+    schema can be applied on top of the previous one (simulating a migration).
+
+    Args:
+        args: Optional list of command line arguments. Defaults to sys.argv[1:].
+    """
     parser = argparse.ArgumentParser(
         description="Verify SQLite schema compatibility between two commits"
     )

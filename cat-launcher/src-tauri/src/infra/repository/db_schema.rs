@@ -7,6 +7,7 @@ use crate::theme::theme::Theme;
 use crate::variants::game_variant::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
+/// Errors that can occur during database schema initialization.
 pub enum InitializeSchemaError {
   #[error("failed to execute schema: {0}")]
   Execute(#[from] rusqlite::Error),
@@ -15,6 +16,8 @@ pub enum InitializeSchemaError {
   ReadFile(#[from] std::io::Error),
 }
 
+/// Initializes the database schema by executing SQL from the provided paths
+/// and populating the variants and themes tables.
 pub fn initialize_schema(
   conn: &Connection,
   schema_paths: &[PathBuf],

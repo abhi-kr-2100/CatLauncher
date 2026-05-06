@@ -18,6 +18,13 @@ import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
 import GameVariantCard from "./GameVariantCard";
 
+/**
+ * The PlayPage component is the main hub for launching games.
+ * It displays a list of game variants as cards, which can be reordered
+ * via drag-and-drop using `@dnd-kit`.
+ *
+ * @returns A React component rendering the Play page.
+ */
 function PlayPage() {
   const {
     gameVariants: orderedItems,

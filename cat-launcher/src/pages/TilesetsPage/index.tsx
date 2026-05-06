@@ -5,6 +5,12 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import TilesetsList from "./TilesetsList";
 
+/**
+ * The Tilesets page component, which allows users to select a game variant
+ * and view/manage tilesets for that variant.
+ *
+ * @returns The tilesets page UI.
+ */
 function TilesetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();

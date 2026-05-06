@@ -7,19 +7,37 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import type { ReleaseType } from "@/generated-types/ReleaseType";
 import { useAppSelector } from "@/store/hooks";
 
+/** A function type used to filter game releases. */
 export type FilterFn = (r: GameRelease) => boolean;
 
+/**
+ * Represents a filter option for game releases.
+ */
 export type Filter = {
+  /** The unique identifier for the filter, corresponding to a release type. */
   id: ReleaseType;
+  /** The display label for the filter. */
   label: string;
+  /** The function to apply when this filter is active. */
   apply: FilterFn;
 };
 
+/**
+ * Props for the {@link ReleaseFilter} component.
+ */
 interface ReleaseFilterProps {
+  /** The game variant for which filters are being applied. */
   variant: GameVariant;
+  /** Callback triggered when the active filter function changes. */
   onChange: (filterFn: FilterFn) => void;
 }
 
+/**
+ * Retrieves the available release filters for a specific game variant.
+ *
+ * @param variant - The game variant.
+ * @returns An array of available filters.
+ */
 function getFilters(variant: GameVariant): Filter[] {
   const stableFilter = {
     id: "Stable",
@@ -53,6 +71,12 @@ function getFilters(variant: GameVariant): Filter[] {
   }
 }
 
+/**
+ * A component that provides checkboxes to filter game releases by type (e.g., Stable, Experimental).
+ *
+ * @param props - The component props.
+ * @returns A React element containing the filter controls.
+ */
 export default function ReleaseFilter({
   variant,
   onChange,

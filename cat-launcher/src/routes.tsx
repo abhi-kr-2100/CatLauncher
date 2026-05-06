@@ -19,15 +19,39 @@ import BackupsPage from "@/pages/BackupsPage";
 import PlayPage from "@/pages/PlayPage";
 import SettingsPage from "@/pages/SettingsPage";
 
+/**
+ * Defines the structure for a route in the application.
+ */
 export interface BaseRoute {
+  /**
+   * The URL path for the route.
+   */
   path: string;
+  /**
+   * The React component to render for this route.
+   */
   element: ReactNode;
+  /**
+   * The display label for the route, often used in navigation.
+   */
   label: string;
+  /**
+   * The icon associated with the route.
+   */
   icon: LucideIcon;
+  /**
+   * The layout type for this route. Defaults to "default".
+   */
   layout?: "sidebar" | "default";
+  /**
+   * Whether the route should be hidden from navigation.
+   */
   hidden?: boolean;
 }
 
+/**
+ * The collection of primary routes for the application.
+ */
 export const routes: BaseRoute[] = [
   {
     path: "/",

@@ -7,6 +7,15 @@ import { toastCL } from "@/lib/utils";
 import { useAppDispatch } from "@/store/hooks";
 import { setCurrentlyPlaying } from "@/store/gameSessionSlice";
 
+/**
+ * Custom hook to handle launching a specific game release.
+ *
+ * @param variant - The game variant to launch.
+ * @param options - Launch configuration options.
+ * @param options.worldName - Optional name of the world to load upon launch.
+ * @param options.onError - Optional callback triggered if the game fails to launch.
+ * @returns An object containing the launch function and a loading state.
+ */
 export function useLaunchGame(
   variant: GameVariant,
   {

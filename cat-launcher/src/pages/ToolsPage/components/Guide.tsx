@@ -1,3 +1,8 @@
+/**
+ * A component that displays the user guide and documentation (Coming soon).
+ *
+ * @returns A React element representing the guide view.
+ */
 export default function Guide() {
   return (
     <div className="space-y-4">

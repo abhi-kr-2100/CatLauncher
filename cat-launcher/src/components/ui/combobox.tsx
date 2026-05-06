@@ -15,24 +15,52 @@ import {
 import { ChevronsUpDownIcon } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 
+/**
+ * Represents an individual item in the {@link Combobox}.
+ * @public
+ */
 export interface ComboboxItem {
+  /** The value of the item, used for selection. */
   value: string;
+  /** The display label of the item. */
   label: ReactNode;
 }
 
+/**
+ * Props for the {@link Combobox} component.
+ * @public
+ */
 interface ComboboxProps {
+  /** The list of items to display in the combobox. */
   items: ComboboxItem[];
+  /** The currently selected value. */
   value?: string;
+  /** Optional label to display above the combobox. */
   label?: string;
+  /** Callback function called when the selection changes. */
   onChange: (_value: string) => void;
+  /** Text to display when no item is selected. */
   placeholder?: string;
+  /** Whether the combobox is disabled. */
   disabled?: boolean;
+  /**
+   * Strategy for auto-selecting an item when the component mounts or items change.
+   * Can be a boolean or a function that returns an item to select.
+   */
   autoselect?:
     | boolean
     | ((_items: ComboboxItem[]) => ComboboxItem | undefined);
+  /** Optional CSS class name for the root element. */
   className?: string;
 }
 
+/**
+ * A searchable dropdown selection component.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the combobox.
+ * @public
+ */
 export function Combobox({
   items,
   value,

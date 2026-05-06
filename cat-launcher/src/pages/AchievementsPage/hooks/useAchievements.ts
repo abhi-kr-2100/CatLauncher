@@ -5,6 +5,13 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import { getAchievementsForVariant } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * A custom hook to fetch achievements for a specific game variant.
+ *
+ * @param variant - The game variant to fetch achievements for, or null if none selected.
+ * @param onAchievementsError - An optional callback function to handle errors during fetching.
+ * @returns The query result from react-query.
+ */
 export function useAchievements(
   variant: GameVariant | null,
   onAchievementsError?: (error: Error) => void,

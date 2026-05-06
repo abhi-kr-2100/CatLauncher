@@ -7,6 +7,9 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useActiveRelease } from "./useActiveRelease";
 import { useReleases } from "./useReleases";
 
+/**
+ * Represents predefined keys for quickly selecting specific versions in release notes.
+ */
 export type QuickSelectKey =
   | "Active"
   | "Latest"
@@ -14,6 +17,13 @@ export type QuickSelectKey =
   | "ReleaseCandidate"
   | "Experimental";
 
+/**
+ * Custom hook to manage the selection and display of release notes for a range of versions.
+ * It handles the loading of notes for multiple versions and provides functions to manipulate the range.
+ *
+ * @param variant - The game variant.
+ * @returns An object containing the range boundaries, combined notes, loading state, and helper functions.
+ */
 export function useReleaseNotesRange(variant: GameVariant) {
   const { releases } = useReleases(variant);
   const { activeRelease } = useActiveRelease(variant);

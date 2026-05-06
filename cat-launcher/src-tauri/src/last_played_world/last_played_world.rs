@@ -8,18 +8,23 @@ use crate::last_played_world::paths::get_last_world_path;
 use crate::last_played_world::types::LastWorld;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when reading the last played world.
 #[derive(thiserror::Error, Debug)]
 pub enum GetLastPlayedWorldError {
+  /// An error occurred while determining the user game data directory.
   #[error("failed to get user game data directory: {0}")]
   GetUserGameDataDir(#[from] GetUserGameDataDirError),
 
+  /// An error occurred while reading the `lastworld.json` file.
   #[error("failed to read lastworld.json: {0}")]
   Read(#[from] io::Error),
 
+  /// An error occurred while parsing the `lastworld.json` file.
   #[error("failed to parse lastworld.json: {0}")]
   Parse(#[from] serde_json::Error),
 }
 
+/// Retrieves the name of the last played world for a given variant, if it exists.
 pub async fn get_last_played_world(
   data_dir: &Path,
   variant: &GameVariant,

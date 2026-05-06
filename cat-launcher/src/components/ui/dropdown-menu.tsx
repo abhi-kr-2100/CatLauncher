@@ -8,6 +8,15 @@ import {
 
 import { cn } from "@/lib/utils";
 
+/**
+ * The root component of a dropdown menu, which manages its open/closed state.
+ * Built on top of Radix UI's DropdownMenu primitive.
+ *
+ * @param props - The properties for the dropdown menu root.
+ * @returns A React element representing the dropdown menu root.
+ *
+ * @public
+ */
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -19,6 +28,14 @@ function DropdownMenu({
   );
 }
 
+/**
+ * A portal component that renders the dropdown menu content into a separate DOM node.
+ *
+ * @param props - The properties for the dropdown menu portal.
+ * @returns A React element representing the dropdown menu portal.
+ *
+ * @public
+ */
 function DropdownMenuPortal({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
@@ -30,6 +47,14 @@ function DropdownMenuPortal({
   );
 }
 
+/**
+ * The trigger element that opens the dropdown menu when interacted with.
+ *
+ * @param props - The properties for the dropdown menu trigger.
+ * @returns A React element representing the dropdown menu trigger.
+ *
+ * @public
+ */
 function DropdownMenuTrigger({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
@@ -41,6 +66,14 @@ function DropdownMenuTrigger({
   );
 }
 
+/**
+ * The content that is displayed inside the dropdown menu when it is open.
+ *
+ * @param props - The properties for the dropdown menu content.
+ * @returns A React element representing the dropdown menu content.
+ *
+ * @public
+ */
 function DropdownMenuContent({
   className,
   sideOffset = 4,
@@ -61,6 +94,14 @@ function DropdownMenuContent({
   );
 }
 
+/**
+ * A component for grouping dropdown menu items together.
+ *
+ * @param props - The properties for the dropdown menu group.
+ * @returns A React element representing the dropdown menu group.
+ *
+ * @public
+ */
 function DropdownMenuGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
@@ -72,6 +113,14 @@ function DropdownMenuGroup({
   );
 }
 
+/**
+ * An individual item within the dropdown menu.
+ *
+ * @param props - The properties for the dropdown menu item, including an optional `inset` for indentation and a visual `variant`.
+ * @returns A React element representing the dropdown menu item.
+ *
+ * @public
+ */
 function DropdownMenuItem({
   className,
   inset,
@@ -95,6 +144,14 @@ function DropdownMenuItem({
   );
 }
 
+/**
+ * A dropdown menu item that can be toggled on and off.
+ *
+ * @param props - The properties for the dropdown menu checkbox item.
+ * @returns A React element representing the dropdown menu checkbox item.
+ *
+ * @public
+ */
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -121,6 +178,14 @@ function DropdownMenuCheckboxItem({
   );
 }
 
+/**
+ * A container for a set of radio items within a dropdown menu.
+ *
+ * @param props - The properties for the dropdown menu radio group.
+ * @returns A React element representing the dropdown menu radio group.
+ *
+ * @public
+ */
 function DropdownMenuRadioGroup({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
@@ -132,6 +197,14 @@ function DropdownMenuRadioGroup({
   );
 }
 
+/**
+ * An individual radio item within a dropdown menu radio group.
+ *
+ * @param props - The properties for the dropdown menu radio item.
+ * @returns A React element representing the dropdown menu radio item.
+ *
+ * @public
+ */
 function DropdownMenuRadioItem({
   className,
   children,
@@ -156,6 +229,14 @@ function DropdownMenuRadioItem({
   );
 }
 
+/**
+ * A label for a section of the dropdown menu.
+ *
+ * @param props - The properties for the dropdown menu label, including an optional `inset` for indentation.
+ * @returns A React element representing the dropdown menu label.
+ *
+ * @public
+ */
 function DropdownMenuLabel({
   className,
   inset,
@@ -176,6 +257,14 @@ function DropdownMenuLabel({
   );
 }
 
+/**
+ * A horizontal line that separates items in the dropdown menu.
+ *
+ * @param props - The properties for the dropdown menu separator.
+ * @returns A React element representing the dropdown menu separator.
+ *
+ * @public
+ */
 function DropdownMenuSeparator({
   className,
   ...props
@@ -189,6 +278,14 @@ function DropdownMenuSeparator({
   );
 }
 
+/**
+ * A shortcut key display for a dropdown menu item.
+ *
+ * @param props - The properties for the dropdown menu shortcut.
+ * @returns A React element representing the dropdown menu shortcut.
+ *
+ * @public
+ */
 function DropdownMenuShortcut({
   className,
   ...props
@@ -205,6 +302,14 @@ function DropdownMenuShortcut({
   );
 }
 
+/**
+ * The root component of a submenu within a dropdown menu.
+ *
+ * @param props - The properties for the dropdown menu submenu.
+ * @returns A React element representing the dropdown menu submenu.
+ *
+ * @public
+ */
 function DropdownMenuSub({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
@@ -216,6 +321,14 @@ function DropdownMenuSub({
   );
 }
 
+/**
+ * The trigger element that opens a submenu when interacted with.
+ *
+ * @param props - The properties for the dropdown menu submenu trigger, including an optional `inset` for indentation.
+ * @returns A React element representing the dropdown menu submenu trigger.
+ *
+ * @public
+ */
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -240,6 +353,14 @@ function DropdownMenuSubTrigger({
   );
 }
 
+/**
+ * The content that is displayed inside a submenu when it is open.
+ *
+ * @param props - The properties for the dropdown menu submenu content.
+ * @returns A React element representing the dropdown menu submenu content.
+ *
+ * @public
+ */
 function DropdownMenuSubContent({
   className,
   ...props

@@ -4,11 +4,22 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import { cn } from "@/lib/utils";
 import { usePlayTime } from "./hooks";
 
+/**
+ * Props for the {@link PlayTime} component.
+ */
 interface PlayTimeProps extends HTMLAttributes<HTMLDivElement> {
+  /** The game variant to show playtime for. */
   variant: GameVariant;
+  /** The specific release version ID to show playtime for. */
   releaseId?: string;
 }
 
+/**
+ * Formats a duration in seconds into a human-readable string (e.g., "2h 15m").
+ *
+ * @param totalSeconds - The duration in seconds.
+ * @returns A formatted duration string.
+ */
 function formatPlayTime(totalSeconds: number): string {
   if (totalSeconds === 0) {
     return "0h";
@@ -23,6 +34,12 @@ function formatPlayTime(totalSeconds: number): string {
   return `${hours}h ${minutes}m`;
 }
 
+/**
+ * Displays the total and version-specific playtime for a given game variant and release.
+ *
+ * @param props - The component props.
+ * @returns A React element showing playtime statistics.
+ */
 export function PlayTime({
   variant,
   releaseId,

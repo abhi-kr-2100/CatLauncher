@@ -3,6 +3,7 @@ use tauri_plugin_updater::UpdaterExt;
 
 use crate::infra::autoupdate::update_status::UpdateStatus;
 
+/// Checks for updates, downloads, and installs them if available, emitting progress events.
 pub async fn run_updater(handle: AppHandle) {
   // Nothing can be done with emit errors. We ignore them.
   let _ = handle.emit("autoupdate-status", &UpdateStatus::Checking);

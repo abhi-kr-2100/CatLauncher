@@ -9,18 +9,23 @@ use crate::settings::paths::{
 };
 use crate::variants::GameVariant;
 
+/// Errors that can occur when updating color theme files.
 #[derive(thiserror::Error, Debug)]
 pub enum UpdateColorFilesError {
+  /// An error occurred while retrieving the user game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
 
+  /// An error occurred while retrieving or creating the user config directory.
   #[error("failed to get or create user config directory: {0}")]
   GetOrCreateUserConfigDir(#[from] GetOrCreateUserConfigDirError),
 
+  /// An error occurred while copying the color theme file.
   #[error("failed to copy color theme file: {0}")]
   Copy(#[from] std::io::Error),
 }
 
+/// Synchronizes the selected color theme with the game's `base_colors.json` configuration file.
 pub async fn update_color_files(
   data_dir: &Path,
   settings: &Settings,

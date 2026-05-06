@@ -6,12 +6,20 @@ import { XIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Root component for a dialog (modal) window.
+ * @public
+ */
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/**
+ * Element that triggers the opening of a {@link Dialog}.
+ * @public
+ */
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -20,6 +28,10 @@ function DialogTrigger({
   );
 }
 
+/**
+ * Portals the dialog content to a separate DOM node (usually the body).
+ * @public
+ */
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
@@ -28,6 +40,10 @@ function DialogPortal({
   );
 }
 
+/**
+ * Element that closes an open {@link Dialog}.
+ * @public
+ */
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
@@ -36,6 +52,13 @@ function DialogClose({
   );
 }
 
+/**
+ * The dim backdrop that appears behind the {@link DialogContent}.
+ *
+ * @param props - Overlay component props.
+ * @returns A React element representing the dialog overlay.
+ * @public
+ */
 function DialogOverlay({
   className,
   ...props
@@ -52,12 +75,20 @@ function DialogOverlay({
   );
 }
 
+/**
+ * The main container for the content within a {@link Dialog}.
+ *
+ * @param props - Content component props, including an optional `showCloseButton`.
+ * @returns A React element representing the dialog content.
+ * @public
+ */
 function DialogContent({
   className,
   children,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  /** Whether to show the default close (X) button in the corner. */
   showCloseButton?: boolean;
 }) {
   return (
@@ -86,6 +117,13 @@ function DialogContent({
   );
 }
 
+/**
+ * Header section of a {@link Dialog}, typically containing {@link DialogTitle}.
+ *
+ * @param props - Div component props.
+ * @returns A React element representing the dialog header.
+ * @public
+ */
 function DialogHeader({
   className,
   ...props
@@ -102,6 +140,13 @@ function DialogHeader({
   );
 }
 
+/**
+ * Footer section of a {@link Dialog}, typically containing action buttons.
+ *
+ * @param props - Div component props.
+ * @returns A React element representing the dialog footer.
+ * @public
+ */
 function DialogFooter({
   className,
   ...props
@@ -118,6 +163,13 @@ function DialogFooter({
   );
 }
 
+/**
+ * The title component for a {@link Dialog}.
+ *
+ * @param props - Title component props.
+ * @returns A React element representing the dialog title.
+ * @public
+ */
 function DialogTitle({
   className,
   ...props
@@ -131,6 +183,13 @@ function DialogTitle({
   );
 }
 
+/**
+ * The description component for a {@link Dialog}, providing additional context.
+ *
+ * @param props - Description component props.
+ * @returns A React element representing the dialog description.
+ * @public
+ */
 function DialogDescription({
   className,
   ...props

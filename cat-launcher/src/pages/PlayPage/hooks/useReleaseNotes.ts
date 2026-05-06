@@ -5,6 +5,13 @@ import type { GameRelease } from "@/generated-types/GameRelease";
 import { fetchReleaseNotes } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * Custom hook to fetch and provide release notes for a specific game release.
+ *
+ * @param release - The game release object to fetch notes for.
+ * @param onReleaseNotesError - Optional callback triggered if the notes fail to load.
+ * @returns An object containing the release notes, loading state, and error state.
+ */
 export default function useReleaseNotes(
   release: GameRelease,
   onReleaseNotesError?: (error: Error) => void,

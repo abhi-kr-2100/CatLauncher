@@ -13,10 +13,14 @@ use crate::variants::GameVariant;
 
 use super::types::{Achievement, CharacterAchievements};
 
+/// Represents the structure of an achievement file stored by the game.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AchievementFile {
+  /// The version of the achievement format.
   pub achievement_version: i32,
+  /// A list of achievement IDs earned.
   pub achievements: Vec<String>,
+  /// The name of the character associated with these achievements.
   pub avatar_name: String,
 }
 
@@ -44,20 +48,27 @@ struct AchievementJsonEntry {
   name: Option<AchievementName>,
 }
 
+/// Errors that can occur when retrieving achievements.
 #[derive(thiserror::Error, Debug)]
 pub enum GetAchievementsError {
+  /// An error occurred while determining the user game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameData(#[from] GetUserGameDataDirError),
+  /// An error occurred while reading from the filesystem.
   #[error("failed to read achievements directory: {0}")]
   Read(#[from] std::io::Error),
+  /// An error occurred while retrieving the active release.
   #[error("failed to get active release: {0}")]
   ActiveRelease(
     #[from] crate::active_release::active_release::ActiveReleaseError,
   ),
+  /// The current operating system is not supported.
   #[error("unsupported OS: {0}")]
   UnsupportedOS(#[from] OSNotSupportedError),
+  /// An error occurred while determining the game resources directory.
   #[error("failed to get game resources directory: {0}")]
   GameResourcesDir(#[from] GetGameExecutableDirError),
+  /// An error occurred while parsing JSON data.
   #[error("failed to parse achievements.json: {0}")]
   Serde(#[from] serde_json::Error),
 }
@@ -148,6 +159,10 @@ async fn load_character_achievement_ids(
   Ok(character_achievements_map)
 }
 
+/// Retrieves all achievements for a character across all game variants.
+///
+/// This function reads the achievement files from the user's game data directory
+/// and maps them to their friendly names by parsing the game's achievement definitions.
 pub async fn get_achievements(
   variant: &GameVariant,
   data_dir: &Path,
