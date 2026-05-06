@@ -2,6 +2,10 @@ import pkg from "../../package.json";
 import { openLink } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+/**
+ * External links for the CatLauncher project.
+ * Includes GitHub repository, issue reporting, and feature requests.
+ */
 const LINKS = [
   {
     label: "⭐ Star CatLauncher on GitHub",
@@ -20,6 +24,12 @@ const LINKS = [
   },
 ];
 
+/**
+ * AboutPage component that displays information about CatLauncher.
+ * It shows the application name, description, version, and helpful links.
+ *
+ * @returns A React component that renders the About page.
+ */
 export default function AboutPage() {
   return (
     <div className="flex flex-col items-center gap-4 py-4 max-w-lg mx-auto">

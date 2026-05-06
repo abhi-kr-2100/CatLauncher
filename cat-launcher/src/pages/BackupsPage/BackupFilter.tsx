@@ -4,18 +4,34 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { CombinedBackup } from "./types/backups";
 
+/**
+ * A function that takes a backup and returns true if it should be included in the filtered results.
+ */
 export type BackupFilterFn = (backup: CombinedBackup) => boolean;
 
+/**
+ * Defines a filter type with its display label and logic.
+ */
 export type BackupFilterType = {
+  /** Unique identifier for the filter. */
   id: "automatic" | "manual";
+  /** Human-readable label for the filter. */
   label: string;
+  /** The function to apply when this filter is active. */
   apply: BackupFilterFn;
 };
 
+/**
+ * Props for the {@link BackupFilter} component.
+ */
 interface BackupFilterProps {
+  /** Callback triggered when the active filter changes. */
   onChange: (filterFn: BackupFilterFn) => void;
 }
 
+/**
+ * Predefined backup filters for automatic and manual backups.
+ */
 const FILTERS: BackupFilterType[] = [
   {
     id: "automatic",
@@ -29,6 +45,12 @@ const FILTERS: BackupFilterType[] = [
   },
 ];
 
+/**
+ * Component that provides checkboxes to filter backups by their type (Automatic/Manual).
+ *
+ * @param props - Component properties.
+ * @returns A React element containing filter controls.
+ */
 export default function BackupFilter({
   onChange,
 }: BackupFilterProps) {

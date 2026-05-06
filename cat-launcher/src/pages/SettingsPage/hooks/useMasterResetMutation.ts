@@ -5,6 +5,14 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import { masterReset } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * A custom hook that provides a mutation for performing a master reset on a game variant.
+ * It invalidates relevant queries (mods, tilesets, soundpacks, settings) upon success.
+ *
+ * @param onSuccess - Optional callback to be called when the reset is successful.
+ * @param onError - Optional callback to be called when the reset fails.
+ * @returns An object containing the `reset` function and `isResetting` status.
+ */
 export function useMasterResetMutation(
   onSuccess?: () => void,
   onError?: (error: Error) => void,

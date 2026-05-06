@@ -5,26 +5,60 @@ import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Represents an individual item within the sidebar navigation.
+ *
+ * @public
+ */
 export interface SidebarItem {
+  /** The destination path for the navigation link. */
   path: string;
+  /** The display label for the item. */
   label: string;
+  /** The icon to display alongside the label. */
   icon: LucideIcon;
+  /** Whether the item should be hidden from the sidebar. */
   hidden?: boolean;
 }
 
+/**
+ * Properties for the {@link Sidebar} component.
+ *
+ * @public
+ */
 export interface SidebarProps {
+  /** The list of navigation items to display. */
   items: SidebarItem[];
+  /** Whether the sidebar is currently in a collapsed state. */
   isCollapsed: boolean;
+  /** Callback function triggered when the collapse state is toggled. */
   onToggleCollapse: () => void;
+  /** An optional base path to prepend to all item paths. */
   basePath?: string;
 }
 
+/**
+ * Properties for the internal {@link SidebarNavItem} component.
+ *
+ * @internal
+ */
 interface SidebarNavItemProps {
+  /** The sidebar item to render. */
   item: SidebarItem;
+  /** Whether the sidebar is collapsed. */
   isCollapsed: boolean;
+  /** The base path for navigation. */
   basePath: string;
 }
 
+/**
+ * An individual navigation link component used within the sidebar.
+ *
+ * @param props - The properties for the sidebar navigation item.
+ * @returns A React element representing a single navigation link.
+ *
+ * @internal
+ */
 function SidebarNavItem({
   item,
   isCollapsed,
@@ -61,6 +95,15 @@ function SidebarNavItem({
   );
 }
 
+/**
+ * The main sidebar navigation component.
+ * Provides a collapsible menu with icons and labels.
+ *
+ * @param props - The properties for the sidebar.
+ * @returns A React element representing the sidebar.
+ *
+ * @public
+ */
 export function Sidebar({
   items,
   isCollapsed,

@@ -3,6 +3,14 @@ import * as ProgressPrimitive from "@radix-ui/react-progress";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A progress bar component that visualizes the completion status of a task.
+ * Supports displaying text children that change color based on the filled progress.
+ *
+ * @param props - Component props, extending Radix UI's Progress Root props.
+ * @returns A React element representing the progress bar.
+ * @public
+ */
 function Progress({
   className,
   value,

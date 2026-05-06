@@ -15,8 +15,20 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener } from "@/lib/utils";
 
+/**
+ * Represents the current status of the mod fetching process.
+ */
 export type ModFetchStatus = "idle" | "loading" | "success" | "error";
 
+/**
+ * A custom hook to manage and fetch the list of mods for a specific game variant.
+ * Listens for real-time updates via events and handles the initial triggering of the fetch.
+ *
+ * @param variant - The game variant to fetch mods for.
+ * @param onModsLoadError - An optional callback function for loading errors.
+ * @param onModsTriggerError - An optional callback function for triggering errors.
+ * @returns An object containing the mods list and loading state.
+ */
 export function useMods(
   variant: GameVariant,
   onModsLoadError?: (error: unknown) => void,

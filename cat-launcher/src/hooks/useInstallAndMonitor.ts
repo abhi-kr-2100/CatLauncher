@@ -11,14 +11,32 @@ import {
   setDownloadProgress,
 } from "@/store/installationProgressSlice";
 
+/**
+ * Represents the type of installation being performed.
+ */
 type InstallationType = "release" | "mod" | "soundpack" | "tileset";
 
+/**
+ * Function type for performing an installation.
+ */
 type InstallationFunction<T> = (
   id: string,
   variant: GameVariant,
   onProgress: (progress: DownloadProgress) => void,
 ) => Promise<T>;
 
+/**
+ * A custom hook that handles the installation of various game components (releases, mods, etc.)
+ * and monitors the download progress, syncing it with the Redux store.
+ *
+ * @param type - The type of component being installed.
+ * @param variant - The game variant.
+ * @param id - The unique identifier of the component being installed.
+ * @param installationFunction - The function that performs the installation and reports progress.
+ * @param onSuccess - Optional callback executed upon successful installation.
+ * @param onError - Optional callback executed upon installation error.
+ * @returns An object containing the install function, installation status, and download progress.
+ */
 export function useInstallAndMonitor<T>(
   type: InstallationType,
   variant: GameVariant,

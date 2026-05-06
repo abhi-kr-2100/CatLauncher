@@ -5,6 +5,13 @@ import { GameVariant } from "@/generated-types/GameVariant";
 import { useGameVariants } from "@/hooks/useGameVariants";
 import SoundpacksList from "./SoundpacksList";
 
+/**
+ * The SoundpacksPage component provides a user interface for browsing and managing soundpacks
+ * for different game variants. It allows users to select a game variant and displays
+ * the corresponding list of soundpacks.
+ *
+ * @returns A React component that renders the soundpack selection and listing interface.
+ */
 function SoundpacksPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();

@@ -17,6 +17,8 @@ fn create_github_pat_headers() -> Option<HeaderMap> {
   None
 }
 
+/// Creates and returns a `reqwest::Client` instance configured with a user-agent
+/// and authorization headers if `GITHUB_PAT` is available in the environment.
 pub fn create_http_client() -> Client {
   let mut builder = Client::builder().user_agent("cat-launcher");
 

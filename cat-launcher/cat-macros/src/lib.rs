@@ -4,6 +4,10 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, DeriveInput};
 
+/// A procedural macro to derive `serde::Serialize` for command error types.
+///
+/// This macro generates a `Serialize` implementation that includes the error's
+/// type (from `Into<&'static str>`) and its message (from `ToString`).
 #[proc_macro_derive(CommandErrorSerialize)]
 pub fn derive_command_error_serialize(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);

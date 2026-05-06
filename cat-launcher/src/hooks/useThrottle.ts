@@ -1,5 +1,14 @@
 import { useRef, useCallback, useEffect } from "react";
 
+/**
+ * A custom hook that returns a throttled version of the provided function.
+ * The throttled function will only execute at most once every `delay` milliseconds.
+ * If called multiple times within the delay period, it will execute once at the end of the period.
+ *
+ * @param func - The function to throttle.
+ * @param delay - The throttle delay in milliseconds.
+ * @returns A throttled version of the function.
+ */
 export function useThrottle<Args extends unknown[]>(
   func: (...args: Args) => void,
   delay: number,

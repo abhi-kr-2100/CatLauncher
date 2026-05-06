@@ -10,14 +10,38 @@ import {
 } from "./lib/stabilityRating";
 import { getRelativeTimeDisplay } from "./lib/timeFormatting";
 
+/**
+ * Props for the {@link ModInstallationConfirmationDialog} component.
+ */
 interface ModInstallationConfirmationDialogProps {
+  /**
+   * Whether the dialog is currently open.
+   */
   open: boolean;
+  /**
+   * Callback function to handle opening/closing the dialog.
+   */
   onOpenChange: (open: boolean) => void;
+  /**
+   * Callback function to execute when the installation is confirmed.
+   */
   onConfirm: () => void;
+  /**
+   * The unique identifier of the mod to be installed.
+   */
   modId: string;
+  /**
+   * The game variant for which the mod is being installed.
+   */
   variant: GameVariant;
 }
 
+/**
+ * Determines the color scheme for the stability rating display based on the stability level.
+ *
+ * @param level - The stability level (low, medium, or high).
+ * @returns An object containing tailwind color classes.
+ */
 const getStabilityColors = (level: StabilityRating["level"]) => {
   switch (level) {
     case "high":
@@ -44,6 +68,13 @@ const getStabilityColors = (level: StabilityRating["level"]) => {
   }
 };
 
+/**
+ * A confirmation dialog shown before installing a third-party mod.
+ * Displays stability information based on the mod's last activity.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the confirmation dialog.
+ */
 export function ModInstallationConfirmationDialog({
   open,
   onOpenChange,

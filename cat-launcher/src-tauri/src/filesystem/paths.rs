@@ -7,20 +7,25 @@ use crate::filesystem::utils::get_safe_filename;
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
+/// Returns the path to the application database file.
 pub fn get_db_path(data_dir: &Path) -> PathBuf {
   data_dir.join("cat-launcher.db")
 }
 
+/// Returns the path to the application settings file.
 pub fn get_settings_path(resource_dir: &Path) -> PathBuf {
   resource_dir.join("settings.json")
 }
 
+/// Errors that can occur when getting the schema file path.
 #[derive(thiserror::Error, Debug)]
 pub enum GetSchemaFilePathError {
+  /// Error retrieving the resource directory.
   #[error("failed to get resource directory: {0}")]
   ResourceDir(#[from] tauri::Error),
 }
 
+/// Returns the path to the database schema SQL file.
 pub fn get_schema_file_path(
   resources_dir: &Path,
 ) -> Result<PathBuf, GetSchemaFilePathError> {
@@ -28,6 +33,7 @@ pub fn get_schema_file_path(
   Ok(schema_dir.join("schema.sql"))
 }
 
+/// Returns the path to the default releases JSON file for a variant.
 pub fn get_default_releases_file_path(
   variant: &GameVariant,
   resources_dir: &Path,
@@ -37,6 +43,7 @@ pub fn get_default_releases_file_path(
     .join(format!("{}.json", variant.id()))
 }
 
+/// Returns the cached releases path for a variant.
 pub fn get_releases_cache_filepath(
   variant: &GameVariant,
   cache_dir: &Path,

@@ -18,26 +18,36 @@ use crate::install_release::install_release::ReleaseInstallationError;
 
 use crate::variants::GameVariant;
 
+/// Errors that can occur when executing the `install_release` command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum InstallReleaseCommandError {
+  /// The system's local data or resource directory could not be found.
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
 
+  /// The installation process failed.
   #[error("installation failed: {0}")]
   Install(#[from] ReleaseInstallationError),
 
+  /// Failed to retrieve the release information from the repository.
   #[error("failed to obtain release: {0}")]
   Release(#[from] GetReleaseError),
 
+  /// The current operating system is not supported.
   #[error("failed to get OS enum: {0}")]
   Os(#[from] OSNotSupportedError),
 
+  /// The current architecture is not supported.
   #[error("failed to get arch enum: {0}")]
   Arch(#[from] ArchNotSupportedError),
 }
 
+/// A Tauri command that installs a specific game release.
+///
+/// This command handles downloading the release asset and extracting it to the
+/// appropriate directory, while reporting progress via a channel.
 #[command]
 pub async fn install_release(
   app_handle: AppHandle,

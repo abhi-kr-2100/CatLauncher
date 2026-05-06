@@ -3,14 +3,41 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
+/**
+ * Props for the {@link SearchInput} component.
+ */
 export interface SearchInputProps {
+  /**
+   * The current search query.
+   */
   value: string;
+  /**
+   * Callback fired when the search query changes.
+   * @param _value - The new search query.
+   */
   onChange: (_value: string) => void;
+  /**
+   * Placeholder text for the input field.
+   * @defaultValue "Search..."
+   */
   placeholder?: string;
+  /**
+   * Additional CSS class names for the container.
+   */
   className?: string;
+  /**
+   * Whether the input is disabled.
+   * @defaultValue false
+   */
   disabled?: boolean;
 }
 
+/**
+ * A reusable search input component with a search icon.
+ *
+ * @param props - The component props.
+ * @returns A React component that renders the search input.
+ */
 export function SearchInput({
   value,
   onChange,

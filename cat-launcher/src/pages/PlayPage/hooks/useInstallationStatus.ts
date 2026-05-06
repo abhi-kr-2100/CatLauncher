@@ -7,6 +7,13 @@ import { getInstallationStatus } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 
+/**
+ * Custom hook to retrieve and monitor the installation status of a specific game release.
+ *
+ * @param variant - The game variant.
+ * @param selectedReleaseId - The specific release version ID.
+ * @returns An object containing the installation status and any error that occurred.
+ */
 export function useInstallationStatus(
   variant: GameVariant,
   selectedReleaseId: string | undefined,

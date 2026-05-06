@@ -10,15 +10,44 @@ import { useRestoreBackup } from "./useRestoreBackup";
 import { useRestoreManualBackup } from "./useRestoreManualBackup";
 import { useCreateManualBackup } from "./useCreateManualBackup";
 
+/**
+ * Options for the {@link useCombinedBackups} hook.
+ */
 interface UseCombinedBackupsOptions {
+  /**
+   * Callback function executed when a backup is successfully deleted.
+   */
   onDeleteSuccess?: () => void;
+  /**
+   * Callback function executed when backup deletion fails.
+   */
   onDeleteError?: (error: unknown) => void;
+  /**
+   * Callback function executed when a backup is successfully restored.
+   */
   onRestoreSuccess?: () => void;
+  /**
+   * Callback function executed when backup restoration fails.
+   */
   onRestoreError?: (error: unknown) => void;
+  /**
+   * Callback function executed when a manual backup is successfully created.
+   */
   onCreateSuccess?: () => void;
+  /**
+   * Callback function executed when manual backup creation fails.
+   */
   onCreateError?: (error: unknown) => void;
 }
 
+/**
+ * A custom hook that combines automatic and manual backups for a specific game variant.
+ * It provides unified functions for listing, creating, deleting, and restoring backups.
+ *
+ * @param variant - The game variant to manage backups for.
+ * @param options - Optional callbacks for various backup operations.
+ * @returns An object containing the combined backups, loading state, and management functions.
+ */
 export function useCombinedBackups(
   variant: GameVariant,
   {

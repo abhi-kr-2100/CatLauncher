@@ -16,6 +16,7 @@ use zip::write::FileOptions;
 use crate::filesystem::utils::{CopyDirError, copy_dir_all};
 use crate::infra::utils::OS;
 
+/// Represents errors that can occur during archive extraction.
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractionError {
   #[error("unsupported archive format")]
@@ -37,6 +38,8 @@ pub enum ExtractionError {
   Join(#[from] JoinError),
 }
 
+/// Extracts an archive at the given `archive_path` to the `target_dir` for the specified `os`.
+/// Supports zip, tar.gz, dmg, and rar formats.
 pub async fn extract_archive(
   archive_path: &Path,
   target_dir: &Path,
@@ -109,6 +112,7 @@ pub async fn extract_archive(
   }
 }
 
+/// Represents errors that can occur during archive creation.
 #[derive(thiserror::Error, Debug)]
 pub enum ArchiveCreationError {
   #[error("destination is a directory")]
@@ -130,6 +134,8 @@ pub enum ArchiveCreationError {
   Join(#[from] JoinError),
 }
 
+/// Creates a zip archive at `archive_path` containing the specified `paths_to_include`
+/// relative to the `source_dir`.
 pub async fn create_zip_archive(
   source_dir: &Path,
   paths_to_include: &[PathBuf],
@@ -178,6 +184,7 @@ pub async fn create_zip_archive(
   .await?
 }
 
+/// Represents errors that can occur while adding files to a zip archive.
 #[derive(thiserror::Error, Debug)]
 pub enum AddToZipError {
   #[error("failed to add to zip file: {0}")]

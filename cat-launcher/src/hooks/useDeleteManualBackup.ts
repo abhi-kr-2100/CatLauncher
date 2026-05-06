@@ -5,10 +5,24 @@ import { deleteManualBackupById } from "@/lib/commands";
 import { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * A custom hook that provides a mutation for deleting a manual backup.
+ * It implements optimistic updates to the manual backups list.
+ *
+ * @param variant - The game variant the backup belongs to.
+ * @param options - Optional callbacks for success and error states.
+ * @returns An object containing the `deleteManualBackup` mutation function.
+ */
 export function useDeleteManualBackup(
   variant: GameVariant,
   options: {
+    /**
+     * Callback function executed when the deletion is successful.
+     */
     onSuccess?: () => void;
+    /**
+     * Callback function executed when the deletion fails.
+     */
     onError?: (error: unknown) => void;
   } = {},
 ) {

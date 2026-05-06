@@ -15,12 +15,24 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { setupEventListener } from "@/lib/utils";
 
+/**
+ * Represents the status of the release fetching process.
+ */
 export type ReleaseFetchStatus =
   | "idle"
   | "loading"
   | "success"
   | "error";
 
+/**
+ * Custom hook to fetch and manage the list of available releases for a specific game variant.
+ * It listens for real-time updates from the backend and manages the local cache.
+ *
+ * @param variant - The game variant to fetch releases for.
+ * @param onReleasesLoadError - Optional callback triggered if releases fail to load from cache.
+ * @param onReleasesTriggerError - Optional callback triggered if the fetch request fails.
+ * @returns An object containing the list of releases and a loading state.
+ */
 export function useReleases(
   variant: GameVariant,
   onReleasesLoadError?: (error: unknown) => void,

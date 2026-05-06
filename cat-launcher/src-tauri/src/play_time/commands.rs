@@ -12,22 +12,27 @@ use crate::play_time::repository::PlayTimeRepositoryError;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::variants::game_variant::GameVariant;
 
+/// Errors that can occur when retrieving play time.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetPlayTimeCommandError {
+  /// An error occurred in the play time repository.
   #[error("Failed to get play time: {0}")]
   Repository(#[from] PlayTimeRepositoryError),
 }
 
+/// Errors that can occur when logging play time.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum LogPlayTimeCommandError {
+  /// An error occurred in the play time repository.
   #[error("Failed to log play time: {0}")]
   Repository(#[from] PlayTimeRepositoryError),
 }
 
+/// Retrieves the total play time for a specific game variant.
 #[tauri::command]
 pub async fn get_play_time_for_variant(
   variant: GameVariant,
@@ -38,6 +43,7 @@ pub async fn get_play_time_for_variant(
   Ok(result)
 }
 
+/// Retrieves the play time for a specific version of a game variant.
 #[tauri::command]
 pub async fn get_play_time_for_version(
   variant: GameVariant,
@@ -53,6 +59,7 @@ pub async fn get_play_time_for_version(
   Ok(result)
 }
 
+/// Logs play time for a specific version of a game variant.
 #[tauri::command]
 pub async fn log_play_time(
   variant: GameVariant,

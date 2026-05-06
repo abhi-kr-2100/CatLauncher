@@ -22,36 +22,47 @@ use crate::tilesets::repository::installed_tilesets_repository::{
 use crate::tilesets::types::ThirdPartyTileset;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when installing a third-party tileset.
 #[derive(thiserror::Error, Debug)]
 pub enum InstallThirdPartyTilesetError {
+  /// An error occurred while retrieving tileset details from the metadata file.
   #[error("failed to get tileset from tilesets.json: {0}")]
   GetTilesetFromJson(#[from] GetTilesetFromJsonError),
 
+  /// An error occurred while creating a directory.
   #[error("failed to create directory: {0}")]
   CreateDirectory(#[from] io::Error),
 
+  /// An error occurred while downloading the tileset.
   #[error("failed to download tileset: {0}")]
   Download(#[from] DownloadFileError),
 
+  /// An error occurred while extracting the tileset archive.
   #[error("failed to extract tileset: {0}")]
   Extract(#[from] ExtractionError),
 
+  /// An error occurred while determining the parent directory of the tileset within the archive.
   #[error("failed to get tileset parent dir: {0}")]
   GetTilesetParentDir(#[from] GetTilesetParentDirError),
 
+  /// An error occurred while determining the user game data directory.
   #[error("failed to get user game data dir: {0}")]
   GetUserGameDataDir(#[from] GetUserGameDataDirError),
 
+  /// An error occurred while creating the user tileset data directory.
   #[error("failed to get user tileset data dir: {0}")]
   GetUserTilesetDataDir(#[from] GetOrCreateDirectoryError),
 
+  /// An error occurred while copying tileset files.
   #[error("failed to copy tileset: {0}")]
   Copy(#[from] CopyDirError),
 
+  /// An error occurred while updating the installed tilesets repository.
   #[error("failed to update repository: {0}")]
   UpdateRepository(#[from] InstalledTilesetsRepositoryError),
 }
 
+/// Downloads, extracts, and installs a third-party tileset for a given game variant.
 #[allow(clippy::too_many_arguments)]
 pub async fn install_third_party_tileset(
   tileset_id: &str,
@@ -150,8 +161,10 @@ async fn get_tileset_from_json(
   Ok(third_party_tileset)
 }
 
+/// Errors that can occur when determining the parent directory of a tileset.
 #[derive(Debug, thiserror::Error)]
 pub enum GetTilesetParentDirError {
+  /// The parent directory for the specified tileset path could not be found.
   #[error("failed to get parent directory for tileset path")]
   ParentDirNotFound,
 }

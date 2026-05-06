@@ -15,23 +15,33 @@ use crate::launch_game::launch_game::{
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::variants::GameVariant;
 
+/// Errors that can occur when executing the launch game command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum LaunchGameCommandError {
+  /// Error that occurred during the game launch or monitoring process.
   #[error("failed to launch game: {0}")]
   LaunchGame(#[from] LaunchGameError),
 
+  /// The system directory required for the operation was not found.
   #[error("system directory not found: {0}")]
   SystemDirectoryNotFound(#[from] tauri::Error),
 
+  /// Failed to retrieve the current system time.
   #[error("failed to get system time: {0}")]
   SystemTime(#[from] SystemTimeError),
 
+  /// The current operating system is not supported.
   #[error("failed to get OS enum: {0}")]
   Os(#[from] OSNotSupportedError),
 }
 
+/// Tauri command to launch and monitor a game instance.
+///
+/// This command resolves necessary paths, gets the current system time,
+/// and starts the game monitoring process. It also sets up an event emitter
+/// to forward game events to the frontend.
 #[command]
 #[allow(clippy::too_many_arguments)]
 pub async fn launch_game(

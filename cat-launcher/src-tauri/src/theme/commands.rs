@@ -8,14 +8,17 @@ use crate::theme::theme::{
   get_theme_preference, update_theme_preference,
 };
 
+/// Errors that can occur when retrieving the preferred theme via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetPreferredThemeCommandError {
+  /// An error occurred while loading the theme preference from the repository.
   #[error("failed to load theme preference: {0}")]
   Get(#[from] GetThemeError),
 }
 
+/// Retrieves the user's preferred theme preference.
 #[tauri::command]
 pub async fn get_preferred_theme(
   repository: State<'_, SqliteThemePreferenceRepository>,
@@ -23,14 +26,17 @@ pub async fn get_preferred_theme(
   Ok(get_theme_preference(repository.inner()).await?)
 }
 
+/// Errors that can occur when setting the preferred theme via a command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum SetPreferredThemeCommandError {
+  /// An error occurred while updating the theme preference in the repository.
   #[error("failed to update theme preference: {0}")]
   Update(#[from] UpdateThemeError),
 }
 
+/// Sets the user's preferred theme preference.
 #[tauri::command]
 pub async fn set_preferred_theme(
   theme: Theme,

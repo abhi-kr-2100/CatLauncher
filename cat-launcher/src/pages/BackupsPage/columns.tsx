@@ -5,11 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CombinedBackup } from "./types/backups";
 
+/**
+ * Type definition for a factory function that creates column definitions for the backups table.
+ */
 type ColumnsFactory = (options: {
+  /** Callback to open the delete confirmation dialog for a backup. */
   openDeleteDialog: (backup: CombinedBackup) => void;
+  /** Callback to open the restore confirmation dialog for a backup. */
   openRestoreDialog: (backup: CombinedBackup) => void;
 }) => ColumnDef<CombinedBackup>[];
 
+/**
+ * Defines the columns for the {@link BackupsTable}.
+ * Includes columns for name (sortable), type (badge), notes, date (sortable), and actions.
+ */
 export const columns: ColumnsFactory = ({
   openDeleteDialog,
   openRestoreDialog,

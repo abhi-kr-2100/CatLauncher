@@ -4,6 +4,15 @@ import { CheckIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A checkbox component that allows users to toggle between checked and unchecked states.
+ * Built on top of Radix UI's Checkbox primitive.
+ *
+ * @param props - The properties for the checkbox component, extending Radix UI's Checkbox root properties.
+ * @returns A React element representing the checkbox.
+ *
+ * @public
+ */
 function Checkbox({
   className,
   ...props

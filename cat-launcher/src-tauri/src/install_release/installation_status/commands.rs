@@ -13,20 +13,25 @@ use crate::game_release::utils::{
 use crate::infra::utils::{OSNotSupportedError, get_os_enum};
 use crate::variants::GameVariant;
 
+/// Errors that can occur when getting the installation status via a Tauri command.
 #[derive(
   thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
 )]
 pub enum GetInstallationStatusCommandError {
+  /// The system's local data or resource directory could not be found.
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
 
+  /// Failed to retrieve the release information from the repository.
   #[error("failed to obtain release: {0}")]
   Release(#[from] GetReleaseError),
 
+  /// The current operating system is not supported.
   #[error("failed to get OS enum: {0}")]
   Os(#[from] OSNotSupportedError),
 }
 
+/// A Tauri command that returns the installation status of a specific release.
 #[command]
 pub async fn get_installation_status(
   app_handle: AppHandle,

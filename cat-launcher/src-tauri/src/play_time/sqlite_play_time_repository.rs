@@ -9,12 +9,14 @@ use crate::play_time::repository::{
 };
 use crate::variants::GameVariant;
 
+/// A repository for managing play time data using a SQLite database.
 #[derive(Clone)]
 pub struct SqlitePlayTimeRepository {
   pool: Pool<SqliteConnectionManager>,
 }
 
 impl SqlitePlayTimeRepository {
+  /// Creates a new instance of `SqlitePlayTimeRepository` with the given connection pool.
   pub fn new(pool: Pool<SqliteConnectionManager>) -> Self {
     Self { pool }
   }

@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::de::Error as SerdeError;
 use serde::{Deserialize, Deserializer, Serializer};
 
+/// Serializes a `DateTime<Utc>` to an RFC3339 formatted string.
 pub fn serialize<S>(
   date: &DateTime<Utc>,
   serializer: S,
@@ -13,6 +14,7 @@ where
   serializer.serialize_str(&s)
 }
 
+/// Deserializes an RFC3339 formatted string to a `DateTime<Utc>`.
 pub fn deserialize<'de, D>(
   deserializer: D,
 ) -> Result<DateTime<Utc>, D::Error>

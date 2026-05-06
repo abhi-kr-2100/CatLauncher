@@ -9,11 +9,13 @@ use crate::variants::game_variant::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+/// A repository for managing active release data using a SQLite database.
 pub struct SqliteActiveReleaseRepository {
   pool: Pool,
 }
 
 impl SqliteActiveReleaseRepository {
+  /// Creates a new instance of `SqliteActiveReleaseRepository` with the given connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

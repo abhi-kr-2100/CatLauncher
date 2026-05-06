@@ -1,6 +1,11 @@
 import { useGameVariants } from "@/hooks/useGameVariants";
 import PlayTimeChart from "./PlayTimeChart";
 
+/**
+ * A component that displays play time statistics across different game variants.
+ *
+ * @returns A React element representing the play time view.
+ */
 export default function PlayTime() {
   const {
     gameVariants,

@@ -5,6 +5,16 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import { getLastModActivity } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * A custom hook to fetch the last recorded activity for a specific mod.
+ * Useful for determining mod stability and update recency.
+ *
+ * @param enabled - Whether the query should be active.
+ * @param modId - The unique identifier of the mod.
+ * @param variant - The game variant associated with the mod.
+ * @param onError - An optional callback function to handle errors.
+ * @returns An object containing the last activity data and loading state.
+ */
 export function useGetLastModActivity(
   enabled: boolean,
   modId: string,

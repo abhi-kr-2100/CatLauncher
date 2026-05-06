@@ -3,6 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { Font } from "@/generated-types/Font";
 import { ensureFontLoaded } from "@/lib/utils";
 
+/**
+ * A custom hook that ensures a font is loaded and returns its font-family name.
+ *
+ * @param font - The font object to load.
+ * @param onFontLoadError - Optional callback fired if the font fails to load.
+ * @returns The font-family name if loaded, otherwise undefined.
+ */
 export function useFontFamily(
   font: Font | null | undefined,
   onFontLoadError?: (error: unknown) => void,

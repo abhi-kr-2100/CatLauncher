@@ -17,19 +17,46 @@ import {
 } from "./hooks";
 import { PreInstalledButton } from "@/components/PreInstalledButton";
 
+/**
+ * Props for the {@link TilesetCard} component.
+ */
 interface TilesetCardProps {
+  /**
+   * The game variant associated with the tileset.
+   */
   variant: GameVariant;
+  /**
+   * The tileset data to display.
+   */
   tileset: Tileset;
 }
 
+/**
+ * Extracts the display name from a tileset.
+ *
+ * @param tileset - The tileset object.
+ * @returns The name of the tileset.
+ */
 function getTilesetName(tileset: Tileset): string {
   return tileset.content.name;
 }
 
+/**
+ * Determines the display type of a tileset (Pre-Installed or Third-Party).
+ *
+ * @param tileset - The tileset object.
+ * @returns A string representing the tileset type.
+ */
 function getTilesetType(tileset: Tileset): string {
   return tileset.type === "Stock" ? "Pre-Installed" : "Third-Party";
 }
 
+/**
+ * A card component that displays information about a single tileset and provides installation/uninstallation controls.
+ *
+ * @param props - The component props.
+ * @returns A React element representing the tileset card.
+ */
 export default function TilesetCard({
   variant,
   tileset,

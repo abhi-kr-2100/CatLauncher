@@ -7,6 +7,12 @@ import { setSelectedVariant } from "@/store/selectedVariantSlice";
 import AssetTypeSelector from "./AssetTypeSelector";
 import { type AssetType, ASSET_COMPONENTS } from "./types";
 
+/**
+ * The main page component for managing game assets like mods, soundpacks, and tilesets.
+ * It allows users to select a game variant and the type of asset they want to view or manage.
+ *
+ * @returns A React element representing the assets page.
+ */
 function AssetsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();

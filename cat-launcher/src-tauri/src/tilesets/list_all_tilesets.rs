@@ -19,21 +19,27 @@ use crate::tilesets::types::{
 };
 use crate::variants::GameVariant;
 
+/// Errors that can occur when listing all tilesets.
 #[derive(thiserror::Error, Debug)]
 pub enum ListAllTilesetsError {
+  /// An error occurred while determining the stock tilesets directory.
   #[error("failed to get stock tilesets dir: {0}")]
   GetStockTilesetsDir(#[from] GetStockTilesetsDirError),
 
+  /// An error occurred while listing stock tilesets.
   #[error("failed to read stock tileset dir: {0}")]
   ExtractStockTileset(#[from] ListAllStockTilesetsError),
 
+  /// An error occurred while retrieving the active release version.
   #[error("failed to get active release: {0}")]
   GetActiveRelease(#[from] ActiveReleaseRepositoryError),
 
+  /// An error occurred while listing third-party tilesets.
   #[error("failed to list third-party tilesets: {0}")]
   ListThirdPartyTilesets(#[from] ListThirdPartyTilesetsError),
 }
 
+/// Lists all available tilesets (both stock and third-party) for a game variant.
 pub async fn list_all_tilesets(
   game_variant: &GameVariant,
   data_dir: &Path,
@@ -71,10 +77,13 @@ pub async fn list_all_tilesets(
   Ok(tilesets)
 }
 
+/// Errors that can occur when extracting stock tileset information.
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractStockTilesetError {
+  /// An error occurred while reading the `tileset.txt` file.
   #[error("failed to read tileset.txt: {0}")]
   ReadTilesetTxt(#[from] io::Error),
+  /// A required field is missing from `tileset.txt`.
   #[error("missing field in tileset.txt: {0}")]
   MissingField(String),
 }
@@ -158,11 +167,14 @@ async fn list_all_stock_tilesets(
   Ok(tilesets)
 }
 
+/// Errors that can occur when listing third-party tilesets.
 #[derive(thiserror::Error, Debug)]
 pub enum ListThirdPartyTilesetsError {
+  /// An error occurred while reading the `tilesets.json` resource file.
   #[error("failed to read tilesets.json: {0}")]
   ReadTilesetsJson(#[from] io::Error),
 
+  /// An error occurred while parsing the `tilesets.json` file.
   #[error("failed to parse tilesets.json: {0}")]
   ParseTilesetsJson(#[from] serde_json::Error),
 }

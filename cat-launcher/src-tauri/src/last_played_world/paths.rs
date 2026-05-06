@@ -4,6 +4,7 @@ use crate::variants::GameVariant;
 use std::path::Path;
 use std::path::PathBuf;
 
+/// Returns the absolute path to the `lastworld.json` file for the specified variant.
 pub async fn get_last_world_path(
   data_dir: &Path,
   variant: &GameVariant,

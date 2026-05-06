@@ -10,6 +10,12 @@ import { toastCL } from "@/lib/utils";
 import AchievementsList from "./AchievementsList";
 import { useAchievements } from "../hooks/useAchievements";
 
+/**
+ * A component that displays achievements for a selected game variant.
+ * Includes a variant selector and a search input to filter achievements by character name.
+ *
+ * @returns A React element representing the game achievements view.
+ */
 export default function GameAchievements() {
   const {
     gameVariants,

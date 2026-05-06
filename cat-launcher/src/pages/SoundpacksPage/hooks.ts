@@ -15,6 +15,15 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 
+/**
+ * Hook to install a third-party soundpack for a specific game variant.
+ *
+ * @param variant - The game variant to install the soundpack for.
+ * @param soundpackId - The unique identifier of the soundpack.
+ * @param onSuccess - Optional callback triggered on successful installation.
+ * @param onError - Optional callback triggered when an error occurs during installation.
+ * @returns An object containing the install function and installation status/progress.
+ */
 export function useInstallThirdPartySoundpack(
   variant: GameVariant,
   soundpackId: string | undefined,
@@ -53,6 +62,13 @@ export function useInstallThirdPartySoundpack(
   };
 }
 
+/**
+ * Hook to fetch the installation status of a third-party soundpack.
+ *
+ * @param soundpackId - The unique identifier of the soundpack.
+ * @param variant - The game variant the soundpack belongs to.
+ * @returns An object containing the installation status and loading state.
+ */
 export function useGetThirdPartySoundpackInstallationStatus(
   soundpackId: string,
   variant: GameVariant,
@@ -72,6 +88,14 @@ export function useGetThirdPartySoundpackInstallationStatus(
   };
 }
 
+/**
+ * Hook to uninstall a third-party soundpack.
+ *
+ * @param variant - The game variant to uninstall the soundpack from.
+ * @param onSuccess - Optional callback triggered on successful uninstallation.
+ * @param onError - Optional callback triggered when an error occurs during uninstallation.
+ * @returns An object containing the uninstall function and uninstallation state.
+ */
 export function useUninstallThirdPartySoundpack(
   variant: GameVariant,
   onSuccess?: () => void,
@@ -103,6 +127,12 @@ export function useUninstallThirdPartySoundpack(
   };
 }
 
+/**
+ * Hook to list all available soundpacks for a specific game variant.
+ *
+ * @param variant - The game variant to list soundpacks for.
+ * @returns An object containing the list of soundpacks, loading state, and any potential error.
+ */
 export function useListAllSoundpacks(variant: GameVariant) {
   const query = useQuery({
     queryKey: queryKeys.soundpacks.listAll(variant),

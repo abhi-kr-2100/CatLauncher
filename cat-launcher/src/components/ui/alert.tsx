@@ -3,6 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * Defines the style variants for the {@link Alert} component.
+ * @internal
+ */
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
   {
@@ -19,6 +23,13 @@ const alertVariants = cva(
   },
 );
 
+/**
+ * A callout component for displaying important information or feedback.
+ *
+ * @param props - Component props including {@link VariantProps} for alertVariants.
+ * @returns A React element representing the alert box.
+ * @public
+ */
 function Alert({
   className,
   variant,
@@ -34,6 +45,13 @@ function Alert({
   );
 }
 
+/**
+ * Component for the title of an {@link Alert}.
+ *
+ * @param props - Div component props.
+ * @returns A React element representing the alert title.
+ * @public
+ */
 function AlertTitle({
   className,
   ...props
@@ -50,6 +68,13 @@ function AlertTitle({
   );
 }
 
+/**
+ * Component for the descriptive text within an {@link Alert}.
+ *
+ * @param props - Div component props.
+ * @returns A React element representing the alert description.
+ * @public
+ */
 function AlertDescription({
   className,
   ...props

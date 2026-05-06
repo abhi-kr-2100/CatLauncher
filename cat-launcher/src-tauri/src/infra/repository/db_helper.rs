@@ -4,6 +4,7 @@ use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
 use tokio::task;
 
+/// Executes a database operation within a blocking task on the thread pool.
 pub async fn run_db<F, R, E>(
   pool: Pool<SqliteConnectionManager>,
   f: F,

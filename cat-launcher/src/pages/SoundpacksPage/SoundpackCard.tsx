@@ -17,19 +17,47 @@ import {
 } from "./hooks";
 import { PreInstalledButton } from "@/components/PreInstalledButton";
 
+/**
+ * Props for the SoundpackCard component.
+ */
 interface SoundpackCardProps {
+  /**
+   * The game variant associated with the soundpack.
+   */
   variant: GameVariant;
+  /**
+   * The soundpack data to display.
+   */
   soundpack: Soundpack;
 }
 
+/**
+ * Extracts the display name from a soundpack object.
+ *
+ * @param soundpack - The soundpack object.
+ * @returns The name of the soundpack.
+ */
 function getSoundpackName(soundpack: Soundpack): string {
   return soundpack.content.name;
 }
 
+/**
+ * Determines the display type of a soundpack (e.g., Pre-Installed or Third-Party).
+ *
+ * @param soundpack - The soundpack object.
+ * @returns A string representing the soundpack type.
+ */
 function getSoundpackType(soundpack: Soundpack): string {
   return soundpack.type === "Stock" ? "Pre-Installed" : "Third-Party";
 }
 
+/**
+ * The SoundpackCard component displays detailed information about a specific soundpack
+ * and provides actions to install or uninstall it if it's a third-party soundpack.
+ *
+ * @param props - The component props.
+ * @returns A React component that renders the soundpack card.
+ */
 export default function SoundpackCard({
   variant,
   soundpack,

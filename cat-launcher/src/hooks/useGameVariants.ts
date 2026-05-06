@@ -13,11 +13,26 @@ import {
 import { queryKeys } from "@/lib/queryKeys";
 import { useEffect } from "react";
 
+/**
+ * Options for the {@link useGameVariants} hook.
+ */
 interface UseGameVariantsOptions {
+  /**
+   * Callback function executed when updating the variant order fails.
+   */
   onOrderUpdateError?: (error: unknown) => void;
+  /**
+   * Callback function executed when fetching variants fails.
+   */
   onFetchError?: (error: unknown) => void;
 }
 
+/**
+ * A custom hook that manages the list of game variants and their display order.
+ *
+ * @param options - Optional callbacks for order update and fetch errors.
+ * @returns An object containing the list of game variants, an update function, and state information.
+ */
 export function useGameVariants({
   onOrderUpdateError,
   onFetchError,

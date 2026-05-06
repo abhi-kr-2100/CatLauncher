@@ -8,6 +8,14 @@ import { installReleaseForVariant } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 
+/**
+ * Custom hook to trigger and monitor the installation progress of a specific game release.
+ * It coordinates with the backend to perform the installation and updates the local state on completion.
+ *
+ * @param variant - The game variant.
+ * @param selectedReleaseId - The version ID of the release to install.
+ * @returns An object containing the install function and various progress indicators.
+ */
 export function useInstallAndMonitorRelease(
   variant: GameVariant,
   selectedReleaseId: string | undefined,

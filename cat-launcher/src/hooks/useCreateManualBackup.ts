@@ -5,10 +5,24 @@ import { createManualBackupForVariant } from "@/lib/commands";
 import { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * A custom hook that provides a mutation for creating a manual backup for a game variant.
+ * It implements optimistic updates to the manual backups list.
+ *
+ * @param variant - The game variant to create a backup for.
+ * @param options - Optional callbacks for success and error states.
+ * @returns An object containing the `createManualBackup` mutation function and its pending state.
+ */
 export function useCreateManualBackup(
   variant: GameVariant,
   options: {
+    /**
+     * Callback function executed when the creation is successful.
+     */
     onSuccess?: () => void;
+    /**
+     * Callback function executed when the creation fails.
+     */
     onError?: (error: unknown) => void;
   } = {},
 ) {

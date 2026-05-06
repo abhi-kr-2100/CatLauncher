@@ -14,13 +14,28 @@ import {
 } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * Configuration options for the {@link useSettingsForm} hook.
+ */
 export interface UseSettingsFormProps {
+  /** Callback fired when there's an error fetching current settings. */
   onSettingsError?: (error: Error) => void;
+  /** Callback fired when there's an error fetching default settings. */
   onDefaultSettingsError?: (error: Error) => void;
+  /** Callback fired when there's an error updating settings. */
   onUpdateError?: (error: Error) => void;
+  /** Callback fired when settings are successfully updated. */
   onUpdateSuccess?: () => void;
 }
 
+/**
+ * A custom hook for managing the settings form.
+ * It handles fetching current and default settings, form state management,
+ * and applying/canceling/resetting changes.
+ *
+ * @param props - Configuration options for the hook.
+ * @returns An object containing form state and methods to apply, cancel, or reset settings.
+ */
 export function useSettingsForm({
   onSettingsError,
   onDefaultSettingsError,

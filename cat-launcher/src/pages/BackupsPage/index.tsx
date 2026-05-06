@@ -16,6 +16,13 @@ import { NewBackupDialog } from "./NewBackupDialog";
 import { RestoreBackupDialog } from "./RestoreBackupDialog";
 import { CombinedBackup } from "./types/backups";
 
+/**
+ * Formats a Unix timestamp (in seconds) into a human-readable string for search purposes.
+ * Format: "DD Month, YYYY, HH:MM:SS"
+ *
+ * @param timestamp - The bigint Unix timestamp to format.
+ * @returns A formatted date and time string.
+ */
 function formatTimestampForSearch(timestamp: bigint): string {
   const date = new Date(Number(timestamp) * 1000);
 
@@ -29,6 +36,13 @@ function formatTimestampForSearch(timestamp: bigint): string {
   return `${day} ${month}, ${year}, ${hours}:${minutes}:${seconds}`;
 }
 
+/**
+ * BackupsPage component providing the user interface for managing game backups.
+ * Allows users to view, search, filter, create, restore, and delete backups
+ * for different game variants.
+ *
+ * @returns A React component for the Backups page.
+ */
 function BackupsPage() {
   const { gameVariants, isLoading: gameVariantsLoading } =
     useGameVariants();

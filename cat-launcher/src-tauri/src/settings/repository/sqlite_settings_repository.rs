@@ -14,12 +14,14 @@ use crate::settings::types::ColorTheme;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
+/// A repository for managing application settings using a SQLite database.
 #[derive(Clone)]
 pub struct SqliteSettingsRepository {
   pool: Pool,
 }
 
 impl SqliteSettingsRepository {
+  /// Creates a new instance of `SqliteSettingsRepository` with the given connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

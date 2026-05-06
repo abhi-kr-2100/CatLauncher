@@ -5,6 +5,14 @@ import type { GameVariant } from "@/generated-types/GameVariant";
 import { getLastPlayedWorld } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 
+/**
+ * Custom hook to fetch and poll for the name of the last played world for a specific game variant.
+ *
+ * @param variant - The game variant.
+ * @param options - Hook options.
+ * @param options.onError - Callback triggered if the world name fails to load.
+ * @returns An object containing the name of the last played world.
+ */
 export function useLastPlayedWorld(
   variant: GameVariant,
   {

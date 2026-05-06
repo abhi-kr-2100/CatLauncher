@@ -11,6 +11,7 @@ use crate::infra::utils::{Arch, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
+/// Returns a list of substrings that identify the correct game asset for the given platform and architecture.
 pub fn get_platform_asset_substrs(
   variant: &GameVariant,
   os: &OS,
@@ -50,15 +51,19 @@ pub fn get_platform_asset_substrs(
   }
 }
 
+/// Errors that can occur when retrieving a specific game release.
 #[derive(thiserror::Error, Debug)]
 pub enum GetReleaseError {
+  /// An error occurred while retrieving the installation status of the release.
   #[error("failed to get release status: {0}")]
   Status(#[from] GetInstallationStatusError),
 
+  /// The release with the specified ID was not found.
   #[error("release with ID {0} not found")]
   NotFound(String),
 }
 
+/// Converts a `GitHubRelease` into a `GameRelease` for a specific game variant.
 pub fn gh_release_to_game_release(
   gh_release: &GitHubRelease,
   variant: &GameVariant,
@@ -76,6 +81,10 @@ pub fn gh_release_to_game_release(
   }
 }
 
+/// Retrieves a specific game release by its ID (tag name).
+///
+/// This function merges cached and default releases to find the requested release
+/// and populates its current installation status.
 pub async fn get_release_by_id(
   variant: &GameVariant,
   release_id: &str,

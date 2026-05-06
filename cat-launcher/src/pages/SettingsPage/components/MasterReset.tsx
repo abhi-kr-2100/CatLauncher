@@ -12,6 +12,12 @@ import { useGameVariants } from "@/hooks/useGameVariants";
 import { toastCL } from "@/lib/utils";
 import { useMasterResetMutation } from "../hooks";
 
+/**
+ * A component that provides a "Master Reset" feature for a selected game variant.
+ * This will delete custom configurations, mods, soundpacks, etc., while preserving saves and backups.
+ *
+ * @returns The master reset UI.
+ */
 export function MasterReset() {
   const onVariantsFetchError = useCallback((error: unknown) => {
     toastCL("error", "Failed to fetch game variants.", error);
