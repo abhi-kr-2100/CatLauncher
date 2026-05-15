@@ -9,6 +9,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "test": "cargo test --manifest-path ./src-tauri/Cargo.toml",
     "lint": "eslint . --max-warnings 0 && pnpm tsc --noEmit && cargo clippy --manifest-path ./src-tauri/Cargo.toml -- -D warnings",
     "lint:fix": "eslint . --fix && cargo clippy --manifest-path ./src-tauri/Cargo.toml --fix --allow-dirty",
     "format": "prettier --write . && cargo fmt --manifest-path ./src-tauri/Cargo.toml",

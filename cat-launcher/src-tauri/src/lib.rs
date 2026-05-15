@@ -21,7 +21,13 @@ mod theme;
 mod tilesets;
 mod users;
 mod utils;
-mod variants;
+pub mod variants;
+
+pub mod database {
+  pub use crate::infra::repository::sqlite_pool::{
+    SqlitePool, create_sqlite_pool,
+  };
+}
 
 use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
