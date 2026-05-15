@@ -130,9 +130,10 @@ impl GameVariant {
       .await?;
 
     if let Some(release) = cached_release
-      && let Some(body) = &release.body {
-        return Ok(Some(body.clone()));
-      }
+      && let Some(body) = &release.body
+    {
+      return Ok(Some(body.clone()));
+    }
 
     // If not found or body is missing, fetch from GitHub
     let repo = get_github_repo_for_variant(self);
