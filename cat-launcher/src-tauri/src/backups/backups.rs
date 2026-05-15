@@ -51,7 +51,7 @@ pub enum DeleteBackupError {
 }
 
 /// Deletes a backup from both the database and the filesystem.
-/// 
+///
 /// If the file removal fails, it attempts to re-insert the backup entry back into the database.
 pub async fn delete_backup(
   id: i64,

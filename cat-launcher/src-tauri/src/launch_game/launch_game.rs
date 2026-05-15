@@ -277,10 +277,11 @@ async fn cleanup_old_backups(
         .delete_backup_entry(backup.id)
         .await
         .is_ok()
-        && let Ok(path) = path_res {
-          // file deletion fails is ignored.
-          let _ = tokio::fs::remove_file(&path).await;
-        }
+        && let Ok(path) = path_res
+      {
+        // file deletion fails is ignored.
+        let _ = tokio::fs::remove_file(&path).await;
+      }
     });
   }
 

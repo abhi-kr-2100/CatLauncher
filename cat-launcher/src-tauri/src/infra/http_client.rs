@@ -5,15 +5,15 @@ use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
 
 fn create_github_pat_headers() -> Option<HeaderMap> {
   if let Ok(github_pat) = env::var("GITHUB_PAT")
-    && !github_pat.is_empty() {
-      let authorization = format!("Bearer {}", github_pat);
-      if let Ok(header_value) = HeaderValue::from_str(&authorization)
-      {
-        let mut headers = HeaderMap::new();
-        headers.insert(AUTHORIZATION, header_value);
-        return Some(headers);
-      }
+    && !github_pat.is_empty()
+  {
+    let authorization = format!("Bearer {}", github_pat);
+    if let Ok(header_value) = HeaderValue::from_str(&authorization) {
+      let mut headers = HeaderMap::new();
+      headers.insert(AUTHORIZATION, header_value);
+      return Some(headers);
     }
+  }
   None
 }
 

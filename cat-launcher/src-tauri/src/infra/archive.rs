@@ -145,9 +145,10 @@ pub async fn create_zip_archive(
   let archive_path = archive_path.to_owned();
 
   if let Ok(metadata) = fs::metadata(&archive_path).await
-    && metadata.is_dir() {
-      return Err(ArchiveCreationError::DestinationIsDirectory);
-    }
+    && metadata.is_dir()
+  {
+    return Err(ArchiveCreationError::DestinationIsDirectory);
+  }
 
   match fs::metadata(&source_dir).await {
     Ok(metadata) => {
@@ -158,7 +159,9 @@ pub async fn create_zip_archive(
       }
     }
     Err(_) => {
-      return Err(ArchiveCreationError::InvalidOrNonExistentSourceDir);
+      return Err(
+        ArchiveCreationError::InvalidOrNonExistentSourceDir,
+      );
     }
   }
 

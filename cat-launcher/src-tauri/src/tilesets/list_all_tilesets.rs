@@ -214,7 +214,9 @@ async fn list_all_third_party_tilesets(
         tilesets.push(Tileset::ThirdParty(third_party_tileset))
       }
       Err(e) => {
-        return Err(ListThirdPartyTilesetsError::ParseTilesetsJson(e));
+        return Err(ListThirdPartyTilesetsError::ParseTilesetsJson(
+          e,
+        ));
       }
     }
   }
