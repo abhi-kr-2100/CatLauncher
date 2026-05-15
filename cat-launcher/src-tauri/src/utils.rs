@@ -1,8 +1,6 @@
 use std::fs;
 use std::io;
-use std::time::Duration;
 
-use r2d2_sqlite::SqliteConnectionManager;
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
@@ -14,8 +12,9 @@ use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
 use crate::infra::http_client::create_http_client;
-use crate::infra::repository::db_schema::initialize_schema;
-use crate::infra::repository::db_schema::InitializeSchemaError;
+use crate::infra::repository::sqlite_pool::{
+  CreateSqlitePoolError, create_sqlite_pool,
+};
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
 use crate::manual_backups::repository::sqlite_manual_backup_repository::SqliteManualBackupRepository;
@@ -66,17 +65,11 @@ pub enum RepositoryError {
   #[error("failed to get system directory: {0}")]
   SystemDir(#[from] tauri::Error),
 
-  #[error("failed to initialize database: {0}")]
-  Database(#[from] rusqlite::Error),
-
-  #[error("failed to initialize schema: {0}")]
-  Schema(#[from] InitializeSchemaError),
-
   #[error("failed to get schema file path: {0}")]
   SchemaFilePath(#[from] GetSchemaFilePathError),
 
-  #[error("failed to create connection pool: {0}")]
-  ConnectionPool(#[from] r2d2::Error),
+  #[error("failed to create database connection pool: {0}")]
+  ConnectionPool(#[from] CreateSqlitePoolError),
 }
 
 pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
@@ -86,16 +79,7 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   let resources_dir = app.path().resource_dir()?;
   let schema_path = get_schema_file_path(&resources_dir)?;
 
-  let manager =
-    SqliteConnectionManager::file(&db_path).with_init(|conn| {
-      conn.pragma_update(None, "journal_mode", "WAL")?;
-      conn.pragma_update(None, "foreign_keys", "ON")?;
-      conn.busy_timeout(Duration::from_secs(5))
-    });
-  let pool = r2d2::Pool::new(manager)?;
-
-  let conn = pool.get()?;
-  initialize_schema(&conn, &[schema_path])?;
+  let pool = create_sqlite_pool(&db_path, &[schema_path])?;
 
   app.manage(SqliteReleasesRepository::new(pool.clone()));
   app.manage(SqliteBackupRepository::new(pool.clone()));
