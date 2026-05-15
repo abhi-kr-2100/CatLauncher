@@ -51,7 +51,7 @@ pub async fn fetch_releases_for_variant(
 
   variant
     .fetch_releases(
-      &client,
+      &*client,
       &resources_dir,
       &*releases_repository,
       on_releases,
@@ -79,7 +79,7 @@ pub async fn fetch_release_notes(
   client: State<'_, Client>,
 ) -> Result<Option<String>, FetchReleaseNotesCommandError> {
   let notes = variant
-    .fetch_release_notes(&release_id, &client, &*releases_repository)
+    .fetch_release_notes(&release_id, &*client, &*releases_repository)
     .await?;
 
   Ok(notes)

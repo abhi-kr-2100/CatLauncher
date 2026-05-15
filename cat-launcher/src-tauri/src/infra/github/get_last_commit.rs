@@ -1,6 +1,5 @@
-use reqwest::Client;
-
 use crate::infra::github::types::GitHubCommit;
+use crate::infra::http_client::HttpClient;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetLastCommitError {
@@ -19,7 +18,7 @@ pub enum GetLastCommitError {
 
 pub async fn get_last_commit(
   repo: &str,
-  client: &Client,
+  client: &dyn HttpClient,
 ) -> Result<GitHubCommit, GetLastCommitError> {
   let api_url = format!(
     "https://api.github.com/repos/{}/commits?per_page=1",

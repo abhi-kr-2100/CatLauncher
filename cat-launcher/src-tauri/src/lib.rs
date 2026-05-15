@@ -5,10 +5,12 @@ pub mod settings;
 mod achievements;
 pub mod active_release;
 mod backups;
-mod fetch_releases;
-mod game_release;
-mod game_tips;
-mod infra;
+#[allow(clippy::module_inception)]
+pub mod fetch_releases;
+#[allow(clippy::module_inception)]
+pub mod game_release;
+pub mod game_tips;
+pub mod infra;
 mod install_release;
 mod last_played_world;
 mod launch_game;
