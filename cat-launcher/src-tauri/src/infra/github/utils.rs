@@ -1,10 +1,10 @@
 use std::sync::LazyLock;
 
 use regex::Regex;
-use reqwest::Client;
 use reqwest::header::LINK;
 
 use crate::infra::github::release::GitHubRelease;
+use crate::infra::http_client::HttpClient;
 
 #[derive(thiserror::Error, Debug)]
 pub enum GitHubReleaseFetchError {
@@ -23,7 +23,7 @@ static NEXT_PAGE_URL_RE: LazyLock<Regex> =
   LazyLock::new(|| Regex::new(r#"<([^>]+)>; rel="next""#).unwrap());
 
 pub async fn fetch_github_releases(
-  client: &Client,
+  client: &dyn HttpClient,
   repo: &str,
   num_releases: Option<usize>,
 ) -> Result<Vec<GitHubRelease>, GitHubReleaseFetchError> {
@@ -86,7 +86,7 @@ pub enum FetchGitHubReleaseByTagError {
 }
 
 pub async fn fetch_github_release_by_tag(
-  client: &Client,
+  client: &dyn HttpClient,
   repo: &str,
   tag: &str,
 ) -> Result<GitHubRelease, FetchGitHubReleaseByTagError> {

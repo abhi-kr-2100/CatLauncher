@@ -50,6 +50,7 @@ walkdir = "2.5.0"
 
 [dev-dependencies]
 tempfile = "3.23.0"
+wiremock = "0.6.5"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2.10.1"
