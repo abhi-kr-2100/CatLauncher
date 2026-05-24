@@ -1,0 +1,5 @@
+[alias]
+cov-term = "llvm-cov --workspace --manifest-path cat-launcher/src-tauri/Cargo.toml"
+cov-lcov = "llvm-cov --lcov --output-path lcov.info --workspace --manifest-path cat-launcher/src-tauri/Cargo.toml"
+cov-html = "llvm-cov --html --output-dir coverage-html --workspace --manifest-path cat-launcher/src-tauri/Cargo.toml"
+

@@ -11,7 +11,7 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-
+        llvm = pkgs.llvmPackages.llvm;
         tauriDependencies = with pkgs; [
           pkg-config
           webkitgtk_4_1
@@ -23,13 +23,20 @@
             packages = with pkgs; [
               cargo
               cargo-edit
+              cargo-llvm-cov
               clippy
+              llvm
               nodejs
               pnpm
               rustc
               rustfmt
               uv
             ] ++ tauriDependencies;
+
+            shellHook = ''
+              export LLVM_COV="${llvm}/bin/llvm-cov"
+              export LLVM_PROFDATA="${llvm}/bin/llvm-profdata"
+            '';
           };
         };
       }
