@@ -25,6 +25,9 @@ mod users;
 mod utils;
 pub mod variants;
 
+#[cfg(test)]
+pub mod testing;
+
 pub mod database {
   pub use crate::infra::repository::sqlite_pool::{
     SqlitePool, create_sqlite_pool,

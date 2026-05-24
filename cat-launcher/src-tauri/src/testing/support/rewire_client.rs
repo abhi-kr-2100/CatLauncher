@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use reqwest::{Client, Method, RequestBuilder};
 use url::Url;
 
-use cat_launcher_lib::infra::endpoint::Endpoint;
-use cat_launcher_lib::infra::http_client::{
+use crate::infra::endpoint::Endpoint;
+use crate::infra::http_client::{
   HttpClient, create_http_client,
 };
 

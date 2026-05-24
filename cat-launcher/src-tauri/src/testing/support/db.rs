@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use cat_launcher_lib::database::{SqlitePool, create_sqlite_pool};
+use crate::database::{SqlitePool, create_sqlite_pool};
 use tempfile::TempDir;
 
 pub struct TestDatabase {
