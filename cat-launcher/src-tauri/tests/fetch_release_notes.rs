@@ -1,12 +1,28 @@
 mod support;
 
+use std::collections::HashMap;
+
 use cat_launcher_lib::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use cat_launcher_lib::fetch_releases::repository::ReleasesRepository;
+use cat_launcher_lib::infra::endpoint::Endpoint;
 use cat_launcher_lib::infra::github::release::GitHubRelease;
 use cat_launcher_lib::variants::GameVariant;
 use chrono::Utc;
+use github_mock_api::{MockServer, Release};
 use support::db::TestDatabase;
-use support::mock_github::{MockGitHubApi, github_not_found_response, github_release_response};
+use support::rewire_client::RewireClient;
+
+fn create_rewire_client(mock_server_uri: &str) -> RewireClient {
+  let mut redirects = HashMap::new();
+  let mock_url = url::Url::parse(mock_server_uri).unwrap();
+  let mock_host = mock_url.host_str().unwrap().to_string();
+  let mock_port = mock_url.port();
+  redirects.insert(
+    Endpoint::new("api.github.com", None, "https"),
+    Endpoint::new(mock_host, mock_port, "http"),
+  );
+  RewireClient::new(redirects)
+}
 
 #[tokio::test]
 async fn returns_cached_body_when_available() {
@@ -29,8 +45,9 @@ async fn returns_cached_body_when_available() {
     .await
     .expect("cache release");
 
-  let mock_api = MockGitHubApi::start().await;
-  let client = mock_api.create_rewire_client();
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
+  let client = create_rewire_client(&mock_api.uri());
 
   let result = GameVariant::DarkDaysAhead
     .fetch_release_notes("v1.0.0", &client, &repo)
@@ -45,21 +62,14 @@ async fn fetches_from_github_when_not_in_cache() {
   let db = TestDatabase::new();
   let repo = SqliteReleasesRepository::new(db.pool.clone());
 
-  let mock_api = MockGitHubApi::start().await;
-  let response = github_release_response(
-    12345,
-    "v2.0.0",
-    Some("Fresh release notes from GitHub"),
-    false,
-  );
-  let mock = mock_api.mock_release_by_tag(
-    "CleverRaven/Cataclysm-DDA",
-    "v2.0.0",
-    response,
-  );
-  mock_api.register(mock).await;
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
+  let release =
+    Release::new("CleverRaven", "Cataclysm-DDA", "v2.0.0")
+      .body("Fresh release notes from GitHub");
+  mock_api.add_release(release).await;
 
-  let client = mock_api.create_rewire_client();
+  let client = create_rewire_client(&mock_api.uri());
 
   let result = GameVariant::DarkDaysAhead
     .fetch_release_notes("v2.0.0", &client, &repo)
@@ -93,21 +103,14 @@ async fn fetches_from_github_when_cached_but_body_is_none() {
     .await
     .expect("cache release");
 
-  let mock_api = MockGitHubApi::start().await;
-  let response = github_release_response(
-    12345,
-    "v3.0.0",
-    Some("Body was missing, fetched from GitHub"),
-    false,
-  );
-  let mock = mock_api.mock_release_by_tag(
-    "CleverRaven/Cataclysm-DDA",
-    "v3.0.0",
-    response,
-  );
-  mock_api.register(mock).await;
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
+  let release =
+    Release::new("CleverRaven", "Cataclysm-DDA", "v3.0.0")
+      .body("Body was missing, fetched from GitHub");
+  mock_api.add_release(release).await;
 
-  let client = mock_api.create_rewire_client();
+  let client = create_rewire_client(&mock_api.uri());
 
   let result = GameVariant::DarkDaysAhead
     .fetch_release_notes("v3.0.0", &client, &repo)
@@ -125,21 +128,14 @@ async fn updates_cache_after_fetching_from_github() {
   let db = TestDatabase::new();
   let repo = SqliteReleasesRepository::new(db.pool.clone());
 
-  let mock_api = MockGitHubApi::start().await;
-  let response = github_release_response(
-    99999,
-    "v4.0.0",
-    Some("Release notes to be cached"),
-    false,
-  );
-  let mock = mock_api.mock_release_by_tag(
-    "CleverRaven/Cataclysm-DDA",
-    "v4.0.0",
-    response,
-  );
-  mock_api.register(mock).await;
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
+  let release =
+    Release::new("CleverRaven", "Cataclysm-DDA", "v4.0.0")
+      .body("Release notes to be cached");
+  mock_api.add_release(release).await;
 
-  let client = mock_api.create_rewire_client();
+  let client = create_rewire_client(&mock_api.uri());
 
   let _ = GameVariant::DarkDaysAhead
     .fetch_release_notes("v4.0.0", &client, &repo)
@@ -165,15 +161,11 @@ async fn returns_error_when_github_returns_404() {
   let db = TestDatabase::new();
   let repo = SqliteReleasesRepository::new(db.pool.clone());
 
-  let mock_api = MockGitHubApi::start().await;
-  let mock = mock_api.mock_release_by_tag(
-    "CleverRaven/Cataclysm-DDA",
-    "nonexistent-tag",
-    github_not_found_response(),
-  );
-  mock_api.register(mock).await;
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
+  // Don't add any release for the nonexistent tag - the server will return 404
 
-  let client = mock_api.create_rewire_client();
+  let client = create_rewire_client(&mock_api.uri());
 
   let result = GameVariant::DarkDaysAhead
     .fetch_release_notes("nonexistent-tag", &client, &repo)
@@ -187,35 +179,20 @@ async fn works_with_different_game_variants() {
   let db = TestDatabase::new();
   let repo = SqliteReleasesRepository::new(db.pool.clone());
 
-  let mock_api = MockGitHubApi::start().await;
+  let mock_api =
+    MockServer::start().await.expect("start mock server");
 
-  let bn_response = github_release_response(
-    111,
-    "bn-v1.0",
-    Some("Bright Nights notes"),
-    false,
-  );
-  let bn_mock = mock_api.mock_release_by_tag(
-    "cataclysmbnteam/Cataclysm-BN",
-    "bn-v1.0",
-    bn_response,
-  );
-  mock_api.register(bn_mock).await;
+  let bn_release =
+    Release::new("cataclysmbnteam", "Cataclysm-BN", "bn-v1.0")
+      .body("Bright Nights notes");
+  mock_api.add_release(bn_release).await;
 
-  let tlg_response = github_release_response(
-    222,
-    "tlg-v1.0",
-    Some("The Last Generation notes"),
-    false,
-  );
-  let tlg_mock = mock_api.mock_release_by_tag(
-    "Cataclysm-TLG/Cataclysm-TLG",
-    "tlg-v1.0",
-    tlg_response,
-  );
-  mock_api.register(tlg_mock).await;
+  let tlg_release =
+    Release::new("Cataclysm-TLG", "Cataclysm-TLG", "tlg-v1.0")
+      .body("The Last Generation notes");
+  mock_api.add_release(tlg_release).await;
 
-  let client = mock_api.create_rewire_client();
+  let client = create_rewire_client(&mock_api.uri());
 
   let bn_result = GameVariant::BrightNights
     .fetch_release_notes("bn-v1.0", &client, &repo)

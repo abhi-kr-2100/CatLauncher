@@ -48,29 +48,13 @@ impl ReleasesRepository for SqliteReleasesRepository {
             let rows = stmt
                 .query_map([game_variant.to_string()], |row| {
                     let release_id_i64: i64 = row.get(0)?;
-                    let release_id: u64 = release_id_i64.try_into().map_err(|e| {
-                        rusqlite::Error::FromSqlConversionFailure(
-                            0,
-                            rusqlite::types::Type::Integer,
-                            Box::new(e),
-                        )
-                    })?;
+                    let release_id: u64 = release_id_i64 as u64;
                     let tag_name: String = row.get(1)?;
                     let prerelease: bool = row.get(2)?;
                     let created_at: String = row.get(3)?;
                     let body: Option<String> = row.get(4)?;
                     let asset_id_i64: Option<i64> = row.get(5)?;
-                    let asset_id: Option<u64> = asset_id_i64
-                        .map(|id| {
-                            id.try_into().map_err(|e| {
-                                rusqlite::Error::FromSqlConversionFailure(
-                                    5,
-                                    rusqlite::types::Type::Integer,
-                                    Box::new(e),
-                                )
-                            })
-                        })
-                        .transpose()?;
+                    let asset_id: Option<u64> = asset_id_i64.map(|id| id as u64);
                     let browser_download_url: Option<String> = row.get(6)?;
                     let name: Option<String> = row.get(7)?;
                     let digest: Option<String> = row.get(8)?;
@@ -145,29 +129,13 @@ impl ReleasesRepository for SqliteReleasesRepository {
             let rows = stmt
                 .query_map([game_variant.to_string(), tag_name], |row| {
                     let release_id_i64: i64 = row.get(0)?;
-                    let release_id: u64 = release_id_i64.try_into().map_err(|e| {
-                        rusqlite::Error::FromSqlConversionFailure(
-                            0,
-                            rusqlite::types::Type::Integer,
-                            Box::new(e),
-                        )
-                    })?;
+                    let release_id: u64 = release_id_i64 as u64;
                     let tag_name: String = row.get(1)?;
                     let prerelease: bool = row.get(2)?;
                     let created_at: String = row.get(3)?;
                     let body: Option<String> = row.get(4)?;
                     let asset_id_i64: Option<i64> = row.get(5)?;
-                    let asset_id: Option<u64> = asset_id_i64
-                        .map(|id| {
-                            id.try_into().map_err(|e| {
-                                rusqlite::Error::FromSqlConversionFailure(
-                                    5,
-                                    rusqlite::types::Type::Integer,
-                                    Box::new(e),
-                                )
-                            })
-                        })
-                        .transpose()?;
+                    let asset_id: Option<u64> = asset_id_i64.map(|id| id as u64);
                     let browser_download_url: Option<String> = row.get(6)?;
                     let name: Option<String> = row.get(7)?;
                     let digest: Option<String> = row.get(8)?;
@@ -233,9 +201,7 @@ impl ReleasesRepository for SqliteReleasesRepository {
                 .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
 
             for release in releases {
-                let release_id: i64 = release.id.try_into().map_err(|e| {
-                    ReleasesRepositoryError::Update(Box::new(e))
-                })?;
+                let release_id: i64 = release.id as i64;
 
                 tx.execute(
                     "INSERT OR REPLACE INTO releases (id, tag_name, prerelease, created_at, game_variant) VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -256,9 +222,7 @@ impl ReleasesRepository for SqliteReleasesRepository {
                 .map_err(|e| ReleasesRepositoryError::Update(Box::new(e)))?;
 
                 for asset in &release.assets {
-                    let asset_id: i64 = asset.id.try_into().map_err(|e| {
-                        ReleasesRepositoryError::Update(Box::new(e))
-                    })?;
+                    let asset_id: i64 = asset.id as i64;
 
                     tx.execute(
                         "INSERT OR REPLACE INTO assets (id, release_id, browser_download_url, name, digest) VALUES (?1, ?2, ?3, ?4, ?5)",
