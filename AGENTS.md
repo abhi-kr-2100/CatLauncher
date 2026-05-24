@@ -37,6 +37,11 @@ At the end of every task, run the following commands:
 * `pnpm --prefix cat-launcher format && pnpm --prefix cat-launcher lint:fix`
 * `pnpm --prefix cat-launcher lint` to ensure there are no errors.
 
+## External Repositories
+
+* The ext/ directory contains code for external repositories which are used by our project.
+* The ext/ directory is strictly read-only.
+
 ## Project Overview
 
 * This project is called CatLauncher. It is a launcher for Cataclysm Dark Days Ahead and its two most popular forks: Bright Nights and The Last Generation.
