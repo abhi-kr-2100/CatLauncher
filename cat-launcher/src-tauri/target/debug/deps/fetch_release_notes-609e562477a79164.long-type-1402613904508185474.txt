@@ -1,0 +1,1 @@
+Pin<Box<dyn Future<Output = Result<reqwest::Response, reqwest::Error>> + std::marker::Send>>

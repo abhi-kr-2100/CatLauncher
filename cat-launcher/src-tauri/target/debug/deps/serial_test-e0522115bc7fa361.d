@@ -1,0 +1,11 @@
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/deps/serial_test-e0522115bc7fa361.d: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/parallel_code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/rwlock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/serial_code_lock.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/deps/libserial_test-e0522115bc7fa361.rlib: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/parallel_code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/rwlock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/serial_code_lock.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/deps/libserial_test-e0522115bc7fa361.rmeta: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/parallel_code_lock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/rwlock.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/serial_code_lock.rs
+
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/lib.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/code_lock.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/parallel_code_lock.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/rwlock.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serial_test-3.4.0/src/serial_code_lock.rs:

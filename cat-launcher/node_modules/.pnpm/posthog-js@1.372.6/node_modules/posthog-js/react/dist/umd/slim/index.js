@@ -1,0 +1,382 @@
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('react')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'react'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.PosthogReactSlim = {}, global.React));
+})(this, (function (exports, React) { 'use strict';
+
+    function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+    var React__default = /*#__PURE__*/_interopDefaultLegacy(React);
+
+    var defaultPostHogInstance;
+    function getDefaultPostHogInstance() {
+        return defaultPostHogInstance;
+    }
+
+    var PostHogContext = React.createContext({
+        get client() {
+            return getDefaultPostHogInstance();
+        },
+        bootstrap: undefined,
+    });
+
+    function PostHogProvider(_a) {
+        var client = _a.client, children = _a.children;
+        var value = React.useMemo(function () { var _a; return ({ client: client, bootstrap: (_a = client.config) === null || _a === void 0 ? void 0 : _a.bootstrap }); }, [client]);
+        return React__default["default"].createElement(PostHogContext.Provider, { value: value }, children);
+    }
+
+    var isFunction = function (f) {
+        return typeof f === 'function';
+    };
+    var isUndefined = function (x) {
+        return x === void 0;
+    };
+    var isNull = function (x) {
+        return x === null;
+    };
+
+    function useFeatureFlagEnabled(flag) {
+        var _a, _b;
+        var _c = React.useContext(PostHogContext), client = _c.client, bootstrap = _c.bootstrap;
+        var _d = React.useState(function () { return client.isFeatureEnabled(flag); }), featureEnabled = _d[0], setFeatureEnabled = _d[1];
+        React.useEffect(function () {
+            return client.onFeatureFlags(function () {
+                setFeatureEnabled(client.isFeatureEnabled(flag));
+            });
+        }, [client, flag]);
+        var bootstrapped = (_a = bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlags) === null || _a === void 0 ? void 0 : _a[flag];
+        if (!((_b = client === null || client === void 0 ? void 0 : client.featureFlags) === null || _b === void 0 ? void 0 : _b.hasLoadedFlags) && (bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlags)) {
+            return isUndefined(bootstrapped) ? undefined : !!bootstrapped;
+        }
+        return featureEnabled;
+    }
+
+    function useFeatureFlagPayload(flag) {
+        var _a;
+        var _b = React.useContext(PostHogContext), client = _b.client, bootstrap = _b.bootstrap;
+        var _c = React.useState(function () { var _a; return (_a = client.getFeatureFlagResult(flag, { send_event: false })) === null || _a === void 0 ? void 0 : _a.payload; }), featureFlagPayload = _c[0], setFeatureFlagPayload = _c[1];
+        React.useEffect(function () {
+            return client.onFeatureFlags(function () {
+                var _a;
+                setFeatureFlagPayload((_a = client.getFeatureFlagResult(flag, { send_event: false })) === null || _a === void 0 ? void 0 : _a.payload);
+            });
+        }, [client, flag]);
+        if (!((_a = client === null || client === void 0 ? void 0 : client.featureFlags) === null || _a === void 0 ? void 0 : _a.hasLoadedFlags) && (bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlagPayloads)) {
+            return bootstrap.featureFlagPayloads[flag];
+        }
+        return featureFlagPayload;
+    }
+
+    function useFeatureFlagResult(flag) {
+        var _a, _b;
+        var _c = React.useContext(PostHogContext), client = _c.client, bootstrap = _c.bootstrap;
+        var _d = React.useState(function () { return client.getFeatureFlagResult(flag); }), result = _d[0], setResult = _d[1];
+        React.useEffect(function () {
+            return client.onFeatureFlags(function () {
+                setResult(client.getFeatureFlagResult(flag));
+            });
+        }, [client, flag]);
+        if (!((_a = client === null || client === void 0 ? void 0 : client.featureFlags) === null || _a === void 0 ? void 0 : _a.hasLoadedFlags) && (bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlags)) {
+            var bootstrappedValue = bootstrap.featureFlags[flag];
+            if (isUndefined(bootstrappedValue)) {
+                return undefined;
+            }
+            return {
+                key: flag,
+                enabled: typeof bootstrappedValue === 'string' ? true : !!bootstrappedValue,
+                variant: typeof bootstrappedValue === 'string' ? bootstrappedValue : undefined,
+                payload: (_b = bootstrap.featureFlagPayloads) === null || _b === void 0 ? void 0 : _b[flag],
+            };
+        }
+        return result;
+    }
+
+    function useActiveFeatureFlags() {
+        var _a;
+        var _b = React.useContext(PostHogContext), client = _b.client, bootstrap = _b.bootstrap;
+        var _c = React.useState(function () { return client.featureFlags.getFlags(); }), featureFlags = _c[0], setFeatureFlags = _c[1];
+        React.useEffect(function () {
+            return client.onFeatureFlags(function (flags) {
+                setFeatureFlags(flags);
+            });
+        }, [client]);
+        if (!((_a = client === null || client === void 0 ? void 0 : client.featureFlags) === null || _a === void 0 ? void 0 : _a.hasLoadedFlags) && (bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlags)) {
+            return Object.keys(bootstrap.featureFlags);
+        }
+        return featureFlags;
+    }
+
+    function useFeatureFlagVariantKey(flag) {
+        var _a;
+        var _b = React.useContext(PostHogContext), client = _b.client, bootstrap = _b.bootstrap;
+        var _c = React.useState(function () {
+            return client.getFeatureFlag(flag);
+        }), featureFlagVariantKey = _c[0], setFeatureFlagVariantKey = _c[1];
+        React.useEffect(function () {
+            return client.onFeatureFlags(function () {
+                setFeatureFlagVariantKey(client.getFeatureFlag(flag));
+            });
+        }, [client, flag]);
+        if (!((_a = client === null || client === void 0 ? void 0 : client.featureFlags) === null || _a === void 0 ? void 0 : _a.hasLoadedFlags) && (bootstrap === null || bootstrap === void 0 ? void 0 : bootstrap.featureFlags)) {
+            return bootstrap.featureFlags[flag];
+        }
+        return featureFlagVariantKey;
+    }
+
+    var usePostHog = function () {
+        var client = React.useContext(PostHogContext).client;
+        return client;
+    };
+
+    /******************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise, SuppressedError, Symbol, Iterator */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+
+    function __rest(s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+            t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+                if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                    t[p[i]] = s[p[i]];
+            }
+        return t;
+    }
+
+    typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+        var e = new Error(message);
+        return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
+
+    function VisibilityAndClickTracker(_a) {
+        var children = _a.children, onIntersect = _a.onIntersect, onClick = _a.onClick, trackView = _a.trackView, options = _a.options, props = __rest(_a, ["children", "onIntersect", "onClick", "trackView", "options"]);
+        var ref = React.useRef(null);
+        var observerOptions = React.useMemo(function () { return (__assign({ threshold: 0.1 }, options)); }, [options === null || options === void 0 ? void 0 : options.threshold, options === null || options === void 0 ? void 0 : options.root, options === null || options === void 0 ? void 0 : options.rootMargin]);
+        React.useEffect(function () {
+            if (isNull(ref.current) || !trackView)
+                return;
+            var observer = new IntersectionObserver(function (_a) {
+                var entry = _a[0];
+                return onIntersect(entry);
+            }, observerOptions);
+            observer.observe(ref.current);
+            return function () { return observer.disconnect(); };
+        }, [observerOptions, trackView, onIntersect]);
+        return (React__default["default"].createElement("div", __assign({ ref: ref }, props, { onClick: onClick }), children));
+    }
+
+    function VisibilityAndClickTrackers(_a) {
+        var children = _a.children, trackInteraction = _a.trackInteraction, trackView = _a.trackView, options = _a.options, onInteract = _a.onInteract, onView = _a.onView, props = __rest(_a, ["children", "trackInteraction", "trackView", "options", "onInteract", "onView"]);
+        var clickTrackedRef = React.useRef(false);
+        var visibilityTrackedRef = React.useRef(false);
+        var cachedOnClick = React.useCallback(function () {
+            if (!clickTrackedRef.current && trackInteraction && onInteract) {
+                onInteract();
+                clickTrackedRef.current = true;
+            }
+        }, [trackInteraction, onInteract]);
+        var onIntersect = function (entry) {
+            if (!visibilityTrackedRef.current && entry.isIntersecting && onView) {
+                onView();
+                visibilityTrackedRef.current = true;
+            }
+        };
+        var trackedChildren = React.Children.map(children, function (child) {
+            return (React__default["default"].createElement(VisibilityAndClickTracker, __assign({ onClick: cachedOnClick, onIntersect: onIntersect, trackView: trackView, options: options }, props), child));
+        });
+        return React__default["default"].createElement(React__default["default"].Fragment, null, trackedChildren);
+    }
+
+    function PostHogFeature(_a) {
+        var flag = _a.flag, match = _a.match, children = _a.children, fallback = _a.fallback, visibilityObserverOptions = _a.visibilityObserverOptions, trackInteraction = _a.trackInteraction, trackView = _a.trackView, props = __rest(_a, ["flag", "match", "children", "fallback", "visibilityObserverOptions", "trackInteraction", "trackView"]);
+        var payload = useFeatureFlagPayload(flag);
+        var variant = useFeatureFlagVariantKey(flag);
+        var posthog = usePostHog();
+        var shouldTrackInteraction = trackInteraction !== null && trackInteraction !== void 0 ? trackInteraction : true;
+        var shouldTrackView = trackView !== null && trackView !== void 0 ? trackView : true;
+        if (!isUndefined(variant)) {
+            if (isUndefined(match) || variant === match) {
+                var childNode = isFunction(children) ? children(payload) : children;
+                return (React__default["default"].createElement(VisibilityAndClickTrackers, __assign({ flag: flag, options: visibilityObserverOptions, trackInteraction: shouldTrackInteraction, trackView: shouldTrackView, onInteract: function () { return captureFeatureInteraction({ flag: flag, posthog: posthog, flagVariant: variant }); }, onView: function () { return captureFeatureView({ flag: flag, posthog: posthog, flagVariant: variant }); } }, props), childNode));
+            }
+        }
+        return React__default["default"].createElement(React__default["default"].Fragment, null, fallback);
+    }
+    function captureFeatureInteraction(_a) {
+        var _b;
+        var flag = _a.flag, posthog = _a.posthog, flagVariant = _a.flagVariant;
+        var properties = {
+            feature_flag: flag,
+            $set: (_b = {}, _b["$feature_interaction/".concat(flag)] = flagVariant !== null && flagVariant !== void 0 ? flagVariant : true, _b),
+        };
+        if (typeof flagVariant === 'string') {
+            properties.feature_flag_variant = flagVariant;
+        }
+        posthog.capture('$feature_interaction', properties);
+    }
+    function captureFeatureView(_a) {
+        var _b;
+        var flag = _a.flag, posthog = _a.posthog, flagVariant = _a.flagVariant;
+        var properties = {
+            feature_flag: flag,
+            $set: (_b = {}, _b["$feature_view/".concat(flag)] = flagVariant !== null && flagVariant !== void 0 ? flagVariant : true, _b),
+        };
+        if (typeof flagVariant === 'string') {
+            properties.feature_flag_variant = flagVariant;
+        }
+        posthog.capture('$feature_view', properties);
+    }
+
+    function TrackedChild(_a) {
+        var child = _a.child, index = _a.index, name = _a.name, properties = _a.properties, observerOptions = _a.observerOptions;
+        var trackedRef = React.useRef(false);
+        var posthog = usePostHog();
+        var onIntersect = React.useCallback(function (entry) {
+            if (entry.isIntersecting && !trackedRef.current) {
+                posthog.capture('$element_viewed', __assign({ element_name: name, child_index: index }, properties));
+                trackedRef.current = true;
+            }
+        }, [posthog, name, index, properties]);
+        return (React__default["default"].createElement(VisibilityAndClickTracker, { onIntersect: onIntersect, trackView: true, options: observerOptions }, child));
+    }
+    function PostHogCaptureOnViewed(_a) {
+        var name = _a.name, properties = _a.properties, observerOptions = _a.observerOptions, trackAllChildren = _a.trackAllChildren, children = _a.children, props = __rest(_a, ["name", "properties", "observerOptions", "trackAllChildren", "children"]);
+        var trackedRef = React.useRef(false);
+        var posthog = usePostHog();
+        var onIntersect = React.useCallback(function (entry) {
+            if (entry.isIntersecting && !trackedRef.current) {
+                posthog.capture('$element_viewed', __assign({ element_name: name }, properties));
+                trackedRef.current = true;
+            }
+        }, [posthog, name, properties]);
+        if (trackAllChildren) {
+            var trackedChildren = React.Children.map(children, function (child, index) {
+                return (React__default["default"].createElement(TrackedChild, { key: index, child: child, index: index, name: name, properties: properties, observerOptions: observerOptions }));
+            });
+            return React__default["default"].createElement("div", __assign({}, props), trackedChildren);
+        }
+        return (React__default["default"].createElement(VisibilityAndClickTracker, __assign({ onIntersect: onIntersect, trackView: true, options: observerOptions }, props), children));
+    }
+
+    var INITIAL_STATE = {
+        componentStack: null,
+        exceptionEvent: null,
+        error: null,
+    };
+    var __POSTHOG_ERROR_MESSAGES = {
+        INVALID_FALLBACK: '[PostHog.js][PostHogErrorBoundary] Invalid fallback prop, provide a valid React element or a function that returns a valid React element.',
+    };
+    var PostHogErrorBoundary = (function (_super) {
+        __extends(PostHogErrorBoundary, _super);
+        function PostHogErrorBoundary(props) {
+            var _this = _super.call(this, props) || this;
+            _this.state = INITIAL_STATE;
+            return _this;
+        }
+        PostHogErrorBoundary.prototype.componentDidCatch = function (error, errorInfo) {
+            var additionalProperties = this.props.additionalProperties;
+            var currentProperties;
+            if (isFunction(additionalProperties)) {
+                currentProperties = additionalProperties(error);
+            }
+            else if (typeof additionalProperties === 'object') {
+                currentProperties = additionalProperties;
+            }
+            var client = this.context.client;
+            var exceptionEvent = client.captureException(error, currentProperties);
+            var componentStack = errorInfo.componentStack;
+            this.setState({
+                error: error,
+                componentStack: componentStack !== null && componentStack !== void 0 ? componentStack : null,
+                exceptionEvent: exceptionEvent,
+            });
+        };
+        PostHogErrorBoundary.prototype.render = function () {
+            var _a = this.props, children = _a.children, fallback = _a.fallback;
+            var state = this.state;
+            if (state.componentStack == null) {
+                return isFunction(children) ? children() : children;
+            }
+            var element = isFunction(fallback)
+                ? React__default["default"].createElement(fallback, {
+                    error: state.error,
+                    componentStack: state.componentStack,
+                    exceptionEvent: state.exceptionEvent,
+                })
+                : fallback;
+            if (React__default["default"].isValidElement(element)) {
+                return element;
+            }
+            console.warn(__POSTHOG_ERROR_MESSAGES.INVALID_FALLBACK);
+            return React__default["default"].createElement(React__default["default"].Fragment, null);
+        };
+        PostHogErrorBoundary.contextType = PostHogContext;
+        return PostHogErrorBoundary;
+    }(React__default["default"].Component));
+
+    var setupReactErrorHandler = function (client, callback) {
+        return function (error, errorInfo) {
+            var event = client.captureException(error);
+            if (callback) {
+                callback(event, error, errorInfo);
+            }
+        };
+    };
+
+    exports.PostHogCaptureOnViewed = PostHogCaptureOnViewed;
+    exports.PostHogContext = PostHogContext;
+    exports.PostHogErrorBoundary = PostHogErrorBoundary;
+    exports.PostHogFeature = PostHogFeature;
+    exports.PostHogProvider = PostHogProvider;
+    exports.captureFeatureInteraction = captureFeatureInteraction;
+    exports.captureFeatureView = captureFeatureView;
+    exports.setupReactErrorHandler = setupReactErrorHandler;
+    exports.useActiveFeatureFlags = useActiveFeatureFlags;
+    exports.useFeatureFlagEnabled = useFeatureFlagEnabled;
+    exports.useFeatureFlagPayload = useFeatureFlagPayload;
+    exports.useFeatureFlagResult = useFeatureFlagResult;
+    exports.useFeatureFlagVariantKey = useFeatureFlagVariantKey;
+    exports.usePostHog = usePostHog;
+
+}));
+//# sourceMappingURL=index.js.map

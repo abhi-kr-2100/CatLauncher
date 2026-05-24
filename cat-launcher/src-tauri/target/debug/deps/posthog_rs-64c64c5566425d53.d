@@ -1,0 +1,16 @@
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/deps/posthog_rs-64c64c5566425d53.d: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/mod.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/async_client.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/endpoints.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/error.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/event.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flag_evaluations.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flags.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/global.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/local_evaluation.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/deps/libposthog_rs-64c64c5566425d53.rmeta: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/mod.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/async_client.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/endpoints.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/error.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/event.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flag_evaluations.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flags.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/global.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/local_evaluation.rs
+
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/lib.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/mod.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/client/async_client.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/endpoints.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/error.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/event.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flag_evaluations.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/feature_flags.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/global.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/posthog-rs-0.6.0/src/local_evaluation.rs:
+
+# env-dep:CARGO_PKG_VERSION=0.6.0

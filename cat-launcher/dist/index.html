@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Tauri + React + Typescript</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("cat-launcher-theme");
+        const isLight = theme === "Light";
+        document.documentElement.classList.toggle("dark", !isLight);
+        document.documentElement.style.colorScheme = isLight
+          ? "light"
+          : "dark";
+      } catch {
+        // Ignore errors. React will set the theme later.
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-Cvm0LoWE.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-F7F-Q6pg.css">
+  </head>
+
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+[package]
+name = "github-mock-api-ffi"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+name = "github_mock_api_ffi"
+doctest = false
+
+[dependencies]
+diplomat = "0.15"
+diplomat-runtime = "0.15"
+github-mock-api = { path = ".." }
+tokio = { version = "1", features = ["rt-multi-thread"] }
+github-mock-api-ffi-common = { path = "common" }
+
+[build-dependencies]
+diplomat-tool = "0.15"
+thiserror = "2"
+
+[dev-dependencies]
+thiserror = "2"

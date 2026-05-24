@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=A Tauri App
+Exec=cat-launcher
+StartupWMClass=cat-launcher
+Icon=cat-launcher
+Name=cat-launcher
+Terminal=false
+Type=Application

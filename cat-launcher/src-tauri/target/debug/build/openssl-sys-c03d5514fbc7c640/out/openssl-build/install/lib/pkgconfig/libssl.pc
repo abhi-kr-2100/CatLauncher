@@ -1,0 +1,12 @@
+# 
+prefix=/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/debug/build/openssl-sys-c03d5514fbc7c640/out/openssl-build/install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include 
+
+Name: OpenSSL-libssl
+Description: Secure Sockets Layer and cryptography libraries
+Version: 3.6.2
+Requires.private: libcrypto
+Libs: -L${libdir} -lssl
+Cflags: -I${includedir}
