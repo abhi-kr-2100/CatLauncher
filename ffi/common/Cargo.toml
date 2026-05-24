@@ -1,0 +1,14 @@
+[package]
+name = "github-mock-api-ffi-common"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+name = "github_mock_api_ffi_common"
+path = "src/lib.rs"
+doctest = false
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread"] }
+github-mock-api = { path = "../.." }

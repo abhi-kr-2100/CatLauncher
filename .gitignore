@@ -1,0 +1,22 @@
+.direnv/
+
+# Added by cargo
+/target
+
+# Coverage (cargo llvm-cov)
+lcov.info
+coverage-html/
+*.profraw
+
+# Generated Diplomat
+bindings/
+
+.dart_tool/
+__pycache__/
+
+*.so
+*.a
+*.dll
+*.pyc
+*.bundle
+*.dylib
