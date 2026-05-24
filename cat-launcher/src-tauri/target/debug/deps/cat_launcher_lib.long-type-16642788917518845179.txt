@@ -1,0 +1,1 @@
+Box<dyn std::future::Future<Output = Result<reqwest::Response, reqwest::Error>> + std::marker::Send>

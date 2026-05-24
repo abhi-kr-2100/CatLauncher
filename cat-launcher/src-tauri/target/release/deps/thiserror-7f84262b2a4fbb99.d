@@ -1,0 +1,14 @@
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/deps/thiserror-7f84262b2a4fbb99.d: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/build/thiserror-6931bf74a09c1e31/out/private.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/deps/libthiserror-7f84262b2a4fbb99.rlib: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/build/thiserror-6931bf74a09c1e31/out/private.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/deps/libthiserror-7f84262b2a4fbb99.rmeta: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/build/thiserror-6931bf74a09c1e31/out/private.rs
+
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/lib.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/aserror.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/display.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/var.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.18/src/private.rs:
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/build/thiserror-6931bf74a09c1e31/out/private.rs:
+
+# env-dep:OUT_DIR=/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/release/build/thiserror-6931bf74a09c1e31/out

@@ -1,0 +1,11 @@
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/tauri_runtime-bdd971105f156f7c.d: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/libtauri_runtime-bdd971105f156f7c.rlib: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/libtauri_runtime-bdd971105f156f7c.rmeta: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs
+
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/lib.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/dpi.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/monitor.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/webview.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tauri-runtime-2.11.0/src/window.rs:

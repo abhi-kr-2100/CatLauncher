@@ -1,0 +1,14 @@
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/serde-7d829a8aadc7d0df.d: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/build/serde-1eb3f4bb76f5e27e/out/private.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/libserde-7d829a8aadc7d0df.rlib: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/build/serde-1eb3f4bb76f5e27e/out/private.rs
+
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/deps/libserde-7d829a8aadc7d0df.rmeta: /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/build/serde-1eb3f4bb76f5e27e/out/private.rs
+
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/home/abhi/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/build/serde-1eb3f4bb76f5e27e/out/private.rs:
+
+# env-dep:OUT_DIR=/home/abhi/Projects/CatLauncher/cat-launcher/src-tauri/target/llvm-cov-target/debug/build/serde-1eb3f4bb76f5e27e/out
