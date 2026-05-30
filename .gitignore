@@ -8,3 +8,7 @@ cat-launcher/src/generated-types/*
 target/rust-analyzer/flycheck0/stderr
 target/rust-analyzer/flycheck0/stdout
 target/rust-analyzer/**
+
+# Coverage artifacts
+lcov.info
+coverage-html
