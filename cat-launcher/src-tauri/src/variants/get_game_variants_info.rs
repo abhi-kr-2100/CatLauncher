@@ -43,7 +43,21 @@ pub async fn get_game_variants_info(
   let variants_to_display = if ordered_variants.is_empty() {
     GameVariant::iter().collect::<Vec<_>>()
   } else {
-    ordered_variants
+    // When the order table is partially populated, return ordered variants first
+    // followed by unordered variants in default enum order
+    let all_variants: Vec<GameVariant> =
+      GameVariant::iter().collect();
+    let ordered_set: std::collections::HashSet<_> =
+      ordered_variants.iter().collect();
+    let mut unordered_variants: Vec<GameVariant> = all_variants
+      .into_iter()
+      .filter(|v| !ordered_set.contains(v))
+      .collect();
+
+    // Maintain order: ordered variants first, then unordered in default order
+    let mut result = ordered_variants;
+    result.append(&mut unordered_variants);
+    result
   };
 
   let result = variants_to_display
