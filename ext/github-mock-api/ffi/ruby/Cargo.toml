@@ -1,0 +1,19 @@
+[package]
+name = "github-mock-api-ruby"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "github_mock_api_ruby"
+doctest = false
+
+[dependencies]
+github-mock-api = { path = "../../" }
+github-mock-api-ffi-common = { path = "../common" }
+magnus = "0.8.2"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+
+[dev-dependencies]
+magnus = { version = "0.8.2", features = ["embed"] }
