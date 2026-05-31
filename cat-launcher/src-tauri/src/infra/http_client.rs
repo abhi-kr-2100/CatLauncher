@@ -1,4 +1,3 @@
-
 use reqwest::Client;
 
 /// Creates and returns a `reqwest::Client` instance configured with a user-agent

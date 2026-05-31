@@ -7,8 +7,8 @@ use crate::theme::theme::Theme;
 use crate::variants::game_variant::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
-/// Errors that can occur during database schema initialization.
-pub enum InitializeSchemaError {
+/// Errors that can occur during database initialization.
+pub enum InitializeDatabaseError {
   #[error("failed to execute schema: {0}")]
   Execute(#[from] rusqlite::Error),
 
@@ -16,17 +16,23 @@ pub enum InitializeSchemaError {
   ReadFile(#[from] std::io::Error),
 }
 
-/// Initializes the database schema by executing SQL from the provided paths
-/// and populating the variants and themes tables.
-pub fn initialize_schema(
+/// Executes the SQL schema files for the database.
+pub fn apply_schema(
   conn: &Connection,
   schema_paths: &[PathBuf],
-) -> Result<(), InitializeSchemaError> {
+) -> Result<(), InitializeDatabaseError> {
   for path in schema_paths {
     let schema = std::fs::read_to_string(path)?;
     conn.execute_batch(&schema)?;
   }
 
+  Ok(())
+}
+
+/// Seeds the database with the stable reference data used by the app.
+pub fn seed_reference_data(
+  conn: &Connection,
+) -> Result<(), InitializeDatabaseError> {
   for variant in GameVariant::iter() {
     conn.execute(
       "INSERT OR IGNORE INTO variants (name) VALUES (?1)",
@@ -40,6 +46,17 @@ pub fn initialize_schema(
       [theme.to_string()],
     )?;
   }
+
+  Ok(())
+}
+
+/// Initializes the database schema and seeds the reference tables.
+pub fn initialize_database(
+  conn: &Connection,
+  schema_paths: &[PathBuf],
+) -> Result<(), InitializeDatabaseError> {
+  apply_schema(conn, schema_paths)?;
+  seed_reference_data(conn)?;
 
   Ok(())
 }
