@@ -6,4 +6,6 @@ pub mod http_client;
 pub mod installation_progress_monitor;
 pub mod repository;
 pub mod rfc3339;
+#[cfg(test)]
+pub(crate) mod testing;
 pub mod utils;
