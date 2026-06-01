@@ -1,7 +1,6 @@
 use std::error::Error;
 use std::path::Path;
 
-use reqwest::Client;
 use serde::Serialize;
 use ts_rs::TS;
 
@@ -16,6 +15,7 @@ use crate::infra::github::utils::{
   FetchGitHubReleaseByTagError, GitHubReleaseFetchError,
   fetch_github_release_by_tag, fetch_github_releases,
 };
+use crate::infra::http_client::HttpClient;
 use crate::infra::utils::{Arch, OS, get_github_repo_for_variant};
 use crate::variants::GameVariant;
 
@@ -59,7 +59,7 @@ pub enum FetchReleaseNotesError {
 impl GameVariant {
   pub async fn fetch_releases<E, F>(
     &self,
-    client: &Client,
+    client: &dyn HttpClient,
     resources_dir: &Path,
     releases_repository: &dyn ReleasesRepository,
     on_releases: F,
@@ -122,7 +122,7 @@ impl GameVariant {
   pub async fn fetch_release_notes(
     &self,
     release_id: &str,
-    client: &Client,
+    client: &dyn HttpClient,
     releases_repository: &dyn ReleasesRepository,
   ) -> Result<Option<String>, FetchReleaseNotesError> {
     let cached_release = releases_repository

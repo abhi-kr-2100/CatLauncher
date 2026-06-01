@@ -1,4 +1,3 @@
-use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 use url::Url;
@@ -6,6 +5,7 @@ use url::Url;
 use crate::infra::github::get_last_commit::{
   GetLastCommitError, get_last_commit,
 };
+use crate::infra::http_client::HttpClient;
 use crate::mods::get_third_party_mod_by_id::{
   GetThirdPartyModByIdError, get_third_party_mod_by_id,
 };
@@ -62,7 +62,7 @@ pub fn extract_repo_from_github_url(url_str: &str) -> Option<String> {
 pub async fn get_last_activity_for_third_party_mod(
   mod_id: &str,
   variant: &GameVariant,
-  client: &Client,
+  client: &dyn HttpClient,
   mods_repository: &impl ModsRepository,
 ) -> Result<LastModActivity, GetLastActivityForThirdPartyModError> {
   let mod_data =
