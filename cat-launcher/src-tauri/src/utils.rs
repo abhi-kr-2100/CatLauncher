@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::sync::Arc;
 
 use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 
@@ -11,7 +12,7 @@ use crate::filesystem::paths::GetSchemaFilePathError;
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
-use crate::infra::http_client::create_http_client;
+use crate::infra::http_client::{HttpClient, create_http_client};
 use crate::infra::repository::sqlite_pool::{
   CreateSqlitePoolError, create_sqlite_pool,
 };
@@ -169,7 +170,9 @@ pub fn manage_downloader(app: &App) {
 
 pub fn manage_http_client(app: &App) {
   let client = create_http_client();
-  app.manage(client);
+  app.manage(client.clone());
+  let http_client: Arc<dyn HttpClient> = Arc::new(client.clone());
+  app.manage(http_client);
 }
 
 pub fn manage_posthog(app: &App) {

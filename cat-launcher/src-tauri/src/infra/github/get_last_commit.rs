@@ -1,11 +1,10 @@
-use reqwest::Client;
-
 use crate::infra::github::types::GitHubCommit;
+use crate::infra::http_client::{HttpClient, HttpClientError};
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetLastCommitError {
   #[error("failed to make API call: {0}")]
-  FetchGithub(#[from] reqwest::Error),
+  FetchGithub(#[from] HttpClientError),
 
   #[error("invalid GitHub response: {0}")]
   InvalidResponse(String),
@@ -19,14 +18,14 @@ pub enum GetLastCommitError {
 
 pub async fn get_last_commit(
   repo: &str,
-  client: &Client,
+  client: &dyn HttpClient,
 ) -> Result<GitHubCommit, GetLastCommitError> {
   let api_url = format!(
     "https://api.github.com/repos/{}/commits?per_page=1",
     repo
   );
 
-  let response = client.get(&api_url).send().await?;
+  let response = client.get(&api_url).await?;
 
   if !response.status().is_success() {
     return Err(GetLastCommitError::InvalidResponse(format!(
@@ -35,7 +34,8 @@ pub async fn get_last_commit(
     )));
   }
 
-  let commits: Vec<GitHubCommit> = response.json().await?;
+  let commits: Vec<GitHubCommit> =
+    response.json().await.map_err(HttpClientError::from)?;
 
   let commit = commits
     .into_iter()
