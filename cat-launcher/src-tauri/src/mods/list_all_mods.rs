@@ -6,6 +6,7 @@ use std::path::Path;
 use tokio::fs::{read_dir, read_to_string};
 
 use crate::active_release::repository::ActiveReleaseRepository;
+use crate::infra::http_client::HttpClient;
 use crate::infra::utils::{OS, sort_assets};
 use crate::mods::lib::{
   GetStockModsDirError, get_mods_resource_path, get_stock_mods_dir,
@@ -98,7 +99,7 @@ pub async fn list_all_mods<F, E>(
   active_release_repository: &impl ActiveReleaseRepository,
   mods_repository: &impl ModsRepository,
   online_mod_repositories: &[Box<dyn OnlineModRepository>],
-  client: &reqwest::Client,
+  client: &dyn HttpClient,
   on_update: F,
 ) -> Result<(), ListAllModsError<E>>
 where
