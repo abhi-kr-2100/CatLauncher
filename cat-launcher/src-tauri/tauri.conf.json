@@ -4,9 +4,9 @@
   "version": "0.15.0",
   "identifier": "com.munetmo.cat-launcher",
   "build": {
-    "beforeDevCommand": "cargo test --manifest-path ./src-tauri/Cargo.toml && pnpm dev",
+    "beforeDevCommand": "cargo test export_bindings --manifest-path ./src-tauri/Cargo.toml && pnpm dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "cargo test --manifest-path ./src-tauri/Cargo.toml && pnpm build",
+    "beforeBuildCommand": "cargo test export_bindings --manifest-path ./src-tauri/Cargo.toml && pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
