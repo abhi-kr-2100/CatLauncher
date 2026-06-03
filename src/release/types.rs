@@ -112,9 +112,9 @@ pub struct ReactionRollup {
 #[serde(rename_all = "snake_case")]
 pub struct Release {
     #[serde(skip)]
-    pub(crate) owner_login: String,
+    pub owner_login: String,
     #[serde(skip)]
-    pub(crate) repo_name: String,
+    pub repo_name: String,
     pub url: String,
     pub html_url: String,
     pub assets_url: String,
@@ -136,7 +136,6 @@ pub struct Release {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub updated_at: Option<String>,
     pub author: SimpleUser,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub assets: Vec<ReleaseAsset>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub body_html: Option<String>,

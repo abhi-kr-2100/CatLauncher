@@ -1,35 +1,18 @@
-use axum::extract::{Path, State};
-use axum::http::StatusCode;
-use axum::response::IntoResponse;
-use axum::Json;
-
+use crate::api::{ApiResponse, ApiError};
 use super::types::Repository;
 
-impl crate::MockServer {
-    /// Register a mocked repository with the server.
-    /// The repository will be available at `GET /repos/{owner}/{repo}`.
-    pub async fn add_repository(&self, repo: Repository) {
-        let key = (repo.owner.login.to_lowercase(), repo.name.to_lowercase());
-        self.state.repositories.write().await.insert(key, repo);
-    }
-}
-
 pub async fn get_repository(
-    Path((owner, repo)): Path<(String, String)>,
-    State(state): State<crate::AppState>,
-) -> impl IntoResponse {
+    owner: String,
+    repo: String,
+    state: crate::AppState,
+) -> ApiResponse<Repository> {
     let key = (owner.to_lowercase(), repo.to_lowercase());
     match state.repositories.read().await.get(&key) {
-        Some(r) => (StatusCode::OK, Json(r.clone())).into_response(),
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(serde_json::json!({
-                "message": "Not Found",
-                "documentation_url":
-                    "https://docs.github.com/rest/repos/repos#get-a-repository",
-            })),
-        )
-            .into_response(),
+        Some(r) => ApiResponse::Ok(r.clone()),
+        None => ApiResponse::Error(ApiError::not_found(
+            "Not Found",
+            "https://docs.github.com/rest/repos/repos#get-a-repository",
+        )),
     }
 }
 
