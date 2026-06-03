@@ -89,8 +89,8 @@ mod tests {
     }
 
     #[test]
-    fn test_load_repositories_from_seed_dir() -> Result<(), SeedError> {
-        let repos = load_repositories(&seed_dir())?.expect("seed file present");
+    fn test_load_repositories_from_seed_dir() -> Result<(), Box<dyn std::error::Error>> {
+        let repos = load_repositories(&seed_dir())?.ok_or("seed file missing")?;
         assert_eq!(repos.len(), 1);
         let repo = &repos[0];
         assert_eq!(repo.owner.login, "octocat");
@@ -127,16 +127,14 @@ mod tests {
     }
 
     #[test]
-    fn test_repository_seed_deserialize_minimal() {
+    fn test_repository_seed_deserialize_minimal() -> Result<(), Box<dyn std::error::Error>> {
         let json = r#"{"owner":"user","name":"repo"}"#;
-        let seed: RepositorySeed = match serde_json::from_str(json) {
-            Ok(seed) => seed,
-            Err(err) => panic!("expected valid json: {err}"),
-        };
+        let seed: RepositorySeed = serde_json::from_str(json)?;
         let repo = Repository::from(seed);
         assert_eq!(repo.owner.login, "user");
         assert_eq!(repo.name, "repo");
         assert!(repo.description.is_none());
         assert!(!repo.private);
+        Ok(())
     }
 }

@@ -30,7 +30,7 @@ let mocked_release = Release::new("octocat", "hello-world", "v1.0.0")
     .body("Release of my awesome project");
 
 // Register it with the server
-server.add_release(mocked_release).await;
+server.add_release("octocat", "hello-world", mocked_release).await;
 
 // The release is now available at:
 //   GET /repos/octocat/hello-world/releases

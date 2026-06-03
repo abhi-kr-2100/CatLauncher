@@ -44,8 +44,8 @@ let commit2 = Commit::new("octocat", "hello-world")
     .additions(42);
 
 // Register them with the server
-server.add_commit(commit1).await;
-server.add_commit(commit2).await;
+server.add_commit("octocat", "hello-world", commit1).await;
+server.add_commit("octocat", "hello-world", commit2).await;
 
 // GET /repos/octocat/hello-world/commits returns both commits
 // GET /repos/octocat/hello-world/commits/{sha} returns a specific commit

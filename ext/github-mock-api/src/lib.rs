@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
+use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::Router;
 use tokio::sync::RwLock;
@@ -21,6 +22,7 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+mod api;
 mod release;
 mod commit;
 mod repository;
@@ -39,13 +41,36 @@ pub(crate) struct AppState {
     pub(crate) commits: Arc<RwLock<HashMap<RepoKey, Vec<Commit>>>>,
 }
 
+impl AppState {
+    pub async fn add_release(&self, owner: &str, repo: &str, release: Release) {
+        let key = (owner.to_lowercase(), repo.to_lowercase());
+        let mut releases = self.releases.write().await;
+        releases.entry(key).or_default().push(release);
+    }
+
+    pub async fn add_commit(&self, owner: &str, repo: &str, commit: Commit) {
+        let key = (owner.to_lowercase(), repo.to_lowercase());
+        let mut commits = self.commits.write().await;
+        commits.entry(key).or_default().push(commit);
+    }
+
+    pub async fn add_repository(&self, repository: Repository) {
+        let key = (
+            repository.owner.login.to_lowercase(),
+            repository.name.to_lowercase(),
+        );
+        let mut repositories = self.repositories.write().await;
+        repositories.insert(key, repository);
+    }
+}
+
 /// A mock GitHub API server that can be used for testing.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```no_run
 /// use github_mock_api::{MockServer, Error};
-/// 
+///
 /// #[tokio::main]
 /// async fn main() -> Result<(), Error> {
 ///     let server = MockServer::start().await?;
@@ -74,34 +99,69 @@ impl MockServer {
     pub async fn start_on(host: IpAddr, port: u16) -> Result<Self> {
         let listener = tokio::net::TcpListener::bind((host, port))
             .await?;
-        
+
         let address = listener.local_addr()?;
 
         let state = AppState::default();
         let app = Router::new()
-            .route("/repos/{owner}/{repo}", get(repository::get_repository))
+            .route(
+                "/repos/{owner}/{repo}",
+                get(|Path((owner, repo)), State(state): State<AppState>| {
+                    repository::get_repository(owner, repo, state)
+                }),
+            )
             .route(
                 "/repos/{owner}/{repo}/releases",
-                get(release::list_releases),
+                get(
+                    |Path((owner, repo)),
+                     Query(pagination),
+                     State(state): State<AppState>| {
+                        release::list_releases(owner, repo, pagination, state)
+                    },
+                ),
             )
             .route(
                 "/repos/{owner}/{repo}/releases/latest",
-                get(release::get_latest_release),
+                get(|Path((owner, repo)), State(state): State<AppState>| {
+                    release::get_latest_release(owner, repo, state)
+                }),
             )
             .route(
                 "/repos/{owner}/{repo}/releases/tags/{tag}",
-                get(release::get_release_by_tag),
+                get(|Path((owner, repo, tag)), State(state): State<AppState>| {
+                    release::get_release_by_tag(owner, repo, tag, state)
+                }),
             )
             .route(
                 "/repos/{owner}/{repo}/releases/{release_id}",
-                get(release::get_release),
+                get(
+                    |Path((owner, repo, release_id)), State(state): State<AppState>| {
+                        release::get_release(owner, repo, release_id, state)
+                    },
+                ),
             )
-            .route("/repos/{owner}/{repo}/commits", get(commit::list_commits))
-            .route("/repos/{owner}/{repo}/commits/{sha}", get(commit::get_commit))
+            .route(
+                "/repos/{owner}/{repo}/commits",
+                get(
+                    |Path((owner, repo)),
+                     Query(pagination),
+                     State(state): State<AppState>| {
+                        commit::list_commits(owner, repo, pagination, state)
+                    },
+                ),
+            )
+            .route(
+                "/repos/{owner}/{repo}/commits/{sha}",
+                get(
+                    |Path((owner, repo, sha)), State(state): State<AppState>| {
+                        commit::get_commit(owner, repo, sha, state)
+                    },
+                ),
+            )
             .with_state(state.clone());
-        
+
         let (shutdown_sender, mut shutdown_receiver) = mpsc::channel(1);
-        
+
         let server_handle = tokio::spawn(async move {
             if let Err(e) = axum::serve(listener, app)
                 .with_graceful_shutdown(async move {
@@ -113,7 +173,7 @@ impl MockServer {
                 tracing::error!("Server failed: {}", e);
             }
         });
-        
+
         Ok(Self {
             address,
             shutdown_sender: Some(shutdown_sender),
@@ -125,6 +185,21 @@ impl MockServer {
     /// Get the full URI of the running server (e.g., "http://127.0.0.1:3000").
     pub fn uri(&self) -> String {
         format!("http://{}", self.address)
+    }
+
+    /// Register a mocked release with the server.
+    pub async fn add_release(&self, owner: &str, repo: &str, release: Release) {
+        self.state.add_release(owner, repo, release).await;
+    }
+
+    /// Register a mocked commit with the server.
+    pub async fn add_commit(&self, owner: &str, repo: &str, commit: Commit) {
+        self.state.add_commit(owner, repo, commit).await;
+    }
+
+    /// Register a mocked repository with the server.
+    pub async fn add_repository(&self, repository: Repository) {
+        self.state.add_repository(repository).await;
     }
 
     /// Manually stop the server.
