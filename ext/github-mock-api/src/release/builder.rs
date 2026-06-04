@@ -10,8 +10,8 @@ impl Release {
         let created_at = super::DEFAULT_TIMESTAMP.to_string();
 
         Self {
-            owner_login: owner.to_string(),
-            repo_name: repo.to_string(),
+            owner: owner.to_string(),
+            repo: repo.to_string(),
             url: format!("{base}/releases/{id}"),
             html_url: format!("{html_base}/releases/tag/{tag_name}"),
             assets_url: format!("{base}/releases/{id}/assets"),

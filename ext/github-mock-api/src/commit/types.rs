@@ -1,4 +1,8 @@
+use std::path::Path;
+
 use serde::{Deserialize, Serialize};
+
+use crate::util::{LoadError, load_json_from_file};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -35,14 +39,6 @@ pub struct CommitParent {
     pub url: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html_url: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub struct CommitStats {
-    pub additions: u64,
-    pub deletions: u64,
-    pub total: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -122,40 +118,73 @@ pub struct CommitDetail {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct DiffEntry {
-    pub sha: Option<String>,
-    pub filename: String,
-    pub status: String,
-    pub additions: u64,
-    pub deletions: u64,
-    pub changes: u64,
-    pub blob_url: String,
-    pub raw_url: String,
-    pub contents_url: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub patch: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub previous_filename: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct Commit {
-    pub url: String,
     pub sha: String,
     pub node_id: String,
+    pub commit: CommitDetail,
+    pub url: String,
     pub html_url: String,
     pub comments_url: String,
-    pub commit: CommitDetail,
     pub author: Option<SimpleUser>,
     pub committer: Option<SimpleUser>,
     pub parents: Vec<CommitParent>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub stats: Option<CommitStats>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub files: Vec<DiffEntry>,
     #[serde(skip)]
     pub(crate) owner: String,
     #[serde(skip)]
     pub(crate) repo: String,
+}
+
+impl Commit {
+    /// Load commits from a JSON file.
+    ///
+    /// The JSON file should contain an array of commit objects as returned by the GitHub API.
+    pub fn load_from_file(
+        path: impl AsRef<Path>,
+        owner: &str,
+        repo: &str,
+    ) -> Result<Vec<Self>, LoadError> {
+        let mut commits: Vec<Self> = load_json_from_file(path)?;
+
+        for commit in &mut commits {
+            commit.owner = owner.to_string();
+            commit.repo = repo.to_string();
+        }
+
+        Ok(commits)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_from_file_happy_path() -> Result<(), Box<dyn std::error::Error>> {
+        let commits = Commit::load_from_file(
+            "testing/data/commits.json",
+            "owner1",
+            "repo1",
+        )?;
+
+        assert_eq!(commits.len(), 30);
+
+        assert_eq!(commits[0].sha, "9291e608e354242c8ff12d47896799d456719922");
+
+        assert_eq!(commits[0].owner, "owner1");
+        assert_eq!(commits[0].repo, "repo1");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_load_from_file_io_error() {
+        let result = Commit::load_from_file("non_existent_file.json", "o", "r");
+        assert!(matches!(result, Err(LoadError::Io { .. })));
+    }
+
+    #[test]
+    fn test_load_from_file_json_error() {
+        let result = Commit::load_from_file("testing/data/commits_invalid.json", "o", "r");
+        assert!(matches!(result, Err(LoadError::Json { .. })));
+    }
 }

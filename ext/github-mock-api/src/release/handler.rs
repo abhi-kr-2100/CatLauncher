@@ -21,7 +21,8 @@ pub async fn list_releases(
     // Sort by created_at descending (latest first)
     releases.sort_by(|a, b| b.created_at.cmp(&a.created_at));
 
-    ApiResponse::Ok(crate::util::paginate(&releases, pagination))
+    let (paginated_releases, metadata) = crate::util::paginate(&releases, pagination);
+    ApiResponse::Paginated(paginated_releases, metadata)
 }
 
 pub async fn get_release(owner: String, repo: String, id: u64, state: AppState) -> ApiResponse<Release> {
@@ -274,6 +275,86 @@ mod tests {
         assert_eq!(body.len(), 5);
         assert_eq!(body[0]["tag_name"], "v05");
         assert_eq!(body[4]["tag_name"], "v01");
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_list_releases_link_header_has_next_page() -> crate::Result<()> {
+        let server = MockServer::start().await?;
+
+        // Add 35 releases (30 is default per_page)
+        for i in 1..=35 {
+            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+        }
+
+        let client = reqwest::Client::new();
+
+        // Page 1: Should have link header for page 2
+        let resp = client
+            .get(server.uri() + "/repos/owner/repo/releases")
+            .send()
+            .await
+            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+
+        let link = resp.headers().get("link").and_then(|h| h.to_str().ok());
+        assert!(link.is_some());
+        let link_str = link.unwrap();
+        assert!(link_str.contains("rel=\"next\""));
+        assert!(link_str.contains("page=2"));
+        assert!(link_str.contains("per_page=30"));
+        assert!(link_str.contains(&server.uri()));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_list_releases_link_header_last_page_has_no_link() -> crate::Result<()> {
+        let server = MockServer::start().await?;
+
+        // Add 35 releases (30 is default per_page)
+        for i in 1..=35 {
+            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+        }
+
+        let client = reqwest::Client::new();
+
+        // Page 2: Should NOT have link header (it's the last page)
+        let resp = client
+            .get(server.uri() + "/repos/owner/repo/releases?page=2")
+            .send()
+            .await
+            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+
+        let link = resp.headers().get("link");
+        assert!(link.is_none());
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_list_releases_link_header_preserves_query_params() -> crate::Result<()> {
+        let server = MockServer::start().await?;
+
+        // Add 35 releases (30 is default per_page)
+        for i in 1..=35 {
+            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+        }
+
+        let client = reqwest::Client::new();
+
+        // Test preserving query parameters
+        let resp = client
+            .get(server.uri() + "/repos/owner/repo/releases?foo=bar")
+            .send()
+            .await
+            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+
+        let link = resp.headers().get("link").and_then(|h| h.to_str().ok());
+        assert!(link.is_some());
+        let link_str = link.unwrap();
+        assert!(link_str.contains("foo=bar"));
+        assert!(link_str.contains("page=2"));
 
         Ok(())
     }

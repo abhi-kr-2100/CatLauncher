@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use crate::util::hash;
 
 use super::types::{
-    Commit, CommitDetail, CommitStats, CommitTree, GitUser, SimpleUser, Verification,
+    Commit, CommitDetail, CommitTree, GitUser, SimpleUser, Verification,
 };
 
 fn generate_sha() -> String {
@@ -58,8 +58,6 @@ impl Commit {
             author: Some(SimpleUser::new(owner)),
             committer: Some(SimpleUser::new(owner)),
             parents: Vec::new(),
-            stats: None,
-            files: Vec::new(),
             owner: owner.to_string(),
             repo: repo.to_string(),
         }
@@ -100,28 +98,6 @@ impl Commit {
         }
         self
     }
-
-    pub fn additions(mut self, additions: u64) -> Self {
-        let stats = self.stats.get_or_insert_with(|| CommitStats {
-            additions: 0,
-            deletions: 0,
-            total: 0,
-        });
-        stats.additions = additions;
-        stats.total = additions + stats.deletions;
-        self
-    }
-
-    pub fn deletions(mut self, deletions: u64) -> Self {
-        let stats = self.stats.get_or_insert_with(|| CommitStats {
-            additions: 0,
-            deletions: 0,
-            total: 0,
-        });
-        stats.deletions = deletions;
-        stats.total = stats.additions + deletions;
-        self
-    }
 }
 
 #[cfg(test)]
@@ -138,8 +114,6 @@ mod tests {
         assert!(commit.node_id.starts_with("mock_commit_node_"));
         assert!(commit.commit.message.is_empty());
         assert!(commit.parents.is_empty());
-        assert!(commit.stats.is_none());
-        assert!(commit.files.is_empty());
     }
 
     #[test]
@@ -155,17 +129,12 @@ mod tests {
             .sha("abc123def456")
             .message("A test commit\n\nWith a body")
             .author_name("Test User")
-            .author_email("test@example.com")
-            .additions(10)
-            .deletions(3);
+            .author_email("test@example.com");
 
         assert_eq!(commit.sha, "abc123def456");
         assert_eq!(commit.commit.message, "A test commit\n\nWith a body");
         assert_eq!(commit.commit.author.as_ref().map(|a| &a.name), Some(&"Test User".to_string()));
         assert_eq!(commit.commit.author.as_ref().map(|a| &a.email), Some(&"test@example.com".to_string()));
-        assert_eq!(commit.stats.as_ref().map(|s| s.additions), Some(10));
-        assert_eq!(commit.stats.as_ref().map(|s| s.deletions), Some(3));
-        assert_eq!(commit.stats.as_ref().map(|s| s.total), Some(13));
     }
 
     #[test]
@@ -176,21 +145,5 @@ mod tests {
         assert!(commit.html_url.ends_with("/commit/customsha"));
         assert!(commit.comments_url.ends_with("/commits/customsha/comments"));
         assert!(commit.commit.url.ends_with("/git/commits/customsha"));
-    }
-
-    #[test]
-    fn test_commit_additions_only() {
-        let commit = Commit::new("u", "r").additions(5);
-        assert_eq!(commit.stats.as_ref().map(|s| s.additions), Some(5));
-        assert_eq!(commit.stats.as_ref().map(|s| s.deletions), Some(0));
-        assert_eq!(commit.stats.as_ref().map(|s| s.total), Some(5));
-    }
-
-    #[test]
-    fn test_commit_deletions_only() {
-        let commit = Commit::new("u", "r").deletions(7);
-        assert_eq!(commit.stats.as_ref().map(|s| s.additions), Some(0));
-        assert_eq!(commit.stats.as_ref().map(|s| s.deletions), Some(7));
-        assert_eq!(commit.stats.as_ref().map(|s| s.total), Some(7));
     }
 }

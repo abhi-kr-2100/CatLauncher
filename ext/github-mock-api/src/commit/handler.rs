@@ -9,8 +9,8 @@ pub async fn list_commits(
 ) -> ApiResponse<Vec<Commit>> {
     let key = (owner.to_lowercase(), repo.to_lowercase());
     let commits = state.commits.read().await.get(&key).cloned().unwrap_or_default();
-    let paginated_commits = crate::util::paginate(&commits, pagination);
-    ApiResponse::Ok(paginated_commits)
+    let (paginated_commits, metadata) = crate::util::paginate(&commits, pagination);
+    ApiResponse::Paginated(paginated_commits, metadata)
 }
 
 pub async fn get_commit(
