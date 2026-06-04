@@ -3,6 +3,17 @@ name = "cat-macros"
 version = "0.1.0"
 edition = "2024"
 
+[lints.clippy]
+expect_used = "deny"
+indexing_slicing = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+todo = "deny"
+unimplemented = "deny"
+unreachable = "deny"
+unwrap_in_result = "deny"
+unwrap_used = "deny"
+
 [lib]
 proc-macro = true
 
