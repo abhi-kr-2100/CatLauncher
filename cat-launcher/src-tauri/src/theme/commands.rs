@@ -1,5 +1,4 @@
 use cat_macros::CommandErrorSerialize;
-use strum::IntoStaticStr;
 use tauri::State;
 
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
@@ -9,9 +8,7 @@ use crate::theme::theme::{
 };
 
 /// Errors that can occur when retrieving the preferred theme via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetPreferredThemeCommandError {
   /// An error occurred while loading the theme preference from the repository.
   #[error("failed to load theme preference: {0}")]
@@ -27,9 +24,7 @@ pub async fn get_preferred_theme(
 }
 
 /// Errors that can occur when setting the preferred theme via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum SetPreferredThemeCommandError {
   /// An error occurred while updating the theme preference in the repository.
   #[error("failed to update theme preference: {0}")]

@@ -12,7 +12,9 @@ use crate::filesystem::paths::GetSchemaFilePathError;
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
-use crate::infra::http_client::{HttpClient, create_http_client};
+use crate::infra::http_client::{
+  create_http_client, HttpClient, HttpClientError,
+};
 use crate::infra::repository::sqlite_pool::{
   CreateSqlitePoolError, create_sqlite_pool,
 };
@@ -168,11 +170,12 @@ pub fn manage_downloader(app: &App) {
   app.manage(downloader);
 }
 
-pub fn manage_http_client(app: &App) {
-  let client = create_http_client();
+pub fn manage_http_client(app: &App) -> Result<(), HttpClientError> {
+  let client = create_http_client()?;
   app.manage(client.clone());
   let http_client: Arc<dyn HttpClient> = Arc::new(client.clone());
   app.manage(http_client);
+  Ok(())
 }
 
 pub fn manage_posthog(app: &App) {
@@ -243,8 +246,12 @@ pub fn manage_posthog(app: &App) {
 pub fn on_quit(app: &App) {
   let app_handle = app.handle().clone();
 
-  // Let the app crash and quit if webview window could not be gotten when quitting
-  let window = app.get_webview_window("main").unwrap();
+  let Some(window) = app.get_webview_window("main") else {
+    eprintln!(
+      "Failed to get main webview window when registering quit handler"
+    );
+    return;
+  };
 
   window.on_window_event(move |event| {
     if let WindowEvent::CloseRequested { api, .. } = event {

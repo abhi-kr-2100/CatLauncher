@@ -8,9 +8,7 @@ use crate::variants::update_game_variant_order::{self, UpdateGameVariantOrderErr
 use crate::variants::GameVariant;
 
 /// Errors that can occur when updating the game variant display order.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum UpdateGameVariantOrderCommandError {
   /// The update operation failed in the repository.
   #[error("failed to update game variant order: {0}")]
@@ -36,9 +34,7 @@ pub async fn update_game_variant_order(
 }
 
 /// Errors that can occur when retrieving game variant information.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetGameVariantsInfoCommandError {
   /// The retrieval operation failed in the repository.
   #[error("failed to get game variant order: {0}")]

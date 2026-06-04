@@ -12,7 +12,6 @@ panic = "deny"
 panic_in_result_fn = "deny"
 todo = "deny"
 unimplemented = "deny"
-unreachable = "deny"
 unwrap_in_result = "deny"
 unwrap_used = "deny"
 

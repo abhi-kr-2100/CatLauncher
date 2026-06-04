@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Manager, command};
 
 use crate::last_played_world::last_played_world::{
@@ -9,9 +8,7 @@ use crate::variants::GameVariant;
 use cat_macros::CommandErrorSerialize;
 
 /// Errors that can occur when retrieving the last played world via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetLastPlayedWorldCommandError {
   /// An error occurred while retrieving the last played world.
   #[error("failed to get last played world: {0}")]

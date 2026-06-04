@@ -1,6 +1,3 @@
-use std::sync::LazyLock;
-
-use regex::Regex;
 use reqwest::header::LINK;
 
 use crate::infra::github::release::GitHubRelease;
@@ -13,14 +10,19 @@ pub enum GitHubReleaseFetchError {
 
   #[error("failed to parse GitHub response: {0}")]
   Parse(#[from] serde_json::Error),
-
-  #[error("regex compilation failed: {0}")]
-  Regex(#[from] regex::Error),
 }
 
-static NEXT_PAGE_URL_RE: LazyLock<Regex> =
-  // safe to unwrap as the regex is hardcoded and should always compile successfully
-  LazyLock::new(|| Regex::new(r#"<([^>]+)>; rel="next""#).unwrap());
+fn next_page_url(link_header: &str) -> Option<String> {
+  link_header.split(',').find_map(|link| {
+    let (url_part, rel_part) = link.trim().split_once(';')?;
+    if rel_part.trim() != r#"rel="next""# {
+      return None;
+    }
+
+    let url = url_part.trim().strip_prefix('<')?.strip_suffix('>')?;
+    Some(url.to_string())
+  })
+}
 
 pub async fn fetch_github_releases(
   client: &dyn HttpClient,
@@ -58,11 +60,7 @@ pub async fn fetch_github_releases(
       .get(LINK)
       .and_then(|value| value.to_str().ok());
 
-    next_url = link_header.and_then(|link| {
-      NEXT_PAGE_URL_RE
-        .captures(link)
-        .and_then(|caps| caps.get(1).map(|m| m.as_str().to_string()))
-    });
+    next_url = link_header.and_then(next_page_url);
 
     let response_text =
       response.text().await.map_err(HttpClientError::from)?;

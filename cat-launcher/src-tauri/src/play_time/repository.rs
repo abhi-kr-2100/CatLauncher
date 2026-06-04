@@ -17,10 +17,6 @@ pub enum PlayTimeRepositoryError {
   #[error("Failed to get play time for variant: {0}")]
   GetPlayTimeForVariant(Box<dyn std::error::Error + Send + Sync>),
 
-  /// An error occurred while retrieving the total play time across all variants.
-  #[error("Failed to get total play time: {0}")]
-  GetTotalPlayTime(Box<dyn std::error::Error + Send + Sync>),
-
   /// An error occurred while waiting for a background task to complete.
   #[error("Task join error: {0}")]
   JoinError(Box<dyn std::error::Error + Send + Sync>),

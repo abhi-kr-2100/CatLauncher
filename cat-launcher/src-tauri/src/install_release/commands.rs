@@ -1,7 +1,6 @@
 use std::env::consts::OS;
 use std::sync::Arc;
 
-use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{AppHandle, Manager, State, command};
 
@@ -19,9 +18,7 @@ use crate::install_release::install_release::ReleaseInstallationError;
 use crate::variants::GameVariant;
 
 /// Errors that can occur when executing the `install_release` command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum InstallReleaseCommandError {
   /// The system's local data or resource directory could not be found.
   #[error("system directory not found: {0}")]

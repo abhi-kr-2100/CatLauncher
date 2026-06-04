@@ -1,7 +1,6 @@
 use std::env::consts::OS;
 use std::time::{SystemTime, SystemTimeError, UNIX_EPOCH};
 
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Emitter, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -16,9 +15,7 @@ use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupReposi
 use crate::variants::GameVariant;
 
 /// Errors that can occur when executing the launch game command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum LaunchGameCommandError {
   /// Error that occurred during the game launch or monitoring process.
   #[error("failed to launch game: {0}")]

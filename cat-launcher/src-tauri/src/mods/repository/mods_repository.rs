@@ -8,9 +8,6 @@ pub enum SaveThirdPartyModsError {
   #[error("failed to save third-party mods: {0}")]
   Save(Box<dyn std::error::Error + Send + Sync>),
 
-  #[error("unsupported activity type: {0}")]
-  UnsupportedActivityType(String),
-
   #[error("invalid data: {0}")]
   InvalidData(String),
 }

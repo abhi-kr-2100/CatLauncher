@@ -8,9 +8,6 @@ use crate::variants::GameVariant;
 pub enum FetchOnlineModsError {
   #[error("HTTP request failed: {0}")]
   RequestFailed(#[from] HttpClientError),
-
-  #[error("failed to fetch from repository: {0}")]
-  Repository(Box<dyn std::error::Error + Send + Sync>),
 }
 
 #[async_trait]

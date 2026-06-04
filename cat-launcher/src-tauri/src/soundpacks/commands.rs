@@ -1,7 +1,6 @@
 use std::env::consts::OS;
 use std::sync::Arc;
 
-use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{Manager, State};
 
@@ -26,9 +25,7 @@ use crate::soundpacks::uninstall_third_party_soundpack::{
 use crate::variants::GameVariant;
 
 /// Errors that can occur when listing all soundpacks via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum ListAllSoundpacksCommandError {
   /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
@@ -68,9 +65,7 @@ pub async fn list_all_soundpacks_command(
 }
 
 /// Errors that can occur when installing a third-party soundpack via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum InstallThirdPartySoundpackCommandError {
   /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
@@ -120,9 +115,7 @@ pub async fn install_third_party_soundpack_command(
 }
 
 /// Errors that can occur when uninstalling a third-party soundpack via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum UninstallThirdPartySoundpackCommandError {
   /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory: {0}")]
@@ -154,9 +147,7 @@ pub async fn uninstall_third_party_soundpack_command(
 }
 
 /// Errors that can occur when retrieving the installation status of a third-party soundpack via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetThirdPartySoundpackInstallationStatusCommandError {
   /// An error occurred while getting the installation status.
   #[error("failed to get soundpack installation status: {0}")]

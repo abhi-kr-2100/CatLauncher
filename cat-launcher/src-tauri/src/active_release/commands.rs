@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -8,9 +7,7 @@ use crate::active_release::repository::sqlite_active_release_repository::SqliteA
 use crate::variants::GameVariant;
 
 /// Errors that can occur when retrieving the active release.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum ActiveReleaseCommandError {
   /// An error occurred while retrieving the active release from the repository.
   #[error("failed to get active release: {0}")]

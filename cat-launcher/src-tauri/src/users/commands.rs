@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::State;
 
 use cat_macros::CommandErrorSerialize;
@@ -9,9 +8,7 @@ use crate::users::service::{
 };
 
 /// Errors that can occur when retrieving the user ID via a command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetUserIdCommandError {
   /// An error occurred while getting or creating the user ID.
   #[error("failed to get or create user id: {0}")]

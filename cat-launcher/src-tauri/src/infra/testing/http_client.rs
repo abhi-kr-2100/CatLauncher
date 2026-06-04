@@ -5,7 +5,7 @@ use reqwest::{Client, Response};
 use url::Url;
 
 use crate::infra::http_client::{
-  create_http_client, HttpClient, HttpClientError,
+  HttpClient, HttpClientError, create_http_client,
 };
 
 /// A test HTTP client that can rewrite URLs based on host mappings.
@@ -16,11 +16,13 @@ pub struct TestHttpClient {
 
 impl TestHttpClient {
   /// Creates a new `TestHttpClient` with the given host mappings.
-  pub fn new(host_mappings: HashMap<String, String>) -> Self {
-    Self {
-      client: create_http_client(),
+  pub fn new(
+    host_mappings: HashMap<String, String>,
+  ) -> Result<Self, HttpClientError> {
+    Ok(Self {
+      client: create_http_client()?,
       host_mappings,
-    }
+    })
   }
 
   fn rewrite_url(
@@ -42,11 +44,14 @@ impl TestHttpClient {
     let mapped_url = Url::parse(&format!("http://{}", mapped_host))
       .map_err(HttpClientError::from)?;
 
-    url.set_host(mapped_url.host_str())
+    url
+      .set_host(mapped_url.host_str())
       .map_err(|_| HttpClientError::UrlComponentError)?;
-    url.set_port(mapped_url.port())
+    url
+      .set_port(mapped_url.port())
       .map_err(|_| HttpClientError::UrlComponentError)?;
-    url.set_scheme("http")
+    url
+      .set_scheme("http")
       .map_err(|_| HttpClientError::UrlComponentError)?;
 
     Ok(url.to_string())

@@ -1,6 +1,5 @@
 use std::env::consts::OS;
 
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -14,9 +13,7 @@ use crate::infra::utils::{OSNotSupportedError, get_os_enum};
 use crate::variants::GameVariant;
 
 /// Errors that can occur when getting the installation status via a Tauri command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetInstallationStatusCommandError {
   /// The system's local data or resource directory could not be found.
   #[error("system directory not found: {0}")]

@@ -19,9 +19,7 @@ use crate::settings::update_settings::{self, UpdateSettingsError};
 use crate::settings::Settings;
 
 /// Errors that can occur when retrieving available fonts.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetFontsError {
   /// The current operating system is not supported.
   #[error("failed to get fonts: {0}")]
@@ -37,9 +35,7 @@ pub async fn get_fonts() -> Result<Vec<Font>, GetFontsError> {
 }
 
 /// Errors that can occur when retrieving color themes.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetColorThemesCommandError {
   /// An error occurred while retrieving color themes from the filesystem.
   #[error("failed to get color themes: {0}")]
@@ -75,9 +71,7 @@ pub async fn get_color_themes(
 }
 
 /// Errors that can occur when retrieving application settings.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetSettingsCommandError {
   /// An error occurred while retrieving settings from the repository.
   #[error("failed to get settings: {0}")]
@@ -94,9 +88,7 @@ pub async fn get_settings(
 }
 
 /// Errors that can occur when updating application settings.
-#[derive(
-  thiserror::Error, Debug, strum::IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum UpdateSettingsCommandError {
   /// An error occurred while updating settings.
   #[error("failed to update settings: {0}")]

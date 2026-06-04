@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::State;
 
 use cat_macros::CommandErrorSerialize;
@@ -13,9 +12,7 @@ use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
 use crate::variants::game_variant::GameVariant;
 
 /// Errors that can occur when retrieving play time.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetPlayTimeCommandError {
   /// An error occurred in the play time repository.
   #[error("Failed to get play time: {0}")]
@@ -23,9 +20,7 @@ pub enum GetPlayTimeCommandError {
 }
 
 /// Errors that can occur when logging play time.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum LogPlayTimeCommandError {
   /// An error occurred in the play time repository.
   #[error("Failed to log play time: {0}")]

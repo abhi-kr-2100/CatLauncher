@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -12,9 +11,7 @@ use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::Sqlit
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
 use crate::variants::GameVariant;
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum MasterResetCommandError {
   #[error("failed to reset: {0}")]
   Reset(#[from] MasterResetError),

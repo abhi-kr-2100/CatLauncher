@@ -91,11 +91,11 @@ fn confirm_quit(app_handle: AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  tauri::Builder::default()
+  let result = tauri::Builder::default()
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_opener::init())
     .setup(|app| {
-      manage_http_client(app);
+      manage_http_client(app)?;
       manage_repositories(app)?;
       manage_settings(app)?;
       manage_online_mod_repository_registry(app);
@@ -155,6 +155,10 @@ pub fn run() {
       master_reset,
       get_achievements_for_variant,
     ])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .run(tauri::generate_context!());
+
+  if let Err(e) = result {
+    eprintln!("error while running tauri application: {}", e);
+    std::process::exit(1);
+  }
 }

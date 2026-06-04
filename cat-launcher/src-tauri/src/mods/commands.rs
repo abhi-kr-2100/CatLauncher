@@ -1,7 +1,6 @@
 use std::env::consts::OS;
 use std::sync::Arc;
 
-use strum::IntoStaticStr;
 use tauri::ipc::Channel;
 use tauri::{Emitter, Manager, State};
 
@@ -35,9 +34,7 @@ use crate::mods::uninstall_third_party_mod::{
 };
 use crate::variants::GameVariant;
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum ListAllModsCommandError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
@@ -88,9 +85,7 @@ pub async fn list_all_mods_command(
   Ok(())
 }
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum InstallThirdPartyModCommandError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
@@ -135,9 +130,7 @@ pub async fn install_third_party_mod_command(
   Ok(())
 }
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum UninstallThirdPartyModCommandError {
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
@@ -165,9 +158,7 @@ pub async fn uninstall_third_party_mod_command(
   Ok(())
 }
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetThirdPartyModInstallationStatusCommandError {
   #[error("failed to get mod installation status: {0}")]
   GetStatus(#[from] GetThirdPartyModInstallationStatusError),
@@ -191,9 +182,7 @@ pub async fn get_third_party_mod_installation_status_command(
   Ok(status)
 }
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetLastActivityCommandError {
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),

@@ -1,7 +1,6 @@
 use std::env::consts::{ARCH, OS};
 use std::sync::Arc;
 
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Emitter, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -17,9 +16,7 @@ use crate::infra::utils::{
 };
 use crate::variants::GameVariant;
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum FetchReleasesCommandError {
   #[error("system directory not found: {0}")]
   SystemDir(#[from] tauri::Error),
@@ -64,9 +61,7 @@ pub async fn fetch_releases_for_variant(
   Ok(())
 }
 
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum FetchReleaseNotesCommandError {
   #[error("failed to fetch release notes: {0}")]
   Fetch(#[from] FetchReleaseNotesError),

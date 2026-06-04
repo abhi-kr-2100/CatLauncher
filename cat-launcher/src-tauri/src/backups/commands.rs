@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{Manager, State};
 
 use cat_macros::CommandErrorSerialize;
@@ -13,9 +12,7 @@ use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupReposi
 use crate::variants::GameVariant;
 
 /// Errors that can occur when executing the list backups command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum ListBackupsCommandError {
   /// Failed to retrieve the list of backups.
   #[error("failed to get backups: {0}")]
@@ -34,9 +31,7 @@ pub async fn list_backups_for_variant(
 }
 
 /// Errors that can occur when executing the delete backup command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum DeleteBackupCommandError {
   /// Failed to delete the backup.
   #[error("failed to delete backup: {0}")]
@@ -59,9 +54,7 @@ pub async fn delete_backup_by_id(
 }
 
 /// Errors that can occur when executing the restore backup command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum RestoreBackupCommandError {
   /// Failed to restore the backup.
   #[error("failed to restore backup: {0}")]

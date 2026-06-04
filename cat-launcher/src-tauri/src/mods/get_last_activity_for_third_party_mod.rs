@@ -42,18 +42,14 @@ pub fn extract_repo_from_github_url(url_str: &str) -> Option<String> {
     .split('/')
     .collect();
 
-  // GitHub URLs have at least 3 parts: [owner, repo, ...rest]
+  // GitHub URLs have at least 2 parts: [owner, repo, ...rest]
   // We want the first two parts only, ignoring any extra path segments
   // like /tree/main, /issues, etc.
-  if parts.len() >= 2 {
-    let owner = parts[0];
-    let repo = parts[1];
+  let owner = parts.first()?;
+  let repo = parts.get(1)?;
 
-    if !owner.is_empty() && !repo.is_empty() {
-      Some(format!("{}/{}", owner, repo))
-    } else {
-      None
-    }
+  if !owner.is_empty() && !repo.is_empty() {
+    Some(format!("{}/{}", owner, repo))
   } else {
     None
   }

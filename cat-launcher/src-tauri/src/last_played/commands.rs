@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{command, State};
 
 use cat_macros::CommandErrorSerialize;
@@ -8,7 +7,7 @@ use crate::last_played::repository::sqlite_last_played_repository::SqliteLastPla
 use crate::variants::GameVariant;
 
 /// Errors that can occur when executing the last played version command.
-#[derive(thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum LastPlayedCommandError {
     /// Failed to retrieve the last played version from the repository.
     #[error("failed to get last played version: {0}")]

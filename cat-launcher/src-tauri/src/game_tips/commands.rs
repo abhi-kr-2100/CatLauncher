@@ -1,4 +1,3 @@
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Manager, State, command};
 
 use cat_macros::CommandErrorSerialize;
@@ -11,9 +10,7 @@ use crate::fetch_releases::repository::sqlite_releases_repository::SqliteRelease
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 
 /// Errors that can occur when executing the get tips command.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetTipsCommandError {
   /// Failed to access the app local data directory.
   #[error("failed to get data directory: {0}")]

@@ -1,5 +1,4 @@
 use cat_macros::CommandErrorSerialize;
-use strum::IntoStaticStr;
 use tauri::{AppHandle, Manager, State};
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
@@ -9,9 +8,7 @@ use super::achievements::{GetAchievementsError, get_achievements};
 use super::types::CharacterAchievements;
 
 /// Errors that can occur when retrieving achievements for a game variant.
-#[derive(
-  thiserror::Error, Debug, IntoStaticStr, CommandErrorSerialize,
-)]
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetAchievementsForVariantCommandError {
   /// An error occurred while retrieving achievements from the game files.
   #[error("failed to get achievements: {0}")]
