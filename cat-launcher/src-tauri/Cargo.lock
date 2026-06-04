@@ -1848,12 +1848,13 @@ dependencies = [
 [[package]]
 name = "github-mock-api"
 version = "0.1.0"
-source = "git+https://github.com/abhi-kr-2100/github-mock-api.git?rev=51e75363e2479edd426590c2fd10d2347d83dbe4#51e75363e2479edd426590c2fd10d2347d83dbe4"
+source = "git+https://github.com/abhi-kr-2100/github-mock-api.git?rev=91a82ca12ca9fcad2a9e35e26d2a9d1fb71ce0e9#91a82ca12ca9fcad2a9e35e26d2a9d1fb71ce0e9"
 dependencies = [
  "axum",
  "clap",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
