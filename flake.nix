@@ -26,6 +26,7 @@
               cargo-edit
               cargo-llvm-cov
               clippy
+              go-task
               llvm
               nodejs
               pnpm
