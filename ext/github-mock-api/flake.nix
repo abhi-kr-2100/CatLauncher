@@ -29,6 +29,7 @@
           ruby
           (ruby.withPackages (ps: with ps; [ rspec ]))
           rustc
+          skills
         ];
 
         shellHook = ''
