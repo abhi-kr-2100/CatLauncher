@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
-use axum::extract::{Path, Query, State};
+use axum::extract::{Path, Query, State, Request};
+use axum::http::HeaderValue;
+use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
 use tokio::sync::RwLock;
@@ -31,6 +33,7 @@ mod util;
 pub use release::Release;
 pub use commit::Commit;
 pub use repository::Repository;
+pub use util::LoadError;
 
 pub(crate) type RepoKey = (String, String);
 
@@ -87,6 +90,48 @@ pub struct MockServer {
     state: AppState,
 }
 
+async fn handle_paginated_response(
+    request: Request,
+    response: impl IntoResponse,
+) -> impl IntoResponse {
+    let mut response = response.into_response();
+    let metadata = response
+        .extensions()
+        .get::<crate::util::PaginationMetadata>()
+        .cloned();
+
+    if let Some(metadata) = metadata && let Some(next_page) = metadata.next_page {
+        let uri = request.uri();
+        let host = request
+            .headers()
+            .get(axum::http::header::HOST)
+            .and_then(|h| h.to_str().ok())
+            .unwrap_or("localhost");
+
+        // Build the next URL preserving existing query parameters
+        let mut query_params: Vec<(String, String)> =
+            serde_urlencoded::from_str(uri.query().unwrap_or("")).unwrap_or_default();
+
+        // Update or add page and per_page
+        query_params.retain(|(k, _)| k != "page" && k != "per_page");
+        query_params.push(("page".to_string(), next_page.to_string()));
+        query_params.push(("per_page".to_string(), metadata.per_page.to_string()));
+
+        let new_query = serde_urlencoded::to_string(&query_params).unwrap_or_default();
+        let next_url = format!("http://{}{}/?{}", host, uri.path(), new_query)
+            .replace("/?","?");
+
+        let link_value = format!("<{}>; rel=\"next\"", next_url);
+        if let Ok(header_value) = HeaderValue::from_str(&link_value) {
+            response
+                .headers_mut()
+                .insert(axum::http::header::LINK, header_value);
+        }
+    }
+
+    response
+}
+
 impl MockServer {
     /// Start a new mock server on 127.0.0.1 with a randomly available port.
     pub async fn start() -> Result<Self> {
@@ -115,8 +160,10 @@ impl MockServer {
                 get(
                     |Path((owner, repo)),
                      Query(pagination),
-                     State(state): State<AppState>| {
-                        release::list_releases(owner, repo, pagination, state)
+                     State(state): State<AppState>,
+                     request: Request| async move {
+                        let response = release::list_releases(owner, repo, pagination, state).await;
+                        handle_paginated_response(request, response).await
                     },
                 ),
             )
@@ -145,8 +192,10 @@ impl MockServer {
                 get(
                     |Path((owner, repo)),
                      Query(pagination),
-                     State(state): State<AppState>| {
-                        commit::list_commits(owner, repo, pagination, state)
+                     State(state): State<AppState>,
+                     request: Request| async move {
+                        let response = commit::list_commits(owner, repo, pagination, state).await;
+                        handle_paginated_response(request, response).await
                     },
                 ),
             )

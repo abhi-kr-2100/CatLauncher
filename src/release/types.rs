@@ -1,4 +1,8 @@
+use std::path::Path;
+
 use serde::{Deserialize, Serialize};
+
+use crate::util::{LoadError, load_json_from_file};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -112,9 +116,9 @@ pub struct ReactionRollup {
 #[serde(rename_all = "snake_case")]
 pub struct Release {
     #[serde(skip)]
-    pub owner_login: String,
+    pub(crate) owner: String,
     #[serde(skip)]
-    pub repo_name: String,
+    pub(crate) repo: String,
     pub url: String,
     pub html_url: String,
     pub assets_url: String,
@@ -147,4 +151,58 @@ pub struct Release {
     pub discussion_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reactions: Option<ReactionRollup>,
+}
+
+impl Release {
+    /// Load releases from a JSON file.
+    ///
+    /// The JSON file should contain an array of release objects as returned by the GitHub API.
+    pub fn load_from_file(
+        path: impl AsRef<Path>,
+        owner: &str,
+        repo: &str,
+    ) -> Result<Vec<Self>, LoadError> {
+        let mut releases: Vec<Self> = load_json_from_file(path)?;
+
+        for release in &mut releases {
+            release.owner = owner.to_string();
+            release.repo = repo.to_string();
+        }
+
+        Ok(releases)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_from_file_happy_path() -> Result<(), Box<dyn std::error::Error>> {
+        let releases = Release::load_from_file(
+            "testing/data/releases.json",
+            "owner1",
+            "repo1",
+        )?;
+
+        assert_eq!(releases.len(), 30);
+
+        assert_eq!(releases[0].tag_name, "cdda-experimental-2026-06-04-1344");
+
+        assert_eq!(releases[0].owner, "owner1");
+        assert_eq!(releases[0].repo, "repo1");
+        Ok(())
+    }
+
+    #[test]
+    fn test_load_from_file_io_error() {
+        let result = Release::load_from_file("non_existent_file.json", "o", "r");
+        assert!(matches!(result, Err(LoadError::Io { .. })));
+    }
+
+    #[test]
+    fn test_load_from_file_json_error() {
+        let result = Release::load_from_file("testing/data/releases_invalid.json", "o", "r");
+        assert!(matches!(result, Err(LoadError::Json { .. })));
+    }
 }

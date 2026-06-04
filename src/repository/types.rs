@@ -1,4 +1,8 @@
+use std::path::Path;
+
 use serde::{Deserialize, Serialize};
+
+use crate::util::{LoadError, load_json_from_file};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -110,7 +114,6 @@ pub struct Repository {
     pub default_branch: String,
     pub open_issues_count: u64,
     pub is_template: bool,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub topics: Vec<String>,
     pub has_issues: bool,
     pub has_projects: bool,
@@ -128,4 +131,40 @@ pub struct Repository {
     pub license: Option<RepositoryLicense>,
     pub allow_forking: bool,
     pub web_commit_signoff_required: bool,
+}
+
+impl Repository {
+    /// Load repositories from a JSON file.
+    ///
+    /// The JSON file should contain an array of repository objects as returned by the GitHub API.
+    pub fn load_from_file(path: impl AsRef<Path>) -> Result<Vec<Self>, LoadError> {
+        load_json_from_file(path)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_load_from_file_happy_path() -> Result<(), Box<dyn std::error::Error>> {
+        let repos = Repository::load_from_file("testing/data/repositories.json")?;
+
+        assert_eq!(repos.len(), 30);
+        assert_eq!(repos[0].name, "arxiv-sanity-lite");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_load_from_file_io_error() {
+        let result = Repository::load_from_file("non_existent_file.json");
+        assert!(matches!(result, Err(LoadError::Io { .. })));
+    }
+
+    #[test]
+    fn test_load_from_file_json_error() {
+        let result = Repository::load_from_file("testing/data/repositories_invalid.json");
+        assert!(matches!(result, Err(LoadError::Json { .. })));
+    }
 }

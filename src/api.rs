@@ -5,6 +5,7 @@ use serde::Serialize;
 
 pub enum ApiResponse<T> {
     Ok(T),
+    Paginated(T, crate::util::PaginationMetadata),
     Error(ApiError),
 }
 
@@ -19,6 +20,11 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
     fn into_response(self) -> Response {
         match self {
             ApiResponse::Ok(data) => (StatusCode::OK, Json(data)).into_response(),
+            ApiResponse::Paginated(data, metadata) => {
+                let mut response = (StatusCode::OK, Json(data)).into_response();
+                response.extensions_mut().insert(metadata);
+                response
+            }
             ApiResponse::Error(err) => (
                 StatusCode::from_u16(err.status).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
                 Json(serde_json::json!({
