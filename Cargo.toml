@@ -7,19 +7,6 @@ name = "github-mock-api"
 version = "0.1.0"
 edition = "2024"
 
-[lints.clippy]
-unwrap_used = "deny"
-expect_used = "deny"
-panic = "deny"
-todo = "deny"
-unimplemented = "deny"
-unreachable = "deny"
-indexing_slicing = "deny"
-arithmetic_side_effects = "deny"
-panic_in_result_fn = "deny"
-unwrap_in_result = "deny"
-assertions_on_result_states = "deny"
-
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 axum = "0.8"

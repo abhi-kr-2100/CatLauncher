@@ -10,6 +10,7 @@ fn runtime_error(ruby: &Ruby, err: CommonError) -> Error {
         CommonError::InvalidHost => Error::new(ruby.exception_arg_error(), "invalid host"),
         CommonError::Shutdown => Error::new(ruby.exception_runtime_error(), "shutdown error"),
         CommonError::Join => Error::new(ruby.exception_runtime_error(), "join error"),
+        CommonError::Conflict => Error::new(ruby.exception_runtime_error(), "mock behavior conflict"),
     }
 }
 
@@ -18,6 +19,7 @@ fn mock_api_error(ruby: &Ruby, err: MockApiError) -> Error {
         MockApiError::Io(err) => Error::new(ruby.exception_io_error(), err.to_string()),
         MockApiError::ShutdownError(err) => Error::new(ruby.exception_runtime_error(), err.to_string()),
         MockApiError::JoinError(err) => Error::new(ruby.exception_runtime_error(), err.to_string()),
+        MockApiError::Conflict(err) => Error::new(ruby.exception_runtime_error(), err),
     }
 }
 

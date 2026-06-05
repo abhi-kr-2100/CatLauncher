@@ -20,16 +20,21 @@ pub enum Error {
 
     #[error("Failed to wait for server to stop: {0}")]
     JoinError(#[from] tokio::task::JoinError),
+
+    #[error("Conflicting mock behavior: {0}")]
+    Conflict(String),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 mod api;
+mod behavior;
 mod release;
 mod commit;
 mod repository;
 mod util;
 
+pub use behavior::{MockBehavior, MockError};
 pub use release::Release;
 pub use commit::Commit;
 pub use repository::Repository;
@@ -42,9 +47,26 @@ pub(crate) struct AppState {
     pub(crate) repositories: Arc<RwLock<HashMap<RepoKey, Repository>>>,
     pub(crate) releases: Arc<RwLock<HashMap<RepoKey, Vec<Release>>>>,
     pub(crate) commits: Arc<RwLock<HashMap<RepoKey, Vec<Commit>>>>,
+    pub(crate) behaviors: Arc<RwLock<Vec<MockBehavior>>>,
 }
 
 impl AppState {
+    pub async fn add_mock_behavior(&self, behavior: MockBehavior) -> Result<()> {
+        let mut behaviors = self.behaviors.write().await;
+        if behavior.error.is_some() && behaviors.iter().any(|b| b.error.is_some()) {
+            return Err(Error::Conflict(
+                "A global error behavior is already set".to_string(),
+            ));
+        }
+        behaviors.push(behavior);
+        Ok(())
+    }
+
+    pub async fn clear_all_mock_behaviors(&self) {
+        let mut behaviors = self.behaviors.write().await;
+        behaviors.clear();
+    }
+
     pub async fn add_release(&self, owner: &str, repo: &str, release: Release) {
         let key = (owner.to_lowercase(), repo.to_lowercase());
         let mut releases = self.releases.write().await;
@@ -88,6 +110,35 @@ pub struct MockServer {
     shutdown_sender: Option<mpsc::Sender<()>>,
     server_handle: Option<tokio::task::JoinHandle<()>>,
     state: AppState,
+}
+
+async fn mock_behavior_middleware(
+    state: State<AppState>,
+    request: Request,
+    next: axum::middleware::Next,
+) -> impl IntoResponse {
+    let behaviors = state.behaviors.read().await;
+    if let Some(behavior) = behaviors.iter().find(|b| b.error.is_some())
+        && let Some(error) = behavior.error
+    {
+        let api_error = match error {
+            MockError::InternalServerError => api::ApiError {
+                status: 500,
+                message: "Internal Server Error".to_string(),
+                documentation_url: "https://docs.github.com/rest".to_string(),
+            },
+            MockError::RateLimitExceeded => api::ApiError {
+                status: 403,
+                message: "API rate limit exceeded".to_string(),
+                documentation_url:
+                    "https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting"
+                        .to_string(),
+            },
+        };
+
+        return api::ApiResponse::<()>::Error(api_error).into_response();
+    }
+    next.run(request).await
 }
 
 async fn handle_paginated_response(
@@ -147,7 +198,12 @@ impl MockServer {
 
         let address = listener.local_addr()?;
 
-        let state = AppState::default();
+        let state = AppState {
+            repositories: Arc::new(RwLock::new(HashMap::new())),
+            releases: Arc::new(RwLock::new(HashMap::new())),
+            commits: Arc::new(RwLock::new(HashMap::new())),
+            behaviors: Arc::new(RwLock::new(Vec::new())),
+        };
         let app = Router::new()
             .route(
                 "/repos/{owner}/{repo}",
@@ -207,6 +263,10 @@ impl MockServer {
                     },
                 ),
             )
+            .layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                mock_behavior_middleware,
+            ))
             .with_state(state.clone());
 
         let (shutdown_sender, mut shutdown_receiver) = mpsc::channel(1);
@@ -249,6 +309,16 @@ impl MockServer {
     /// Register a mocked repository with the server.
     pub async fn add_repository(&self, repository: Repository) {
         self.state.add_repository(repository).await;
+    }
+
+    /// Add a mock behavior to the server.
+    pub async fn add_mock_behavior(&self, behavior: MockBehavior) -> Result<()> {
+        self.state.add_mock_behavior(behavior).await
+    }
+
+    /// Clear all mock behaviors from the server.
+    pub async fn clear_all_mock_behaviors(&self) {
+        self.state.clear_all_mock_behaviors().await;
     }
 
     /// Manually stop the server.
@@ -401,4 +471,5 @@ mod tests {
         assert!(result.is_ok());
         Ok(())
     }
+
 }

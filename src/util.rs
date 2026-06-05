@@ -72,17 +72,21 @@ pub fn paginate<T: Clone>(items: &[T], pagination: Pagination) -> (Vec<T>, Pagin
     let page = pagination.page();
     let per_page = pagination.per_page();
 
-    let start = (page - 1) * per_page;
+    let start = page.saturating_sub(1).saturating_mul(per_page);
     let items_slice = if start >= items.len() {
         &[]
     } else {
-        let end = (start + per_page).min(items.len());
-        &items[start..end]
+        let end = start.saturating_add(per_page).min(items.len());
+        items.get(start..end).unwrap_or(&[])
     };
 
-    let has_next = start + per_page < items.len();
+    let has_next = start.saturating_add(per_page) < items.len();
     let metadata = PaginationMetadata {
-        next_page: if has_next { Some(page + 1) } else { None },
+        next_page: if has_next {
+            Some(page.saturating_add(1))
+        } else {
+            None
+        },
         per_page,
     };
 

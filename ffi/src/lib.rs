@@ -19,6 +19,7 @@ mod ffi {
         Shutdown,
         Join,
         InvalidHost,
+        Conflict,
     }
 
     impl From<Error> for MockServerError {
@@ -28,6 +29,7 @@ mod ffi {
                 CommonError::Shutdown => MockServerError::Shutdown,
                 CommonError::Join => MockServerError::Join,
                 CommonError::InvalidHost => MockServerError::InvalidHost,
+                CommonError::Conflict => MockServerError::Conflict,
             }
         }
     }
@@ -39,6 +41,7 @@ mod ffi {
                 CommonError::Shutdown => MockServerError::Shutdown,
                 CommonError::Join => MockServerError::Join,
                 CommonError::InvalidHost => MockServerError::InvalidHost,
+                CommonError::Conflict => MockServerError::Conflict,
             }
         }
     }
