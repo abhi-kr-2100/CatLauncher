@@ -604,11 +604,10 @@ mod tests {
     let resources_dir =
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    // We can't easily make github-mock-api return 500 without modifying its state or code.
-    // Based on the provided code, it doesn't seem to have a way to inject errors for specific endpoints.
-    // However, I can stop the server to cause a connection error.
-    let mut server = server;
-    server.stop().await?;
+    let behavior = github_mock_api::MockBehavior::builder()
+      .error(github_mock_api::MockError::InternalServerError)
+      .build();
+    server.add_mock_behavior(behavior).await?;
 
     let result = variant
       .fetch_releases(
@@ -629,12 +628,34 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_repository_error_handling() {
-    // To trigger a repository error, I could use a closed database pool or similar.
-    // However, SqliteReleasesRepository doesn't easily expose the pool to be closed.
-    // I will try to use an invalid path for the database but TestDatabase handles it.
-    // Let's assume github-mock-api has limitations here as well.
-    panic!("This scenario cannot be fully implemented because we cannot easily inject repository errors into SqliteReleasesRepository without modifying it or r2d2 pool.");
+  async fn test_fetch_releases_repository_error_handling() -> Result<(), Box<dyn std::error::Error>> {
+    let (_server, client, _test_db) = setup_test_context().await?;
+
+    // Create a database without the required schema to trigger a repository error
+    let test_db_no_schema = TestDatabase::builder()
+      .with_schema_initializer(|_, _| Ok(()))
+      .build()?;
+
+    let repo = SqliteReleasesRepository::new(test_db_no_schema.pool().clone());
+    let variant = GameVariant::BrightNights;
+    let resources_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+
+    let result = variant
+      .fetch_releases(
+        &client,
+        &resources_dir,
+        &repo,
+        |_| Ok::<(), std::io::Error>(()),
+        &OS::Windows,
+        &Arch::X64,
+      )
+      .await;
+
+    assert!(result.is_err());
+    let err = result.err().ok_or("Expected error")?;
+    assert!(matches!(err, FetchReleasesError::Repository(_)));
+
+    Ok(())
   }
 
   #[tokio::test]

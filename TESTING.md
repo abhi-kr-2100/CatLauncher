@@ -46,12 +46,12 @@ This document outlines the test scenarios for the `fetch_releases` function in `
 
 ### 8. GitHub API Error Handling
 - **Goal**: Verify how the function behaves when the GitHub API returns an error.
-- **Scenario**: GitHub API returns a 500 Internal Server Error.
+- **Scenario**: GitHub API returns a 500 Internal Server Error (using `github-mock-api`'s `MockBehavior`).
 - **Expected Outcome**: Function returns `FetchReleasesError::Fetch`.
 
 ### 9. Repository Error Handling
 - **Goal**: Verify how the function behaves when the database is inaccessible.
-- **Scenario**: `get_cached_releases` returns an error.
+- **Scenario**: `get_cached_releases` returns an error (using `TestDatabaseBuilder` with a missing schema).
 - **Expected Outcome**: Function returns `FetchReleasesError::Repository`.
 
 ### 10. Callback Error Handling

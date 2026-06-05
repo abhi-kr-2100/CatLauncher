@@ -5,7 +5,6 @@ use tempfile::TempDir;
 
 use crate::infra::repository::db_schema::{
   InitializeDatabaseError, apply_schema, initialize_database,
-  seed_reference_data,
 };
 use crate::infra::repository::sqlite_pool::{
   SqlitePool, create_sqlite_pool_without_initialization,
@@ -96,7 +95,6 @@ impl TestDatabaseBuilder {
         }
         (Some(schema_initializer), None) => {
           schema_initializer(&conn, &self.schema_paths)?;
-          seed_reference_data(&conn)?;
         }
         (None, Some(seed_initializer)) => {
           apply_schema(&conn, &self.schema_paths)?;
