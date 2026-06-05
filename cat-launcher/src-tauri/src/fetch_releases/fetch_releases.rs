@@ -153,6 +153,14 @@ impl GameVariant {
 }
 
 #[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::get_first,
+  dead_code
+)]
 mod tests {
   use super::*;
   use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
@@ -186,47 +194,17 @@ mod tests {
     Ok((server, client, test_db))
   }
 
-  fn create_mock_github_release(id: u64, tag: &str) -> github_mock_api::Release {
-    let mut release = github_mock_api::Release::new("cataclysmbnteam", "Cataclysm-BN", tag)
-      .created_at("2024-01-01T00:00:00Z");
-    release.id = id;
-    release
+  fn load_test_releases() -> Vec<github_mock_api::Release> {
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let path = std::path::Path::new(manifest_dir)
+      .join("src/infra/testing/data/releases.json");
+    github_mock_api::Release::load_from_file(
+      path,
+      "cataclysmbnteam",
+      "Cataclysm-BN",
+    )
+    .expect("Failed to load test releases")
   }
-
-  fn create_mock_github_asset(name: &str) -> serde_json::Value {
-    serde_json::json!({
-      "url": "https://api.github.com/repos/cataclysmbnteam/Cataclysm-BN/releases/assets/1",
-      "browser_download_url": "https://example.com/download",
-      "id": 1,
-      "node_id": "mock_node_id_1",
-      "name": name,
-      "state": "uploaded",
-      "content_type": "application/zip",
-      "size": 1024,
-      "download_count": 0,
-      "created_at": "2024-01-01T00:00:00Z",
-      "updated_at": "2024-01-01T00:00:00Z",
-      "uploader": {
-        "login": "cataclysmbnteam",
-        "id": 1,
-        "node_id": "mock_node_id_1",
-        "avatar_url": "https://avatars.githubusercontent.com/u/1?v=4",
-        "html_url": "https://github.com/cataclysmbnteam",
-        "followers_url": "https://api.github.com/users/cataclysmbnteam/followers",
-        "following_url": "https://api.github.com/users/cataclysmbnteam/following{/other_user}",
-        "gists_url": "https://api.github.com/users/cataclysmbnteam/gists{/gist_id}",
-        "starred_url": "https://api.github.com/users/cataclysmbnteam/starred{/owner}{/repo}",
-        "subscriptions_url": "https://api.github.com/users/cataclysmbnteam/subscriptions",
-        "organizations_url": "https://api.github.com/users/cataclysmbnteam/orgs",
-        "repos_url": "https://api.github.com/users/cataclysmbnteam/repos",
-        "events_url": "https://api.github.com/users/cataclysmbnteam/events{/privacy}",
-        "received_events_url": "https://api.github.com/users/cataclysmbnteam/received_events",
-        "type": "User",
-        "site_admin": false
-      }
-    })
-  }
-
 
   fn create_github_release_with_assets(
     id: u64,
@@ -253,7 +231,8 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_full_flow() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_full_flow()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -264,20 +243,19 @@ mod tests {
     let cached_release = create_github_release_with_assets(
       1,
       "v1-cached",
-      vec!["cbn-windows-tiles-x64.zip"],
+      vec!["cbn-windows-tiles-x64-msvc-2026-06-05.zip"],
     );
     repo
       .update_cached_releases(&variant, &[cached_release])
       .await?;
 
     // Setup GitHub Mock
-    let mut gh_release = create_mock_github_release(2, "v2-github");
-    let asset_json = create_mock_github_asset("cbn-windows-tiles-x64.zip");
-    let asset = serde_json::from_value(asset_json)?;
-    gh_release.assets.push(asset);
-    server
-      .add_release("cataclysmbnteam", "Cataclysm-BN", gh_release)
-      .await;
+    let releases = load_test_releases();
+    for release in releases {
+      server
+        .add_release("cataclysmbnteam", "Cataclysm-BN", release)
+        .await;
+    }
 
     let received_payloads = Arc::new(Mutex::new(Vec::new()));
     let payloads_clone = received_payloads.clone();
@@ -290,7 +268,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -299,9 +282,8 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     assert_eq!(payloads.len(), 3);
 
     // 1. Cached
@@ -312,7 +294,7 @@ mod tests {
     // 2. GitHub
     let p1 = payloads.get(1).ok_or("Missing payload 1")?;
     assert_eq!(p1.status, ReleasesUpdateStatus::Fetching);
-    assert!(p1.releases.iter().any(|r| r.version == "v2-github"));
+    assert!(p1.releases.iter().any(|r| r.version == "2026-06-05"));
 
     // 3. Default
     let p2 = payloads.get(2).ok_or("Missing payload 2")?;
@@ -322,7 +304,8 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_initial_cache_emission() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_initial_cache_emission()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (_server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -350,7 +333,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -359,9 +347,8 @@ mod tests {
       )
       .await;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     assert!(!payloads.is_empty());
     let p0 = payloads.get(0).ok_or("Missing payload 0")?;
     assert_eq!(p0.status, ReleasesUpdateStatus::Fetching);
@@ -371,20 +358,20 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_github_fetch_and_emission() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_github_fetch_and_emission()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
     let resources_dir =
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    let mut gh_release = create_mock_github_release(2, "v2-github");
-    let asset_json = create_mock_github_asset("cbn-windows-tiles-x64.zip");
-    let asset = serde_json::from_value(asset_json)?;
-    gh_release.assets.push(asset);
-    server
-      .add_release("cataclysmbnteam", "Cataclysm-BN", gh_release)
-      .await;
+    let releases = load_test_releases();
+    for release in releases {
+      server
+        .add_release("cataclysmbnteam", "Cataclysm-BN", release)
+        .await;
+    }
 
     let received_payloads = Arc::new(Mutex::new(Vec::new()));
     let payloads_clone = received_payloads.clone();
@@ -397,7 +384,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -406,32 +398,31 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     // Index 1 should be GitHub emission
     let p1 = payloads.get(1).ok_or("Missing payload 1")?;
     assert_eq!(p1.status, ReleasesUpdateStatus::Fetching);
-    assert!(p1.releases.iter().any(|r| r.version == "v2-github"));
+    assert!(p1.releases.iter().any(|r| r.version == "2026-06-05"));
 
     Ok(())
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_database_update_after_github_fetch() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_database_update_after_github_fetch()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
     let resources_dir =
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    let mut gh_release = create_mock_github_release(2, "v2-github");
-    let asset_json = create_mock_github_asset("cbn-windows-tiles-x64.zip");
-    let asset = serde_json::from_value(asset_json)?;
-    gh_release.assets.push(asset);
-    server
-      .add_release("cataclysmbnteam", "Cataclysm-BN", gh_release)
-      .await;
+    let releases = load_test_releases();
+    for release in releases {
+      server
+        .add_release("cataclysmbnteam", "Cataclysm-BN", release)
+        .await;
+    }
 
     variant
       .fetch_releases(
@@ -445,13 +436,14 @@ mod tests {
       .await?;
 
     let cached = repo.get_cached_releases(&variant).await?;
-    assert!(cached.iter().any(|r| r.tag_name == "v2-github"));
+    assert!(cached.iter().any(|r| r.tag_name == "2026-06-05"));
 
     Ok(())
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_default_releases_emission() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_default_releases_emission()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (_server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -469,7 +461,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -478,9 +475,8 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     // Index 2 should be default releases
     let p2 = payloads.get(2).ok_or("Missing payload 2")?;
     assert_eq!(p2.status, ReleasesUpdateStatus::Success);
@@ -490,30 +486,20 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_platform_filtering() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_platform_filtering()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
     let resources_dir =
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
-    // Release for Windows
-    let mut win_release = create_mock_github_release(2, "v-win");
-    let win_asset_json = create_mock_github_asset("cbn-windows-tiles-x64.zip");
-    let win_asset = serde_json::from_value(win_asset_json)?;
-    win_release.assets.push(win_asset);
-    server
-      .add_release("cataclysmbnteam", "Cataclysm-BN", win_release)
-      .await;
-
-    // Release for Linux
-    let mut lin_release = create_mock_github_release(3, "v-lin");
-    let lin_asset_json = create_mock_github_asset("cbn-linux-tiles-x64.tar.gz");
-    let lin_asset = serde_json::from_value(lin_asset_json)?;
-    lin_release.assets.push(lin_asset);
-    server
-      .add_release("cataclysmbnteam", "Cataclysm-BN", lin_release)
-      .await;
+    let releases = load_test_releases();
+    for release in releases {
+      server
+        .add_release("cataclysmbnteam", "Cataclysm-BN", release)
+        .await;
+    }
 
     let received_payloads = Arc::new(Mutex::new(Vec::new()));
     let payloads_clone = received_payloads.clone();
@@ -526,7 +512,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -535,18 +526,30 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
-    let github_payload = payloads.get(1).ok_or("Missing payload 1")?;
-    assert!(github_payload.releases.iter().any(|r| r.version == "v-win"));
-    assert!(!github_payload.releases.iter().any(|r| r.version == "v-lin"));
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
+    let github_payload =
+      payloads.get(1).ok_or("Missing payload 1")?;
+    assert!(
+      github_payload
+        .releases
+        .iter()
+        .any(|r| r.version == "2026-06-05")
+    );
+    // Verify that linux assets are not included when fetching for Windows
+    assert!(
+      github_payload
+        .releases
+        .iter()
+        .all(|r| !r.version.contains("lin"))
+    );
 
     Ok(())
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_pagination_handling() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_pagination_handling()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -554,14 +557,19 @@ mod tests {
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
     // Add 110 releases to GitHub (should fetch up to 100)
+    let test_releases = load_test_releases();
+    let base_release = test_releases.first().ok_or("No test releases found")?;
     for i in 1..=110 {
       let tag = format!("v{}", i);
-      let mut gh_release = create_mock_github_release(i as u64, &tag);
-      gh_release.created_at =
-        format!("2024-01-01T{:02}:{:02}:{:02}Z", (i / 3600) % 24, (i / 60) % 60, i % 60);
-      let asset_json = create_mock_github_asset("cbn-windows-tiles-x64.zip");
-      let asset = serde_json::from_value(asset_json)?;
-      gh_release.assets.push(asset);
+      let mut gh_release = base_release.clone();
+      gh_release.tag_name = tag;
+      gh_release.id = i as u64;
+      gh_release.created_at = format!(
+        "2024-01-01T{:02}:{:02}:{:02}Z",
+        (i / 3600) % 24,
+        (i / 60) % 60,
+        i % 60
+      );
       server
         .add_release("cataclysmbnteam", "Cataclysm-BN", gh_release)
         .await;
@@ -578,7 +586,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -587,9 +600,8 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     let p1 = payloads.get(1).ok_or("Missing payload 1")?;
     assert_eq!(p1.releases.len(), 100);
 
@@ -597,7 +609,8 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_github_api_error_handling() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_github_api_error_handling()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -627,7 +640,8 @@ mod tests {
     Ok(())
   }
 
-  async fn test_fetch_releases_repository_error_handling() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_repository_error_handling()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (_server, client, _test_db) = setup_test_context().await?;
 
     // Create a database without the required schema to trigger a repository error
@@ -635,9 +649,11 @@ mod tests {
       .with_schema_initializer(|_, _| Ok(()))
       .build()?;
 
-    let repo = SqliteReleasesRepository::new(test_db_no_schema.pool().clone());
+    let repo =
+      SqliteReleasesRepository::new(test_db_no_schema.pool().clone());
     let variant = GameVariant::BrightNights;
-    let resources_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let resources_dir =
+      std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
     let result = variant
       .fetch_releases(
@@ -658,7 +674,8 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_callback_error_handling() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_callback_error_handling()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (_server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::BrightNights;
@@ -689,7 +706,8 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_variant_specificity() -> Result<(), Box<dyn std::error::Error>> {
+  async fn test_fetch_releases_variant_specificity()
+  -> Result<(), Box<dyn std::error::Error>> {
     let (server, client, test_db) = setup_test_context().await?;
     let repo = SqliteReleasesRepository::new(test_db.pool().clone());
     let variant = GameVariant::DarkDaysAhead;
@@ -697,16 +715,20 @@ mod tests {
       std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
     // Setup GitHub Mock for DDA
-    let mut gh_release = github_mock_api::Release::new("CleverRaven", "Cataclysm-DDA", "v-dda");
-    // Ensure ID is not too large for i64 if needed, though 187090088 fits.
-    // Let's use a safe small ID for mock.
-    gh_release.id = 12345;
-    let asset_json = create_mock_github_asset("windows-with-graphics-and-sounds");
-    let asset = serde_json::from_value(asset_json)?;
-    gh_release.assets.push(asset);
-    server
-      .add_release("CleverRaven", "Cataclysm-DDA", gh_release)
-      .await;
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let path = std::path::Path::new(manifest_dir)
+      .join("src/infra/testing/data/dda_releases.json");
+    let releases = github_mock_api::Release::load_from_file(
+      path,
+      "CleverRaven",
+      "Cataclysm-DDA",
+    )?;
+
+    for release in releases {
+      server
+        .add_release("CleverRaven", "Cataclysm-DDA", release)
+        .await;
+    }
 
     let received_payloads = Arc::new(Mutex::new(Vec::new()));
     let payloads_clone = received_payloads.clone();
@@ -719,7 +741,12 @@ mod tests {
         |payload| {
           payloads_clone
             .lock()
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))?
+            .map_err(|e| {
+              std::io::Error::new(
+                std::io::ErrorKind::Other,
+                e.to_string(),
+              )
+            })?
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
@@ -728,11 +755,14 @@ mod tests {
       )
       .await?;
 
-    let payloads = received_payloads
-      .lock()
-      .map_err(|e| e.to_string())?;
+    let payloads =
+      received_payloads.lock().map_err(|e| e.to_string())?;
     let p1 = payloads.get(1).ok_or("Missing payload 1")?;
-    assert!(p1.releases.iter().any(|r| r.version == "v-dda"));
+    assert!(
+      p1.releases
+        .iter()
+        .any(|r| r.version == "cdda-experimental-2026-06-05-1638")
+    );
     assert_eq!(p1.variant, GameVariant::DarkDaysAhead);
 
     Ok(())
