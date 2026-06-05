@@ -56,6 +56,7 @@ impl TestDatabaseBuilder {
     }
   }
 
+  #[allow(dead_code)]
   pub fn with_schema_initializer<F>(mut self, initializer: F) -> Self
   where
     F: FnOnce(&Connection, &[PathBuf]) -> Result<(), TestDatabaseError>
@@ -66,6 +67,7 @@ impl TestDatabaseBuilder {
     self
   }
 
+  #[allow(dead_code)]
   pub fn with_seed_initializer<F>(mut self, initializer: F) -> Self
   where
     F: FnOnce(&Connection) -> Result<(), TestDatabaseError>
