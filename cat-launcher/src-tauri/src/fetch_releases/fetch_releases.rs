@@ -629,12 +629,13 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_fetch_releases_repository_error_handling() {
+  async fn test_fetch_releases_repository_error_handling(
+  ) -> Result<(), Box<dyn std::error::Error>> {
     // To trigger a repository error, I could use a closed database pool or similar.
     // However, SqliteReleasesRepository doesn't easily expose the pool to be closed.
     // I will try to use an invalid path for the database but TestDatabase handles it.
     // Let's assume github-mock-api has limitations here as well.
-    panic!("This scenario cannot be fully implemented because we cannot easily inject repository errors into SqliteReleasesRepository without modifying it or r2d2 pool.");
+    Err("This scenario cannot be fully implemented because we cannot easily inject repository errors into SqliteReleasesRepository without modifying it or r2d2 pool.".into())
   }
 
   #[tokio::test]

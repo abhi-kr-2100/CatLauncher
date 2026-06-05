@@ -5,11 +5,9 @@ version: '3'
 tasks:
   verify:
     desc: Run tests, lints and other verifications
-    ignore_error: true
     cmds:
-      - rm -rf cat-launcher/src/generated-types > /dev/null 2>&1
+      - rm -rf cat-launcher/src/generated-types
       - cargo test --manifest-path cat-launcher/src-tauri/Cargo.toml
-      - pnpm --prefix cat-launcher format > /dev/null 2>&1
-      - pnpm --prefix cat-launcher lint:fix > /dev/null 2>&1
+      - pnpm --prefix cat-launcher format
+      - pnpm --prefix cat-launcher lint:fix
       - pnpm --prefix cat-launcher lint
-    silent: true
