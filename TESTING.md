@@ -51,13 +51,16 @@ This document outlines the test scenarios for the `fetch_release_notes` function
     - The tag name is correctly encoded in the GitHub API request.
 - **Verification**: Verify the mock server receives the correctly encoded tag name.
 
+## Request Verification
+
+- **Request Verification**: While `github-mock-api` does not provide built-in request verification, `TestHttpClient` in `cat-launcher/src-tauri/src/infra/testing/http_client.rs` has been enhanced with a request counter.
+    - `request_count()`: Returns the number of GET requests made through the client.
+    - `reset_request_count()`: Resets the counter to zero.
+- **Verification strategy**: Tests use these methods to assert that no network calls are made during cache hits and exactly one call is made when fetching from GitHub is required.
+
 ## `github-mock-api` Limitations
 
-- **No built-in request verification**: The mock server does not provide a way to inspect received requests or count hits.
-    - *Workaround*: To verify that NO call was made, we can use a `TestHttpClient` without a mapping for the GitHub API host, which will result in a "No mapping found" error if a call is attempted.
-    - *Workaround*: To verify THAT a call was made, we can ensure the data is NOT in the cache and see it successfully return data that could only have come from the mock server.
-- **Limited Error Injection**: While we can mock 404s by not adding a release, injecting other specific HTTP errors (like 500) might be limited if the mock server doesn't support it directly.
-    - *Note*: If `github-mock-api` cannot return a 500, this scenario will be marked as failed/untestable as per instructions.
+- **Error Injection**: `github-mock-api` supports injecting specific HTTP errors (like 500 Internal Server Error) using `MockBehavior`.
 
 ## Test Environment Setup
 

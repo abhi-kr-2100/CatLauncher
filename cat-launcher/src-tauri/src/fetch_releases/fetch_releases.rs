@@ -187,7 +187,7 @@ mod tests {
 
   #[tokio::test]
   async fn test_fetch_release_notes_cache_hit() -> TestResult {
-    let (db, _server, _client) = setup().await?;
+    let (db, _server, client) = setup().await?;
     let repo = SqliteReleasesRepository::new(db.pool().clone());
     let variant = GameVariant::DarkDaysAhead;
     let tag = "v1.0.0";
@@ -208,17 +208,21 @@ mod tests {
       )
       .await?;
 
-    // Use a client with NO mappings to ensure no network call is made.
-    let no_mapping_client =
-      Arc::new(TestHttpClient::new(HashMap::new())?);
-
     let result = variant
-      .fetch_release_notes(tag, no_mapping_client.as_ref(), &repo)
+      .fetch_release_notes(tag, client.as_ref(), &repo)
       .await?;
 
     if result != Some(body.to_string()) {
       return Err(
         format!("Expected {:?}, got {:?}", Some(body), result).into(),
+      );
+    }
+
+    // Verify NO network call was made
+    if client.request_count() != 0 {
+      return Err(
+        format!("Expected 0 network calls, got {}", client.request_count())
+          .into(),
       );
     }
     Ok(())
@@ -278,6 +282,14 @@ mod tests {
           .into(),
       );
     }
+
+    // Verify EXACTLY one network call was made
+    if client.request_count() != 1 {
+      return Err(
+        format!("Expected 1 network call, got {}", client.request_count())
+          .into(),
+      );
+    }
     Ok(())
   }
 
@@ -326,6 +338,14 @@ mod tests {
           .into(),
       );
     }
+
+    // Verify EXACTLY one network call was made
+    if client.request_count() != 1 {
+      return Err(
+        format!("Expected 1 network call, got {}", client.request_count())
+          .into(),
+      );
+    }
     Ok(())
   }
 
@@ -352,16 +372,31 @@ mod tests {
 
   #[tokio::test]
   async fn test_fetch_release_notes_github_500() -> TestResult {
-    // github-mock-api does not currently support injecting 500 errors.
-    // As per instructions, this test fails because it cannot be implemented.
-    let can_implement = false;
-    if !can_implement {
-      return Err(
-        "Scenario 'GitHub API Error (500)' cannot be implemented using github-mock-api"
-          .into(),
-      );
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let tag = "v1.0.0";
+
+    use github_mock_api::{MockBehavior, MockError};
+    server
+      .add_mock_behavior(
+        MockBehavior::builder()
+          .error(MockError::InternalServerError)
+          .build(),
+      )
+      .await?;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await;
+
+    match result {
+      Err(FetchReleaseNotesError::Fetch(_)) => Ok(()),
+      Err(e) => Err(format!("Expected Fetch error, got: {:?}", e).into()),
+      Ok(res) => {
+        Err(format!("Expected error, got success: {:?}", res).into())
+      }
     }
-    Ok(())
   }
 
   #[tokio::test]
@@ -391,6 +426,66 @@ mod tests {
         format!("Expected {:?}, got {:?}", Some(body), result).into(),
       );
     }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_different_game_variants() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let tag = "v1.0.0";
+
+    let variants = [
+      (
+        GameVariant::DarkDaysAhead,
+        "CleverRaven",
+        "Cataclysm-DDA",
+        "dda notes",
+      ),
+      (
+        GameVariant::BrightNights,
+        "cataclysmbnteam",
+        "Cataclysm-BN",
+        "bn notes",
+      ),
+      (
+        GameVariant::TheLastGeneration,
+        "Cataclysm-TLG",
+        "Cataclysm-TLG",
+        "tlg notes",
+      ),
+    ];
+
+    for (variant, owner, repo_name, body) in variants {
+      let mut mock_release = MockRelease::new(owner, repo_name, tag).body(body);
+      // Manually set ID to a value that fits in i64 to avoid Sqlite conversion error
+      mock_release.id = 12345 + (variant as u64);
+
+      server
+        .add_release(
+          owner,
+          repo_name,
+          mock_release,
+        )
+        .await;
+
+      let result = variant
+        .fetch_release_notes(tag, client.as_ref(), &repo)
+        .await?;
+
+      if result != Some(body.to_string()) {
+        return Err(
+          format!(
+            "Variant {:?}: Expected {:?}, got {:?}",
+            variant,
+            Some(body),
+            result
+          )
+          .into(),
+        );
+      }
+    }
+
     Ok(())
   }
 }
