@@ -10,6 +10,7 @@ fn runtime_error(err: CommonError) -> PyErr {
         CommonError::InvalidHost => PyErr::new::<PyValueError, _>("invalid host"),
         CommonError::Shutdown => PyErr::new::<PyRuntimeError, _>("shutdown error"),
         CommonError::Join => PyErr::new::<PyRuntimeError, _>("join error"),
+        CommonError::Conflict => PyErr::new::<PyRuntimeError, _>("mock behavior conflict"),
     }
 }
 
@@ -18,6 +19,7 @@ fn mock_api_error(err: MockApiError) -> PyErr {
         MockApiError::Io(err) => PyErr::new::<pyo3::exceptions::PyIOError, _>(err.to_string()),
         MockApiError::ShutdownError(err) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string()),
         MockApiError::JoinError(err) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string()),
+        MockApiError::Conflict(err) => PyErr::new::<PyRuntimeError, _>(err),
     }
 }
 

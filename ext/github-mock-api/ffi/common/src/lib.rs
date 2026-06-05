@@ -9,6 +9,7 @@ pub enum CommonError {
     Shutdown,
     Join,
     InvalidHost,
+    Conflict,
 }
 
 impl From<MockApiError> for CommonError {
@@ -17,6 +18,7 @@ impl From<MockApiError> for CommonError {
             MockApiError::Io(_) => CommonError::Io,
             MockApiError::ShutdownError(_) => CommonError::Shutdown,
             MockApiError::JoinError(_) => CommonError::Join,
+            MockApiError::Conflict(_) => CommonError::Conflict,
         }
     }
 }
