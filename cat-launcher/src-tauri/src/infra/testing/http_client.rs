@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use async_trait::async_trait;
 use reqwest::{Client, Response};
@@ -12,6 +13,7 @@ use crate::infra::http_client::{
 pub struct TestHttpClient {
   client: Client,
   host_mappings: HashMap<String, String>,
+  request_count: AtomicUsize,
 }
 
 impl TestHttpClient {
@@ -22,7 +24,16 @@ impl TestHttpClient {
     Ok(Self {
       client: create_http_client()?,
       host_mappings,
+      request_count: AtomicUsize::new(0),
     })
+  }
+
+  pub fn request_count(&self) -> usize {
+    self.request_count.load(Ordering::Relaxed)
+  }
+
+  pub fn reset_request_count(&self) {
+    self.request_count.store(0, Ordering::Relaxed);
   }
 
   fn rewrite_url(
@@ -64,6 +75,7 @@ impl HttpClient for TestHttpClient {
     &self,
     url: &str,
   ) -> Result<Response, HttpClientError> {
+    self.request_count.fetch_add(1, Ordering::Relaxed);
     let rewritten_url = self.rewrite_url(url)?;
     self
       .client
