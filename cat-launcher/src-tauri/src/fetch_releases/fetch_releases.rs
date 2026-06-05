@@ -151,3 +151,341 @@ impl GameVariant {
     Ok(github_release.body)
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+  use crate::infra::github::release::GitHubRelease;
+  use crate::infra::testing::http_client::TestHttpClient;
+  use crate::infra::testing::test_database::TestDatabase;
+  use chrono::Utc;
+  use github_mock_api::{MockServer, Release as MockRelease};
+  use std::collections::HashMap;
+  use std::sync::Arc;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  async fn setup() -> TestResult<(TestDatabase, MockServer, Arc<TestHttpClient>)>
+  {
+    let db = TestDatabase::builder().build()?;
+    let server = MockServer::start().await?;
+
+    let mut host_mappings = HashMap::new();
+    let uri = server.uri();
+    let host_port = uri
+      .strip_prefix("http://")
+      .ok_or("uri should start with http://")?;
+    host_mappings
+      .insert("api.github.com".to_string(), host_port.to_string());
+
+    let client = Arc::new(TestHttpClient::new(host_mappings)?);
+
+    Ok((db, server, client))
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_cache_hit() -> TestResult {
+    let (db, _server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let tag = "v1.0.0";
+    let body = "cached notes";
+
+    // Seed cache
+    repo
+      .update_cached_releases(
+        &variant,
+        &[GitHubRelease {
+          id: 123,
+          tag_name: tag.to_string(),
+          prerelease: false,
+          body: Some(body.to_string()),
+          assets: vec![],
+          created_at: Utc::now(),
+        }],
+      )
+      .await?;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await?;
+
+    if result != Some(body.to_string()) {
+      return Err(
+        format!("Expected {:?}, got {:?}", Some(body), result).into(),
+      );
+    }
+
+    // Verify NO network call was made
+    if client.request_count() != 0 {
+      return Err(
+        format!("Expected 0 network calls, got {}", client.request_count())
+          .into(),
+      );
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_cache_hit_empty_body() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let tag = "v1.0.0";
+    let body = "github notes";
+
+    // Seed cache with empty body
+    repo
+      .update_cached_releases(
+        &variant,
+        &[GitHubRelease {
+          id: 123,
+          tag_name: tag.to_string(),
+          prerelease: false,
+          body: None,
+          assets: vec![],
+          created_at: Utc::now(),
+        }],
+      )
+      .await?;
+
+    // Seed GitHub
+    server
+      .add_release(
+        "CleverRaven",
+        "Cataclysm-DDA",
+        MockRelease::new("CleverRaven", "Cataclysm-DDA", tag)
+          .body(body),
+      )
+      .await;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await?;
+
+    if result != Some(body.to_string()) {
+      return Err(
+        format!("Expected {:?}, got {:?}", Some(body), result).into(),
+      );
+    }
+
+    // Verify cache updated
+    let cached = repo
+      .get_cached_release_by_tag(&variant, tag)
+      .await?
+      .ok_or("should have cached release")?;
+    if cached.body != Some(body.to_string()) {
+      return Err(
+        format!("Cached body expected {:?}, got {:?}", Some(body), cached.body)
+          .into(),
+      );
+    }
+
+    // Verify EXACTLY one network call was made
+    if client.request_count() != 1 {
+      return Err(
+        format!("Expected 1 network call, got {}", client.request_count())
+          .into(),
+      );
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_cache_miss() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::BrightNights;
+    let tag = "bn-1.0";
+    let body = "bn notes";
+
+    // Seed GitHub
+    server
+      .add_release(
+        "cataclysmbnteam",
+        "Cataclysm-BN",
+        MockRelease::new("cataclysmbnteam", "Cataclysm-BN", tag)
+          .body(body),
+      )
+      .await;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await?;
+
+    if result != Some(body.to_string()) {
+      return Err(
+        format!("Expected {:?}, got {:?}", Some(body), result).into(),
+      );
+    }
+
+    // Verify cache updated
+    let cached = repo
+      .get_cached_release_by_tag(&variant, tag)
+      .await?
+      .ok_or("should have cached release")?;
+    if cached.body != Some(body.to_string()) {
+      return Err(
+        format!("Cached body expected {:?}, got {:?}", Some(body), cached.body)
+          .into(),
+      );
+    }
+    if cached.tag_name != tag {
+      return Err(
+        format!("Cached tag expected {:?}, got {:?}", tag, cached.tag_name)
+          .into(),
+      );
+    }
+
+    // Verify EXACTLY one network call was made
+    if client.request_count() != 1 {
+      return Err(
+        format!("Expected 1 network call, got {}", client.request_count())
+          .into(),
+      );
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_github_404() -> TestResult {
+    let (db, _server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::TheLastGeneration;
+    let tag = "missing-tag";
+
+    // GitHub is empty, should 404
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await;
+
+    match result {
+      Err(FetchReleaseNotesError::Fetch(_)) => Ok(()),
+      Err(e) => Err(format!("Expected Fetch error, got: {:?}", e).into()),
+      Ok(res) => {
+        Err(format!("Expected error, got success: {:?}", res).into())
+      }
+    }
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_github_500() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let tag = "v1.0.0";
+
+    use github_mock_api::{MockBehavior, MockError};
+    server
+      .add_mock_behavior(
+        MockBehavior::builder()
+          .error(MockError::InternalServerError)
+          .build(),
+      )
+      .await?;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await;
+
+    match result {
+      Err(FetchReleaseNotesError::Fetch(_)) => Ok(()),
+      Err(e) => Err(format!("Expected Fetch error, got: {:?}", e).into()),
+      Ok(res) => {
+        Err(format!("Expected error, got success: {:?}", res).into())
+      }
+    }
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_special_characters_in_tag() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let tag = "v1.0.0+test";
+    let body = "special notes";
+
+    // Seed GitHub
+    server
+      .add_release(
+        "CleverRaven",
+        "Cataclysm-DDA",
+        MockRelease::new("CleverRaven", "Cataclysm-DDA", tag)
+          .body(body),
+      )
+      .await;
+
+    let result = variant
+      .fetch_release_notes(tag, client.as_ref(), &repo)
+      .await?;
+
+    if result != Some(body.to_string()) {
+      return Err(
+        format!("Expected {:?}, got {:?}", Some(body), result).into(),
+      );
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_fetch_release_notes_different_game_variants() -> TestResult {
+    let (db, server, client) = setup().await?;
+    let repo = SqliteReleasesRepository::new(db.pool().clone());
+    let tag = "v1.0.0";
+
+    let variants = [
+      (
+        GameVariant::DarkDaysAhead,
+        "CleverRaven",
+        "Cataclysm-DDA",
+        "dda notes",
+      ),
+      (
+        GameVariant::BrightNights,
+        "cataclysmbnteam",
+        "Cataclysm-BN",
+        "bn notes",
+      ),
+      (
+        GameVariant::TheLastGeneration,
+        "Cataclysm-TLG",
+        "Cataclysm-TLG",
+        "tlg notes",
+      ),
+    ];
+
+    for (variant, owner, repo_name, body) in variants {
+      let mut mock_release = MockRelease::new(owner, repo_name, tag).body(body);
+      // Manually set ID to a value that fits in i64 to avoid Sqlite conversion error
+      mock_release.id = 12345 + (variant as u64);
+
+      server
+        .add_release(
+          owner,
+          repo_name,
+          mock_release,
+        )
+        .await;
+
+      let result = variant
+        .fetch_release_notes(tag, client.as_ref(), &repo)
+        .await?;
+
+      if result != Some(body.to_string()) {
+        return Err(
+          format!(
+            "Variant {:?}: Expected {:?}, got {:?}",
+            variant,
+            Some(body),
+            result
+          )
+          .into(),
+        );
+      }
+    }
+
+    Ok(())
+  }
+}
