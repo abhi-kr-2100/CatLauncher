@@ -10,3 +10,4 @@ Cargo.lock
 .next
 out
 src/generated-types
+.agents/skills/*

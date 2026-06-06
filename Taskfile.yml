@@ -2,14 +2,46 @@
 
 version: '3'
 
+vars:
+  CARGO_FLAGS: --workspace --all-targets --quiet
+  CODE_DIR: cat-launcher
+
 tasks:
-  verify:
-    desc: Run tests, lints and other verifications
-    ignore_error: true
+  generate-types:
+    desc: Regenerate Tauri type bindings
     cmds:
-      - rm -rf cat-launcher/src/generated-types > /dev/null 2>&1
-      - cargo test --manifest-path cat-launcher/src-tauri/Cargo.toml
-      - pnpm --prefix cat-launcher format > /dev/null 2>&1
-      - pnpm --prefix cat-launcher lint:fix > /dev/null 2>&1
-      - pnpm --prefix cat-launcher lint
-    silent: true
+      - rm -rf {{.CODE_DIR}}/src/generated-types
+      - cargo test {{.CARGO_FLAGS}} export_bindings --manifest-path {{.CODE_DIR}}/Cargo.toml -- --nocapture
+
+  fmt:
+    desc: Format all code (Rust and TypeScript)
+    cmds:
+      - cargo fmt --all --manifest-path {{.CODE_DIR}}/Cargo.toml
+      - pnpm -prefix {{.CODE_DIR}} exec prettier --write . --log-level warn
+
+  lint-fix:
+    desc: Apply autofixes across the workspace
+    cmds:
+      - cargo clippy {{.CARGO_FLAGS}} --fix --allow-dirty --allow-staged --manifest-path {{.CODE_DIR}}/Cargo.toml
+      - pnpm --prefix {{.CODE_DIR}} exec eslint . --fix --quiet
+
+  lint:
+    desc: Lint all code and deny warnings
+    cmds:
+      - cargo clippy {{.CARGO_FLAGS}} --manifest-path {{.CODE_DIR}}/Cargo.toml -- -D warnings 
+      - pnpm --prefix {{.CODE_DIR}} exec eslint . --max-warnings 0 --quiet
+      - pnpm --prefix {{.CODE_DIR}} exec tsc --noEmit
+
+  test:
+    desc: Run all Rust tests
+    cmds:
+      - cargo test {{.CARGO_FLAGS}} --manifest-path {{.CODE_DIR}}/Cargo.toml -- --nocapture
+
+  verify:
+    desc: Regenerate types, format, lint autofix, lint, and test everything
+    cmds:
+      - task: generate-types
+      - task: fmt
+      - task: lint-fix
+      - task: lint
+      - task: test
