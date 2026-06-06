@@ -1,0 +1,8 @@
+[workspace]
+members = ["cat-macros", "src-tauri"]
+resolver = "3"
+
+[workspace.lints.clippy]
+panic = "deny"
+expect_used = "deny"
+unwrap_used = "deny"
