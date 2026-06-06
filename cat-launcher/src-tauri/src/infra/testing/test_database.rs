@@ -56,26 +56,6 @@ impl TestDatabaseBuilder {
     }
   }
 
-  pub fn with_schema_initializer<F>(mut self, initializer: F) -> Self
-  where
-    F: FnOnce(&Connection, &[PathBuf]) -> Result<(), TestDatabaseError>
-      + Send
-      + 'static,
-  {
-    self.schema_initializer = Some(Box::new(initializer));
-    self
-  }
-
-  pub fn with_seed_initializer<F>(mut self, initializer: F) -> Self
-  where
-    F: FnOnce(&Connection) -> Result<(), TestDatabaseError>
-      + Send
-      + 'static,
-  {
-    self.seed_initializer = Some(Box::new(initializer));
-    self
-  }
-
   pub fn build(self) -> Result<TestDatabase, TestDatabaseError> {
     let temp_dir = tempfile::tempdir()?;
     let db_path = temp_dir.path().join("cat-launcher.db");

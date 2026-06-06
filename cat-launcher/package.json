@@ -9,11 +9,6 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "test": "cargo test --manifest-path ./src-tauri/Cargo.toml",
-    "lint": "eslint . --max-warnings 0 && pnpm tsc --noEmit && cargo clippy --manifest-path ./src-tauri/Cargo.toml --all-targets -- -D warnings",
-    "lint:fix": "eslint . --fix && cargo clippy --manifest-path ./src-tauri/Cargo.toml --all-targets --fix --allow-dirty",
-    "format": "prettier --write . && cargo fmt --manifest-path ./src-tauri/Cargo.toml",
-    "format:check": "prettier --check . && cargo fmt --manifest-path ./src-tauri/Cargo.toml -- --check",
     "prepare": "cd .. && husky cat-launcher/.husky"
   },
   "dependencies": {

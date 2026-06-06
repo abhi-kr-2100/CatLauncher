@@ -32,10 +32,6 @@ impl TestHttpClient {
     self.request_count.load(Ordering::Relaxed)
   }
 
-  pub fn reset_request_count(&self) {
-    self.request_count.store(0, Ordering::Relaxed);
-  }
-
   fn rewrite_url(
     &self,
     url_str: &str,
