@@ -5,7 +5,7 @@ mod ffi {
     use diplomat_runtime::DiplomatWrite;
     use github_mock_api::{Error, MockServer as RustMockServer};
 
-    use github_mock_api_ffi_common::{parse_host, runtime, CommonError};
+    use github_mock_api_ffi_common::{CommonError, parse_host, runtime};
 
     #[diplomat::rust_link(github_mock_api::MockServer, Struct)]
     #[diplomat::opaque_mut]
@@ -67,7 +67,7 @@ mod ffi {
         /// Write the server base URI (for example `http://127.0.0.1:3000`) into `write`.
         pub fn uri(&self, write: &mut DiplomatWrite) {
             let _ = write.write_str(&self.server.uri());
-            let _ = write.flush();
+            write.flush();
         }
 
         /// Stop the server and wait for background tasks to finish.

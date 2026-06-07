@@ -31,7 +31,9 @@ fn main() -> Result<(), BuildError> {
 
     let mut config = diplomat_tool::config::Config::default();
     if config_file.exists() {
-        config.read_file(&config_file).map_err(BuildError::ConfigLoad)?;
+        config
+            .read_file(&config_file)
+            .map_err(BuildError::ConfigLoad)?;
     }
 
     let docs = diplomat_tool::DocsUrlGenerator::with_base_urls(None, HashMap::new());

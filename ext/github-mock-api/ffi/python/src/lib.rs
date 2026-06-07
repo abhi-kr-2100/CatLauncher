@@ -1,8 +1,12 @@
-use std::sync::{Mutex};
+use std::sync::Mutex;
 
 use ::github_mock_api::{Error as MockApiError, MockServer as RustMockServer};
-use pyo3::{exceptions::{PyValueError, PyRuntimeError}, prelude::*, PyErr};
-use github_mock_api_ffi_common::{runtime, parse_host, CommonError};
+use github_mock_api_ffi_common::{CommonError, parse_host, runtime};
+use pyo3::{
+    PyErr,
+    exceptions::{PyRuntimeError, PyValueError},
+    prelude::*,
+};
 
 fn runtime_error(err: CommonError) -> PyErr {
     match err {
@@ -17,8 +21,12 @@ fn runtime_error(err: CommonError) -> PyErr {
 fn mock_api_error(err: MockApiError) -> PyErr {
     match err {
         MockApiError::Io(err) => PyErr::new::<pyo3::exceptions::PyIOError, _>(err.to_string()),
-        MockApiError::ShutdownError(err) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string()),
-        MockApiError::JoinError(err) => PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string()),
+        MockApiError::ShutdownError(err) => {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string())
+        }
+        MockApiError::JoinError(err) => {
+            PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(err.to_string())
+        }
         MockApiError::Conflict(err) => PyErr::new::<PyRuntimeError, _>(err),
     }
 }

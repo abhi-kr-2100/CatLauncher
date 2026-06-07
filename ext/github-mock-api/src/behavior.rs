@@ -35,7 +35,7 @@ impl MockBehaviorBuilder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{MockBehavior, MockServer, Result, Error, MockError};
+    use crate::{Error, MockBehavior, MockError, MockServer, Result};
 
     #[tokio::test]
     #[allow(clippy::panic_in_result_fn)]
@@ -53,7 +53,10 @@ mod tests {
             .await
             .map_err(|e| Error::Io(std::io::Error::other(e)))?;
 
-        assert_eq!(response.status(), axum::http::StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
         let body: serde_json::Value = response
             .json()
             .await
@@ -128,7 +131,10 @@ mod tests {
             .send()
             .await
             .map_err(|e| Error::Io(std::io::Error::other(e)))?;
-        assert_eq!(response.status(), axum::http::StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
 
         server.clear_all_mock_behaviors().await;
 

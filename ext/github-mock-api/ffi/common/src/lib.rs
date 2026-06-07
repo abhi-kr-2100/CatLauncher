@@ -1,7 +1,7 @@
+use github_mock_api::Error as MockApiError;
 use std::net::IpAddr;
 use std::sync::OnceLock;
 use tokio::runtime::Runtime;
-use github_mock_api::Error as MockApiError;
 
 #[derive(Debug, Clone, Copy)]
 pub enum CommonError {
@@ -32,6 +32,5 @@ pub fn runtime() -> Result<&'static Runtime, CommonError> {
 }
 
 pub fn parse_host(host: &str) -> Result<IpAddr, CommonError> {
-    host.parse::<IpAddr>()
-        .map_err(|_| CommonError::InvalidHost)
+    host.parse::<IpAddr>().map_err(|_| CommonError::InvalidHost)
 }

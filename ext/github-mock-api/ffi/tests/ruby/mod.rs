@@ -1,15 +1,13 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use crate::common::{
-    lib_path_env_var, profile_dir, target_dir, workspace_root, TestError,
-};
+use crate::common::{TestError, lib_path_env_var, profile_dir, target_dir, workspace_root};
 
 fn which_rspec() -> Option<String> {
-    if let Ok(output) = Command::new("rspec").arg("--version").output() {
-        if output.status.success() {
-            return Some("rspec".to_string());
-        }
+    if let Ok(output) = Command::new("rspec").arg("--version").output()
+        && output.status.success()
+    {
+        return Some("rspec".to_string());
     }
     None
 }
@@ -35,7 +33,11 @@ fn ruby_module_extension() -> &'static str {
 }
 
 fn ruby_output_name() -> String {
-    let prefix = if cfg!(target_os = "windows") { "" } else { "lib" };
+    let prefix = if cfg!(target_os = "windows") {
+        ""
+    } else {
+        "lib"
+    };
     format!("{prefix}github_mock_api_ruby.{}", ruby_lib_extension())
 }
 
@@ -81,14 +83,13 @@ fn ruby_mock_server_spec() -> Result<(), TestError> {
     std::fs::copy(&lib_path, &module_path).map_err(|_| TestError::CopyModule)?;
 
     let mut cmd = Command::new(&rspec);
-    cmd.arg("--format").arg("documentation").current_dir(&test_dir);
+    cmd.arg("--format")
+        .arg("documentation")
+        .current_dir(&test_dir);
     cmd.env(lib_path_env_var(), profile_dir()?);
 
     let status = cmd.status().map_err(|_| TestError::RunRubyTest)?;
-    assert!(
-        status.success(),
-        "Ruby API RSpec tests exited with failure"
-    );
+    assert!(status.success(), "Ruby API RSpec tests exited with failure");
 
     Ok(())
 }

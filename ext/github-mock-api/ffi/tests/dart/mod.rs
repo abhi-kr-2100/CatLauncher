@@ -1,12 +1,12 @@
 use std::process::Command;
 
-use crate::common::{build_cdylib, mock_api_lib_path, preload_env_vars, workspace_root, TestError};
+use crate::common::{TestError, build_cdylib, mock_api_lib_path, preload_env_vars, workspace_root};
 
 fn which_dart() -> Option<String> {
-    if let Ok(output) = Command::new("dart").arg("--version").output() {
-        if output.status.success() {
-            return Some("dart".to_string());
-        }
+    if let Ok(output) = Command::new("dart").arg("--version").output()
+        && output.status.success()
+    {
+        return Some("dart".to_string());
     }
     None
 }
@@ -44,10 +44,7 @@ fn dart_mock_server_test() -> Result<(), TestError> {
     }
 
     let status = cmd.status().map_err(|_| TestError::RunDartTest)?;
-    assert!(
-        status.success(),
-        "Dart API tests exited with failure"
-    );
+    assert!(status.success(), "Dart API tests exited with failure");
 
     Ok(())
 }

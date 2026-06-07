@@ -147,7 +147,10 @@ mod tests {
         let release = Release::new("octocat", "hello-world", "v1.0.0");
         assert_eq!(
             release.url,
-            format!("https://api.github.com/repos/octocat/hello-world/releases/{}", release.id)
+            format!(
+                "https://api.github.com/repos/octocat/hello-world/releases/{}",
+                release.id
+            )
         );
         assert_eq!(
             release.html_url,

@@ -1,26 +1,24 @@
 use std::path::PathBuf;
 use std::process::Command;
 
-use crate::common::{
-    lib_path_env_var, profile_dir, target_dir, workspace_root, TestError,
-};
+use crate::common::{TestError, lib_path_env_var, profile_dir, target_dir, workspace_root};
 
 fn which_python() -> Option<String> {
     for candidate in ["python3", "python"] {
-        if let Ok(output) = Command::new(candidate).arg("--version").output() {
-            if output.status.success() {
-                return Some(candidate.to_string());
-            }
+        if let Ok(output) = Command::new(candidate).arg("--version").output()
+            && output.status.success()
+        {
+            return Some(candidate.to_string());
         }
     }
     None
 }
 
 fn which_pytest() -> Option<String> {
-    if let Ok(output) = Command::new("pytest").arg("--version").output() {
-        if output.status.success() {
-            return Some("pytest".to_string());
-        }
+    if let Ok(output) = Command::new("pytest").arg("--version").output()
+        && output.status.success()
+    {
+        return Some("pytest".to_string());
     }
     None
 }
@@ -44,7 +42,11 @@ fn python_module_extension() -> &'static str {
 }
 
 fn python_output_name() -> String {
-    let prefix = if cfg!(target_os = "windows") { "" } else { "lib" };
+    let prefix = if cfg!(target_os = "windows") {
+        ""
+    } else {
+        "lib"
+    };
     format!("{prefix}github_mock_api_python.{}", python_lib_extension())
 }
 

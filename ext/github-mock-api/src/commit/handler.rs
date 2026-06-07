@@ -1,5 +1,5 @@
-use crate::api::{ApiResponse, ApiError};
 use super::types::Commit;
+use crate::api::{ApiError, ApiResponse};
 
 pub async fn list_commits(
     owner: String,
@@ -8,7 +8,13 @@ pub async fn list_commits(
     state: crate::AppState,
 ) -> ApiResponse<Vec<Commit>> {
     let key = (owner.to_lowercase(), repo.to_lowercase());
-    let commits = state.commits.read().await.get(&key).cloned().unwrap_or_default();
+    let commits = state
+        .commits
+        .read()
+        .await
+        .get(&key)
+        .cloned()
+        .unwrap_or_default();
     let (paginated_commits, metadata) = crate::util::paginate(&commits, pagination);
     ApiResponse::Paginated(paginated_commits, metadata)
 }
@@ -27,7 +33,7 @@ pub async fn get_commit(
             return ApiResponse::Error(ApiError::not_found(
                 "Not Found",
                 "https://docs.github.com/rest/commits/commits#get-a-commit",
-            ))
+            ));
         }
     };
 
@@ -42,8 +48,8 @@ pub async fn get_commit(
 
 #[cfg(test)]
 mod tests {
-    use crate::MockServer;
     use crate::Commit;
+    use crate::MockServer;
 
     type TestResult = std::result::Result<(), Box<dyn std::error::Error>>;
 
@@ -53,7 +59,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/octocat/hello-world/commits", server.uri()))
+            .get(format!(
+                "{}/repos/octocat/hello-world/commits",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -73,7 +82,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/octocat/hello-world/commits", server.uri()))
+            .get(format!(
+                "{}/repos/octocat/hello-world/commits",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -95,7 +107,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/octocat/hello-world/commits/customsha", server.uri()))
+            .get(format!(
+                "{}/repos/octocat/hello-world/commits/customsha",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -112,7 +127,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/octocat/hello-world/commits/nonexistent", server.uri()))
+            .get(format!(
+                "{}/repos/octocat/hello-world/commits/nonexistent",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -132,7 +150,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/octocat/hello-world/commits", server.uri()))
+            .get(format!(
+                "{}/repos/octocat/hello-world/commits",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -152,7 +173,10 @@ mod tests {
 
         let client = reqwest::Client::new();
         let resp = client
-            .get(format!("{}/repos/Octocat/Hello-World/commits/abc123", server.uri()))
+            .get(format!(
+                "{}/repos/Octocat/Hello-World/commits/abc123",
+                server.uri()
+            ))
             .send()
             .await?;
 
@@ -221,7 +245,7 @@ mod tests {
                 .add_commit(
                     "u",
                     "r",
-                    Commit::new("u", "r").message(&format!("Commit {}", i)),
+                    Commit::new("u", "r").message(format!("Commit {}", i)),
                 )
                 .await;
         }
@@ -246,10 +270,7 @@ mod tests {
 
         // Custom per_page
         let resp = client
-            .get(format!(
-                "{}/repos/u/r/commits?per_page=10",
-                server.uri()
-            ))
+            .get(format!("{}/repos/u/r/commits?per_page=10", server.uri()))
             .send()
             .await?;
         let body: Vec<serde_json::Value> = resp.json().await?;
@@ -257,10 +278,7 @@ mod tests {
 
         // per_page capping
         let resp = client
-            .get(format!(
-                "{}/repos/u/r/commits?per_page=200",
-                server.uri()
-            ))
+            .get(format!("{}/repos/u/r/commits?per_page=200", server.uri()))
             .send()
             .await?;
         let body: Vec<serde_json::Value> = resp.json().await?;
@@ -273,15 +291,12 @@ mod tests {
                 .add_commit(
                     "u",
                     "r",
-                    Commit::new("u", "r").message(&format!("Commit {}", i)),
+                    Commit::new("u", "r").message(format!("Commit {}", i)),
                 )
                 .await;
         }
         let resp = client
-            .get(format!(
-                "{}/repos/u/r/commits?per_page=200",
-                server.uri()
-            ))
+            .get(format!("{}/repos/u/r/commits?per_page=200", server.uri()))
             .send()
             .await?;
         let body: Vec<serde_json::Value> = resp.json().await?;
@@ -293,7 +308,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_commit_not_found_in_existing_repo() -> TestResult {
         let server = MockServer::start().await?;
-        server.add_commit("u", "r", Commit::new("u", "r").sha("sha1")).await;
+        server
+            .add_commit("u", "r", Commit::new("u", "r").sha("sha1"))
+            .await;
 
         let client = reqwest::Client::new();
         let resp = client

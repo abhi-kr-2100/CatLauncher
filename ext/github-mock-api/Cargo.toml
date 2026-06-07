@@ -7,10 +7,18 @@ name = "github-mock-api"
 version = "0.1.0"
 edition = "2024"
 
+[lints]
+workspace = true
+
+[workspace.lints.clippy]
+panic = "deny"
+expect_used = "deny"
+unwrap_used = "deny"
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 axum = "0.8"
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal", "fs"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 thiserror = "2"

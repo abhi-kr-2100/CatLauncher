@@ -1,5 +1,5 @@
-use crate::api::{ApiResponse, ApiError};
 use super::types::Repository;
+use crate::api::{ApiError, ApiResponse};
 
 pub async fn get_repository(
     owner: String,
@@ -66,8 +66,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_repository_case_insensitive() -> TestResult {
         let server = MockServer::start().await?;
-        let repo = Repository::new("octocat", "hello-world")
-            .description("Case insensitive");
+        let repo = Repository::new("octocat", "hello-world").description("Case insensitive");
         server.add_repository(repo).await;
 
         let client = reqwest::Client::new();
@@ -96,10 +95,12 @@ mod tests {
 
         assert_eq!(resp.status(), 200);
         let body: serde_json::Value = resp.json().await?;
-        assert!(body["id"].as_u64().map_or(false, |v| v > 0));
-        assert!(body["node_id"]
-            .as_str()
-            .map_or(false, |v| v.starts_with("mock_node_id_")));
+        assert!(body["id"].as_u64().is_some_and(|v| v > 0));
+        assert!(
+            body["node_id"]
+                .as_str()
+                .is_some_and(|v| v.starts_with("mock_node_id_"))
+        );
         Ok(())
     }
 }
