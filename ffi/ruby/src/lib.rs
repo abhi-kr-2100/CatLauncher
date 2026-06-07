@@ -1,8 +1,8 @@
-use std::sync::{Mutex};
+use std::sync::Mutex;
 
 use github_mock_api::{Error as MockApiError, MockServer as RustMockServer};
+use github_mock_api_ffi_common::{CommonError, parse_host, runtime};
 use magnus::{Error, Ruby, function, method, prelude::*, wrap};
-use github_mock_api_ffi_common::{runtime, parse_host, CommonError};
 
 fn runtime_error(ruby: &Ruby, err: CommonError) -> Error {
     match err {
@@ -10,14 +10,18 @@ fn runtime_error(ruby: &Ruby, err: CommonError) -> Error {
         CommonError::InvalidHost => Error::new(ruby.exception_arg_error(), "invalid host"),
         CommonError::Shutdown => Error::new(ruby.exception_runtime_error(), "shutdown error"),
         CommonError::Join => Error::new(ruby.exception_runtime_error(), "join error"),
-        CommonError::Conflict => Error::new(ruby.exception_runtime_error(), "mock behavior conflict"),
+        CommonError::Conflict => {
+            Error::new(ruby.exception_runtime_error(), "mock behavior conflict")
+        }
     }
 }
 
 fn mock_api_error(ruby: &Ruby, err: MockApiError) -> Error {
     match err {
         MockApiError::Io(err) => Error::new(ruby.exception_io_error(), err.to_string()),
-        MockApiError::ShutdownError(err) => Error::new(ruby.exception_runtime_error(), err.to_string()),
+        MockApiError::ShutdownError(err) => {
+            Error::new(ruby.exception_runtime_error(), err.to_string())
+        }
         MockApiError::JoinError(err) => Error::new(ruby.exception_runtime_error(), err.to_string()),
         MockApiError::Conflict(err) => Error::new(ruby.exception_runtime_error(), err),
     }

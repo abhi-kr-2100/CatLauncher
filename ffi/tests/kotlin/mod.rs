@@ -2,17 +2,15 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use crate::common::{
-    build_cdylib, lib_dirs, lib_path_env_var, profile_dir, target_dir,
-    workspace_root,
-    TestError,
+    TestError, build_cdylib, lib_dirs, lib_path_env_var, profile_dir, target_dir, workspace_root,
 };
 
 fn which_kotlinc() -> Option<String> {
     for candidate in ["kotlinc"] {
-        if let Ok(output) = Command::new(candidate).arg("-version").output() {
-            if output.status.success() {
-                return Some(candidate.to_string());
-            }
+        if let Ok(output) = Command::new(candidate).arg("-version").output()
+            && output.status.success()
+        {
+            return Some(candidate.to_string());
         }
     }
     None
@@ -61,7 +59,10 @@ fn kotlin_mock_server_smoke_test() -> Result<(), TestError> {
         .arg(&jar)
         .status()
         .map_err(|_| TestError::RunKotlinc)?;
-    assert!(compile_status.success(), "failed to compile Kotlin API smoke test");
+    assert!(
+        compile_status.success(),
+        "failed to compile Kotlin API smoke test"
+    );
 
     let lib_path = env_lib_path(&lib_dirs)?;
     let classpath = join_classpath(&[&jar, &bindings_dir, &jna_jar])?;

@@ -2,14 +2,14 @@ use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::common::{build_cdylib, lib_dirs, lib_name, target_dir, workspace_root, TestError};
+use crate::common::{TestError, build_cdylib, lib_dirs, lib_name, target_dir, workspace_root};
 
 fn which_cc() -> Option<String> {
     for candidate in ["cc"] {
-        if let Ok(output) = Command::new(candidate).arg("--version").output() {
-            if output.status.success() {
-                return Some(candidate.to_string());
-            }
+        if let Ok(output) = Command::new(candidate).arg("--version").output()
+            && output.status.success()
+        {
+            return Some(candidate.to_string());
         }
     }
     None
@@ -37,17 +37,10 @@ fn pkg_config(args: &[&str]) -> Result<Vec<String>, TestError> {
         return Err(TestError::NoPkgConfig);
     }
     let stdout = String::from_utf8_lossy(&output.stdout);
-    Ok(stdout
-        .split_whitespace()
-        .map(|s| s.to_string())
-        .collect())
+    Ok(stdout.split_whitespace().map(|s| s.to_string()).collect())
 }
 
-fn compile(
-    compiler: &str,
-    source: &Path,
-    binary: &Path,
-) -> Result<Command, TestError> {
+fn compile(compiler: &str, source: &Path, binary: &Path) -> Result<Command, TestError> {
     let include = workspace_root()?.join("bindings").join("c");
     let lib_dirs = lib_dirs()?;
 
@@ -64,13 +57,11 @@ fn compile(
     for arg in pkg_config(&["--cflags", "check"])? {
         cmd.arg(arg);
     }
-    cmd.arg("-l")
-        .arg(lib_name());
+    cmd.arg("-l").arg(lib_name());
     for arg in pkg_config(&["--libs", "check"])? {
         cmd.arg(arg);
     }
-    cmd.arg("-o")
-        .arg(binary);
+    cmd.arg("-o").arg(binary);
     if cfg!(target_os = "linux") {
         cmd.arg("-pthread");
     }

@@ -2,14 +2,14 @@ use std::fs::create_dir_all;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::common::{build_cdylib, lib_dirs, lib_name, target_dir, workspace_root, TestError};
+use crate::common::{TestError, build_cdylib, lib_dirs, lib_name, target_dir, workspace_root};
 
 fn which_cxx() -> Option<String> {
     for candidate in ["c++"] {
-        if let Ok(output) = Command::new(candidate).arg("--version").output() {
-            if output.status.success() {
-                return Some(candidate.to_string());
-            }
+        if let Ok(output) = Command::new(candidate).arg("--version").output()
+            && output.status.success()
+        {
+            return Some(candidate.to_string());
         }
     }
     None
@@ -28,11 +28,7 @@ fn lib_dir_args(lib_dirs: &[PathBuf]) -> Vec<String> {
     args
 }
 
-fn compile(
-    compiler: &str,
-    source: &Path,
-    binary: &Path,
-) -> Result<Command, TestError> {
+fn compile(compiler: &str, source: &Path, binary: &Path) -> Result<Command, TestError> {
     let include = workspace_root()?.join("bindings").join("cpp");
     let lib_dirs = lib_dirs()?;
 
@@ -46,10 +42,7 @@ fn compile(
     for arg in lib_dir_args(&lib_dirs) {
         cmd.arg(arg);
     }
-    cmd.arg("-l")
-        .arg(lib_name())
-        .arg("-o")
-        .arg(binary);
+    cmd.arg("-l").arg(lib_name()).arg("-o").arg(binary);
     if cfg!(target_os = "linux") {
         cmd.arg("-pthread");
     }
@@ -69,18 +62,12 @@ fn cpp_mock_server_tests() -> Result<(), TestError> {
 
     let mut cmd = compile(&cxx, &source, &binary)?;
     let compile_status = cmd.status().map_err(|_| TestError::RunCxxCompiler)?;
-    assert!(
-        compile_status.success(),
-        "failed to compile C++ API tests"
-    );
+    assert!(compile_status.success(), "failed to compile C++ API tests");
 
     let run_status = Command::new(&binary)
         .status()
         .map_err(|_| TestError::RunSmokeTest)?;
-    assert!(
-        run_status.success(),
-        "C++ API tests exited with failure"
-    );
+    assert!(run_status.success(), "C++ API tests exited with failure");
 
     Ok(())
 }

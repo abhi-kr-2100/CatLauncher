@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: '3'
+
+vars:
+  CARGO_FLAGS: --workspace --all-targets --quiet
+
+tasks:
+  fmt:
+    desc: Format all crates
+    cmds:
+      - cargo fmt --all
+
+  lint-fix:
+    desc: Apply clippy autofixes across the workspace
+    cmds:
+      - cargo clippy {{.CARGO_FLAGS}} --fix --allow-dirty --allow-staged
+
+  lint:
+    desc: Lint all crates and deny warnings
+    cmds:
+      - cargo clippy {{.CARGO_FLAGS}} -- -D warnings
+
+  test:
+    desc: Run tests for all crates
+    cmds:
+      - cargo test {{.CARGO_FLAGS}} -- --nocapture
+
+  verify:
+    desc: Format, lint autofix, lint, then test all crates
+    cmds:
+      - task: fmt
+      - task: lint-fix
+      - task: lint
+      - task: test

@@ -52,20 +52,14 @@ impl SimpleUser {
             url: Some(format!("https://api.github.com/users/{login}")),
             html_url: format!("https://github.com/{login}"),
             followers_url: format!("https://api.github.com/users/{login}/followers"),
-            following_url: format!(
-                "https://api.github.com/users/{login}/following{{/other_user}}"
-            ),
+            following_url: format!("https://api.github.com/users/{login}/following{{/other_user}}"),
             gists_url: format!("https://api.github.com/users/{login}/gists{{/gist_id}}"),
-            starred_url: format!(
-                "https://api.github.com/users/{login}/starred{{/owner}}{{/repo}}"
-            ),
+            starred_url: format!("https://api.github.com/users/{login}/starred{{/owner}}{{/repo}}"),
             subscriptions_url: format!("https://api.github.com/users/{login}/subscriptions"),
             organizations_url: format!("https://api.github.com/users/{login}/orgs"),
             repos_url: format!("https://api.github.com/users/{login}/repos"),
             events_url: format!("https://api.github.com/users/{login}/events{{/privacy}}"),
-            received_events_url: format!(
-                "https://api.github.com/users/{login}/received_events"
-            ),
+            received_events_url: format!("https://api.github.com/users/{login}/received_events"),
             user_type: "User".to_string(),
             site_admin: false,
             starred_at: None,
@@ -179,11 +173,7 @@ mod tests {
 
     #[test]
     fn test_load_from_file_happy_path() -> Result<(), Box<dyn std::error::Error>> {
-        let releases = Release::load_from_file(
-            "testing/data/releases.json",
-            "owner1",
-            "repo1",
-        )?;
+        let releases = Release::load_from_file("testing/data/releases.json", "owner1", "repo1")?;
 
         assert_eq!(releases.len(), 30);
 

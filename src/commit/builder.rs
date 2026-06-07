@@ -2,16 +2,19 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::util::hash;
 
-use super::types::{
-    Commit, CommitDetail, CommitTree, GitUser, SimpleUser, Verification,
-};
+use super::types::{Commit, CommitDetail, CommitTree, GitUser, SimpleUser, Verification};
 
 fn generate_sha() -> String {
     static COUNTER: AtomicU64 = AtomicU64::new(0);
     let n = COUNTER.fetch_add(1, Ordering::Relaxed);
     let h1 = crate::util::hash(&format!("commit_high:{n}"));
     let h2 = crate::util::hash(&format!("commit_low:{n}"));
-    format!("{:016x}{:016x}{:08x}", h1, h2, h1.wrapping_add(h2) & 0xFFFF_FFFF)
+    format!(
+        "{:016x}{:016x}{:08x}",
+        h1,
+        h2,
+        h1.wrapping_add(h2) & 0xFFFF_FFFF
+    )
 }
 
 impl Commit {
@@ -133,8 +136,14 @@ mod tests {
 
         assert_eq!(commit.sha, "abc123def456");
         assert_eq!(commit.commit.message, "A test commit\n\nWith a body");
-        assert_eq!(commit.commit.author.as_ref().map(|a| &a.name), Some(&"Test User".to_string()));
-        assert_eq!(commit.commit.author.as_ref().map(|a| &a.email), Some(&"test@example.com".to_string()));
+        assert_eq!(
+            commit.commit.author.as_ref().map(|a| &a.name),
+            Some(&"Test User".to_string())
+        );
+        assert_eq!(
+            commit.commit.author.as_ref().map(|a| &a.email),
+            Some(&"test@example.com".to_string())
+        );
     }
 
     #[test]

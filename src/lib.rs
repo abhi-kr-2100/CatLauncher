@@ -2,11 +2,11 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 
-use axum::extract::{Path, Query, State, Request};
+use axum::Router;
+use axum::extract::{Path, Query, Request, State};
 use axum::http::HeaderValue;
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::Router;
 use tokio::sync::RwLock;
 use tokio::sync::mpsc;
 
@@ -28,25 +28,29 @@ pub enum Error {
 pub type Result<T> = std::result::Result<T, Error>;
 
 mod api;
+mod asset;
 mod behavior;
-mod release;
 mod commit;
+mod release;
 mod repository;
 mod util;
 
+pub use asset::Asset;
 pub use behavior::{MockBehavior, MockError};
-pub use release::Release;
 pub use commit::Commit;
+pub use release::Release;
 pub use repository::Repository;
 pub use util::LoadError;
 
 pub(crate) type RepoKey = (String, String);
+pub(crate) type AssetKey = (String, String, String, String); // (owner, repo, tag, filename)
 
 #[derive(Clone, Default)]
 pub(crate) struct AppState {
     pub(crate) repositories: Arc<RwLock<HashMap<RepoKey, Repository>>>,
     pub(crate) releases: Arc<RwLock<HashMap<RepoKey, Vec<Release>>>>,
     pub(crate) commits: Arc<RwLock<HashMap<RepoKey, Vec<Commit>>>>,
+    pub(crate) assets: Arc<RwLock<HashMap<AssetKey, Asset>>>,
     pub(crate) behaviors: Arc<RwLock<Vec<MockBehavior>>>,
 }
 
@@ -86,6 +90,17 @@ impl AppState {
         );
         let mut repositories = self.repositories.write().await;
         repositories.insert(key, repository);
+    }
+
+    pub async fn add_asset(&self, owner: &str, repo: &str, tag: &str, asset: Asset) {
+        let key = (
+            owner.to_lowercase(),
+            repo.to_lowercase(),
+            tag.to_string(),
+            asset.name.clone(),
+        );
+        let mut assets = self.assets.write().await;
+        assets.insert(key, asset);
     }
 }
 
@@ -151,7 +166,9 @@ async fn handle_paginated_response(
         .get::<crate::util::PaginationMetadata>()
         .cloned();
 
-    if let Some(metadata) = metadata && let Some(next_page) = metadata.next_page {
+    if let Some(metadata) = metadata
+        && let Some(next_page) = metadata.next_page
+    {
         let uri = request.uri();
         let host = request
             .headers()
@@ -169,8 +186,7 @@ async fn handle_paginated_response(
         query_params.push(("per_page".to_string(), metadata.per_page.to_string()));
 
         let new_query = serde_urlencoded::to_string(&query_params).unwrap_or_default();
-        let next_url = format!("http://{}{}/?{}", host, uri.path(), new_query)
-            .replace("/?","?");
+        let next_url = format!("http://{}{}/?{}", host, uri.path(), new_query).replace("/?", "?");
 
         let link_value = format!("<{}>; rel=\"next\"", next_url);
         if let Ok(header_value) = HeaderValue::from_str(&link_value) {
@@ -193,8 +209,7 @@ impl MockServer {
     /// Start a new mock server on the specified host and port.
     /// Use port 0 for a randomly available port.
     pub async fn start_on(host: IpAddr, port: u16) -> Result<Self> {
-        let listener = tokio::net::TcpListener::bind((host, port))
-            .await?;
+        let listener = tokio::net::TcpListener::bind((host, port)).await?;
 
         let address = listener.local_addr()?;
 
@@ -202,6 +217,7 @@ impl MockServer {
             repositories: Arc::new(RwLock::new(HashMap::new())),
             releases: Arc::new(RwLock::new(HashMap::new())),
             commits: Arc::new(RwLock::new(HashMap::new())),
+            assets: Arc::new(RwLock::new(HashMap::new())),
             behaviors: Arc::new(RwLock::new(Vec::new())),
         };
         let app = Router::new()
@@ -220,6 +236,14 @@ impl MockServer {
                      request: Request| async move {
                         let response = release::list_releases(owner, repo, pagination, state).await;
                         handle_paginated_response(request, response).await
+                    },
+                ),
+            )
+            .route(
+                "/{owner}/{repo}/releases/download/{tag}/{filename}",
+                get(
+                    |Path((owner, repo, tag, filename)), State(state): State<AppState>| async move {
+                        asset::download_release_asset(owner, repo, tag, filename, state).await
                     },
                 ),
             )
@@ -257,11 +281,9 @@ impl MockServer {
             )
             .route(
                 "/repos/{owner}/{repo}/commits/{sha}",
-                get(
-                    |Path((owner, repo, sha)), State(state): State<AppState>| {
-                        commit::get_commit(owner, repo, sha, state)
-                    },
-                ),
+                get(|Path((owner, repo, sha)), State(state): State<AppState>| {
+                    commit::get_commit(owner, repo, sha, state)
+                }),
             )
             .layer(axum::middleware::from_fn_with_state(
                 state.clone(),
@@ -309,6 +331,11 @@ impl MockServer {
     /// Register a mocked repository with the server.
     pub async fn add_repository(&self, repository: Repository) {
         self.state.add_repository(repository).await;
+    }
+
+    /// Register a mocked asset with the server.
+    pub async fn add_asset(&self, owner: &str, repo: &str, tag: &str, asset: Asset) {
+        self.state.add_asset(owner, repo, tag, asset).await;
     }
 
     /// Add a mock behavior to the server.
@@ -471,5 +498,4 @@ mod tests {
         assert!(result.is_ok());
         Ok(())
     }
-
 }

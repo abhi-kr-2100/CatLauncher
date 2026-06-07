@@ -1,6 +1,6 @@
+use crate::AppState;
 use crate::api::{ApiError, ApiResponse};
 use crate::release::types::Release;
-use crate::AppState;
 use crate::util::Pagination;
 
 pub async fn list_releases(
@@ -25,7 +25,12 @@ pub async fn list_releases(
     ApiResponse::Paginated(paginated_releases, metadata)
 }
 
-pub async fn get_release(owner: String, repo: String, id: u64, state: AppState) -> ApiResponse<Release> {
+pub async fn get_release(
+    owner: String,
+    repo: String,
+    id: u64,
+    state: AppState,
+) -> ApiResponse<Release> {
     let key = (owner.to_lowercase(), repo.to_lowercase());
     let releases_map = state.releases.read().await;
     let releases = match releases_map.get(&key) {
@@ -34,7 +39,7 @@ pub async fn get_release(owner: String, repo: String, id: u64, state: AppState) 
             return ApiResponse::Error(ApiError::not_found(
                 "Not Found",
                 "https://docs.github.com/rest/releases/releases#get-a-release",
-            ))
+            ));
         }
     };
 
@@ -61,7 +66,7 @@ pub async fn get_release_by_tag(
             return ApiResponse::Error(ApiError::not_found(
                 "Not Found",
                 "https://docs.github.com/rest/releases/releases#get-a-release-by-tag-name",
-            ))
+            ));
         }
     };
 
@@ -74,7 +79,11 @@ pub async fn get_release_by_tag(
     }
 }
 
-pub async fn get_latest_release(owner: String, repo: String, state: AppState) -> ApiResponse<Release> {
+pub async fn get_latest_release(
+    owner: String,
+    repo: String,
+    state: AppState,
+) -> ApiResponse<Release> {
     let key = (owner.to_lowercase(), repo.to_lowercase());
     let releases_map = state.releases.read().await;
     let releases = match releases_map.get(&key) {
@@ -83,7 +92,7 @@ pub async fn get_latest_release(owner: String, repo: String, state: AppState) ->
             return ApiResponse::Error(ApiError::not_found(
                 "Not Found",
                 "https://docs.github.com/rest/releases/releases#get-the-latest-release",
-            ))
+            ));
         }
     };
 
@@ -236,10 +245,8 @@ mod tests {
                 .add_release(
                     "owner",
                     "repo",
-                    Release::new("owner", "repo", &format!("v{:02}", i)).created_at(format!(
-                        "2024-01-{:02}T00:00:00Z",
-                        i
-                    )),
+                    Release::new("owner", "repo", &format!("v{:02}", i))
+                        .created_at(format!("2024-01-{:02}T00:00:00Z", i)),
                 )
                 .await;
         }
@@ -251,11 +258,11 @@ mod tests {
             .get(server.uri() + "/repos/owner/repo/releases")
             .send()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
         let body: Vec<serde_json::Value> = resp
             .json()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
         assert_eq!(body.len(), 30);
 
         // Verify descending order by created_at (v35 should be first)
@@ -267,11 +274,11 @@ mod tests {
             .get(server.uri() + "/repos/owner/repo/releases?page=2")
             .send()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
         let body: Vec<serde_json::Value> = resp
             .json()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
         assert_eq!(body.len(), 5);
         assert_eq!(body[0]["tag_name"], "v05");
         assert_eq!(body[4]["tag_name"], "v01");
@@ -285,7 +292,13 @@ mod tests {
 
         // Add 35 releases (30 is default per_page)
         for i in 1..=35 {
-            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+            server
+                .add_release(
+                    "owner",
+                    "repo",
+                    Release::new("owner", "repo", &format!("v{}", i)),
+                )
+                .await;
         }
 
         let client = reqwest::Client::new();
@@ -295,7 +308,7 @@ mod tests {
             .get(server.uri() + "/repos/owner/repo/releases")
             .send()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
 
         let link = resp.headers().get("link").and_then(|h| h.to_str().ok());
         assert!(link.is_some());
@@ -314,7 +327,13 @@ mod tests {
 
         // Add 35 releases (30 is default per_page)
         for i in 1..=35 {
-            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+            server
+                .add_release(
+                    "owner",
+                    "repo",
+                    Release::new("owner", "repo", &format!("v{}", i)),
+                )
+                .await;
         }
 
         let client = reqwest::Client::new();
@@ -324,7 +343,7 @@ mod tests {
             .get(server.uri() + "/repos/owner/repo/releases?page=2")
             .send()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
 
         let link = resp.headers().get("link");
         assert!(link.is_none());
@@ -338,7 +357,13 @@ mod tests {
 
         // Add 35 releases (30 is default per_page)
         for i in 1..=35 {
-            server.add_release("owner", "repo", Release::new("owner", "repo", &format!("v{}", i))).await;
+            server
+                .add_release(
+                    "owner",
+                    "repo",
+                    Release::new("owner", "repo", &format!("v{}", i)),
+                )
+                .await;
         }
 
         let client = reqwest::Client::new();
@@ -348,7 +373,7 @@ mod tests {
             .get(server.uri() + "/repos/owner/repo/releases?foo=bar")
             .send()
             .await
-            .map_err(|e| crate::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
+            .map_err(|e| crate::Error::Io(std::io::Error::other(e)))?;
 
         let link = resp.headers().get("link").and_then(|h| h.to_str().ok());
         assert!(link.is_some());
@@ -358,4 +383,5 @@ mod tests {
 
         Ok(())
     }
+
 }

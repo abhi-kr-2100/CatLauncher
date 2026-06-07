@@ -1,9 +1,9 @@
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 
-use serde::de::DeserializeOwned;
 use serde::Deserialize;
+use serde::de::DeserializeOwned;
 
 #[derive(Debug, thiserror::Error)]
 pub enum LoadError {
@@ -58,7 +58,9 @@ impl Pagination {
     }
 
     pub fn per_page(&self) -> usize {
-        self.per_page.unwrap_or(DEFAULT_PER_PAGE).clamp(1, MAX_PER_PAGE)
+        self.per_page
+            .unwrap_or(DEFAULT_PER_PAGE)
+            .clamp(1, MAX_PER_PAGE)
     }
 }
 
@@ -136,7 +138,10 @@ mod tests {
     #[test]
     fn test_paginate_first_page_with_next() {
         let items = vec![1, 2, 3, 4, 5];
-        let pagination = Pagination { page: Some(1), per_page: Some(2) };
+        let pagination = Pagination {
+            page: Some(1),
+            per_page: Some(2),
+        };
         let (res, meta) = paginate(&items, pagination);
         assert_eq!(res, vec![1, 2]);
         assert_eq!(meta.next_page, Some(2));
@@ -146,7 +151,10 @@ mod tests {
     #[test]
     fn test_paginate_middle_page_with_next() {
         let items = vec![1, 2, 3, 4, 5];
-        let pagination = Pagination { page: Some(2), per_page: Some(2) };
+        let pagination = Pagination {
+            page: Some(2),
+            per_page: Some(2),
+        };
         let (res, meta) = paginate(&items, pagination);
         assert_eq!(res, vec![3, 4]);
         assert_eq!(meta.next_page, Some(3));
@@ -155,7 +163,10 @@ mod tests {
     #[test]
     fn test_paginate_last_page_with_partial_results() {
         let items = vec![1, 2, 3, 4, 5];
-        let pagination = Pagination { page: Some(3), per_page: Some(2) };
+        let pagination = Pagination {
+            page: Some(3),
+            per_page: Some(2),
+        };
         let (res, meta) = paginate(&items, pagination);
         assert_eq!(res, vec![5]);
         assert_eq!(meta.next_page, None);
@@ -164,7 +175,10 @@ mod tests {
     #[test]
     fn test_paginate_beyond_available_pages() {
         let items = vec![1, 2, 3, 4, 5];
-        let pagination = Pagination { page: Some(4), per_page: Some(2) };
+        let pagination = Pagination {
+            page: Some(4),
+            per_page: Some(2),
+        };
         let (res, meta) = paginate(&items, pagination);
         assert_eq!(res, Vec::<i32>::new());
         assert_eq!(meta.next_page, None);
@@ -173,7 +187,10 @@ mod tests {
     #[test]
     fn test_paginate_huge_page_number() {
         let items = vec![1, 2, 3, 4, 5];
-        let pagination = Pagination { page: Some(100), per_page: Some(2) };
+        let pagination = Pagination {
+            page: Some(100),
+            per_page: Some(2),
+        };
         let (res, meta) = paginate(&items, pagination);
         assert_eq!(res, Vec::<i32>::new());
         assert_eq!(meta.next_page, None);

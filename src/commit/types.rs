@@ -160,11 +160,7 @@ mod tests {
 
     #[test]
     fn test_load_from_file_happy_path() -> Result<(), Box<dyn std::error::Error>> {
-        let commits = Commit::load_from_file(
-            "testing/data/commits.json",
-            "owner1",
-            "repo1",
-        )?;
+        let commits = Commit::load_from_file("testing/data/commits.json", "owner1", "repo1")?;
 
         assert_eq!(commits.len(), 30);
 

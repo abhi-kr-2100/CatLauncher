@@ -1,3 +1,4 @@
+#![cfg(test)]
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -93,7 +94,11 @@ pub(crate) fn target_dir() -> Result<PathBuf, TestError> {
 }
 
 pub(crate) fn profile_dir() -> Result<PathBuf, TestError> {
-    let profile = if cfg!(debug_assertions) { "debug" } else { "release" };
+    let profile = if cfg!(debug_assertions) {
+        "debug"
+    } else {
+        "release"
+    };
     Ok(target_dir()?.join(profile))
 }
 
@@ -109,7 +114,11 @@ pub(crate) fn lib_name() -> &'static str {
 pub(crate) fn build_cdylib() -> Result<(), TestError> {
     let target = target_dir()?;
     let cargo = std::env::var("CARGO").map_err(|_| TestError::CargoEnvMissing)?;
-    let profile = if cfg!(debug_assertions) { "debug" } else { "release" };
+    let profile = if cfg!(debug_assertions) {
+        "debug"
+    } else {
+        "release"
+    };
     let mut cmd = Command::new(cargo);
     cmd.arg("build")
         .arg("-p")
@@ -136,7 +145,11 @@ pub(crate) fn mock_api_lib_path() -> Result<PathBuf, TestError> {
     } else {
         "so"
     };
-    let prefix = if cfg!(target_os = "windows") { "" } else { "lib" };
+    let prefix = if cfg!(target_os = "windows") {
+        ""
+    } else {
+        "lib"
+    };
     Ok(profile_dir()?.join(format!("{prefix}{}.{ext}", lib_name())))
 }
 

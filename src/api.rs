@@ -1,12 +1,17 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 use serde::Serialize;
 
 pub enum ApiResponse<T> {
     Ok(T),
     Paginated(T, crate::util::PaginationMetadata),
     Error(ApiError),
+    Raw {
+        bytes: Vec<u8>,
+        content_type: String,
+        filename: String,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -33,6 +38,25 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
                 })),
             )
                 .into_response(),
+            ApiResponse::Raw {
+                bytes,
+                content_type,
+                filename,
+            } => {
+                let mut response = bytes.into_response();
+                if let Ok(value) = axum::http::HeaderValue::from_str(&content_type) {
+                    response
+                        .headers_mut()
+                        .insert(axum::http::header::CONTENT_TYPE, value);
+                }
+                let disposition = format!("attachment; filename=\"{filename}\"");
+                if let Ok(value) = axum::http::HeaderValue::from_str(&disposition) {
+                    response
+                        .headers_mut()
+                        .insert(axum::http::header::CONTENT_DISPOSITION, value);
+                }
+                response
+            }
         }
     }
 }
