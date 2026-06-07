@@ -32,8 +32,14 @@ tasks:
       - pnpm --prefix {{.CODE_DIR}} exec eslint . --max-warnings 0 --quiet
       - pnpm --prefix {{.CODE_DIR}} exec tsc --noEmit
 
+  setup-tests:
+    desc: Fetch test release assets from game repositories
+    cmds:
+      - cd scripts/setup-test-data && uv run setup-test-data
+
   test:
     desc: Run all Rust tests
+    deps: [setup-tests]
     cmds:
       - cargo test {{.CARGO_FLAGS}} --manifest-path {{.CODE_DIR}}/Cargo.toml -- --nocapture
 

@@ -30,6 +30,7 @@
               llvm
               nodejs
               pnpm
+              python3
               rustc
               rustfmt
               uv
