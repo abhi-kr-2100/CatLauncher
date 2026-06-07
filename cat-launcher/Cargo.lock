@@ -1856,7 +1856,7 @@ dependencies = [
 [[package]]
 name = "github-mock-api"
 version = "0.1.0"
-source = "git+https://github.com/abhi-kr-2100/github-mock-api.git?rev=58d1d7828c38b5d4137c4eaed9f500ef9a540136#58d1d7828c38b5d4137c4eaed9f500ef9a540136"
+source = "git+https://github.com/abhi-kr-2100/github-mock-api.git?rev=68bbeca7b0e4035ced327e840f8a118d5a31aedf#68bbeca7b0e4035ced327e840f8a118d5a31aedf"
 dependencies = [
  "axum",
  "clap",
