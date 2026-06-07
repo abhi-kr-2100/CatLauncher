@@ -32,6 +32,10 @@ impl TestHttpClient {
     self.request_count.load(Ordering::Relaxed)
   }
 
+  pub fn client(&self) -> &Client {
+    &self.client
+  }
+
   fn rewrite_url(
     &self,
     url_str: &str,

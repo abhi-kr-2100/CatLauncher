@@ -241,6 +241,506 @@ where
   Ok(())
 }
 
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+  use crate::constants::PARALLEL_REQUESTS;
+  use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
+  use crate::filesystem::paths::{
+    get_game_executable_filenames, get_or_create_asset_installation_dir,
+  };
+  use crate::game_release::game_release::GameReleaseStatus;
+  use crate::infra::testing::http_client::TestHttpClient;
+  use crate::infra::testing::test_database::TestDatabase;
+  use crate::infra::utils::{Arch, OS};
+  use crate::launch_game::repository::sqlite_backup_repository::SqliteBackupRepository;
+  use chrono::Utc;
+  use downloader::progress::Reporter;
+  use github_mock_api::{MockServer, Release as MockRelease};
+  use std::collections::HashMap;
+  use std::path::PathBuf;
+  use std::sync::Arc;
+  use tokio::sync::Mutex;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  struct TestReporter;
+  impl Reporter for TestReporter {
+    fn setup(&self, _max: Option<u64>, _message: &str) {}
+    fn progress(&self, _current: u64) {}
+    fn set_message(&self, _message: &str) {}
+    fn done(&self) {}
+  }
+
+  async fn setup() -> TestResult<(
+    TestDatabase,
+    MockServer,
+    Arc<TestHttpClient>,
+    tempfile::TempDir,
+    tempfile::TempDir,
+  )> {
+    let db = TestDatabase::builder().build()?;
+    let server = MockServer::start().await?;
+
+    let mut host_mappings = HashMap::new();
+    let uri = server.uri();
+    let host_port = uri
+      .strip_prefix("http://")
+      .ok_or("uri should start with http://")?;
+    host_mappings
+      .insert("api.github.com".to_string(), host_port.to_string());
+    host_mappings
+      .insert("github.com".to_string(), host_port.to_string());
+
+    let client = Arc::new(TestHttpClient::new(host_mappings)?);
+    let data_dir = tempfile::tempdir()?;
+    let resource_dir = tempfile::tempdir()?;
+
+    // Create releases directory in resource_dir for default releases
+    tokio::fs::create_dir_all(resource_dir.path().join("releases"))
+      .await?;
+
+    Ok((db, server, client, data_dir, resource_dir))
+  }
+
+  fn get_fixtures_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .join("src/infra/testing/fixtures")
+  }
+
+  #[tokio::test]
+  async fn test_prepare_launch_with_world() -> TestResult {
+    let (db, _server, _client, data_dir, _resource_dir) = setup().await?;
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let version = "0.F-3";
+    let timestamp = 1234567890;
+    let world = "test-world";
+
+    // Create dummy executable
+    let install_dir = get_or_create_asset_installation_dir(
+      &variant,
+      version,
+      data_dir.path(),
+    )
+    .await?;
+    let game_dir = install_dir.join("cataclysm-test");
+    tokio::fs::create_dir_all(&game_dir).await?;
+    let exec_filename = get_game_executable_filenames(&variant, &OS::Linux)[0];
+    let exec_path = game_dir.join(exec_filename);
+    tokio::fs::write(&exec_path, "").await?;
+
+    let release = GameRelease {
+      variant,
+      version: version.to_string(),
+      body: None,
+      release_type: crate::game_release::game_release::ReleaseType::Stable,
+      status: GameReleaseStatus::ReadyToPlay,
+      created_at: Utc::now(),
+    };
+
+    let command = release
+      .prepare_launch(
+        &OS::Linux,
+        Some(world),
+        timestamp,
+        data_dir.path(),
+        &backup_repo,
+      )
+      .await?;
+
+    let args: Vec<_> = command.as_std().get_args().collect();
+    assert!(args.contains(&std::ffi::OsStr::new("--world")));
+    assert!(args.contains(&std::ffi::OsStr::new(world)));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_run_game_and_monitor_stderr() -> TestResult {
+    let mut command = Command::new("sh");
+    command.arg("-c").arg("echo error message >&2").stdout(Stdio::piped()).stderr(Stdio::piped());
+
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let events_clone = events.clone();
+
+    run_game_and_monitor(command, move |event| {
+      let events_clone = events_clone.clone();
+      async move {
+        events_clone.lock().await.push(event);
+      }
+    })
+    .await?;
+
+    let events = events.lock().await;
+    assert!(events.iter().any(|e| matches!(e, GameEvent::Log(s) if s == "error message")));
+    assert!(events.iter().any(|e| matches!(e, GameEvent::Exit(payload) if payload.code == Some(0))));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_run_game_and_monitor_exit_code() -> TestResult {
+    let mut command = Command::new("sh");
+    command.arg("-c").arg("exit 42").stdout(Stdio::piped()).stderr(Stdio::piped());
+
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let events_clone = events.clone();
+
+    run_game_and_monitor(command, move |event| {
+      let events_clone = events_clone.clone();
+      async move {
+        events_clone.lock().await.push(event);
+      }
+    })
+    .await?;
+
+    let events = events.lock().await;
+    assert!(events.iter().any(|e| matches!(e, GameEvent::Exit(payload) if payload.code == Some(42))));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_prepare_launch_executable_missing() -> TestResult {
+    let (db, _server, _client, data_dir, _resource_dir) = setup().await?;
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let version = "0.F-3";
+    let timestamp = 1234567890;
+
+    let release = GameRelease {
+      variant,
+      version: version.to_string(),
+      body: None,
+      release_type: crate::game_release::game_release::ReleaseType::Stable,
+      status: GameReleaseStatus::ReadyToPlay,
+      created_at: Utc::now(),
+    };
+
+    let result = release
+      .prepare_launch(
+        &OS::Linux,
+        None,
+        timestamp,
+        data_dir.path(),
+        &backup_repo,
+      )
+      .await;
+
+    assert!(matches!(result, Err(LaunchGameError::Executable(_))));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_prepare_launch_success() -> TestResult {
+    let (db, _server, _client, data_dir, _resource_dir) = setup().await?;
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+    let version = "0.F-3";
+    let timestamp = 1234567890;
+
+    // Create dummy executable
+    let install_dir = get_or_create_asset_installation_dir(
+      &variant,
+      version,
+      data_dir.path(),
+    )
+    .await?;
+    let game_dir = install_dir.join("cataclysm-test");
+    tokio::fs::create_dir_all(&game_dir).await?;
+    let exec_filename = get_game_executable_filenames(&variant, &OS::Linux)[0];
+    let exec_path = game_dir.join(exec_filename);
+    tokio::fs::write(&exec_path, "").await?;
+
+    let release = GameRelease {
+      variant,
+      version: version.to_string(),
+      body: None,
+      release_type: crate::game_release::game_release::ReleaseType::Stable,
+      status: GameReleaseStatus::ReadyToPlay,
+      created_at: Utc::now(),
+    };
+
+    let command = release
+      .prepare_launch(
+        &OS::Linux,
+        None,
+        timestamp,
+        data_dir.path(),
+        &backup_repo,
+      )
+      .await?;
+
+    assert_eq!(command.as_std().get_program(), exec_path.as_os_str());
+
+    // Verify backup entry was created
+    let backups = backup_repo.get_backups_sorted_by_timestamp(&variant).await?;
+    assert_eq!(backups.len(), 1);
+    assert_eq!(backups[0].release_version, version);
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_run_game_and_monitor_success() -> TestResult {
+    let mut command = Command::new("echo");
+    command.arg("hello world").stdout(Stdio::piped()).stderr(Stdio::piped());
+
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let events_clone = events.clone();
+
+    run_game_and_monitor(command, move |event| {
+      let events_clone = events_clone.clone();
+      async move {
+        events_clone.lock().await.push(event);
+      }
+    })
+    .await?;
+
+    let events = events.lock().await;
+    assert!(events.iter().any(|e| matches!(e, GameEvent::Log(s) if s == "hello world")));
+    assert!(events.iter().any(|e| matches!(e, GameEvent::Exit(payload) if payload.code == Some(0))));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_cleanup_backups_under_limit() -> TestResult {
+    let (db, _server, _client, data_dir, _resource_dir) = setup().await?;
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Create 3 backups (limit is 5)
+    for i in 0..3 {
+        let timestamp = 1000 + i as u64;
+        let version = format!("v{}", i);
+        backup_repo.add_backup_entry(&variant, &version, timestamp).await?;
+    }
+
+    cleanup_old_backups(backup_repo.clone(), &variant, data_dir.path()).await?;
+
+    let backups = backup_repo.get_backups_sorted_by_timestamp(&variant).await?;
+    assert_eq!(backups.len(), 3);
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_cleanup_old_backups() -> TestResult {
+    let (db, _server, _client, data_dir, _resource_dir) = setup().await?;
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Create more than MAX_BACKUPS
+    let max = MAX_BACKUPS.get();
+    for i in 0..max + 2 {
+        let timestamp = 1000 + i as u64;
+        let version = format!("v{}", i);
+        let id = backup_repo.add_backup_entry(&variant, &version, timestamp).await?;
+
+        // Create dummy backup file
+        let backup_path = get_or_create_automatic_backup_archive_filepath(
+            &variant, id, &version, timestamp, data_dir.path()
+        ).await?;
+        tokio::fs::create_dir_all(backup_path.parent().unwrap()).await?;
+        tokio::fs::write(&backup_path, "").await?;
+    }
+
+    cleanup_old_backups(backup_repo.clone(), &variant, data_dir.path()).await?;
+
+    let backups = backup_repo.get_backups_sorted_by_timestamp(&variant).await?;
+    assert_eq!(backups.len(), max);
+
+    // Verify oldest backups (v0, v1) are gone
+    assert!(backups.iter().all(|b| b.release_version != "v0" && b.release_version != "v1"));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_launch_and_monitor_game_release_not_found() -> TestResult {
+    let (db, _server, _client, data_dir, resource_dir) = setup().await?;
+    let releases_repo = SqliteReleasesRepository::new(db.pool().clone());
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let active_release_repo = SqliteActiveReleaseRepository::new(db.pool().clone());
+    let variant = GameVariant::BrightNights;
+    let tag = "non-existent-tag";
+
+    let result = launch_and_monitor_game(
+        &variant,
+        tag,
+        None,
+        &OS::Linux,
+        12345,
+        data_dir.path(),
+        resource_dir.path(),
+        &releases_repo,
+        backup_repo,
+        &active_release_repo,
+        |_| async {}
+    ).await;
+
+    assert!(matches!(result, Err(LaunchGameError::Release(GetReleaseError::NotFound(_)))));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_full_launch_flow() -> TestResult {
+    let (db, server, client, data_dir, resource_dir) = setup().await?;
+    let releases_repo = SqliteReleasesRepository::new(db.pool().clone());
+    let backup_repo = SqliteBackupRepository::new(db.pool().clone());
+    let active_release_repo = SqliteActiveReleaseRepository::new(db.pool().clone());
+    let variant = GameVariant::BrightNights;
+    let version = "2026-06-07";
+    let tag = version;
+    let timestamp = Utc::now().timestamp() as u64;
+
+    // 1. Setup GitHub Mock for release and asset
+    let owner = "cataclysmbnteam";
+    let repo_name = "Cataclysm-BN";
+    let asset_name = "cbn-linux-tiles-x64-2026-06-07.tar.gz";
+    let fixture_path = get_fixtures_dir().join("dummy-release.tar.gz");
+
+    let download_url = format!("{}/{}/{}/releases/download/{}/{}", server.uri(), owner, repo_name, version, asset_name);
+
+    let mock_release_json = serde_json::json!({
+        "id": 12345,
+        "tag_name": tag,
+        "prerelease": false,
+        "created_at": "2024-01-01T00:00:00Z",
+        "assets": [
+            {
+                "id": 54321,
+                "name": asset_name,
+                "browser_download_url": download_url,
+                "content_type": "application/gzip",
+                "size": 0,
+                "state": "uploaded",
+                "download_count": 0,
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+                "url": "",
+                "node_id": ""
+            }
+        ],
+        "url": "",
+        "html_url": "",
+        "assets_url": "",
+        "upload_url": "",
+        "node_id": "",
+        "target_commitish": "main",
+        "draft": false,
+        "author": {
+            "login": owner,
+            "id": 1,
+            "node_id": "",
+            "avatar_url": "",
+            "gravatar_id": "",
+            "html_url": "",
+            "followers_url": "",
+            "following_url": "",
+            "gists_url": "",
+            "starred_url": "",
+            "subscriptions_url": "",
+            "organizations_url": "",
+            "repos_url": "",
+            "events_url": "",
+            "received_events_url": "",
+            "type": "User",
+            "site_admin": false
+        }
+    });
+    let mock_release: MockRelease = serde_json::from_value(mock_release_json)?;
+
+    let mock_asset = github_mock_api::Asset::from_path(
+      asset_name,
+      fixture_path,
+      "application/gzip",
+    );
+
+    server.add_release(owner, repo_name, mock_release).await;
+    server.add_asset(owner, repo_name, version, mock_asset).await;
+
+    // 2. Fetch releases to populate releases_repo
+    // We need to use the TestHttpClient which knows about host mappings
+    variant.fetch_releases(
+        client.as_ref(),
+        resource_dir.path(),
+        &releases_repo,
+        |_| Ok::<(), std::io::Error>(()),
+        &OS::Linux,
+        &Arch::X64
+    ).await?;
+
+    // We also need to make sure the Downloader uses the same host mappings if it's going to use the mock server.
+    // However, the Downloader in install_release uses a standard create_http_client().
+    // We should probably pass a client to install_release if we could, but it takes &Downloader which owns a Client.
+    // Let's see if we can make Downloader use our client.
+
+    let mut release = get_release_by_id(
+        &variant,
+        tag,
+        &OS::Linux,
+        data_dir.path(),
+        resource_dir.path(),
+        &releases_repo
+    ).await?;
+
+    // 3. Install release
+    // Use the TestHttpClient's internal client because it might have some configuration,
+    // but browser_download_url needs to be reachable.
+    let downloader = crate::infra::download::Downloader::new(client.client().clone(), PARALLEL_REQUESTS);
+    release.install_release(
+        &downloader,
+        &OS::Linux,
+        &Arch::X64,
+        data_dir.path(),
+        resource_dir.path(),
+        &releases_repo,
+        &active_release_repo,
+        Arc::new(TestReporter)
+    ).await?;
+
+    // 4. Launch and monitor
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let events_clone = events.clone();
+
+    launch_and_monitor_game(
+        &variant,
+        tag,
+        None,
+        &OS::Linux,
+        timestamp,
+        data_dir.path(),
+        resource_dir.path(),
+        &releases_repo,
+        backup_repo,
+        &active_release_repo,
+        move |event| {
+            let events_clone = events_clone.clone();
+            async move {
+                events_clone.lock().await.push(event);
+            }
+        }
+    ).await?;
+
+    // Since launch_and_monitor_game spawns tasks, we might need a small wait or check for conditions
+    // Wait for a bit for tasks to run
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+    // Verify active release was set
+    let active = active_release_repo.get_active_release(&variant).await?;
+    assert_eq!(active, Some(tag.to_string()));
+
+    Ok(())
+  }
+}
+
 async fn cleanup_old_backups(
   backup_repository: impl BackupRepository + Clone + 'static,
   variant: &GameVariant,
