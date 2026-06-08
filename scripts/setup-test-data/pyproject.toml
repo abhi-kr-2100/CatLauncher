@@ -1,0 +1,20 @@
+[project]
+name = "setup-test-data"
+version = "0.2.0"
+description = "Download release assets from game repositories for testing"
+readme = "README.md"
+authors = [
+    { name = "Abhishek Kumar", email = "abhi.kr.2100@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.27.0",
+    "tenacity>=8.2.0",
+]
+
+[project.scripts]
+setup-test-data = "setup_test_data.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
