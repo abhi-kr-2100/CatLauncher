@@ -1,5 +1,37 @@
 [
   {
+    "id": 331902715,
+    "tag_name": "v0.12.0",
+    "prerelease": false,
+    "created_at": "2026-05-30T08:48:29Z",
+    "assets": [
+      {
+        "id": 433692343,
+        "name": "cbn-linux-tiles-x64-v0.12.0.tar.gz",
+        "digest": "sha256:8d9ac87b426e94f9544c8ef9f508216dbbcb537c2d4411592096bf8c57478e1a",
+        "browser_download_url": "https://github.com/cataclysmbn/Cataclysm-BN/releases/download/v0.12.0/cbn-linux-tiles-x64-v0.12.0.tar.gz"
+      },
+      {
+        "id": 433693059,
+        "name": "cbn-osx-tiles-arm-v0.12.0.dmg",
+        "digest": "sha256:72ab5e96ff17453283c5a969830ee4c8790f9dc37a2572bc6de09b85264df847",
+        "browser_download_url": "https://github.com/cataclysmbn/Cataclysm-BN/releases/download/v0.12.0/cbn-osx-tiles-arm-v0.12.0.dmg"
+      },
+      {
+        "id": 433695452,
+        "name": "cbn-osx-tiles-x64-v0.12.0.dmg",
+        "digest": "sha256:05a3bb26dad5c859ce0e9068496ac9481e78fde95fcafa9d3565f5dc8aaa7c2b",
+        "browser_download_url": "https://github.com/cataclysmbn/Cataclysm-BN/releases/download/v0.12.0/cbn-osx-tiles-x64-v0.12.0.dmg"
+      },
+      {
+        "id": 433710507,
+        "name": "cbn-windows-tiles-x64-msvc-v0.12.0.zip",
+        "digest": "sha256:e47a58915357af734f48a5c5ac8fb8ae5e7b8270bb672e85cc5920a7cb0ed001",
+        "browser_download_url": "https://github.com/cataclysmbn/Cataclysm-BN/releases/download/v0.12.0/cbn-windows-tiles-x64-msvc-v0.12.0.zip"
+      }
+    ]
+  },
+  {
     "id": 215342457,
     "tag_name": "v0.8.0",
     "name": "Cataclysm-BN v0.8.0",
