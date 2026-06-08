@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 
 GITHUB_API = "https://api.github.com"
 
@@ -59,6 +59,16 @@ class Release:
             self.id = int(self.id)
 
 
+def is_retryable_exception(exception: Exception) -> bool:
+    if isinstance(exception, (httpx.TimeoutException, httpx.RequestError)):
+        # Transport errors (connection, dns, etc) are retryable
+        if isinstance(exception, httpx.HTTPStatusError):
+            # Retry on 5xx errors or 429 Too Many Requests
+            return exception.response.status_code >= 500 or exception.response.status_code == 429
+        return True
+    return False
+
+
 def determine_release_type(
     variant: str, tag_name: str, prerelease: bool
 ) -> ReleaseType:
@@ -75,7 +85,7 @@ def determine_release_type(
 
 
 def get_platform_asset_substrs(
-    variant: str, os: OS, arch: Arch
+    variant: str, os_type: OS, arch: Arch
 ) -> list[str]:
     mapping: dict[tuple[str, OS, Arch], list[str]] = {
         ("dda", OS.WINDOWS, Arch.X64): [
@@ -115,7 +125,7 @@ def get_platform_asset_substrs(
         ("tlg", OS.LINUX, Arch.X64): ["linux-tiles-sounds"],
         ("tlg", OS.LINUX, Arch.ARM64): ["linux-tiles-sounds"],
     }
-    return mapping.get((variant, os, arch), [])
+    return mapping.get((variant, os_type, arch), [])
 
 
 def find_matching_asset(
@@ -147,6 +157,8 @@ def get_headers() -> dict[str, str]:
 @retry(
     wait=wait_exponential(multiplier=1, min=2, max=10),
     stop=stop_after_attempt(3),
+    retry=retry_if_exception(is_retryable_exception),
+    reraise=True,
 )
 def fetch_experimental_releases(client: httpx.Client, variant: str, count: int) -> list[Release]:
     repo = REPOS[variant]
@@ -183,7 +195,7 @@ def load_stable_releases(variant: str) -> list[Release]:
     if not filepath.exists():
         return []
 
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     releases: list[Release] = []
@@ -205,6 +217,8 @@ def load_stable_releases(variant: str) -> list[Release]:
 @retry(
     wait=wait_exponential(multiplier=1, min=2, max=10),
     stop=stop_after_attempt(3),
+    retry=retry_if_exception(is_retryable_exception),
+    reraise=True,
 )
 def download_asset(
     client: httpx.Client, url: str, dest: Path, quiet: bool = False
@@ -215,11 +229,20 @@ def download_asset(
             print(f"    Already exists, skipping: {dest.name}")
         return
 
-    with client.stream("GET", url) as response:
-        response.raise_for_status()
-        with open(dest, "wb") as f:
-            for chunk in response.iter_bytes(chunk_size=8192):
-                f.write(chunk)
+    temp_dest = dest.with_suffix(".part")
+    try:
+        with client.stream("GET", url) as response:
+            response.raise_for_status()
+            with open(temp_dest, "wb") as f:
+                for chunk in response.iter_bytes(chunk_size=8192):
+                    f.write(chunk)
+                f.flush()
+                os.fsync(f.fileno())
+        os.replace(temp_dest, dest)
+    except Exception:
+        if temp_dest.exists():
+            os.unlink(temp_dest)
+        raise
 
 
 def download_asset_task(
@@ -262,7 +285,7 @@ def save_releases_metadata(
             }
         )
 
-    with open(filepath, "w") as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     if not quiet:
         print(f"  Saved releases metadata: {filepath}")
@@ -274,9 +297,9 @@ def get_download_tasks(
     tasks = []
     for release in releases:
         downloaded: set[str] = set()
-        for platform in OS:
+        for os_type in OS:
             for arch in Arch:
-                substrings = get_platform_asset_substrs(variant, platform, arch)
+                substrings = get_platform_asset_substrs(variant, os_type, arch)
                 if not substrings:
                     continue
 
@@ -285,7 +308,7 @@ def get_download_tasks(
                     continue
 
                 asset_name: str = asset.get("name", "")
-                cache_key = f"{platform.value}/{asset_name}"
+                cache_key = f"{os_type.value}/{asset_name}"
                 if cache_key in downloaded:
                     continue
                 downloaded.add(cache_key)
@@ -295,7 +318,7 @@ def get_download_tasks(
                     continue
 
                 dest = output_dir / variant / asset_name
-                description = f"{variant} {release.tag_name} {platform.value}/{arch.value}: {asset_name}"
+                description = f"{variant} {release.tag_name} {os_type.value}/{arch.value}: {asset_name}"
                 tasks.append((download_url, dest, description))
     return tasks
 
@@ -306,40 +329,48 @@ def process_variant(
     experimental_count: int,
     output_dir: Path,
     quiet: bool,
-) -> tuple[list[Release], list[tuple[str, Path, str]]]:
+) -> tuple[list[Release], list[tuple[str, Path, str]], bool]:
     if not quiet:
         print(f"\nProcessing {variant} ({REPOS[variant]})...")
 
+    error_occurred = False
+    stable_releases = []
     try:
         stable_releases = load_stable_releases(variant)
         if not quiet:
             print(f"  Loaded {len(stable_releases)} stable/RC releases from local files")
+    except Exception as e:
+        print(f"Error loading stable releases for variant {variant}: {e}", file=sys.stderr)
+        error_occurred = True
 
+    experimental_releases = []
+    try:
         experimental_releases = fetch_experimental_releases(
             client, variant, experimental_count
         )
         if not quiet:
             print(f"  Fetched {len(experimental_releases)} experimental releases from API")
-
-        selected = stable_releases + experimental_releases
-        tasks = get_download_tasks(variant, selected, output_dir)
-        return selected, tasks
     except Exception as e:
-        print(f"Error processing variant {variant}: {e}", file=sys.stderr)
-        return [], []
+        print(f"Error fetching experimental releases for variant {variant}: {e}", file=sys.stderr)
+        error_occurred = True
+
+    selected = stable_releases + experimental_releases
+    tasks = get_download_tasks(variant, selected, output_dir)
+    return selected, tasks, error_occurred
 
 
 def execute_downloads(
     client: httpx.Client,
     tasks: list[tuple[str, Path, str]],
     quiet: bool,
-) -> None:
+) -> bool:
     if not tasks:
-        return
+        return False
 
     if not quiet:
         print(f"\nDownloading {len(tasks)} assets in parallel...")
 
+    error_occurred = False
     with ThreadPoolExecutor(max_workers=8) as executor:
         futures = [
             executor.submit(download_asset_task, client, url, dest, desc, quiet)
@@ -349,8 +380,10 @@ def execute_downloads(
             desc, error = future.result()
             if error:
                 print(f"Failed {desc}: {error}", file=sys.stderr)
+                error_occurred = True
             elif not quiet:
                 print(f"Completed: {desc}")
+    return error_occurred
 
 
 def main(args: Optional[list[str]] = None) -> None:
@@ -390,32 +423,40 @@ def main(args: Optional[list[str]] = None) -> None:
     parsed = parser.parse_args(args)
 
     headers = get_headers()
+    global_error = False
     with httpx.Client(headers=headers, timeout=None, follow_redirects=True) as client:
         all_download_tasks = []
         variant_releases: dict[str, list[Release]] = {}
 
         for variant in parsed.variants:
-            releases, tasks = process_variant(
+            releases, tasks, variant_error = process_variant(
                 client,
                 variant,
                 parsed.experimental_count,
                 parsed.output_dir,
                 parsed.quiet,
             )
+            if variant_error:
+                global_error = True
             if releases:
                 variant_releases[variant] = releases
             all_download_tasks.extend(tasks)
 
-        execute_downloads(client, all_download_tasks, parsed.quiet)
+        if execute_downloads(client, all_download_tasks, parsed.quiet):
+            global_error = True
 
         for variant, releases in variant_releases.items():
             try:
                 save_releases_metadata(releases, variant, parsed.metadata_dir, parsed.quiet)
             except Exception as e:
                 print(f"Error saving metadata for {variant}: {e}", file=sys.stderr)
+                global_error = True
 
     if not parsed.quiet:
         print("\nDone!")
+
+    if global_error:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
