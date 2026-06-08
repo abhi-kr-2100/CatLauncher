@@ -10,7 +10,24 @@ env:
   VITE_PUBLIC_POSTHOG_HOST: "https://us.i.posthog.com"
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify version match
+        env:
+          ACTUAL_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PACKAGE_VERSION=$(jq -r .version cat-launcher/package.json)
+          EXPECTED_TAG="v$PACKAGE_VERSION"
+          if [ "$ACTUAL_TAG" != "$EXPECTED_TAG" ]; then
+            echo "ERROR: Release tag '$ACTUAL_TAG' does not match version in package.json '$PACKAGE_VERSION' (expected '$EXPECTED_TAG')"
+            exit 1
+          fi
+          echo "Version match: $ACTUAL_TAG == $EXPECTED_TAG"
+
   build-and-publish:
+    needs: [check-version]
     permissions:
       contents: write
 
