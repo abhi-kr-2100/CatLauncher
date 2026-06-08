@@ -11,3 +11,11 @@ Cargo.lock
 out
 src/generated-types
 .agents/skills/*
+
+# Ignore Rust and non-frontend directories
+src-tauri/
+cat-macros/
+
+# Ignore other non-essential files in root if any
+*.toml
+*.lock

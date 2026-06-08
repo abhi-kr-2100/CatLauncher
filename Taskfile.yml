@@ -17,7 +17,7 @@ tasks:
     desc: Format all code (Rust and TypeScript)
     cmds:
       - cargo fmt --all --manifest-path {{.CODE_DIR}}/Cargo.toml
-      - pnpm -prefix {{.CODE_DIR}} exec prettier --write . --log-level warn
+      - pnpm --prefix {{.CODE_DIR}} exec prettier --write . --log-level warn --cache --cache-location .prettier_cache
 
   lint-fix:
     desc: Apply autofixes across the workspace
