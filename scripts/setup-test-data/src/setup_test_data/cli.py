@@ -19,12 +19,11 @@ REPOS: dict[str, str] = {
     "tlg": "Cataclysm-TLG/Cataclysm-TLG",
 }
 
-STABLE_COUNT = 5
-RELEASE_CANDIDATE_COUNT = 3
 EXPERIMENTAL_COUNT = 2
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-OUTPUT_DIR = SCRIPT_DIR / "cat-launcher/src-tauri/src/infra/testing/data/assets"
+DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "cat-launcher/src-tauri/src/infra/testing/data/assets"
+DEFAULT_METADATA_DIR = SCRIPT_DIR / "cat-launcher/src-tauri/src/infra/testing/data/metadata"
 RESOURCES_DIR = SCRIPT_DIR / "cat-launcher/src-tauri"
 
 
@@ -130,8 +129,8 @@ def find_matching_asset(
     return None
 
 
-def variant_id(variant: str) -> str:
-    return {"dda": "dark_days_ahead", "bn": "bright_nights", "tlg": "the_last_generation"}[variant]
+def variant_id_pascal(variant: str) -> str:
+    return {"dda": "DarkDaysAhead", "bn": "BrightNights", "tlg": "TheLastGeneration"}[variant]
 
 
 def get_headers() -> dict[str, str]:
@@ -149,7 +148,8 @@ def get_headers() -> dict[str, str]:
     wait=wait_exponential(multiplier=1, min=2, max=10),
     stop=stop_after_attempt(3),
 )
-def fetch_releases(client: httpx.Client, repo: str) -> list[Release]:
+def fetch_experimental_releases(client: httpx.Client, variant: str, count: int) -> list[Release]:
+    repo = REPOS[variant]
     url = f"{GITHUB_API}/repos/{repo}/releases"
     params = {"per_page": 100}
     response = client.get(url, params=params)
@@ -158,46 +158,61 @@ def fetch_releases(client: httpx.Client, repo: str) -> list[Release]:
 
     releases: list[Release] = []
     for item in data:
-        body = item.get("body")
+        tag_name = item["tag_name"]
+        prerelease = item["prerelease"]
+        if determine_release_type(variant, tag_name, prerelease) == ReleaseType.EXPERIMENTAL:
+            body = item.get("body")
+            releases.append(
+                Release(
+                    id=int(item["id"]),
+                    tag_name=tag_name,
+                    name=item["name"],
+                    prerelease=prerelease,
+                    body=body if body and body.strip() else None,
+                    published_at=item["published_at"],
+                    assets=item.get("assets", []),
+                )
+            )
+            if len(releases) >= count:
+                break
+    return releases
+
+
+def load_stable_releases(variant: str) -> list[Release]:
+    filepath = RESOURCES_DIR / "releases" / f"{variant_id_pascal(variant)}.json"
+    if not filepath.exists():
+        return []
+
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    releases: list[Release] = []
+    for item in data:
         releases.append(
             Release(
                 id=int(item["id"]),
                 tag_name=item["tag_name"],
-                name=item["name"],
+                name=item.get("name", item["tag_name"]),
                 prerelease=item["prerelease"],
-                body=body if body and body.strip() else None,
-                published_at=item["published_at"],
+                body=item.get("body"),
+                published_at=item.get("published_at", item.get("created_at", "")),
                 assets=item.get("assets", []),
             )
         )
     return releases
 
 
-def classify_and_sort(
-    releases: list[Release], variant: str
-) -> dict[ReleaseType, list[Release]]:
-    classified: dict[ReleaseType, list[Release]] = {
-        ReleaseType.STABLE: [],
-        ReleaseType.RELEASE_CANDIDATE: [],
-        ReleaseType.EXPERIMENTAL: [],
-    }
-
-    for r in releases:
-        rt = determine_release_type(variant, r.tag_name, r.prerelease)
-        classified[rt].append(r)
-
-    for rt in classified:
-        classified[rt].sort(key=lambda x: x.published_at, reverse=True)
-
-    return classified
-
-
+@retry(
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    stop=stop_after_attempt(3),
+)
 def download_asset(
-    client: httpx.Client, url: str, dest: Path
+    client: httpx.Client, url: str, dest: Path, quiet: bool = False
 ) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
-        print(f"    Already exists, skipping: {dest.name}")
+        if not quiet:
+            print(f"    Already exists, skipping: {dest.name}")
         return
 
     with client.stream("GET", url) as response:
@@ -208,22 +223,20 @@ def download_asset(
 
 
 def download_asset_task(
-    client: httpx.Client, url: str, dest: Path, description: str
+    client: httpx.Client, url: str, dest: Path, description: str, quiet: bool = False
 ) -> tuple[str, Optional[Exception]]:
     try:
-        download_asset(client, url, dest)
+        download_asset(client, url, dest, quiet)
         return (description, None)
     except Exception as e:
         return (description, e)
 
 
 def save_releases_metadata(
-    releases: list[Release], variant: str
+    releases: list[Release], variant: str, metadata_dir: Path, quiet: bool = False
 ) -> None:
-    releases_dir = RESOURCES_DIR / "releases"
-    releases_dir.mkdir(parents=True, exist_ok=True)
-
-    filepath = releases_dir / f"{variant_id(variant)}.json"
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+    filepath = metadata_dir / f"{variant_id_pascal(variant)}.json"
     data: list[dict] = []
     for r in releases:
         assets_out: list[dict] = []
@@ -251,11 +264,11 @@ def save_releases_metadata(
 
     with open(filepath, "w") as f:
         json.dump(data, f, indent=2)
-    print(f"  Saved releases metadata: {filepath}")
+    if not quiet:
+        print(f"  Saved releases metadata: {filepath}")
 
 
 def main(args: Optional[list[str]] = None) -> None:
-    global OUTPUT_DIR, RESOURCES_DIR
     parser = argparse.ArgumentParser(
         description="Download release assets from game repositories for testing"
     )
@@ -267,18 +280,6 @@ def main(args: Optional[list[str]] = None) -> None:
         help="Game variants to fetch releases for",
     )
     parser.add_argument(
-        "--stable-count",
-        type=int,
-        default=STABLE_COUNT,
-        help="Number of stable releases to select per variant",
-    )
-    parser.add_argument(
-        "--rc-count",
-        type=int,
-        default=RELEASE_CANDIDATE_COUNT,
-        help="Number of release candidates to select per variant",
-    )
-    parser.add_argument(
         "--experimental-count",
         type=int,
         default=EXPERIMENTAL_COUNT,
@@ -287,60 +288,56 @@ def main(args: Optional[list[str]] = None) -> None:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=None,
+        default=DEFAULT_OUTPUT_DIR,
         help="Output directory for downloaded assets",
     )
     parser.add_argument(
-        "--resources-dir",
+        "--metadata-dir",
         type=Path,
-        default=None,
-        help="Resources directory for releases metadata",
+        default=DEFAULT_METADATA_DIR,
+        help="Output directory for releases metadata",
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress output and only show errors",
     )
     parsed = parser.parse_args(args)
 
-    if parsed.output_dir is not None:
-        OUTPUT_DIR = parsed.output_dir
-    if parsed.resources_dir is not None:
-        RESOURCES_DIR = parsed.resources_dir
+    output_dir = parsed.output_dir
+    metadata_dir = parsed.metadata_dir
+    quiet = parsed.quiet
 
     headers = get_headers()
+    # Disable timeout as requested
     with httpx.Client(
-        headers=headers, timeout=60.0, follow_redirects=True
+        headers=headers, timeout=None, follow_redirects=True
     ) as client:
+        all_download_tasks = []
+        variant_releases: dict[str, list[Release]] = {}
+
         for variant in parsed.variants:
-            repo = REPOS[variant]
-            print(f"\nProcessing {variant} ({repo})...")
+            if not quiet:
+                print(f"\nProcessing {variant} ({REPOS[variant]})...")
 
             try:
-                all_releases = fetch_releases(client, repo)
-                print(f"  Fetched {len(all_releases)} releases")
+                # Load stable releases from file
+                stable_releases = load_stable_releases(variant)
+                if not quiet:
+                    print(f"  Loaded {len(stable_releases)} stable/RC releases from local files")
 
-                classified = classify_and_sort(all_releases, variant)
-
-                stable = classified[ReleaseType.STABLE][
-                    : parsed.stable_count
-                ]
-                rc = classified[ReleaseType.RELEASE_CANDIDATE][
-                    : parsed.rc_count
-                ]
-                experimental = classified[ReleaseType.EXPERIMENTAL][
-                    : parsed.experimental_count
-                ]
-
-                selected = stable + rc + experimental
-
-                print(
-                    f"  Selected: {len(stable)} stable, {len(rc)} rc, {len(experimental)} experimental"
+                # Fetch experimental releases from API
+                experimental_releases = fetch_experimental_releases(
+                    client, variant, parsed.experimental_count
                 )
+                if not quiet:
+                    print(f"  Fetched {len(experimental_releases)} experimental releases from API")
+
+                selected = stable_releases + experimental_releases
+                variant_releases[variant] = selected
 
                 for release in selected:
-                    print(
-                        f"  Release: {release.tag_name} ({release.name})"
-                    )
-
                     downloaded: set[str] = set()
-                    download_tasks: list[tuple[str, str, Path, str]] = []
-
                     for platform in OS:
                         for arch in Arch:
                             substrings = get_platform_asset_substrs(
@@ -369,60 +366,39 @@ def main(args: Optional[list[str]] = None) -> None:
                             if not download_url:
                                 continue
 
-                            dest_dir = OUTPUT_DIR / variant
-                            dest = dest_dir / asset_name
-                            description = f"{platform.value}/{arch.value}: {asset_name}"
-                            download_tasks.append((download_url, dest, description))
+                            dest = output_dir / variant / asset_name
+                            description = f"{variant} {release.tag_name} {platform.value}/{arch.value}: {asset_name}"
+                            all_download_tasks.append((download_url, dest, description))
 
-                    if download_tasks:
-                        print(f"    Downloading {len(download_tasks)} assets in parallel...")
-                        with ThreadPoolExecutor(max_workers=4) as executor:
-                            futures = [
-                                executor.submit(
-                                    download_asset_task, client, url, dest, desc
-                                )
-                                for url, dest, desc in download_tasks
-                            ]
-                            for future in as_completed(futures):
-                                desc, error = future.result()
-                                if error:
-                                    print(f"    Failed {desc}: {error}", file=sys.stderr)
-                                else:
-                                    print(f"    Completed: {desc}")
-
-                save_releases_metadata(selected, variant)
-
-            except RetryError as e:
-                last_attempt = e.last_attempt
-                if last_attempt.exception():
-                    exc = last_attempt.exception()
-                    if isinstance(exc, httpx.HTTPStatusError):
-                        print(
-                            f"  Error fetching releases for {variant}: {exc.response.status_code} - {exc.response.text}",
-                            file=sys.stderr,
-                        )
-                    else:
-                        print(
-                            f"  Unexpected error for {variant}: {type(exc).__name__}: {exc}",
-                            file=sys.stderr,
-                        )
-                else:
-                    print(
-                        f"  Retry failed for {variant}: {e}",
-                        file=sys.stderr,
-                    )
-                sys.exit(1)
-            except httpx.HTTPStatusError as e:
-                print(
-                    f"  Error fetching releases for {variant}: {e.response.status_code} - {e.response.text}",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
             except Exception as e:
-                print(
-                    f"  Unexpected error for {variant}: {type(e).__name__}: {e}",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
+                print(f"Error preparing tasks for {variant}: {e}", file=sys.stderr)
 
-    print("\nDone!")
+        if all_download_tasks:
+            if not quiet:
+                print(f"\nDownloading {len(all_download_tasks)} assets in parallel...")
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                futures = [
+                    executor.submit(
+                        download_asset_task, client, url, dest, desc, quiet
+                    )
+                    for url, dest, desc in all_download_tasks
+                ]
+                for future in as_completed(futures):
+                    desc, error = future.result()
+                    if error:
+                        print(f"Failed {desc}: {error}", file=sys.stderr)
+                    elif not quiet:
+                        print(f"Completed: {desc}")
+
+        for variant, releases in variant_releases.items():
+            try:
+                save_releases_metadata(releases, variant, metadata_dir, quiet)
+            except Exception as e:
+                print(f"Error saving metadata for {variant}: {e}", file=sys.stderr)
+
+    if not quiet:
+        print("\nDone!")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,86 @@
+[
+  {
+    "id": 187090088,
+    "tag_name": "0.H-RELEASE",
+    "prerelease": false,
+    "body": null,
+    "assets": [
+      {
+        "id": 208602462,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-linux-with-graphics-and-sounds-x64-2024-11-23-1857.tar.gz",
+        "name": "cdda-linux-with-graphics-and-sounds-x64-2024-11-23-1857.tar.gz",
+        "digest": null
+      },
+      {
+        "id": 208602528,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-osx-with-graphics-universal-2024-11-23-1857.dmg",
+        "name": "cdda-osx-with-graphics-universal-2024-11-23-1857.dmg",
+        "digest": null
+      },
+      {
+        "id": 208602419,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/0.H-RELEASE/cdda-windows-with-graphics-and-sounds-x64-2024-11-23-1857.zip",
+        "name": "cdda-windows-with-graphics-and-sounds-x64-2024-11-23-1857.zip",
+        "digest": null
+      }
+    ],
+    "created_at": "2024-11-23T03:33:01Z"
+  },
+  {
+    "id": 335722620,
+    "tag_name": "cdda-experimental-2026-06-08-0210",
+    "prerelease": true,
+    "body": "## What's Changed\n* Remove weaving recipes that use spinning tools by @olivia-fl in https://github.com/CleverRaven/Cataclysm-DDA/pull/87482\n\n\n**Full Changelog**: https://github.com/CleverRaven/Cataclysm-DDA/compare/cdda-experimental-2026-06-08-0002...cdda-experimental-2026-06-08-0210\n",
+    "assets": [
+      {
+        "id": 441357810,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-android-x32-2026-06-08-0210.apk",
+        "name": "cdda-android-x32-2026-06-08-0210.apk",
+        "digest": "sha256:f8924e65ddade4343d2bf75f8dbbf889e0b9e663609565f9dc0b48ab4045b5ec"
+      },
+      {
+        "id": 441358703,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-android-x64-2026-06-08-0210.apk",
+        "name": "cdda-android-x64-2026-06-08-0210.apk",
+        "digest": "sha256:b02c1fa9339ebabd6faf9a2901a0494701575f093369c9e94954b2f75f29722d"
+      },
+      {
+        "id": 441360165,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-linux-terminal-only-x64-2026-06-08-0210.tar.gz",
+        "name": "cdda-linux-terminal-only-x64-2026-06-08-0210.tar.gz",
+        "digest": "sha256:3ae2abb0b5c635ad0bb3c77d7b8d46dade7e65b13a9db5efc5cde5f3369594c9"
+      },
+      {
+        "id": 441361524,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-linux-with-graphics-and-sounds-x64-2026-06-08-0210.tar.gz",
+        "name": "cdda-linux-with-graphics-and-sounds-x64-2026-06-08-0210.tar.gz",
+        "digest": "sha256:b8ab0a35d257a22bb98b20b6f2614d06a761c1184e03a4df8bbe070477c84036"
+      },
+      {
+        "id": 441359561,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-linux-with-graphics-x64-2026-06-08-0210.tar.gz",
+        "name": "cdda-linux-with-graphics-x64-2026-06-08-0210.tar.gz",
+        "digest": "sha256:d17a2648b1a817eb75f5c294d79bced5ccb970690934e71ba77b6675e3dff980"
+      },
+      {
+        "id": 441362176,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-osx-with-graphics-universal-2026-06-08-0210.dmg",
+        "name": "cdda-osx-with-graphics-universal-2026-06-08-0210.dmg",
+        "digest": "sha256:8d679fc74bf4a0770852e7395264e1c86444af4761c9e8449e3f6bb66e444aea"
+      },
+      {
+        "id": 441361800,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-windows-with-graphics-and-sounds-x64-2026-06-08-0210.zip",
+        "name": "cdda-windows-with-graphics-and-sounds-x64-2026-06-08-0210.zip",
+        "digest": "sha256:4c4f3b9388b951fc690b13265f73fb850e1444ff9f83d97cb2212df2b2ea74f6"
+      },
+      {
+        "id": 441362539,
+        "browser_download_url": "https://github.com/CleverRaven/Cataclysm-DDA/releases/download/cdda-experimental-2026-06-08-0210/cdda-windows-with-graphics-x64-2026-06-08-0210.zip",
+        "name": "cdda-windows-with-graphics-x64-2026-06-08-0210.zip",
+        "digest": "sha256:18a1e7c6f6c66749a25a75571548cdfe2573c95a435f4e1784c203c46fae4b05"
+      }
+    ],
+    "created_at": "2026-06-08T02:10:38Z"
+  }
+]
