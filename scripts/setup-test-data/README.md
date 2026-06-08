@@ -12,24 +12,29 @@ uv run setup-test-data
 ### Options
 
 - `--variants`: Game variants to fetch releases for (default: all)
-- `--stable-count`: Number of stable releases to select per variant (default: 5)
-- `--rc-count`: Number of release candidates to select per variant (default: 3)
 - `--experimental-count`: Number of experimental releases to select per variant (default: 2)
 - `--output-dir`: Output directory for downloaded assets (default: cat-launcher/src-tauri/src/infra/testing/data/assets)
-- `--resources-dir`: Resources directory for releases metadata (default: cat-launcher/src-tauri)
+- `--metadata-dir`: Output directory for releases metadata (default: cat-launcher/src-tauri/src/infra/testing/data/metadata)
+- `--quiet`: Suppress output and only show errors
 
 ### Example
 
 ```bash
-# Download assets for all variants with default counts
+# Download assets for all variants
 uv run setup-test-data
 
-# Download assets for only DDA and BN with custom counts
-uv run setup-test-data --variants dda bn --stable-count 3 --experimental-count 1
+# Download assets for only DDA and BN with custom experimental count
+uv run setup-test-data --variants dda bn --experimental-count 1 --quiet
 
 # Use a custom output directory
 uv run setup-test-data --output-dir ./test-assets
 ```
+
+## Release Selection
+
+The script uses a hybrid approach to select releases:
+- **Stable and Release Candidate**: These are loaded from local files in `cat-launcher/src-tauri/releases/`.
+- **Experimental**: These are fetched from the GitHub API, controlled by the `--experimental-count` option.
 
 ## Release Type Classification
 
@@ -79,8 +84,8 @@ cat-launcher/src-tauri/src/infra/testing/data/assets/
     ├── tlg-osx-tiles-universal-*.dmg
     └── ...
 
-cat-launcher/src-tauri/releases/
-├── dark_days_ahead.json
-├── bright_nights.json
-└── the_last_generation.json
+cat-launcher/src-tauri/src/infra/testing/data/metadata/
+├── DarkDaysAhead.json
+├── BrightNights.json
+└── TheLastGeneration.json
 ```

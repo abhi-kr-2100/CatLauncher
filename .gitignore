@@ -17,3 +17,4 @@ coverage-html
 
 # Test assets
 cat-launcher/src-tauri/src/infra/testing/data/assets/
+cat-launcher/src-tauri/src/infra/testing/data/metadata/
