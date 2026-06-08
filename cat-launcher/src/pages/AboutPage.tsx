@@ -44,6 +44,7 @@ export default function AboutPage() {
     setIsDialogOpen,
     reportStep,
     zipPath,
+    isCreating,
     handleReportIssueClick,
     onConfirm,
   } = useDebugReport(reportIssueUrl);
@@ -66,6 +67,7 @@ export default function AboutPage() {
           <Button
             key={link.id}
             variant={link.variant}
+            disabled={link.id === "report-issue" && isCreating}
             onClick={() => {
               if (link.id === "report-issue") {
                 handleReportIssueClick();

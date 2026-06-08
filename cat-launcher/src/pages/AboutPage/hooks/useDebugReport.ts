@@ -15,33 +15,58 @@ export function useDebugReport(issueUrl: string) {
   const [reportStep, setReportStep] = useState<ReportStep>("idle");
   const [zipPath, setZipPath] = useState<string | null>(null);
 
-  // Track if dialog is open to avoid race conditions
+  // Track the ID of the current active request to ignore outdated promises
+  const latestRequestIdRef = useRef(0);
+  // Track if a report is currently being created to prevent concurrent starts
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Track if dialog is open to avoid updating state for a closed dialog
   const isDialogOpenRef = useRef(isDialogOpen);
   useEffect(() => {
     isDialogOpenRef.current = isDialogOpen;
   }, [isDialogOpen]);
 
   const handleReportIssueClick = useCallback(async () => {
+    // Prevent starting a new report if one is already in progress
+    if (isCreating) return;
+
+    const requestId = ++latestRequestIdRef.current;
+
     setIsDialogOpen(true);
     setReportStep("creating");
     setZipPath(null);
+    setIsCreating(true);
 
     try {
       const path = await createDebugReport();
-      // Only update state if the dialog is still open
-      if (isDialogOpenRef.current) {
+
+      // Only update state if this is the latest request AND the dialog is still open
+      if (
+        requestId === latestRequestIdRef.current &&
+        isDialogOpenRef.current
+      ) {
         setZipPath(path);
         setReportStep("created");
       }
     } catch (error) {
       console.error("Failed to create debug report:", error);
-      if (isDialogOpenRef.current) {
+
+      // Only update state if this is the latest request AND the dialog is still open
+      if (
+        requestId === latestRequestIdRef.current &&
+        isDialogOpenRef.current
+      ) {
         setIsDialogOpen(false);
         // Fallback to just opening the link if report creation fails
         openLink(issueUrl);
       }
+    } finally {
+      // Only reset isCreating if this is the latest request
+      if (requestId === latestRequestIdRef.current) {
+        setIsCreating(false);
+      }
     }
-  }, [issueUrl]);
+  }, [issueUrl, isCreating]);
 
   const onConfirm = useCallback(() => {
     if (reportStep === "created") {
@@ -54,6 +79,7 @@ export function useDebugReport(issueUrl: string) {
     setIsDialogOpen,
     reportStep,
     zipPath,
+    isCreating,
     handleReportIssueClick,
     onConfirm,
   };
