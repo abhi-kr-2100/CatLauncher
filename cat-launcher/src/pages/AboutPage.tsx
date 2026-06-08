@@ -1,6 +1,9 @@
+import { useState } from "react";
 import pkg from "../../package.json";
 import { openLink } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { createDebugReport } from "@/lib/commands";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 
 /**
  * External links for the CatLauncher project.
@@ -31,6 +34,27 @@ const LINKS = [
  * @returns A React component that renders the About page.
  */
 export default function AboutPage() {
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
+  const [reportStep, setReportStep] = useState<
+    "idle" | "creating" | "created"
+  >("idle");
+  const [zipPath, setZipPath] = useState<string | null>(null);
+
+  const handleReportIssueClick = async () => {
+    setIsReportDialogOpen(true);
+    setReportStep("creating");
+    try {
+      const path = await createDebugReport();
+      setZipPath(path);
+      setReportStep("created");
+    } catch (error) {
+      console.error("Failed to create debug report:", error);
+      setIsReportDialogOpen(false);
+      // Fallback to just opening the link if report creation fails
+      openLink(LINKS[1].url);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 py-4 max-w-lg mx-auto">
       <div className="flex flex-col items-center gap-2">
@@ -49,12 +73,39 @@ export default function AboutPage() {
           <Button
             key={link.label}
             variant={link.variant}
-            onClick={() => openLink(link.url)}
+            onClick={() => {
+              if (link.label === "🐛 Report an issue") {
+                handleReportIssueClick();
+              } else {
+                openLink(link.url);
+              }
+            }}
           >
             {link.label}
           </Button>
         ))}
       </div>
+
+      <ConfirmationDialog
+        open={isReportDialogOpen}
+        onOpenChange={setIsReportDialogOpen}
+        title="Report an Issue"
+        description={
+          reportStep === "creating"
+            ? "Creating a .zip archive of CatLauncher's current state to help us debug the issue. Please wait..."
+            : `A debug report has been created at: ${zipPath}. Please attach this file when reporting the issue on GitHub.`
+        }
+        confirmText={
+          reportStep === "creating" ? "Creating..." : "Proceed to GitHub"
+        }
+        cancelText="Close"
+        onConfirm={() => {
+          if (reportStep === "created") {
+            openLink(LINKS[1].url);
+          }
+        }}
+        closeOnConfirm={false}
+      />
     </div>
   );
 }

@@ -779,6 +779,16 @@ export async function getDefaultSettings(): Promise<Settings> {
 }
 
 /**
+ * Creates a debug report .zip archive.
+ *
+ * @returns A promise that resolves to the path of the created .zip archive.
+ */
+export async function createDebugReport(): Promise<string> {
+  const response = await invoke<string>("create_debug_report");
+  return response;
+}
+
+/**
  * Updates the application settings.
  *
  * @param settings - The new settings to apply.

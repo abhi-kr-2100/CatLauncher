@@ -22,6 +22,7 @@ mod tilesets;
 mod users;
 mod utils;
 pub mod variants;
+mod debug_report;
 
 pub mod database {
   pub use crate::infra::repository::sqlite_pool::{
@@ -31,6 +32,7 @@ pub mod database {
 
 use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
+use crate::debug_report::commands::create_debug_report;
 use crate::backups::commands::{
   delete_backup_by_id, list_backups_for_variant, restore_backup_by_id,
 };
@@ -154,6 +156,7 @@ pub fn run() {
       confirm_quit,
       master_reset,
       get_achievements_for_variant,
+      create_debug_report,
     ])
     .run(tauri::generate_context!());
 
