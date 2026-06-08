@@ -60,11 +60,13 @@ class Release:
 
 
 def is_retryable_exception(exception: Exception) -> bool:
+    if isinstance(exception, httpx.HTTPStatusError):
+        # Retry on 5xx errors or 429 Too Many Requests
+        if exception.response is not None:
+            return exception.response.status_code >= 500 or exception.response.status_code == 429
+        return False
     if isinstance(exception, (httpx.TimeoutException, httpx.RequestError)):
         # Transport errors (connection, dns, etc) are retryable
-        if isinstance(exception, httpx.HTTPStatusError):
-            # Retry on 5xx errors or 429 Too Many Requests
-            return exception.response.status_code >= 500 or exception.response.status_code == 429
         return True
     return False
 
