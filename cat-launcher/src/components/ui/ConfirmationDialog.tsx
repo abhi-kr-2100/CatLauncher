@@ -34,6 +34,8 @@ interface ConfirmationDialogProps {
   children?: ReactNode;
   /** Whether to close the dialog when the confirm button is clicked. Defaults to true. */
   closeOnConfirm?: boolean;
+  /** Whether the confirmation button is disabled. Defaults to false. */
+  confirmDisabled?: boolean;
 }
 
 /**
@@ -53,9 +55,12 @@ export function ConfirmationDialog({
   cancelText = "Cancel",
   children,
   closeOnConfirm = true,
+  confirmDisabled = false,
 }: ConfirmationDialogProps) {
   const ConfirmButton = (
-    <Button onClick={onConfirm}>{confirmText}</Button>
+    <Button onClick={onConfirm} disabled={confirmDisabled}>
+      {confirmText}
+    </Button>
   );
 
   return (

@@ -1,9 +1,8 @@
-import { useState } from "react";
 import pkg from "../../package.json";
 import { openLink } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { createDebugReport } from "@/lib/commands";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import { useDebugReport } from "./AboutPage/hooks/useDebugReport";
 
 /**
  * External links for the CatLauncher project.
@@ -11,16 +10,19 @@ import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
  */
 const LINKS = [
   {
+    id: "star",
     label: "⭐ Star CatLauncher on GitHub",
     url: "https://github.com/abhi-kr-2100/CatLauncher",
     variant: "outline" as const,
   },
   {
+    id: "report-issue",
     label: "🐛 Report an issue",
     url: "https://github.com/abhi-kr-2100/CatLauncher/issues/new",
     variant: "outline" as const,
   },
   {
+    id: "request-feature",
     label: "🚀 Request a new feature",
     url: "https://github.com/abhi-kr-2100/CatLauncher/issues/new",
     variant: "outline" as const,
@@ -34,26 +36,17 @@ const LINKS = [
  * @returns A React component that renders the About page.
  */
 export default function AboutPage() {
-  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [reportStep, setReportStep] = useState<
-    "idle" | "creating" | "created"
-  >("idle");
-  const [zipPath, setZipPath] = useState<string | null>(null);
+  const reportIssueUrl =
+    LINKS.find((l) => l.id === "report-issue")?.url || "";
 
-  const handleReportIssueClick = async () => {
-    setIsReportDialogOpen(true);
-    setReportStep("creating");
-    try {
-      const path = await createDebugReport();
-      setZipPath(path);
-      setReportStep("created");
-    } catch (error) {
-      console.error("Failed to create debug report:", error);
-      setIsReportDialogOpen(false);
-      // Fallback to just opening the link if report creation fails
-      openLink(LINKS[1].url);
-    }
-  };
+  const {
+    isDialogOpen,
+    setIsDialogOpen,
+    reportStep,
+    zipPath,
+    handleReportIssueClick,
+    onConfirm,
+  } = useDebugReport(reportIssueUrl);
 
   return (
     <div className="flex flex-col items-center gap-4 py-4 max-w-lg mx-auto">
@@ -71,10 +64,10 @@ export default function AboutPage() {
       <div className="flex flex-col gap-2">
         {LINKS.map((link) => (
           <Button
-            key={link.label}
+            key={link.id}
             variant={link.variant}
             onClick={() => {
-              if (link.label === "🐛 Report an issue") {
+              if (link.id === "report-issue") {
                 handleReportIssueClick();
               } else {
                 openLink(link.url);
@@ -87,8 +80,8 @@ export default function AboutPage() {
       </div>
 
       <ConfirmationDialog
-        open={isReportDialogOpen}
-        onOpenChange={setIsReportDialogOpen}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         title="Report an Issue"
         description={
           reportStep === "creating"
@@ -96,14 +89,13 @@ export default function AboutPage() {
             : `A debug report has been created at: ${zipPath}. Please attach this file when reporting the issue on GitHub.`
         }
         confirmText={
-          reportStep === "creating" ? "Creating..." : "Proceed to GitHub"
+          reportStep === "creating"
+            ? "Creating..."
+            : "Proceed to GitHub"
         }
+        confirmDisabled={reportStep === "creating"}
         cancelText="Close"
-        onConfirm={() => {
-          if (reportStep === "created") {
-            openLink(LINKS[1].url);
-          }
-        }}
+        onConfirm={onConfirm}
         closeOnConfirm={false}
       />
     </div>

@@ -5,6 +5,7 @@ pub mod settings;
 mod achievements;
 pub mod active_release;
 mod backups;
+mod debug_report;
 mod fetch_releases;
 mod game_release;
 mod game_tips;
@@ -22,7 +23,6 @@ mod tilesets;
 mod users;
 mod utils;
 pub mod variants;
-mod debug_report;
 
 pub mod database {
   pub use crate::infra::repository::sqlite_pool::{
@@ -32,10 +32,10 @@ pub mod database {
 
 use crate::achievements::commands::get_achievements_for_variant;
 use crate::active_release::commands::get_active_release;
-use crate::debug_report::commands::create_debug_report;
 use crate::backups::commands::{
   delete_backup_by_id, list_backups_for_variant, restore_backup_by_id,
 };
+use crate::debug_report::commands::create_debug_report;
 use crate::fetch_releases::commands::{
   fetch_release_notes, fetch_releases_for_variant,
 };
