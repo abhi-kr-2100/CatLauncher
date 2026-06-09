@@ -1,7 +1,6 @@
 use chrono::Local;
 use tauri::{AppHandle, Manager, command};
 use cat_macros::CommandErrorSerialize;
-use crate::filesystem::paths::get_db_path;
 use crate::infra::archive::ArchiveCreationError;
 use crate::debug_report::lib::create_debug_report_impl;
 
@@ -25,15 +24,12 @@ pub async fn create_debug_report(
   let downloads_dir = app_handle.path().download_dir()
     .map_err(|_| CreateDebugReportError::DownloadsDir)?;
 
-  let db_path = get_db_path(&data_dir);
-  let settings_path = data_dir.join("settings.json");
-
   let version = app_handle.package_info().version.to_string();
   let timestamp = Local::now().format("%Y%m%d-%H%M%S");
   let zip_name = format!("cat-launcher-debug-report-v{}-{}.zip", version, timestamp);
   let zip_path = downloads_dir.join(zip_name);
 
-  create_debug_report_impl(&db_path, &settings_path, &zip_path).await?;
+  create_debug_report_impl(&data_dir, &zip_path).await?;
 
   Ok(zip_path.to_string_lossy().to_string())
 }

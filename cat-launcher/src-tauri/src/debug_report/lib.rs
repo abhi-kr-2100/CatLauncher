@@ -1,31 +1,24 @@
 use std::path::Path;
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
 
-/// Creates a debug report .zip archive containing the specified database and settings files.
-/// The archive is saved at the specified `zip_path`.
+/// Creates a debug report .zip archive containing the database and settings files
+/// located in the specified `data_dir`. The archive is saved at `zip_path`.
 pub async fn create_debug_report_impl(
-  db_path: &Path,
-  settings_path: &Path,
+  data_dir: &Path,
   zip_path: &Path,
 ) -> Result<(), ArchiveCreationError> {
-  // Use tempfile for automatic cleanup
-  let temp_dir = tempfile::tempdir().map_err(ArchiveCreationError::Io)?;
-  let temp_path = temp_dir.path();
+  let db_path = data_dir.join("cat-launcher.db");
+  let settings_path = data_dir.join("settings.json");
 
-  let mut paths_in_temp = Vec::new();
-
+  let mut paths_to_include = Vec::new();
   if db_path.exists() {
-    let dest = temp_path.join("cat-launcher.db");
-    tokio::fs::copy(db_path, &dest).await.map_err(ArchiveCreationError::Io)?;
-    paths_in_temp.push(dest);
+    paths_to_include.push(db_path);
   }
   if settings_path.exists() {
-    let dest = temp_path.join("settings.json");
-    tokio::fs::copy(settings_path, &dest).await.map_err(ArchiveCreationError::Io)?;
-    paths_in_temp.push(dest);
+    paths_to_include.push(settings_path);
   }
 
-  create_zip_archive(temp_path, &paths_in_temp, zip_path).await?;
+  create_zip_archive(data_dir, &paths_to_include, zip_path).await?;
 
   Ok(())
 }
@@ -39,9 +32,9 @@ mod tests {
 
   #[tokio::test]
   async fn test_create_debug_report_impl() {
-    let source_dir = tempdir().unwrap();
-    let db_path = source_dir.path().join("cat-launcher.db");
-    let settings_path = source_dir.path().join("settings.json");
+    let data_dir = tempdir().unwrap();
+    let db_path = data_dir.path().join("cat-launcher.db");
+    let settings_path = data_dir.path().join("settings.json");
 
     File::create(&db_path).unwrap().write_all(b"db content").unwrap();
     File::create(&settings_path).unwrap().write_all(b"settings content").unwrap();
@@ -49,7 +42,7 @@ mod tests {
     let target_dir = tempdir().unwrap();
     let zip_path = target_dir.path().join("report.zip");
 
-    create_debug_report_impl(&db_path, &settings_path, &zip_path).await.unwrap();
+    create_debug_report_impl(data_dir.path(), &zip_path).await.unwrap();
 
     assert!(zip_path.exists());
 
@@ -63,14 +56,11 @@ mod tests {
 
   #[tokio::test]
   async fn test_create_debug_report_impl_missing_files() {
-    let source_dir = tempdir().unwrap();
-    let db_path = source_dir.path().join("non-existent.db");
-    let settings_path = source_dir.path().join("non-existent.json");
-
+    let data_dir = tempdir().unwrap();
     let target_dir = tempdir().unwrap();
     let zip_path = target_dir.path().join("report.zip");
 
-    create_debug_report_impl(&db_path, &settings_path, &zip_path).await.unwrap();
+    create_debug_report_impl(data_dir.path(), &zip_path).await.unwrap();
 
     assert!(zip_path.exists());
 
