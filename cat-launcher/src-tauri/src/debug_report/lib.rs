@@ -1,14 +1,21 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use crate::infra::archive::{create_zip_archive, ArchiveCreationError};
 
 /// Creates a debug report .zip archive containing the database and settings files
-/// located in the specified `data_dir`. The archive is saved at `zip_path`.
+/// located in the specified `data_dir`. The archive is saved in `downloads_dir`
+/// with a name based on the `version` and `timestamp`.
+/// Returns the path to the created .zip archive.
 pub async fn create_debug_report_impl(
   data_dir: &Path,
-  zip_path: &Path,
-) -> Result<(), ArchiveCreationError> {
+  downloads_dir: &Path,
+  version: &str,
+  timestamp: &str,
+) -> Result<PathBuf, ArchiveCreationError> {
   let db_path = data_dir.join("cat-launcher.db");
   let settings_path = data_dir.join("settings.json");
+
+  let zip_name = format!("cat-launcher-debug-report-v{}-{}.zip", version, timestamp);
+  let zip_path = downloads_dir.join(zip_name);
 
   let mut paths_to_include = Vec::new();
   if db_path.exists() {
@@ -18,9 +25,9 @@ pub async fn create_debug_report_impl(
     paths_to_include.push(settings_path);
   }
 
-  create_zip_archive(data_dir, &paths_to_include, zip_path).await?;
+  create_zip_archive(data_dir, &paths_to_include, &zip_path).await?;
 
-  Ok(())
+  Ok(zip_path)
 }
 
 #[cfg(test)]
@@ -39,12 +46,17 @@ mod tests {
     File::create(&db_path).unwrap().write_all(b"db content").unwrap();
     File::create(&settings_path).unwrap().write_all(b"settings content").unwrap();
 
-    let target_dir = tempdir().unwrap();
-    let zip_path = target_dir.path().join("report.zip");
+    let downloads_dir = tempdir().unwrap();
 
-    create_debug_report_impl(data_dir.path(), &zip_path).await.unwrap();
+    let zip_path = create_debug_report_impl(
+      data_dir.path(),
+      downloads_dir.path(),
+      "0.1.0",
+      "20230101"
+    ).await.unwrap();
 
     assert!(zip_path.exists());
+    assert_eq!(zip_path.file_name().unwrap(), "cat-launcher-debug-report-v0.1.0-20230101.zip");
 
     // Verify zip contents
     let file = File::open(&zip_path).unwrap();
@@ -57,10 +69,14 @@ mod tests {
   #[tokio::test]
   async fn test_create_debug_report_impl_missing_files() {
     let data_dir = tempdir().unwrap();
-    let target_dir = tempdir().unwrap();
-    let zip_path = target_dir.path().join("report.zip");
+    let downloads_dir = tempdir().unwrap();
 
-    create_debug_report_impl(data_dir.path(), &zip_path).await.unwrap();
+    let zip_path = create_debug_report_impl(
+      data_dir.path(),
+      downloads_dir.path(),
+      "0.1.0",
+      "20230101"
+    ).await.unwrap();
 
     assert!(zip_path.exists());
 

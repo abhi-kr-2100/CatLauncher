@@ -25,11 +25,9 @@ pub async fn create_debug_report(
     .map_err(|_| CreateDebugReportError::DownloadsDir)?;
 
   let version = app_handle.package_info().version.to_string();
-  let timestamp = Local::now().format("%Y%m%d-%H%M%S");
-  let zip_name = format!("cat-launcher-debug-report-v{}-{}.zip", version, timestamp);
-  let zip_path = downloads_dir.join(zip_name);
+  let timestamp = Local::now().format("%Y%m%d-%H%M%S").to_string();
 
-  create_debug_report_impl(&data_dir, &zip_path).await?;
+  let zip_path = create_debug_report_impl(&data_dir, &downloads_dir, &version, &timestamp).await?;
 
   Ok(zip_path.to_string_lossy().to_string())
 }
