@@ -1,0 +1,17 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: downloader
+Upstream-Contact: Tobias Hunger <tobias.hunger@gmail.com>
+Source: https://github.com/hunger/downloader
+
+Files: *.md
+Copyright: 2020 Tobias Hunger <tobias.hunger@gmail.com>
+License: LGPL-3.0-or-later
+
+Files: .github/* .gitignore
+Source: https://github.com/rust-github/template
+Copyright: Github User Id @MarcoIeni and others
+License: MIT OR Apache-2.0
+
+Files: .pre-commit-config.yaml cspell.json
+Copyright: 2020 Tobias Hunger <tobias.hunger@gmail.com>
+License: LGPL-3.0-or-later
