@@ -1,0 +1,65 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-case-conflict
+    -   id: check-executables-have-shebangs
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: check-toml
+    -   id: check-vcs-permalinks
+    -   id: check-xml
+    -   id: check-yaml
+    -   id: destroyed-symlinks
+    -   id: end-of-file-fixer
+    -   id: fix-byte-order-marker
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+    -   id: black
+-   repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+    -   id: cargo-check
+    -   id: clippy
+    -   id: fmt
+-   repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v7.3.0
+    hooks:
+    -   id: cspell
+-   repo: https://github.com/redwarp/optimize-png-hooks
+    rev: v1.2.2
+    hooks:
+    -   id: optimize-png
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+    -   id: mdformat
+        additional_dependencies:
+        -   mdformat-beautysh
+        -   mdformat-black
+        -   mdformat-config
+        -   mdformat-gfm
+        -   mdformat-rustfmt
+        -   mdformat-tables
+        -   mdformat-web
+-   repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.26.3
+    hooks:
+    -   id: check-github-workflows
+    -   id: check-github-actions
+-   repo: https://github.com/fsfe/reuse-tool
+    rev: v2.1.0
+    hooks:
+    -   id: reuse
+
+ci:
+  skip:
+  -   cargo-check
+  -   clippy
+  -   fmt
+  -   check-github-actions
+  -   check-github-workflows

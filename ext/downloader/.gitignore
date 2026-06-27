@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk # backup files from rustfmt
+.cargo-ok
+
+*.patch
+*.diff
+
+.vscode
+.direnv

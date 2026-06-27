@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2021 Tobias Hunger <tobias.hunger@gmail.com>
+
+[package]
+name = "downloader"
+version = "0.2.7"
+authors = ["Tobias Hunger <tobias.hunger@gmail.com>"]
+edition = "2018"
+rust-version = "1.75"
+description = "A simple way to download things via HTTP/HTTPS"
+repository = "https://github.com/hunger/downloader"
+license = "LGPL-3.0-or-later"
+keywords = [ "http", "https", "download" ]
+categories = [ "web-programming::http-client" ]
+
+[dependencies]
+futures = { version = "0.3" }
+http = { version = "1" }
+rand = { version = "0.10" }
+thiserror = { version = "2.0" }
+tokio = { version = "1.52", features = [ "rt-multi-thread", "time" ] }
+url = { version = "2.5" }
