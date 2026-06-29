@@ -37,3 +37,29 @@ pub fn create_http_client() -> Result<Client, HttpClientError> {
   let builder = Client::builder().user_agent("cat-launcher");
   builder.build().map_err(HttpClientError::from)
 }
+
+#[derive(Clone, Debug)]
+pub struct ReqwestHttpClient {
+  client: Client,
+}
+
+impl ReqwestHttpClient {
+  pub fn new(client: Client) -> Self {
+    Self { client }
+  }
+}
+
+#[async_trait]
+impl HttpClient for ReqwestHttpClient {
+  async fn get(
+    &self,
+    url: &str,
+  ) -> Result<Response, HttpClientError> {
+    self
+      .client
+      .get(url)
+      .send()
+      .await
+      .map_err(HttpClientError::from)
+  }
+}
