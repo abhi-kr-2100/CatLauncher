@@ -24,9 +24,10 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"
 reqwest = { version = "0.13.3", features = ["json"] }
+bytes = "1.12"
 ts-rs = "12.0.1"
 chrono = { version = "0.4.44", features = ["serde"] }
-downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "db3d764b6677a1ca4a685b21f0fff10734a4e2e2" }
+downloader = { git = "https://github.com/abhi-kr-2100/downloader.git", rev = "0ec074ed8b323dcc24678c4a6c41cdc1e4ee597e" }
 zip = "8.6.0"
 tokio = { version = "1.52.1", features = ["rt-multi-thread", "process", "macros"] }
 tar = "0.4.45"

@@ -9,11 +9,14 @@ use crate::infra::http_client::{
   HttpClient, HttpClientError, create_http_client,
 };
 
+use std::sync::Arc;
+
 /// A test HTTP client that can rewrite URLs based on host mappings.
+#[derive(Clone)]
 pub struct TestHttpClient {
   client: Client,
   host_mappings: HashMap<String, String>,
-  request_count: AtomicUsize,
+  request_count: Arc<AtomicUsize>,
 }
 
 impl TestHttpClient {
@@ -24,7 +27,7 @@ impl TestHttpClient {
     Ok(Self {
       client: create_http_client()?,
       host_mappings,
-      request_count: AtomicUsize::new(0),
+      request_count: Arc::new(AtomicUsize::new(0)),
     })
   }
 

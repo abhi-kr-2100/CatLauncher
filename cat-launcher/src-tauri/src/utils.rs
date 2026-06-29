@@ -13,7 +13,7 @@ use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
 use crate::infra::http_client::{
-  create_http_client, HttpClient, HttpClientError,
+  create_http_client, HttpClient, HttpClientError, ReqwestHttpClient,
 };
 use crate::infra::repository::sqlite_pool::{
   CreateSqlitePoolError, create_sqlite_pool,
@@ -165,8 +165,10 @@ async fn migrate_to_local_data_dir_impl(
 
 pub fn manage_downloader(app: &App) {
   let client: tauri::State<reqwest::Client> = app.state();
-  let downloader =
-    Downloader::new(client.inner().clone(), PARALLEL_REQUESTS);
+  let downloader = Downloader::new(
+    ReqwestHttpClient::new(client.inner().clone()),
+    PARALLEL_REQUESTS,
+  );
   app.manage(downloader);
 }
 
