@@ -1,0 +1,33 @@
+use chrono::Local;
+use tauri::{AppHandle, Manager, command};
+use cat_macros::CommandErrorSerialize;
+use crate::infra::archive::ArchiveCreationError;
+use crate::debug_report::lib::create_debug_report_impl;
+
+#[derive(thiserror::Error, Debug, CommandErrorSerialize)]
+pub enum CreateDebugReportError {
+  #[error("failed to get app local data directory: {0}")]
+  AppLocalDataDir(#[from] tauri::Error),
+
+  #[error("failed to get downloads directory")]
+  DownloadsDir,
+
+  #[error("failed to create zip archive: {0}")]
+  ArchiveCreation(#[from] ArchiveCreationError),
+}
+
+#[command]
+pub async fn create_debug_report(
+  app_handle: AppHandle,
+) -> Result<String, CreateDebugReportError> {
+  let data_dir = app_handle.path().app_local_data_dir()?;
+  let downloads_dir = app_handle.path().download_dir()
+    .map_err(|_| CreateDebugReportError::DownloadsDir)?;
+
+  let version = app_handle.package_info().version.to_string();
+  let timestamp = Local::now().format("%Y%m%d-%H%M%S").to_string();
+
+  let zip_path = create_debug_report_impl(&data_dir, &downloads_dir, &version, &timestamp).await?;
+
+  Ok(zip_path.to_string_lossy().to_string())
+}

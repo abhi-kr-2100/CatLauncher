@@ -1,0 +1,13 @@
+
+> cat-launcher@0.16.0 dev /app/cat-launcher
+> vite
+
+
+  VITE v8.0.10  ready in 522 ms
+
+  ➜  Local:   http://localhost:1420/
+7:10:05 PM [vite] (client) hmr update /src/styles/global.css, /src/components/ui/ConfirmationDialog.tsx
+7:11:22 PM [vite] (client) hmr update /src/styles/global.css, /src/pages/AboutPage.tsx
+7:11:22 PM [vite] (client) hmr update /src/styles/global.css, /src/pages/AboutPage.tsx
+7:15:27 PM [vite] (client) hmr update /src/styles/global.css, /src/pages/AboutPage.tsx
+7:37:42 PM [vite] (client) hmr update /src/styles/global.css, /src/pages/AboutPage.tsx

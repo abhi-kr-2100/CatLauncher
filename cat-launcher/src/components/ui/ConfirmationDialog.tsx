@@ -32,6 +32,10 @@ interface ConfirmationDialogProps {
   cancelText?: string;
   /** Optional additional content to display within the dialog. */
   children?: ReactNode;
+  /** Whether to close the dialog when the confirm button is clicked. Defaults to true. */
+  closeOnConfirm?: boolean;
+  /** Whether the confirmation button is disabled. Defaults to false. */
+  confirmDisabled?: boolean;
 }
 
 /**
@@ -50,7 +54,15 @@ export function ConfirmationDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
   children,
+  closeOnConfirm = true,
+  confirmDisabled = false,
 }: ConfirmationDialogProps) {
+  const ConfirmButton = (
+    <Button onClick={onConfirm} disabled={confirmDisabled}>
+      {confirmText}
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -63,9 +75,11 @@ export function ConfirmationDialog({
           <DialogClose asChild>
             <Button variant="outline">{cancelText}</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button onClick={onConfirm}>{confirmText}</Button>
-          </DialogClose>
+          {closeOnConfirm ? (
+            <DialogClose asChild>{ConfirmButton}</DialogClose>
+          ) : (
+            ConfirmButton
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
