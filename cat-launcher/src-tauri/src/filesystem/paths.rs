@@ -7,9 +7,14 @@ use crate::filesystem::utils::get_safe_filename;
 use crate::infra::utils::OS;
 use crate::variants::GameVariant;
 
-/// Returns the path to the application database file.
-pub fn get_db_path(data_dir: &Path) -> PathBuf {
-  data_dir.join("cat-launcher.db")
+/// Returns the path to the application database file, creating the data
+/// directory if it does not exist yet.
+pub async fn get_or_create_db_path(
+  data_dir: &Path,
+) -> Result<PathBuf, GetOrCreateDirectoryError> {
+  create_dir_all(data_dir).await?;
+
+  Ok(data_dir.join("cat-launcher.db"))
 }
 
 /// Returns the path to the application settings file.
@@ -432,4 +437,27 @@ pub async fn get_or_create_directory(
   create_dir_all(&dir_path).await?;
 
   Ok(dir_path)
+}
+
+#[cfg(test)]
+mod tests {
+  use std::error::Error;
+
+  use tempfile::tempdir;
+
+  use super::get_or_create_db_path;
+
+  #[tokio::test]
+  async fn creates_the_data_directory_when_it_does_not_exist()
+  -> Result<(), Box<dyn Error + Send + Sync>> {
+    let temp_dir = tempdir()?;
+    let data_dir = temp_dir.path().join("com.munetmo.cat-launcher");
+
+    let db_path = get_or_create_db_path(&data_dir).await?;
+
+    assert!(data_dir.is_dir());
+    assert_eq!(db_path, data_dir.join("cat-launcher.db"));
+
+    Ok(())
+  }
 }
