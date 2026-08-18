@@ -6,7 +6,13 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -21,20 +27,30 @@
       {
         devShells = {
           default = pkgs.mkShell {
-            packages = with pkgs; [
-              cargo
-              cargo-edit
-              cargo-llvm-cov
-              clippy
-              go-task
-              llvm
-              nodejs
-              pnpm
-              python3
-              rustc
-              rustfmt
-              uv
-            ] ++ tauriDependencies;
+            packages =
+              with pkgs;
+              [
+                cargo
+                cargo-edit
+                cargo-llvm-cov
+                clippy
+                go-task
+                lldb
+                llvm
+                nodejs
+                pnpm
+                python3
+                python313Packages.jedi-language-server
+                python313Packages.python-lsp-server
+                ruff
+                rust-analyzer
+                rustc
+                rustfmt
+                ty
+                typescript-language-server
+                uv
+              ]
+              ++ tauriDependencies;
 
             shellHook = ''
               export LLVM_COV="${llvm}/bin/llvm-cov"
