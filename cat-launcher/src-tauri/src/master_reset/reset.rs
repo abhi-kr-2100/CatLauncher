@@ -8,10 +8,6 @@ use crate::filesystem::paths::{
 use crate::mods::repository::installed_mods_repository::{
   InstalledModsRepository, InstalledModsRepositoryError,
 };
-use crate::settings::repository::settings_repository::{
-  SaveSettingsError, SettingsRepository,
-};
-use crate::settings::Settings;
 use crate::soundpacks::repository::installed_soundpacks_repository::{
   InstalledSoundpacksRepository, InstalledSoundpacksRepositoryError,
 };
@@ -39,9 +35,6 @@ pub enum MasterResetError {
 
   #[error("failed to delete installed tilesets: {0}")]
   DeleteTilesets(#[from] InstalledTilesetsRepositoryError),
-
-  #[error("failed to reset settings: {0}")]
-  ResetSettings(#[from] SaveSettingsError),
 }
 
 async fn should_skip(
@@ -65,7 +58,6 @@ pub async fn master_reset(
   installed_mods_repository: &dyn InstalledModsRepository,
   installed_soundpacks_repository: &dyn InstalledSoundpacksRepository,
   installed_tilesets_repository: &dyn InstalledTilesetsRepository,
-  settings_repository: &dyn SettingsRepository,
 ) -> Result<(), MasterResetError> {
   let user_data_dir =
     get_or_create_user_game_data_dir(variant, data_dir).await?;
@@ -102,10 +94,6 @@ pub async fn master_reset(
     .delete_all_installed_tilesets(variant)
     .await?;
 
-  settings_repository
-    .save_settings(&Settings::default())
-    .await?;
-
   Ok(())
 }
 
@@ -121,11 +109,8 @@ mod tests {
   use std::path::PathBuf;
 
   use super::*;
-  use crate::infra::repository::sqlite_pool::SqlitePool;
   use crate::infra::testing::test_database::TestDatabase;
   use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
-  use crate::settings::repository::settings_repository::GetSettingsError;
-  use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
   use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
   use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
   use async_trait::async_trait;
@@ -288,49 +273,6 @@ mod tests {
     }
   }
 
-  struct FailingSettingsRepository {
-    fail_save: bool,
-  }
-
-  #[async_trait]
-  impl SettingsRepository for FailingSettingsRepository {
-    async fn get_settings(
-      &self,
-    ) -> Result<Settings, GetSettingsError> {
-      Ok(Settings::default())
-    }
-
-    async fn save_settings(
-      &self,
-      _settings: &Settings,
-    ) -> Result<(), SaveSettingsError> {
-      if self.fail_save {
-        return Err(SaveSettingsError::Save(mock_io_error()));
-      }
-      Ok(())
-    }
-  }
-
-  fn get_stored_settings(
-    pool: &SqlitePool,
-  ) -> Result<
-    (Option<String>, Option<String>),
-    Box<dyn std::error::Error>,
-  > {
-    let conn = pool.clone().get()?;
-    let font_path: Option<String> = conn.query_row(
-      "SELECT font_path FROM settings WHERE _id = 1",
-      [],
-      |row| row.get(0),
-    )?;
-    let theme_path: Option<String> = conn.query_row(
-      "SELECT theme_path FROM color_settings WHERE _id = 1",
-      [],
-      |row| row.get(0),
-    )?;
-    Ok((font_path, theme_path))
-  }
-
   #[tokio::test]
   async fn test_master_reset_preserves_save_dir_and_removes_other_entries()
   -> TestResult {
@@ -341,8 +283,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
 
     let temp_data = TempDir::new()?;
 
@@ -360,7 +300,6 @@ mod tests {
         &mods_repo,
         &soundpacks_repo,
         &tilesets_repo,
-        &settings_repo,
       )
       .await?;
 
@@ -398,8 +337,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
 
     let temp_data = TempDir::new()?;
 
@@ -439,7 +376,6 @@ mod tests {
         &mods_repo,
         &soundpacks_repo,
         &tilesets_repo,
-        &settings_repo,
       )
       .await?;
 
@@ -485,91 +421,6 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_master_reset_resets_settings_to_default() -> TestResult
-  {
-    let db = TestDatabase::builder().build()?;
-    let mods_repo =
-      SqliteInstalledModsRepository::new(db.pool().clone());
-    let soundpacks_repo =
-      SqliteInstalledSoundpacksRepository::new(db.pool().clone());
-    let tilesets_repo =
-      SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
-
-    let temp_data = TempDir::new()?;
-
-    for variant in [
-      GameVariant::DarkDaysAhead,
-      GameVariant::BrightNights,
-      GameVariant::TheLastGeneration,
-    ] {
-      let theme_path = temp_data.path().join("base_colors-test.json");
-      tokio::fs::write(&theme_path, b"{}").await?;
-
-      let font_path = temp_data.path().join("custom_font.ttf");
-      tokio::fs::write(&font_path, b"dummy font").await?;
-
-      let custom_settings = crate::settings::settings::Settings {
-        font: Some(crate::settings::types::Font {
-          name: "TestFont".to_string(),
-          path: font_path.to_string_lossy().into_owned(),
-        }),
-        color_theme: crate::settings::types::ColorTheme::from_path(
-          &theme_path,
-        ),
-      };
-      settings_repo.save_settings(&custom_settings).await?;
-
-      // Confirm a non-default font and theme are actually stored before reset
-      let (stored_font, stored_theme) =
-        get_stored_settings(db.pool())?;
-      assert_eq!(
-        stored_font,
-        Some(font_path.to_string_lossy().into_owned()),
-        "custom font should be stored before reset"
-      );
-      assert!(
-        stored_theme.is_some(),
-        "custom color theme should be stored before reset"
-      );
-
-      master_reset(
-        &variant,
-        temp_data.path(),
-        &mods_repo,
-        &soundpacks_repo,
-        &tilesets_repo,
-        &settings_repo,
-      )
-      .await?;
-
-      let (stored_font, stored_theme) =
-        get_stored_settings(db.pool())?;
-      assert!(
-        stored_font.is_none(),
-        "stored font path should be cleared by reset"
-      );
-      assert!(
-        stored_theme.is_none(),
-        "stored color theme path should be cleared by reset"
-      );
-
-      let current_settings = settings_repo.get_settings().await?;
-      assert!(
-        current_settings.font.is_none(),
-        "Font settings should be reset"
-      );
-      assert!(
-        current_settings.color_theme.is_none(),
-        "Color theme settings should be reset"
-      );
-    }
-
-    Ok(())
-  }
-
-  #[tokio::test]
   async fn test_master_reset_succeeds_with_empty_database_and_empty_user_data_dir()
   -> TestResult {
     let db = TestDatabase::builder().build()?;
@@ -579,8 +430,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
 
     let temp_data = TempDir::new()?;
     let variant = GameVariant::DarkDaysAhead;
@@ -608,7 +457,6 @@ mod tests {
       &mods_repo,
       &soundpacks_repo,
       &tilesets_repo,
-      &settings_repo,
     )
     .await?;
 
@@ -661,8 +509,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
 
     let temp_data = TempDir::new()?;
     let variant = GameVariant::DarkDaysAhead;
@@ -681,7 +527,6 @@ mod tests {
       &mods_repo,
       &soundpacks_repo,
       &tilesets_repo,
-      &settings_repo,
     )
     .await?;
 
@@ -710,8 +555,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
 
     let temp_data = TempDir::new()?;
     let variant = GameVariant::DarkDaysAhead;
@@ -729,7 +572,6 @@ mod tests {
       &mods_repo,
       &soundpacks_repo,
       &tilesets_repo,
-      &settings_repo,
     )
     .await?;
 
@@ -755,8 +597,6 @@ mod tests {
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
     let failing_mods_repo = FailingModsRepository {
       fail_delete_all: true,
     };
@@ -772,15 +612,6 @@ mod tests {
     tilesets_repo
       .add_installed_tileset("tileset1", &variant)
       .await?;
-    let theme_path = temp_data.path().join("base_colors-test.json");
-    tokio::fs::write(&theme_path, b"{}").await?;
-    let custom_settings = crate::settings::settings::Settings {
-      font: None,
-      color_theme: crate::settings::types::ColorTheme::from_path(
-        &theme_path,
-      ),
-    };
-    settings_repo.save_settings(&custom_settings).await?;
 
     let result = master_reset(
       &variant,
@@ -788,7 +619,6 @@ mod tests {
       &failing_mods_repo,
       &soundpacks_repo,
       &tilesets_repo,
-      &settings_repo,
     )
     .await;
 
@@ -821,10 +651,6 @@ mod tests {
         .await?,
       "tilesets should not be deleted when mods step fails"
     );
-    assert!(
-      settings_repo.get_settings().await?.color_theme.is_some(),
-      "settings should not be reset when mods step fails"
-    );
 
     Ok(())
   }
@@ -837,8 +663,6 @@ mod tests {
       SqliteInstalledModsRepository::new(db.pool().clone());
     let tilesets_repo =
       SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
     let failing_soundpacks_repo = FailingSoundpacksRepository {
       fail_delete_all: true,
     };
@@ -852,15 +676,6 @@ mod tests {
     tilesets_repo
       .add_installed_tileset("tileset1", &variant)
       .await?;
-    let theme_path = temp_data.path().join("base_colors-test.json");
-    tokio::fs::write(&theme_path, b"{}").await?;
-    let custom_settings = crate::settings::settings::Settings {
-      font: None,
-      color_theme: crate::settings::types::ColorTheme::from_path(
-        &theme_path,
-      ),
-    };
-    settings_repo.save_settings(&custom_settings).await?;
 
     let result = master_reset(
       &variant,
@@ -868,7 +683,6 @@ mod tests {
       &mods_repo,
       &failing_soundpacks_repo,
       &tilesets_repo,
-      &settings_repo,
     )
     .await;
 
@@ -894,10 +708,6 @@ mod tests {
         .await?,
       "tilesets should not be deleted when soundpacks step fails"
     );
-    assert!(
-      settings_repo.get_settings().await?.color_theme.is_some(),
-      "settings should not be reset when soundpacks step fails"
-    );
     assert_eq!(
       tokio::fs::read_to_string(save_dir.join("save1.json")).await?,
       "saved game",
@@ -915,8 +725,6 @@ mod tests {
       SqliteInstalledModsRepository::new(db.pool().clone());
     let soundpacks_repo =
       SqliteInstalledSoundpacksRepository::new(db.pool().clone());
-    let settings_repo =
-      SqliteSettingsRepository::new(db.pool().clone());
     let failing_tilesets_repo = FailingTilesetsRepository {
       fail_delete_all: true,
     };
@@ -930,15 +738,6 @@ mod tests {
     soundpacks_repo
       .add_installed_soundpack("soundpack1", &variant)
       .await?;
-    let theme_path = temp_data.path().join("base_colors-test.json");
-    tokio::fs::write(&theme_path, b"{}").await?;
-    let custom_settings = crate::settings::settings::Settings {
-      font: None,
-      color_theme: crate::settings::types::ColorTheme::from_path(
-        &theme_path,
-      ),
-    };
-    settings_repo.save_settings(&custom_settings).await?;
 
     let result = master_reset(
       &variant,
@@ -946,7 +745,6 @@ mod tests {
       &mods_repo,
       &soundpacks_repo,
       &failing_tilesets_repo,
-      &settings_repo,
     )
     .await;
 
@@ -969,83 +767,6 @@ mod tests {
         .is_soundpack_installed("soundpack1", &variant)
         .await?,
       "soundpacks should be deleted before the tilesets step"
-    );
-
-    // Steps after the tilesets delete must not have run
-    assert!(
-      settings_repo.get_settings().await?.color_theme.is_some(),
-      "settings should not be reset when tilesets step fails"
-    );
-    assert_eq!(
-      tokio::fs::read_to_string(save_dir.join("save1.json")).await?,
-      "saved game",
-      "save directory must be preserved on partial failure"
-    );
-
-    Ok(())
-  }
-
-  #[tokio::test]
-  async fn test_master_reset_partial_failure_when_settings_save_fails()
-  -> TestResult {
-    let db = TestDatabase::builder().build()?;
-    let mods_repo =
-      SqliteInstalledModsRepository::new(db.pool().clone());
-    let soundpacks_repo =
-      SqliteInstalledSoundpacksRepository::new(db.pool().clone());
-    let tilesets_repo =
-      SqliteInstalledTilesetsRepository::new(db.pool().clone());
-    let failing_settings_repo =
-      FailingSettingsRepository { fail_save: true };
-
-    let temp_data = TempDir::new()?;
-    let variant = GameVariant::DarkDaysAhead;
-    let (save_dir, config_dir) =
-      seed_user_data(temp_data.path(), &variant).await?;
-
-    mods_repo.add_installed_mod("mod1", &variant).await?;
-    soundpacks_repo
-      .add_installed_soundpack("soundpack1", &variant)
-      .await?;
-    tilesets_repo
-      .add_installed_tileset("tileset1", &variant)
-      .await?;
-
-    let result = master_reset(
-      &variant,
-      temp_data.path(),
-      &mods_repo,
-      &soundpacks_repo,
-      &tilesets_repo,
-      &failing_settings_repo,
-    )
-    .await;
-
-    assert!(
-      matches!(result, Err(MasterResetError::ResetSettings(_))),
-      "expected settings save failure, got {result:?}"
-    );
-
-    // All steps before the settings save must have completed
-    assert!(
-      !config_dir.exists(),
-      "files should still be deleted before the settings step fails"
-    );
-    assert!(
-      !mods_repo.is_mod_installed("mod1", &variant).await?,
-      "mods should be deleted before the settings step"
-    );
-    assert!(
-      !soundpacks_repo
-        .is_soundpack_installed("soundpack1", &variant)
-        .await?,
-      "soundpacks should be deleted before the settings step"
-    );
-    assert!(
-      !tilesets_repo
-        .is_tileset_installed("tileset1", &variant)
-        .await?,
-      "tilesets should be deleted before the settings step"
     );
     assert_eq!(
       tokio::fs::read_to_string(save_dir.join("save1.json")).await?,

@@ -171,14 +171,3 @@ CREATE TABLE IF NOT EXISTS github_commit_mod_activity (
     FOREIGN KEY (mod_id, game_variant) REFERENCES mods (id, game_variant) ON DELETE CASCADE
 );
 
--- This table stores application settings.
-CREATE TABLE IF NOT EXISTS settings (
-    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
-    font_path TEXT
-);
-
--- This table stores the persisted color theme preference for the launcher.
-CREATE TABLE IF NOT EXISTS color_settings (
-    _id INTEGER PRIMARY KEY DEFAULT 1 CHECK(_id = 1),
-    theme_path TEXT
-);

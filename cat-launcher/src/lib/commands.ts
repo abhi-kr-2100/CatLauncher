@@ -2,10 +2,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 
 import type { BackupEntry } from "@/generated-types/BackupEntry";
-import type { CharacterAchievements } from "@/generated-types/CharacterAchievements";
-import type { ColorTheme } from "@/generated-types/ColorTheme";
 import type { DownloadProgress } from "@/generated-types/DownloadProgress";
-import type { Font } from "@/generated-types/Font";
 import type { GameEvent } from "@/generated-types/GameEvent";
 import type { GameRelease } from "@/generated-types/GameRelease";
 import type { GameReleaseStatus } from "@/generated-types/GameReleaseStatus";
@@ -16,7 +13,6 @@ import type { ManualBackupEntry } from "@/generated-types/ManualBackupEntry";
 import type { ModInstallationStatus } from "@/generated-types/ModInstallationStatus";
 import type { ModsUpdatePayload } from "@/generated-types/ModsUpdatePayload";
 import type { ReleasesUpdatePayload } from "@/generated-types/ReleasesUpdatePayload";
-import type { Settings } from "@/generated-types/Settings";
 import type { Soundpack } from "@/generated-types/Soundpack";
 import type { SoundpackInstallationStatus } from "@/generated-types/SoundpackInstallationStatus";
 import type { Theme } from "@/generated-types/Theme";
@@ -736,84 +732,4 @@ export async function uninstallThirdPartySoundpack(
  */
 export async function confirmQuit(): Promise<void> {
   await invoke("confirm_quit");
-}
-
-/**
- * Fetches all available system/application fonts.
- *
- * @returns A promise that resolves to an array of {@link Font}.
- */
-export async function getFonts(): Promise<Font[]> {
-  const response = await invoke<Font[]>("get_fonts");
-  return response;
-}
-
-/**
- * Fetches all available color themes.
- *
- * @returns A promise that resolves to an array of {@link ColorTheme}.
- */
-export async function getColorThemes(): Promise<ColorTheme[]> {
-  const response = await invoke<ColorTheme[]>("get_color_themes");
-  return response;
-}
-
-/**
- * Fetches the current application settings.
- *
- * @returns A promise that resolves to the current {@link Settings}.
- */
-export async function getSettings(): Promise<Settings> {
-  const response = await invoke<Settings>("get_settings");
-  return response;
-}
-
-/**
- * Fetches the default application settings.
- *
- * @returns A promise that resolves to the default {@link Settings}.
- */
-export async function getDefaultSettings(): Promise<Settings> {
-  const response = await invoke<Settings>("get_default_settings");
-  return response;
-}
-
-/**
- * Updates the application settings.
- *
- * @param settings - The new settings to apply.
- */
-export async function updateSettings(
-  settings: Settings,
-): Promise<void> {
-  await invoke("update_settings", { settings });
-}
-
-/**
- * Resets a game variant to its initial state, deleting all associated data.
- *
- * @param variant - The game variant to reset.
- */
-export async function masterReset(
-  variant: GameVariant,
-): Promise<void> {
-  await invoke("master_reset", { variant });
-}
-
-/**
- * Fetches character achievements for a specific variant.
- *
- * @param variant - The game variant.
- * @returns A promise that resolves to an array of {@link CharacterAchievements}.
- */
-export async function getAchievementsForVariant(
-  variant: GameVariant,
-): Promise<CharacterAchievements[]> {
-  const response = await invoke<CharacterAchievements[]>(
-    "get_achievements_for_variant",
-    {
-      variant,
-    },
-  );
-  return response;
 }

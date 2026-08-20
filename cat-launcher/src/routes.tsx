@@ -1,23 +1,13 @@
-import {
-  Award,
-  FileUp,
-  Gamepad2,
-  Info,
-  Music,
-  Settings,
-  Wrench,
-} from "lucide-react";
+import { FileUp, Gamepad2, Info, Music, Wrench } from "lucide-react";
 
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import AboutPage from "@/pages/AboutPage";
-import AchievementsPage from "@/pages/AchievementsPage";
 import ToolsPage from "@/pages/ToolsPage";
 import AssetsPage from "@/pages/AssetsPage";
 import BackupsPage from "@/pages/BackupsPage";
 import PlayPage from "@/pages/PlayPage";
-import SettingsPage from "@/pages/SettingsPage";
 
 /**
  * Defines the structure for a route in the application.
@@ -60,13 +50,6 @@ export const routes: BaseRoute[] = [
     icon: Gamepad2,
   },
   {
-    path: "/achievements/*",
-    element: <AchievementsPage />,
-    label: "Achievements",
-    icon: Award,
-    layout: "sidebar",
-  },
-  {
     path: "/tools/*",
     element: <ToolsPage />,
     label: "Tools",
@@ -85,12 +68,6 @@ export const routes: BaseRoute[] = [
     element: <AssetsPage />,
     label: "Mods, Music & Tiles",
     icon: Music,
-  },
-  {
-    path: "/settings",
-    element: <SettingsPage />,
-    label: "Settings",
-    icon: Settings,
   },
   {
     path: "/about",

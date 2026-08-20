@@ -12,11 +12,6 @@ pub fn get_db_path(data_dir: &Path) -> PathBuf {
   data_dir.join("cat-launcher.db")
 }
 
-/// Returns the path to the application settings file.
-pub fn get_settings_path(resource_dir: &Path) -> PathBuf {
-  resource_dir.join("settings.json")
-}
-
 /// Errors that can occur when getting the schema file path.
 #[derive(thiserror::Error, Debug)]
 pub enum GetSchemaFilePathError {
