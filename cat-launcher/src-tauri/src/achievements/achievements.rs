@@ -209,3 +209,279 @@ pub async fn get_achievements(
 
   Ok(result)
 }
+
+#[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::unwrap_used
+)]
+mod tests {
+  use super::*;
+  use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+  use crate::filesystem::paths::{
+    get_game_resources_dir, get_or_create_asset_installation_dir,
+    get_or_create_user_game_data_dir,
+  };
+  use crate::infra::testing::test_database::TestDatabase;
+  use crate::infra::utils::get_os_enum;
+  use tempfile::TempDir;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  #[tokio::test]
+  async fn test_get_achievements_missing_directory() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = TempDir::new()?;
+
+    for variant in [
+      GameVariant::DarkDaysAhead,
+      GameVariant::BrightNights,
+      GameVariant::TheLastGeneration,
+    ] {
+      // Intentionally do NOT create achievements directory to test missing directory handling
+      let result =
+        get_achievements(&variant, temp_data.path(), &active_repo)
+          .await?;
+
+      assert!(result.is_empty());
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_get_achievements_empty_directory() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = TempDir::new()?;
+
+    for variant in [
+      GameVariant::DarkDaysAhead,
+      GameVariant::BrightNights,
+      GameVariant::TheLastGeneration,
+    ] {
+      let user_data =
+        get_or_create_user_game_data_dir(&variant, temp_data.path())
+          .await?;
+      let ach_dir = user_data.join("achievements");
+      tokio::fs::create_dir_all(&ach_dir).await?;
+
+      let result =
+        get_achievements(&variant, temp_data.path(), &active_repo)
+          .await?;
+
+      assert!(result.is_empty());
+    }
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_get_achievements_no_active_release() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = TempDir::new()?;
+
+    for variant in [
+      GameVariant::DarkDaysAhead,
+      GameVariant::BrightNights,
+      GameVariant::TheLastGeneration,
+    ] {
+      let user_data =
+        get_or_create_user_game_data_dir(&variant, temp_data.path())
+          .await?;
+      let ach_dir = user_data.join("achievements");
+      tokio::fs::create_dir_all(&ach_dir).await?;
+
+      let ach_file = AchievementFile {
+        achievement_version: 1,
+        achievements: vec![
+          "ACH_FIRST_KILL".to_string(),
+          "ACH_SURVIVED_10_DAYS".to_string(),
+        ],
+        avatar_name: "Alice".to_string(),
+      };
+      let json_str = serde_json::to_string(&ach_file)?;
+      tokio::fs::write(ach_dir.join("alice.json"), json_str).await?;
+
+      let result =
+        get_achievements(&variant, temp_data.path(), &active_repo)
+          .await?;
+
+      assert_eq!(result.len(), 1);
+      assert_eq!(result[0].character_name, "Alice");
+      assert_eq!(result[0].achievements.len(), 2);
+      assert_eq!(result[0].achievements[0].name, "ACH_FIRST_KILL");
+      assert_eq!(
+        result[0].achievements[1].name,
+        "ACH_SURVIVED_10_DAYS"
+      );
+    }
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_get_achievements_missing_definitions_directory()
+  -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = TempDir::new()?;
+
+    for variant in [
+      GameVariant::DarkDaysAhead,
+      GameVariant::BrightNights,
+      GameVariant::TheLastGeneration,
+    ] {
+      let version = "v1.0.0";
+      active_repo.set_active_release(&variant, version).await?;
+
+      let install_dir = get_or_create_asset_installation_dir(
+        &variant,
+        version,
+        temp_data.path(),
+      )
+      .await?;
+      let game_dir = install_dir.join("cataclysm-dda");
+      tokio::fs::create_dir_all(&game_dir).await?;
+
+      // Intentionally do NOT create data/json/achievements.json directory or file to test missing definitions
+
+      let user_data =
+        get_or_create_user_game_data_dir(&variant, temp_data.path())
+          .await?;
+      let ach_dir = user_data.join("achievements");
+      tokio::fs::create_dir_all(&ach_dir).await?;
+
+      let ach_file = AchievementFile {
+        achievement_version: 1,
+        achievements: vec!["ACH_FIRST_KILL".to_string()],
+        avatar_name: "Charlie".to_string(),
+      };
+      tokio::fs::write(
+        ach_dir.join("charlie.json"),
+        serde_json::to_string(&ach_file)?,
+      )
+      .await?;
+
+      let result =
+        get_achievements(&variant, temp_data.path(), &active_repo)
+          .await?;
+
+      assert_eq!(result.len(), 1);
+      assert_eq!(result[0].character_name, "Charlie");
+      assert_eq!(result[0].achievements.len(), 1);
+      assert_eq!(result[0].achievements[0].name, "ACH_FIRST_KILL");
+    }
+
+    Ok(())
+  }
+
+  async fn run_achievements_with_definitions_case(
+    db: &TestDatabase,
+    temp_data: &TempDir,
+    variant: GameVariant,
+  ) -> TestResult {
+    let active_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let version = "v1.0.0";
+
+    // Set active release
+    active_repo.set_active_release(&variant, version).await?;
+
+    // Setup resources dir using helper function
+    let install_dir = get_or_create_asset_installation_dir(
+      &variant,
+      version,
+      temp_data.path(),
+    )
+    .await?;
+    let game_dir = install_dir.join("cataclysm-dda");
+    tokio::fs::create_dir_all(&game_dir).await?;
+
+    let current_os = get_os_enum(std::env::consts::OS)?;
+    let resources_dir = get_game_resources_dir(
+      &variant,
+      version,
+      temp_data.path(),
+      &current_os,
+    )
+    .await?;
+    let json_dir = resources_dir.join("data").join("json");
+    tokio::fs::create_dir_all(&json_dir).await?;
+
+    let defs_json = r#"[
+        {
+          "id": "ACH_FIRST_KILL",
+          "type": "achievement",
+          "name": "First Blood"
+        },
+        {
+          "id": "ACH_SURVIVED_10_DAYS",
+          "type": "achievement",
+          "name": { "str": "Decade of Survival" }
+        }
+      ]"#;
+    tokio::fs::write(json_dir.join("achievements.json"), defs_json)
+      .await?;
+
+    // Setup user character achievements
+    let user_data =
+      get_or_create_user_game_data_dir(&variant, temp_data.path())
+        .await?;
+    let ach_dir = user_data.join("achievements");
+    tokio::fs::create_dir_all(&ach_dir).await?;
+
+    let ach_file = AchievementFile {
+      achievement_version: 1,
+      achievements: vec![
+        "ACH_FIRST_KILL".to_string(),
+        "ACH_SURVIVED_10_DAYS".to_string(),
+      ],
+      avatar_name: "Bob".to_string(),
+    };
+    tokio::fs::write(
+      ach_dir.join("bob.json"),
+      serde_json::to_string(&ach_file)?,
+    )
+    .await?;
+
+    let result =
+      get_achievements(&variant, temp_data.path(), &active_repo)
+        .await?;
+
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].character_name, "Bob");
+    assert_eq!(result[0].achievements.len(), 2);
+    assert_eq!(result[0].achievements[0].name, "Decade of Survival");
+    assert_eq!(result[0].achievements[1].name, "First Blood");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_get_achievements_with_definitions() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let temp_data = TempDir::new()?;
+
+    for variant in [
+      GameVariant::DarkDaysAhead,
+      GameVariant::BrightNights,
+      GameVariant::TheLastGeneration,
+    ] {
+      run_achievements_with_definitions_case(
+        &db, &temp_data, variant,
+      )
+      .await?;
+    }
+
+    Ok(())
+  }
+}

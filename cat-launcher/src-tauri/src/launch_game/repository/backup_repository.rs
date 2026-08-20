@@ -49,6 +49,18 @@ pub trait BackupRepository: Send + Sync {
     timestamp: u64,
   ) -> Result<i64, BackupRepositoryError>;
 
+  /// Re-inserts a backup entry using its original id.
+  ///
+  /// Used to roll back a deletion that failed on the filesystem so that the
+  /// archive path derived from the id stays resolvable.
+  async fn reinsert_backup_entry(
+    &self,
+    id: i64,
+    game_variant: &GameVariant,
+    release_version: &str,
+    timestamp: u64,
+  ) -> Result<(), BackupRepositoryError>;
+
   /// Retrieves all backup entries for a specific game variant, sorted by timestamp.
   async fn get_backups_sorted_by_timestamp(
     &self,

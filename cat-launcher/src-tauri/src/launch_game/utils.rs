@@ -46,8 +46,16 @@ pub async fn backup_save_files(
   )
   .await?;
 
-  create_zip_archive(&user_data_dir, &dirs_to_backup, &archive_path)
-    .await?;
+  if let Err(e) =
+    create_zip_archive(&user_data_dir, &dirs_to_backup, &archive_path)
+      .await
+  {
+    // create_zip_archive may leave a partially written archive behind
+    // after creating the destination file; remove it so no orphaned
+    // file remains.
+    let _ = tokio::fs::remove_file(&archive_path).await;
+    return Err(e.into());
+  }
 
   Ok(())
 }

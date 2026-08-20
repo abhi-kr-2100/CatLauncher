@@ -52,6 +52,32 @@ impl BackupRepository for SqliteBackupRepository {
         .map_err(|e| BackupRepositoryError::Add(Box::new(e)))?
   }
 
+  async fn reinsert_backup_entry(
+    &self,
+    id: i64,
+    game_variant: &GameVariant,
+    release_version: &str,
+    timestamp: u64,
+  ) -> Result<(), BackupRepositoryError> {
+    let pool = self.pool.clone();
+    let game_variant = game_variant.to_string();
+    let release_version = release_version.to_string();
+
+    task::spawn_blocking(move || {
+            let conn = pool.get().map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
+            let timestamp_i64: i64 = timestamp.try_into().map_err(|e| {
+                BackupRepositoryError::Add(Box::new(e))
+            })?;
+            conn.execute(
+                "INSERT OR REPLACE INTO backups (id, game_variant, release_version, timestamp) VALUES (?1, ?2, ?3, ?4)",
+                rusqlite::params![id, game_variant, release_version, timestamp_i64],
+            ).map_err(|e| BackupRepositoryError::Add(Box::new(e)))?;
+            Ok(())
+        })
+        .await
+        .map_err(|e| BackupRepositoryError::Add(Box::new(e)))?
+  }
+
   async fn get_backups_sorted_by_timestamp(
     &self,
     game_variant: &GameVariant,

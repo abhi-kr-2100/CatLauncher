@@ -52,6 +52,33 @@ impl ManualBackupRepository for SqliteManualBackupRepository {
         .map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?
   }
 
+  async fn reinsert_manual_backup_entry(
+    &self,
+    id: i64,
+    name: &str,
+    game_variant: &GameVariant,
+    timestamp: u64,
+    notes: Option<String>,
+  ) -> Result<(), ManualBackupRepositoryError> {
+    let pool = self.pool.clone();
+    let name = name.to_string();
+    let game_variant = game_variant.to_string();
+
+    task::spawn_blocking(move || {
+            let conn = pool.get().map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?;
+            let timestamp_i64: i64 = timestamp.try_into().map_err(|e| {
+                ManualBackupRepositoryError::Add(Box::new(e))
+            })?;
+            conn.execute(
+                "INSERT OR REPLACE INTO manual_backups (id, name, game_variant, timestamp, notes) VALUES (?1, ?2, ?3, ?4, ?5)",
+                rusqlite::params![id, name, game_variant, timestamp_i64, notes],
+            ).map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?;
+            Ok(())
+        })
+        .await
+        .map_err(|e| ManualBackupRepositoryError::Add(Box::new(e)))?
+  }
+
   async fn get_manual_backups_sorted_by_timestamp(
     &self,
     game_variant: &GameVariant,
