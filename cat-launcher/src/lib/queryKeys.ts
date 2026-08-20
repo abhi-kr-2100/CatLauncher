@@ -140,28 +140,4 @@ export const queryKeys = {
    */
   lastPlayedWorld: (variant: GameVariant) =>
     ["last_played_world", variant] as const,
-
-  /**
-   * Key for the list of available fonts.
-   */
-  fonts: () => ["fonts"] as const,
-  /**
-   * Key for the list of available color themes.
-   */
-  colorThemes: () => ["color_themes"] as const,
-  /**
-   * Key for the application settings.
-   */
-  settings: () => ["settings"] as const,
-
-  /**
-   * Key for the default application settings.
-   */
-  defaultSettings: () => ["default_settings"] as const,
-
-  /**
-   * Key for character achievements of a specific variant.
-   */
-  achievements: (variant: GameVariant) =>
-    ["achievements", variant] as const,
 };

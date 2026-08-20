@@ -6,7 +6,6 @@ use crate::master_reset::reset::{
   master_reset as master_reset_fn, MasterResetError,
 };
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
-use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
 use crate::variants::GameVariant;
@@ -33,7 +32,6 @@ pub async fn master_reset(
     '_,
     SqliteInstalledTilesetsRepository,
   >,
-  settings_repository: State<'_, SqliteSettingsRepository>,
 ) -> Result<(), MasterResetCommandError> {
   let data_dir = app_handle.path().app_local_data_dir()?;
 
@@ -43,7 +41,6 @@ pub async fn master_reset(
     installed_mods_repository.inner(),
     installed_soundpacks_repository.inner(),
     installed_tilesets_repository.inner(),
-    settings_repository.inner(),
   )
   .await?;
 

@@ -26,31 +26,12 @@ use crate::mods::online::bright_nights::BrightNightsModRepository;
 use crate::mods::repository::sqlite_installed_mods_repository::SqliteInstalledModsRepository;
 use crate::mods::repository::sqlite_mods_repository::SqliteModsRepository;
 use crate::play_time::sqlite_play_time_repository::SqlitePlayTimeRepository;
-use crate::settings::repository::settings_repository::SettingsRepository;
-use crate::settings::repository::settings_repository::GetSettingsError;
-use crate::settings::repository::sqlite_settings_repository::SqliteSettingsRepository;
 use crate::soundpacks::repository::sqlite_installed_soundpacks_repository::SqliteInstalledSoundpacksRepository;
 use crate::theme::sqlite_theme_preference_repository::SqliteThemePreferenceRepository;
 use crate::tilesets::repository::sqlite_installed_tilesets_repository::SqliteInstalledTilesetsRepository;
 use crate::users::repository::sqlite_users_repository::SqliteUsersRepository;
 use crate::users::service::get_or_create_user_id;
 use crate::variants::repository::sqlite_game_variant_order_repository::SqliteGameVariantOrderRepository;
-
-#[derive(thiserror::Error, Debug)]
-pub enum ManageSettingsError {
-  #[error("failed to get settings: {0}")]
-  Get(#[from] GetSettingsError),
-}
-
-pub fn manage_settings(app: &App) -> Result<(), ManageSettingsError> {
-  let settings_repo = app.state::<SqliteSettingsRepository>();
-  let settings =
-    tauri::async_runtime::block_on(settings_repo.get_settings())?;
-
-  app.manage(settings);
-
-  Ok(())
-}
 
 pub fn autoupdate(app: &App) {
   let handle = app.handle();
@@ -91,7 +72,6 @@ pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   app.manage(SqlitePlayTimeRepository::new(pool.clone()));
   app.manage(SqliteGameVariantOrderRepository::new(pool.clone()));
   app.manage(SqliteThemePreferenceRepository::new(pool.clone()));
-  app.manage(SqliteSettingsRepository::new(pool.clone()));
   app.manage(SqliteInstalledModsRepository::new(pool.clone()));
   app.manage(SqliteModsRepository::new(pool.clone()));
   app.manage(SqliteInstalledTilesetsRepository::new(pool.clone()));
