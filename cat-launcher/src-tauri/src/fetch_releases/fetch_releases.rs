@@ -59,9 +59,9 @@ pub enum FetchReleaseNotesError {
 impl GameVariant {
   pub async fn fetch_releases<E, F>(
     &self,
-    client: &dyn HttpClient,
+    client: &impl HttpClient,
     resources_dir: &Path,
-    releases_repository: &dyn ReleasesRepository,
+    releases_repository: &impl ReleasesRepository,
     on_releases: F,
     os: &OS,
     arch: &Arch,
@@ -122,8 +122,8 @@ impl GameVariant {
   pub async fn fetch_release_notes(
     &self,
     release_id: &str,
-    client: &dyn HttpClient,
-    releases_repository: &dyn ReleasesRepository,
+    client: &impl HttpClient,
+    releases_repository: &impl ReleasesRepository,
   ) -> Result<Option<String>, FetchReleaseNotesError> {
     let cached_release = releases_repository
       .get_cached_release_by_tag(self, release_id)
@@ -179,7 +179,7 @@ mod tests {
     std::result::Result<T, Box<dyn std::error::Error>>;
 
   async fn setup()
-  -> TestResult<(TestDatabase, MockServer, Arc<TestHttpClient>)> {
+  -> TestResult<(TestDatabase, MockServer, TestHttpClient)> {
     let db = TestDatabase::builder().build()?;
     let server = MockServer::start().await?;
 
@@ -191,7 +191,7 @@ mod tests {
     host_mappings
       .insert("api.github.com".to_string(), host_port.to_string());
 
-    let client = Arc::new(TestHttpClient::new(host_mappings)?);
+    let client = TestHttpClient::new(host_mappings)?;
 
     Ok((db, server, client))
   }
@@ -219,9 +219,8 @@ mod tests {
       )
       .await?;
 
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await?;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await?;
 
     if result != Some(body.to_string()) {
       return Err(
@@ -276,9 +275,8 @@ mod tests {
       )
       .await;
 
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await?;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await?;
 
     if result != Some(body.to_string()) {
       return Err(
@@ -333,9 +331,8 @@ mod tests {
       )
       .await;
 
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await?;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await?;
 
     if result != Some(body.to_string()) {
       return Err(
@@ -389,9 +386,8 @@ mod tests {
     let tag = "missing-tag";
 
     // GitHub is empty, should 404
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await;
 
     match result {
       Err(FetchReleaseNotesError::Fetch(_)) => Ok(()),
@@ -420,9 +416,8 @@ mod tests {
       )
       .await?;
 
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await;
 
     match result {
       Err(FetchReleaseNotesError::Fetch(_)) => Ok(()),
@@ -454,9 +449,8 @@ mod tests {
       )
       .await;
 
-    let result = variant
-      .fetch_release_notes(tag, client.as_ref(), &repo)
-      .await?;
+    let result =
+      variant.fetch_release_notes(tag, &client, &repo).await?;
 
     if result != Some(body.to_string()) {
       return Err(
@@ -502,9 +496,8 @@ mod tests {
 
       server.add_release(owner, repo_name, mock_release).await;
 
-      let result = variant
-        .fetch_release_notes(tag, client.as_ref(), &repo)
-        .await?;
+      let result =
+        variant.fetch_release_notes(tag, &client, &repo).await?;
 
       if result != Some(body.to_string()) {
         return Err(

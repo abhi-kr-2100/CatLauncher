@@ -70,7 +70,7 @@ pub fn merge_releases(
 pub async fn get_assets(
   release: &GameRelease,
   resources_dir: &Path,
-  releases_repository: &dyn ReleasesRepository,
+  releases_repository: &impl ReleasesRepository,
 ) -> Vec<GitHubAsset> {
   let cached_releases = releases_repository
     .get_cached_releases(&release.variant)

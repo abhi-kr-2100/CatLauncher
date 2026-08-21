@@ -15,7 +15,7 @@ impl GameVariant {
   /// Retrieves the version of the currently active release for this variant.
   pub async fn get_active_release(
     &self,
-    repository: &dyn ActiveReleaseRepository,
+    repository: &impl ActiveReleaseRepository,
   ) -> Result<Option<String>, ActiveReleaseError> {
     Ok(repository.get_active_release(self).await?)
   }
@@ -24,7 +24,7 @@ impl GameVariant {
   pub async fn set_active_release(
     &self,
     version: &str,
-    repository: &dyn ActiveReleaseRepository,
+    repository: &impl ActiveReleaseRepository,
   ) -> Result<(), ActiveReleaseError> {
     repository.set_active_release(self, version).await?;
     Ok(())

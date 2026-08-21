@@ -91,7 +91,7 @@ pub async fn get_release_by_id(
   os: &OS,
   data_dir: &Path,
   resources_dir: &Path,
-  releases_repository: &dyn ReleasesRepository,
+  releases_repository: &impl ReleasesRepository,
 ) -> Result<GameRelease, GetReleaseError> {
   let cached_releases = releases_repository
     .get_cached_releases(variant)

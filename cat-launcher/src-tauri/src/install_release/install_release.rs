@@ -74,8 +74,8 @@ impl GameRelease {
     arch: &Arch,
     data_dir: &Path,
     resources_dir: &Path,
-    releases_repository: &dyn ReleasesRepository,
-    active_release_repository: &dyn ActiveReleaseRepository,
+    releases_repository: &impl ReleasesRepository,
+    active_release_repository: &impl ActiveReleaseRepository,
     progress: Arc<dyn Reporter + Send + Sync>,
   ) -> Result<(), ReleaseInstallationError> {
     if self.status == GameReleaseStatus::Unknown {

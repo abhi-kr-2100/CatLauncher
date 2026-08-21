@@ -18,7 +18,7 @@ pub enum GetLastCommitError {
 
 pub async fn get_last_commit(
   repo: &str,
-  client: &dyn HttpClient,
+  client: &impl HttpClient,
 ) -> Result<GitHubCommit, GetLastCommitError> {
   let api_url = format!(
     "https://api.github.com/repos/{}/commits?per_page=1",

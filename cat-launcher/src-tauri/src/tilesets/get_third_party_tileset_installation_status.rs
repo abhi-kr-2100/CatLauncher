@@ -16,7 +16,7 @@ pub enum GetThirdPartyTilesetInstallationStatusError {
 pub async fn get_third_party_tileset_installation_status(
   tileset_id: &str,
   variant: &GameVariant,
-  repository: &dyn InstalledTilesetsRepository,
+  repository: &impl InstalledTilesetsRepository,
 ) -> Result<
   TilesetInstallationStatus,
   GetThirdPartyTilesetInstallationStatusError,

@@ -1,5 +1,4 @@
 use std::env::consts::{ARCH, OS};
-use std::sync::Arc;
 
 use tauri::{AppHandle, Emitter, Manager, State, command};
 
@@ -9,7 +8,7 @@ use crate::fetch_releases::fetch_releases::{
   FetchReleaseNotesError, FetchReleasesError, ReleasesUpdatePayload,
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::infra::http_client::HttpClient;
+use crate::infra::http_client::ReqwestHttpClient;
 use crate::infra::utils::{
   ArchNotSupportedError, OSNotSupportedError, get_arch_enum,
   get_os_enum,
@@ -36,7 +35,7 @@ pub async fn fetch_releases_for_variant(
   app_handle: AppHandle,
   variant: GameVariant,
   releases_repository: State<'_, SqliteReleasesRepository>,
-  client: State<'_, Arc<dyn HttpClient>>,
+  client: State<'_, ReqwestHttpClient>,
 ) -> Result<(), FetchReleasesCommandError> {
   let resources_dir = app_handle.path().resource_dir()?;
   let os = get_os_enum(OS)?;
@@ -49,7 +48,7 @@ pub async fn fetch_releases_for_variant(
 
   variant
     .fetch_releases(
-      client.inner().as_ref(),
+      client.inner(),
       &resources_dir,
       &*releases_repository,
       on_releases,
@@ -72,12 +71,12 @@ pub async fn fetch_release_notes(
   variant: GameVariant,
   release_id: String,
   releases_repository: State<'_, SqliteReleasesRepository>,
-  client: State<'_, Arc<dyn HttpClient>>,
+  client: State<'_, ReqwestHttpClient>,
 ) -> Result<Option<String>, FetchReleaseNotesCommandError> {
   let notes = variant
     .fetch_release_notes(
       &release_id,
-      client.inner().as_ref(),
+      client.inner(),
       &*releases_repository,
     )
     .await?;
