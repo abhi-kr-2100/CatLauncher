@@ -13,7 +13,7 @@ pub enum GetThirdPartySoundpackInstallationStatusError {
 pub async fn get_third_party_soundpack_installation_status(
   soundpack_id: &str,
   variant: &GameVariant,
-  repository: &dyn InstalledSoundpacksRepository,
+  repository: &impl InstalledSoundpacksRepository,
 ) -> Result<
   SoundpackInstallationStatus,
   GetThirdPartySoundpackInstallationStatusError,

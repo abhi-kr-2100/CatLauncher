@@ -55,9 +55,9 @@ async fn should_skip(
 pub async fn master_reset(
   variant: &GameVariant,
   data_dir: &Path,
-  installed_mods_repository: &dyn InstalledModsRepository,
-  installed_soundpacks_repository: &dyn InstalledSoundpacksRepository,
-  installed_tilesets_repository: &dyn InstalledTilesetsRepository,
+  installed_mods_repository: &impl InstalledModsRepository,
+  installed_soundpacks_repository: &impl InstalledSoundpacksRepository,
+  installed_tilesets_repository: &impl InstalledTilesetsRepository,
 ) -> Result<(), MasterResetError> {
   let user_data_dir =
     get_or_create_user_game_data_dir(variant, data_dir).await?;

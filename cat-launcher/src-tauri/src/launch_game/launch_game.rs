@@ -127,7 +127,7 @@ impl GameRelease {
     world: Option<&str>,
     timestamp: u64,
     data_dir: &Path,
-    backup_repository: &dyn BackupRepository,
+    backup_repository: &impl BackupRepository,
   ) -> Result<(Command, Option<BackupError>), LaunchGameError> {
     let executable_path = get_game_executable_filepath(
       &self.variant,
@@ -310,9 +310,9 @@ pub async fn launch_and_monitor_game<F, Fut>(
   timestamp: u64,
   data_dir: &Path,
   resource_dir: &Path,
-  releases_repository: &dyn ReleasesRepository,
+  releases_repository: &impl ReleasesRepository,
   backup_repository: impl BackupRepository + Clone + 'static,
-  active_release_repository: &dyn ActiveReleaseRepository,
+  active_release_repository: &impl ActiveReleaseRepository,
   on_game_event: F,
 ) -> Result<(), LaunchGameError>
 where

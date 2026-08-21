@@ -8,7 +8,7 @@ use cat_macros::CommandErrorSerialize;
 
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::infra::download::Downloader;
-use crate::infra::http_client::HttpClient;
+use crate::infra::http_client::ReqwestHttpClient;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
 use crate::infra::utils::{get_os_enum, OSNotSupportedError};
 use crate::mods::get_last_activity_for_third_party_mod::{
@@ -57,7 +57,7 @@ pub async fn list_all_mods_command(
     '_,
     OnlineModRepositoryRegistry,
   >,
-  client: State<'_, Arc<dyn HttpClient>>,
+  client: State<'_, ReqwestHttpClient>,
 ) -> Result<(), ListAllModsCommandError> {
   let data_dir = app.path().app_local_data_dir()?;
   let resource_dir = app.path().resource_dir()?;
@@ -77,7 +77,7 @@ pub async fn list_all_mods_command(
     active_release_repository.inner(),
     mods_repository.inner(),
     online_mod_repository_registry.repositories(),
-    client.inner().as_ref(),
+    client.inner(),
     on_update,
   )
   .await?;
@@ -198,13 +198,13 @@ pub enum GetLastActivityCommandError {
 pub async fn get_last_activity_on_third_party_mod_command(
   id: String,
   variant: GameVariant,
-  client: State<'_, Arc<dyn HttpClient>>,
+  client: State<'_, ReqwestHttpClient>,
   mods_repository: State<'_, SqliteModsRepository>,
 ) -> Result<LastModActivity, GetLastActivityCommandError> {
   let last_activity = get_last_activity_for_third_party_mod(
     &id,
     &variant,
-    client.inner().as_ref(),
+    client.inner(),
     mods_repository.inner(),
   )
   .await?;

@@ -16,7 +16,7 @@ pub enum GetThirdPartyModInstallationStatusError {
 pub async fn get_third_party_mod_installation_status(
   mod_id: &str,
   variant: &GameVariant,
-  repository: &dyn InstalledModsRepository,
+  repository: &impl InstalledModsRepository,
 ) -> Result<
   ModInstallationStatus,
   GetThirdPartyModInstallationStatusError,

@@ -72,7 +72,7 @@ impl GameRelease {
     os: &OS,
     arch: &Arch,
     resources_dir: &Path,
-    releases_repository: &dyn ReleasesRepository,
+    releases_repository: &impl ReleasesRepository,
   ) -> Option<GitHubAsset> {
     let assets =
       get_assets(self, resources_dir, releases_repository).await;

@@ -81,10 +81,8 @@ pub async fn get_all_tips_for_variant(
   variant: &GameVariant,
   data_dir: &std::path::Path,
   os: &OS,
-  active_release_repository: &(
-     dyn ActiveReleaseRepository + Send + Sync
-   ),
-  releases_repository: &(dyn ReleasesRepository + Send + Sync),
+  active_release_repository: &impl ActiveReleaseRepository,
+  releases_repository: &impl ReleasesRepository,
 ) -> Result<Vec<String>, GetAllTipsForVariantError> {
   if let Some(active_release) = active_release_repository
     .get_active_release(variant)

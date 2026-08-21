@@ -25,7 +25,7 @@ fn next_page_url(link_header: &str) -> Option<String> {
 }
 
 pub async fn fetch_github_releases(
-  client: &dyn HttpClient,
+  client: &impl HttpClient,
   repo: &str,
   num_releases: Option<usize>,
 ) -> Result<Vec<GitHubRelease>, GitHubReleaseFetchError> {
@@ -87,7 +87,7 @@ pub enum FetchGitHubReleaseByTagError {
 }
 
 pub async fn fetch_github_release_by_tag(
-  client: &dyn HttpClient,
+  client: &impl HttpClient,
   repo: &str,
   tag: &str,
 ) -> Result<GitHubRelease, FetchGitHubReleaseByTagError> {

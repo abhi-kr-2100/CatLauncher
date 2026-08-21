@@ -58,7 +58,7 @@ pub fn extract_repo_from_github_url(url_str: &str) -> Option<String> {
 pub async fn get_last_activity_for_third_party_mod(
   mod_id: &str,
   variant: &GameVariant,
-  client: &dyn HttpClient,
+  client: &impl HttpClient,
   mods_repository: &impl ModsRepository,
 ) -> Result<LastModActivity, GetLastActivityForThirdPartyModError> {
   let mod_data =

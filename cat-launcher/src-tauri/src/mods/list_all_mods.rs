@@ -99,7 +99,7 @@ pub async fn list_all_mods<F, E>(
   active_release_repository: &impl ActiveReleaseRepository,
   mods_repository: &impl ModsRepository,
   online_mod_repositories: &[Box<dyn OnlineModRepository>],
-  client: &dyn HttpClient,
+  client: &impl HttpClient,
   on_update: F,
 ) -> Result<(), ListAllModsError<E>>
 where
