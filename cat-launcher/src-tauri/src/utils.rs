@@ -7,8 +7,12 @@ use tauri::{App, Emitter, Listener, Manager, WindowEvent};
 use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
 use crate::constants::PARALLEL_REQUESTS;
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
-use crate::filesystem::paths::{get_db_path, get_schema_file_path};
-use crate::filesystem::paths::GetSchemaFilePathError;
+use crate::filesystem::paths::{
+  get_or_create_db_path, get_schema_file_path,
+};
+use crate::filesystem::paths::{
+  GetOrCreateDirectoryError, GetSchemaFilePathError,
+};
 use crate::filesystem::utils::{copy_dir_all, CopyDirError};
 use crate::infra::autoupdate::update::run_updater;
 use crate::infra::download::Downloader;
@@ -68,6 +72,9 @@ pub enum RepositoryError {
   #[error("failed to get system directory: {0}")]
   SystemDir(#[from] tauri::Error),
 
+  #[error("failed to get database path: {0}")]
+  DbPath(#[from] GetOrCreateDirectoryError),
+
   #[error("failed to get schema file path: {0}")]
   SchemaFilePath(#[from] GetSchemaFilePathError),
 
@@ -77,7 +84,8 @@ pub enum RepositoryError {
 
 pub fn manage_repositories(app: &App) -> Result<(), RepositoryError> {
   let data_dir = app.path().app_local_data_dir()?;
-  let db_path = get_db_path(&data_dir);
+  let db_path =
+    tauri::async_runtime::block_on(get_or_create_db_path(&data_dir))?;
 
   let resources_dir = app.path().resource_dir()?;
   let schema_path = get_schema_file_path(&resources_dir)?;
