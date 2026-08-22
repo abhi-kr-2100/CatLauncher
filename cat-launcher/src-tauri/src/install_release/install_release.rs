@@ -18,7 +18,7 @@ use crate::game_release::game_release::{
 use crate::infra::archive::{ExtractionError, extract_archive};
 use crate::infra::download::Downloader;
 use crate::infra::github::asset::AssetDownloadError;
-use crate::infra::utils::{Arch, OS};
+use crate::infra::utils::HostSystem;
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 
 /// Errors that can occur during the release installation process.
@@ -70,8 +70,7 @@ impl GameRelease {
   pub async fn install_release(
     &mut self,
     downloader: &Downloader,
-    os: &OS,
-    arch: &Arch,
+    host_system: &HostSystem,
     data_dir: &Path,
     resources_dir: &Path,
     releases_repository: &impl ReleasesRepository,
@@ -79,8 +78,9 @@ impl GameRelease {
     progress: Arc<dyn Reporter + Send + Sync>,
   ) -> Result<(), ReleaseInstallationError> {
     if self.status == GameReleaseStatus::Unknown {
-      self.status =
-        self.get_installation_status(os, data_dir).await?;
+      self.status = self
+        .get_installation_status(&host_system.os, data_dir)
+        .await?;
     }
 
     if self.status == GameReleaseStatus::ReadyToPlay {
@@ -95,7 +95,7 @@ impl GameRelease {
       get_or_create_asset_download_dir(&self.variant, data_dir)
         .await?;
     let asset = self
-      .get_asset(os, arch, resources_dir, releases_repository)
+      .get_asset(host_system, resources_dir, releases_repository)
       .await
       .ok_or(ReleaseInstallationError::NoCompatibleAsset)?;
 
@@ -115,8 +115,12 @@ impl GameRelease {
     )
     .await?;
 
-    extract_archive(&download_filepath, &installation_dir, os)
-      .await?;
+    extract_archive(
+      &download_filepath,
+      &installation_dir,
+      &host_system.os,
+    )
+    .await?;
 
     self.status = GameReleaseStatus::ReadyToPlay;
 
@@ -192,7 +196,7 @@ mod tests {
   use crate::infra::github::release::GitHubRelease;
   use crate::infra::http_client::ReqwestHttpClient;
   use crate::infra::testing::test_database::TestDatabase;
-  use crate::infra::utils::{Arch, OS};
+  use crate::infra::utils::{Arch, HostSystem, OS};
   use crate::variants::GameVariant;
   use chrono::Utc;
   use downloader::progress::Reporter;
@@ -238,15 +242,15 @@ mod tests {
 
   fn get_test_archive_path(
     variant: GameVariant,
-    os: &OS,
-    arch: &Arch,
+    host_system: &HostSystem,
   ) -> PathBuf {
-    let extension = match os {
+    let extension = match host_system.os {
       OS::Linux => "tar.gz",
       OS::Windows => "zip",
       OS::Mac => "dmg",
     };
-    let substrings = get_platform_asset_substrs(&variant, os, arch);
+    let substrings =
+      get_platform_asset_substrs(&variant, host_system);
     let assets_dir = get_test_assets_dir(variant);
     let mut matches: Vec<PathBuf> = std::fs::read_dir(&assets_dir)
       .expect("failed to read test assets dir")
@@ -302,19 +306,31 @@ mod tests {
     }
   }
 
-  const PLATFORMS: [(OS, Arch); 4] = [
-    (OS::Linux, Arch::X64),
-    (OS::Windows, Arch::X64),
-    (OS::Mac, Arch::ARM64),
-    (OS::Mac, Arch::X64),
+  const PLATFORMS: [HostSystem; 4] = [
+    HostSystem {
+      os: OS::Linux,
+      arch: Arch::X64,
+    },
+    HostSystem {
+      os: OS::Windows,
+      arch: Arch::X64,
+    },
+    HostSystem {
+      os: OS::Mac,
+      arch: Arch::ARM64,
+    },
+    HostSystem {
+      os: OS::Mac,
+      arch: Arch::X64,
+    },
   ];
 
   /// Expected first asset substring for each supported platform combination.
   fn expected_asset_substr(
     variant: GameVariant,
-    os: &OS,
-    arch: &Arch,
+    host_system: &HostSystem,
   ) -> &'static str {
+    let HostSystem { os, arch } = host_system;
     match (variant, os, arch) {
       (GameVariant::DarkDaysAhead, OS::Windows, _) => {
         "windows-with-graphics-and-sounds"
@@ -379,8 +395,10 @@ mod tests {
       release
         .install_release(
           &downloader,
-          &OS::Linux,
-          &Arch::X64,
+          &HostSystem {
+            os: OS::Linux,
+            arch: Arch::X64,
+          },
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -436,8 +454,10 @@ mod tests {
       release
         .install_release(
           &downloader,
-          &OS::Linux,
-          &Arch::X64,
+          &HostSystem {
+            os: OS::Linux,
+            arch: Arch::X64,
+          },
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -498,8 +518,10 @@ mod tests {
       let result = release
         .install_release(
           &downloader,
-          &OS::Linux,
-          &Arch::X64,
+          &HostSystem {
+            os: OS::Linux,
+            arch: Arch::X64,
+          },
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -539,10 +561,12 @@ mod tests {
       let parts: Vec<&str> = repo_full.split('/').collect();
       let (owner, repo_name) = (parts[0], parts[1]);
       let version = "cdda-exp-1";
-      let os = OS::Linux;
-      let arch = Arch::X64;
+      let host_system = HostSystem {
+        os: OS::Linux,
+        arch: Arch::X64,
+      };
 
-      let archive_path = get_test_archive_path(variant, &os, &arch);
+      let archive_path = get_test_archive_path(variant, &host_system);
       let asset_name = get_test_asset_name(&archive_path);
       let content_type = if asset_name.ends_with(".zip") {
         "application/zip"
@@ -596,8 +620,7 @@ mod tests {
       release
         .install_release(
           &downloader,
-          &os,
-          &arch,
+          &host_system,
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -624,7 +647,7 @@ mod tests {
         &variant,
         version,
         temp_data.path(),
-        &os,
+        &host_system.os,
       )
       .await?;
       assert!(
@@ -655,10 +678,12 @@ mod tests {
     .enumerate()
     {
       let version = "cdda-local-1";
-      let os = OS::Linux;
-      let arch = Arch::X64;
+      let host_system = HostSystem {
+        os: OS::Linux,
+        arch: Arch::X64,
+      };
 
-      let archive_path = get_test_archive_path(variant, &os, &arch);
+      let archive_path = get_test_archive_path(variant, &host_system);
       let asset_name = get_test_asset_name(&archive_path);
 
       let download_dir =
@@ -696,8 +721,7 @@ mod tests {
       release
         .install_release(
           &downloader,
-          &os,
-          &arch,
+          &host_system,
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -713,7 +737,7 @@ mod tests {
         &variant,
         version,
         temp_data.path(),
-        &os,
+        &host_system.os,
       )
       .await?;
       assert!(
@@ -746,8 +770,10 @@ mod tests {
     .into_iter()
     .enumerate()
     {
-      let os = OS::Linux;
-      let arch = Arch::X64;
+      let host_system = HostSystem {
+        os: OS::Linux,
+        arch: Arch::X64,
+      };
 
       let old_version = "v0.1.0";
       let old_install_dir = get_or_create_asset_installation_dir(
@@ -765,7 +791,7 @@ mod tests {
       .await?;
 
       let new_version = "v0.2.0";
-      let archive_path = get_test_archive_path(variant, &os, &arch);
+      let archive_path = get_test_archive_path(variant, &host_system);
       let asset_name = get_test_asset_name(&archive_path);
 
       let download_dir =
@@ -803,8 +829,7 @@ mod tests {
       release
         .install_release(
           &downloader,
-          &os,
-          &arch,
+          &host_system,
           temp_data.path(),
           temp_res.path(),
           &releases_repo,
@@ -834,7 +859,7 @@ mod tests {
         &variant,
         new_version,
         temp_data.path(),
-        &os,
+        &host_system.os,
       )
       .await?;
       assert!(
@@ -865,13 +890,13 @@ mod tests {
     {
       let version = "v1.0.0";
 
-      for (os, arch) in PLATFORMS {
+      for host_system in PLATFORMS {
         let asset_substrs =
-          get_platform_asset_substrs(&variant, &os, &arch);
+          get_platform_asset_substrs(&variant, &host_system);
         assert_eq!(
           asset_substrs[0],
-          expected_asset_substr(variant, &os, &arch),
-          "unexpected asset mapping for {variant:?} on {os:?}/{arch:?}"
+          expected_asset_substr(variant, &host_system),
+          "unexpected asset mapping for {variant:?} on {host_system:?}"
         );
         let asset_name = format!("{}-test.zip", asset_substrs[0]);
 
@@ -907,8 +932,7 @@ mod tests {
         let result = release
           .install_release(
             &downloader,
-            &os,
-            &arch,
+            &host_system,
             temp_data.path(),
             temp_res.path(),
             &releases_repo,
@@ -944,13 +968,13 @@ mod tests {
     {
       let version = "v1.0.0";
 
-      for (os, arch) in PLATFORMS {
+      for host_system in PLATFORMS {
         let asset_substrs =
-          get_platform_asset_substrs(&variant, &os, &arch);
+          get_platform_asset_substrs(&variant, &host_system);
         assert_eq!(
           asset_substrs[0],
-          expected_asset_substr(variant, &os, &arch),
-          "unexpected asset mapping for {variant:?} on {os:?}/{arch:?}"
+          expected_asset_substr(variant, &host_system),
+          "unexpected asset mapping for {variant:?} on {host_system:?}"
         );
         let asset_name = format!("{}-test.zip", asset_substrs[0]);
 
@@ -992,8 +1016,7 @@ mod tests {
         let result = release
           .install_release(
             &downloader,
-            &os,
-            &arch,
+            &host_system,
             temp_data.path(),
             temp_res.path(),
             &releases_repo,

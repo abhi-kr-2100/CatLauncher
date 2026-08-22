@@ -12,7 +12,7 @@ use crate::game_release::utils::{
 };
 use crate::infra::github::asset::GitHubAsset;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::{Arch, OS, read_from_file};
+use crate::infra::utils::{HostSystem, read_from_file};
 use crate::variants::GameVariant;
 
 pub async fn get_default_releases(
@@ -94,10 +94,10 @@ pub async fn get_assets(
 pub fn is_installable(
   variant: &GameVariant,
   release: &GitHubRelease,
-  os: &OS,
-  arch: &Arch,
+  host_system: &HostSystem,
 ) -> bool {
-  let asset_substrs = get_platform_asset_substrs(variant, os, arch);
+  let asset_substrs =
+    get_platform_asset_substrs(variant, host_system);
   release.assets.iter().any(|asset| {
     asset_substrs
       .iter()
@@ -109,13 +109,12 @@ pub fn get_releases_payload(
   variant: &GameVariant,
   gh_releases: &[GitHubRelease],
   status: ReleasesUpdateStatus,
-  os: &OS,
-  arch: &Arch,
+  host_system: &HostSystem,
 ) -> ReleasesUpdatePayload {
   let releases: Vec<GameRelease> = gh_releases
     .iter()
     .filter_map(|r| {
-      if !is_installable(variant, r, os, arch) {
+      if !is_installable(variant, r, host_system) {
         return None;
       }
 

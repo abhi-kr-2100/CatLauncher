@@ -16,7 +16,7 @@ use crate::infra::github::utils::{
   fetch_github_release_by_tag, fetch_github_releases,
 };
 use crate::infra::http_client::HttpClient;
-use crate::infra::utils::{Arch, OS, get_github_repo_for_variant};
+use crate::infra::utils::{HostSystem, get_github_repo_for_variant};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug)]
@@ -63,8 +63,7 @@ impl GameVariant {
     resources_dir: &Path,
     releases_repository: &impl ReleasesRepository,
     on_releases: F,
-    os: &OS,
-    arch: &Arch,
+    host_system: &HostSystem,
   ) -> Result<(), FetchReleasesError<E>>
   where
     E: Error,
@@ -77,8 +76,7 @@ impl GameVariant {
       self,
       &cached_releases,
       ReleasesUpdateStatus::Fetching,
-      os,
-      arch,
+      host_system,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
@@ -97,8 +95,7 @@ impl GameVariant {
       self,
       &fetched_releases,
       ReleasesUpdateStatus::Fetching,
-      os,
-      arch,
+      host_system,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
@@ -111,8 +108,7 @@ impl GameVariant {
       self,
       &default_releases,
       ReleasesUpdateStatus::Success,
-      os,
-      arch,
+      host_system,
     );
     on_releases(payload).map_err(FetchReleasesError::Send)?;
 
@@ -167,7 +163,7 @@ mod tests {
   use crate::infra::github::release::GitHubRelease;
   use crate::infra::testing::http_client::TestHttpClient;
   use crate::infra::testing::test_database::TestDatabase;
-  use crate::infra::utils::{Arch, OS};
+  use crate::infra::utils::{Arch, HostSystem, OS};
   use crate::variants::GameVariant;
   use chrono::Utc;
   use github_mock_api::{MockServer, Release as MockRelease};
@@ -617,8 +613,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -682,8 +680,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await;
 
@@ -733,8 +733,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -770,8 +772,10 @@ mod tests {
         &resources_dir,
         &repo,
         |_| Ok::<(), std::io::Error>(()),
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -810,8 +814,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -861,8 +867,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -929,8 +937,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 
@@ -962,8 +972,10 @@ mod tests {
         &resources_dir,
         &repo,
         |_| Ok::<(), std::io::Error>(()),
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await;
 
@@ -993,8 +1005,10 @@ mod tests {
         &resources_dir,
         &repo,
         |_| Ok::<(), std::io::Error>(()),
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await;
 
@@ -1024,8 +1038,10 @@ mod tests {
             "callback error",
           ))
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await;
 
@@ -1081,8 +1097,10 @@ mod tests {
             .push(payload);
           Ok::<(), std::io::Error>(())
         },
-        &OS::Windows,
-        &Arch::X64,
+        &HostSystem {
+          os: OS::Windows,
+          arch: Arch::X64,
+        },
       )
       .await?;
 

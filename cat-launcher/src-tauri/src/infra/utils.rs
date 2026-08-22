@@ -91,6 +91,33 @@ pub fn get_arch_enum(
   }
 }
 
+#[derive(Debug, PartialEq)]
+pub struct HostSystem {
+  pub os: OS,
+  pub arch: Arch,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum HostSystemError {
+  #[error("OS not supported: {0}")]
+  Os(#[from] OSNotSupportedError),
+
+  #[error("Architecture not supported: {0}")]
+  Arch(#[from] ArchNotSupportedError),
+}
+
+impl HostSystem {
+  pub fn current(
+    os: &'static str,
+    arch: &'static str,
+  ) -> Result<Self, HostSystemError> {
+    Ok(Self {
+      os: get_os_enum(os)?,
+      arch: get_arch_enum(arch)?,
+    })
+  }
+}
+
 pub fn sort_assets<T: Asset>(items: &mut [T]) {
   items.sort_by(|a, b| {
     a.is_third_party()
@@ -98,4 +125,52 @@ pub fn sort_assets<T: Asset>(items: &mut [T]) {
       .reverse()
       .then_with(|| a.id().cmp(b.id()))
   });
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_current_parses_supported_platform() {
+    assert_eq!(
+      HostSystem::current("linux", "x86_64").ok(),
+      Some(HostSystem {
+        os: OS::Linux,
+        arch: Arch::X64,
+      })
+    );
+
+    assert_eq!(
+      HostSystem::current("macos", "aarch64").ok(),
+      Some(HostSystem {
+        os: OS::Mac,
+        arch: Arch::ARM64,
+      })
+    );
+
+    assert_eq!(
+      HostSystem::current("windows", "x86_64").ok(),
+      Some(HostSystem {
+        os: OS::Windows,
+        arch: Arch::X64,
+      })
+    );
+  }
+
+  #[test]
+  fn test_current_rejects_unsupported_os() {
+    assert!(matches!(
+      HostSystem::current("freebsd", "x86_64"),
+      Err(HostSystemError::Os(_))
+    ));
+  }
+
+  #[test]
+  fn test_current_rejects_unsupported_arch() {
+    assert!(matches!(
+      HostSystem::current("linux", "wasm32"),
+      Err(HostSystemError::Arch(_))
+    ));
+  }
 }
