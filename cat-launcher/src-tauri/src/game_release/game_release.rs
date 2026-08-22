@@ -7,7 +7,7 @@ use crate::fetch_releases::repository::ReleasesRepository;
 use crate::fetch_releases::utils::get_assets;
 use crate::game_release::utils::get_platform_asset_substrs;
 use crate::infra::github::asset::GitHubAsset;
-use crate::infra::utils::{Arch, OS};
+use crate::infra::utils::HostSystem;
 use crate::variants::GameVariant;
 
 #[derive(
@@ -66,18 +66,17 @@ pub enum GameReleaseStatus {
 }
 
 impl GameRelease {
-  /// Attempts to find a compatible GitHub asset for this release based on the OS and architecture.
+  /// Attempts to find a compatible GitHub asset for this release based on the host system.
   pub async fn get_asset(
     &self,
-    os: &OS,
-    arch: &Arch,
+    host_system: &HostSystem,
     resources_dir: &Path,
     releases_repository: &impl ReleasesRepository,
   ) -> Option<GitHubAsset> {
     let assets =
       get_assets(self, resources_dir, releases_repository).await;
     let substrings =
-      get_platform_asset_substrs(&self.variant, os, arch);
+      get_platform_asset_substrs(&self.variant, host_system);
 
     substrings
       .iter()

@@ -7,16 +7,16 @@ use crate::fetch_releases::utils::{
 use crate::game_release::GameRelease;
 use crate::game_release::game_release::GameReleaseStatus;
 use crate::infra::github::release::GitHubRelease;
-use crate::infra::utils::{Arch, OS};
+use crate::infra::utils::{Arch, HostSystem, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
 /// Returns a list of substrings that identify the correct game asset for the given platform and architecture.
 pub fn get_platform_asset_substrs(
   variant: &GameVariant,
-  os: &OS,
-  arch: &Arch,
+  host_system: &HostSystem,
 ) -> Vec<&'static str> {
+  let HostSystem { os, arch } = host_system;
   match (variant, os, arch) {
     (GameVariant::DarkDaysAhead, OS::Windows, _) => {
       vec!["windows-with-graphics-and-sounds"]

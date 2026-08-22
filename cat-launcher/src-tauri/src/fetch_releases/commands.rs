@@ -9,10 +9,7 @@ use crate::fetch_releases::fetch_releases::{
 };
 use crate::fetch_releases::repository::sqlite_releases_repository::SqliteReleasesRepository;
 use crate::infra::http_client::ReqwestHttpClient;
-use crate::infra::utils::{
-  ArchNotSupportedError, OSNotSupportedError, get_arch_enum,
-  get_os_enum,
-};
+use crate::infra::utils::{HostSystem, HostSystemError};
 use crate::variants::GameVariant;
 
 #[derive(thiserror::Error, Debug, CommandErrorSerialize)]
@@ -23,11 +20,8 @@ pub enum FetchReleasesCommandError {
   #[error("failed to fetch releases: {0}")]
   Fetch(#[from] FetchReleasesError<tauri::Error>),
 
-  #[error("failed to get OS enum: {0}")]
-  Os(#[from] OSNotSupportedError),
-
-  #[error("failed to get arch enum: {0}")]
-  Arch(#[from] ArchNotSupportedError),
+  #[error("failed to determine host system: {0}")]
+  HostSystem(#[from] HostSystemError),
 }
 
 #[command]
@@ -38,8 +32,7 @@ pub async fn fetch_releases_for_variant(
   client: State<'_, ReqwestHttpClient>,
 ) -> Result<(), FetchReleasesCommandError> {
   let resources_dir = app_handle.path().resource_dir()?;
-  let os = get_os_enum(OS)?;
-  let arch = get_arch_enum(ARCH)?;
+  let host_system = HostSystem::current(OS, ARCH)?;
 
   let on_releases = move |payload: ReleasesUpdatePayload| {
     app_handle.emit("releases-update", payload)?;
@@ -52,8 +45,7 @@ pub async fn fetch_releases_for_variant(
       &resources_dir,
       &*releases_repository,
       on_releases,
-      &os,
-      &arch,
+      &host_system,
     )
     .await?;
 

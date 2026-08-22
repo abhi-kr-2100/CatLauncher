@@ -1,4 +1,4 @@
-use std::env::consts::OS;
+use std::env::consts::{ARCH, OS};
 use std::sync::Arc;
 
 use tauri::ipc::Channel;
@@ -12,7 +12,7 @@ use crate::game_release::game_release::GameRelease;
 use crate::game_release::utils::{get_release_by_id, GetReleaseError};
 use crate::infra::download::Downloader;
 use crate::infra::installation_progress_monitor::channel_reporter::ChannelReporter;
-use crate::infra::utils::{get_arch_enum, get_os_enum, ArchNotSupportedError, OSNotSupportedError};
+use crate::infra::utils::{HostSystem, HostSystemError};
 use crate::install_release::install_release::ReleaseInstallationError;
 
 use crate::variants::GameVariant;
@@ -32,13 +32,9 @@ pub enum InstallReleaseCommandError {
   #[error("failed to obtain release: {0}")]
   Release(#[from] GetReleaseError),
 
-  /// The current operating system is not supported.
-  #[error("failed to get OS enum: {0}")]
-  Os(#[from] OSNotSupportedError),
-
-  /// The current architecture is not supported.
-  #[error("failed to get arch enum: {0}")]
-  Arch(#[from] ArchNotSupportedError),
+  /// The host system (OS/architecture) is not supported.
+  #[error("failed to determine host system: {0}")]
+  HostSystem(#[from] HostSystemError),
 }
 
 /// A Tauri command that installs a specific game release.
@@ -58,13 +54,12 @@ pub async fn install_release(
   let data_dir = app_handle.path().app_local_data_dir()?;
   let resource_dir = app_handle.path().resource_dir()?;
 
-  let os = get_os_enum(OS)?;
-  let arch = get_arch_enum(std::env::consts::ARCH)?;
+  let host_system = HostSystem::current(OS, ARCH)?;
 
   let mut release = get_release_by_id(
     &variant,
     release_id,
-    &os,
+    &host_system.os,
     &data_dir,
     &resource_dir,
     &*releases_repository,
@@ -76,8 +71,7 @@ pub async fn install_release(
   release
     .install_release(
       &downloader,
-      &os,
-      &arch,
+      &host_system,
       &data_dir,
       &resource_dir,
       &*releases_repository,
