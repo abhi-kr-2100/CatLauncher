@@ -44,6 +44,7 @@
                 python313Packages.python-lsp-server
                 ruff
                 rust-analyzer
+                rust-code-analysis
                 rustc
                 rustfmt
                 ty
