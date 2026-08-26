@@ -7,9 +7,6 @@ import { queryKeys } from "@/lib/queryKeys";
 import { useActiveRelease } from "./useActiveRelease";
 import { useReleases } from "./useReleases";
 
-/**
- * Represents predefined keys for quickly selecting specific versions in release notes.
- */
 export type QuickSelectKey =
   | "Active"
   | "Latest"
@@ -17,13 +14,6 @@ export type QuickSelectKey =
   | "ReleaseCandidate"
   | "Experimental";
 
-/**
- * Custom hook to manage the selection and display of release notes for a range of versions.
- * It handles the loading of notes for multiple versions and provides functions to manipulate the range.
- *
- * @param variant - The game variant.
- * @returns An object containing the range boundaries, combined notes, loading state, and helper functions.
- */
 export function useReleaseNotesRange(variant: GameVariant) {
   const { releases } = useReleases(variant);
   const { activeRelease } = useActiveRelease(variant);
@@ -31,7 +21,6 @@ export function useReleaseNotesRange(variant: GameVariant) {
   const [fromId, setFromId] = useState<string | undefined>();
   const [toId, setToId] = useState<string | undefined>();
 
-  // Initialize selection
   useEffect(() => {
     if (activeRelease) {
       setFromId((fromId) => fromId ?? activeRelease);
@@ -40,7 +29,6 @@ export function useReleaseNotesRange(variant: GameVariant) {
 
   useEffect(() => {
     if (releases.length > 0) {
-      // Ignore previously set toId if a newer version is available
       setToId(releases[0].version);
     }
   }, [releases.length, releases[0]?.version]);
@@ -90,7 +78,6 @@ export function useReleaseNotesRange(variant: GameVariant) {
     if (versionsToShow.length === 0)
       return "No changes between selected versions.";
 
-    // Single version case
     if (versionsToShow.length === 1 && fromId === toId) {
       const release = versionsToShow[0];
       const note = notesQueries[0]?.data;

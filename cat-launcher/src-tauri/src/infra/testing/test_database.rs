@@ -34,7 +34,6 @@ pub enum TestDatabaseError {
   Sql(#[from] rusqlite::Error),
 }
 
-/// Builder for a temporary on-disk SQLite database used by tests.
 pub struct TestDatabaseBuilder {
   schema_paths: Vec<PathBuf>,
   schema_initializer: Option<SchemaInitializer>,
@@ -92,7 +91,6 @@ impl TestDatabaseBuilder {
   }
 }
 
-/// A reusable test database that keeps the temporary SQLite file alive.
 pub struct TestDatabase {
   pool: SqlitePool,
   _temp_dir: TempDir,

@@ -5,14 +5,6 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-/**
- * A fieldset component for grouping related elements in a form.
- *
- * @param props - The properties for the fieldset component.
- * @returns A React element representing the fieldset.
- *
- * @public
- */
 function FieldSet({
   className,
   ...props
@@ -30,14 +22,6 @@ function FieldSet({
   );
 }
 
-/**
- * A legend component for a fieldset, providing a caption.
- *
- * @param props - The properties for the field legend component, including an optional visual `variant`.
- * @returns A React element representing the field legend.
- *
- * @public
- */
 function FieldLegend({
   className,
   variant = "legend",
@@ -60,14 +44,6 @@ function FieldLegend({
   );
 }
 
-/**
- * A container for grouping fields together.
- *
- * @param props - The properties for the field group component.
- * @returns A React element representing the field group.
- *
- * @public
- */
 function FieldGroup({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
@@ -81,11 +57,6 @@ function FieldGroup({ className, ...props }: ComponentProps<"div">) {
   );
 }
 
-/**
- * Defines the visual variants for the Field component, supporting different orientations.
- *
- * @public
- */
 const fieldVariants = cva(
   "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
   {
@@ -110,14 +81,6 @@ const fieldVariants = cva(
   },
 );
 
-/**
- * A wrapper for a single field, including label, input, description, and error message.
- *
- * @param props - The properties for the field component, including orientation.
- * @returns A React element representing the field.
- *
- * @public
- */
 function Field({
   className,
   orientation = "vertical",
@@ -134,14 +97,6 @@ function Field({
   );
 }
 
-/**
- * A container for the main content of a field (e.g., the input).
- *
- * @param props - The properties for the field content component.
- * @returns A React element representing the field content.
- *
- * @public
- */
 function FieldContent({
   className,
   ...props
@@ -158,14 +113,6 @@ function FieldContent({
   );
 }
 
-/**
- * A label component specifically styled for use within a Field.
- *
- * @param props - The properties for the field label component.
- * @returns A React element representing the field label.
- *
- * @public
- */
 function FieldLabel({
   className,
   ...props
@@ -184,14 +131,6 @@ function FieldLabel({
   );
 }
 
-/**
- * A simpler title component for use within a Field when a full Label is not needed.
- *
- * @param props - The properties for the field title component.
- * @returns A React element representing the field title.
- *
- * @public
- */
 function FieldTitle({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
@@ -205,14 +144,6 @@ function FieldTitle({ className, ...props }: ComponentProps<"div">) {
   );
 }
 
-/**
- * A description component for providing additional context for a field.
- *
- * @param props - The properties for the field description component.
- * @returns A React element representing the field description.
- *
- * @public
- */
 function FieldDescription({
   className,
   ...props
@@ -231,14 +162,6 @@ function FieldDescription({
   );
 }
 
-/**
- * A separator component for visually dividing sections within a field group.
- *
- * @param props - The properties for the field separator component, which can optionally include children.
- * @returns A React element representing the field separator.
- *
- * @public
- */
 function FieldSeparator({
   children,
   className,
@@ -269,14 +192,6 @@ function FieldSeparator({
   );
 }
 
-/**
- * A component for displaying error messages related to a field.
- *
- * @param props - The properties for the field error component, including an optional `errors` array.
- * @returns A React element representing the field error, or null if no errors are present.
- *
- * @public
- */
 function FieldError({
   className,
   children,

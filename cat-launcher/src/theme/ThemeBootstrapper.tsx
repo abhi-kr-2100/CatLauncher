@@ -10,7 +10,6 @@ export interface ThemeBootstrapperProps {
 export default function ThemeBootstrapper({
   children,
 }: ThemeBootstrapperProps) {
-  // Call useTheme to load the theme preference early.
   useTheme((error) => {
     toastCL("error", "Failed to load theme preference", error);
   });

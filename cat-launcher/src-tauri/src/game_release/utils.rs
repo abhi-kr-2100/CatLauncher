@@ -11,7 +11,6 @@ use crate::infra::utils::{Arch, HostSystem, OS};
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
-/// Returns a list of substrings that identify the correct game asset for the given platform and architecture.
 pub fn get_platform_asset_substrs(
   variant: &GameVariant,
   host_system: &HostSystem,
@@ -51,19 +50,15 @@ pub fn get_platform_asset_substrs(
   }
 }
 
-/// Errors that can occur when retrieving a specific game release.
 #[derive(thiserror::Error, Debug)]
 pub enum GetReleaseError {
-  /// An error occurred while retrieving the installation status of the release.
   #[error("failed to get release status: {0}")]
   Status(#[from] GetInstallationStatusError),
 
-  /// The release with the specified ID was not found.
   #[error("release with ID {0} not found")]
   NotFound(String),
 }
 
-/// Converts a `GitHubRelease` into a `GameRelease` for a specific game variant.
 pub fn gh_release_to_game_release(
   gh_release: &GitHubRelease,
   variant: &GameVariant,
@@ -81,10 +76,6 @@ pub fn gh_release_to_game_release(
   }
 }
 
-/// Retrieves a specific game release by its ID (tag name).
-///
-/// This function merges cached and default releases to find the requested release
-/// and populates its current installation status.
 pub async fn get_release_by_id(
   variant: &GameVariant,
   release_id: &str,
@@ -96,9 +87,7 @@ pub async fn get_release_by_id(
   let cached_releases = releases_repository
     .get_cached_releases(variant)
     .await
-    .unwrap_or_default(); // It's okay if getting cached releases fails.
-  // If the release is not found, this function
-  // will return an error.
+    .unwrap_or_default();
 
   let default_releases =
     get_default_releases(variant, resources_dir).await;

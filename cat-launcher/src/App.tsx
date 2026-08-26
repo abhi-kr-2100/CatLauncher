@@ -3,12 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import { routes } from "@/routes";
 
-/**
- * The root component of the CatLauncher application.
- * Defines the overall layout and handles client-side routing.
- *
- * @returns The rendered application.
- */
 function App() {
   return (
     <BrowserRouter>

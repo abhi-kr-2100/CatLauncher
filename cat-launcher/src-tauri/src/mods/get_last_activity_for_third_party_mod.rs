@@ -42,9 +42,6 @@ pub fn extract_repo_from_github_url(url_str: &str) -> Option<String> {
     .split('/')
     .collect();
 
-  // GitHub URLs have at least 2 parts: [owner, repo, ...rest]
-  // We want the first two parts only, ignoring any extra path segments
-  // like /tree/main, /issues, etc.
   let owner = parts.first()?;
   let repo = parts.get(1)?;
 

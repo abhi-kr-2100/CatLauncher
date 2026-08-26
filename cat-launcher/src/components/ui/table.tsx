@@ -2,13 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * Main container for a data table.
- *
- * @param props - Table element props.
- * @returns A React element representing the table.
- * @public
- */
 function Table({
   className,
   ...props
@@ -27,13 +20,6 @@ function Table({
   );
 }
 
-/**
- * The header section of a {@link Table}.
- *
- * @param props - Thead element props.
- * @returns A React element representing the table header.
- * @public
- */
 function TableHeader({
   className,
   ...props
@@ -47,13 +33,6 @@ function TableHeader({
   );
 }
 
-/**
- * The body section of a {@link Table}.
- *
- * @param props - Tbody element props.
- * @returns A React element representing the table body.
- * @public
- */
 function TableBody({
   className,
   ...props
@@ -67,13 +46,6 @@ function TableBody({
   );
 }
 
-/**
- * The footer section of a {@link Table}.
- *
- * @param props - Tfoot element props.
- * @returns A React element representing the table footer.
- * @public
- */
 function TableFooter({
   className,
   ...props
@@ -90,13 +62,6 @@ function TableFooter({
   );
 }
 
-/**
- * A row within a {@link Table}.
- *
- * @param props - Tr element props.
- * @returns A React element representing a table row.
- * @public
- */
 function TableRow({
   className,
   ...props
@@ -113,13 +78,6 @@ function TableRow({
   );
 }
 
-/**
- * A header cell within a {@link TableHeader}.
- *
- * @param props - Th element props.
- * @returns A React element representing a table head cell.
- * @public
- */
 function TableHead({
   className,
   ...props
@@ -136,13 +94,6 @@ function TableHead({
   );
 }
 
-/**
- * A data cell within a {@link TableRow}.
- *
- * @param props - Td element props.
- * @returns A React element representing a table cell.
- * @public
- */
 function TableCell({
   className,
   ...props
@@ -159,13 +110,6 @@ function TableCell({
   );
 }
 
-/**
- * A caption for a {@link Table}.
- *
- * @param props - Caption element props.
- * @returns A React element representing the table caption.
- * @public
- */
 function TableCaption({
   className,
   ...props

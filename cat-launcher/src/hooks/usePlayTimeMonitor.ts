@@ -6,22 +6,10 @@ import { logPlayTime } from "@/lib/commands";
 import { queryKeys } from "@/lib/queryKeys";
 import { toastCL } from "@/lib/utils";
 
-/**
- * The duration in seconds after which play time is logged to the backend.
- */
 const DURATION_TO_LOG_SECONDS = 60;
-/**
- * The interval in milliseconds at which the play time monitor checks for logging.
- */
+
 const INTERVAL_MS = DURATION_TO_LOG_SECONDS * 1000;
 
-/**
- * A custom hook that monitors and logs play time for the currently playing game variant.
- * It periodically sends play time updates to the backend and invalidates related queries.
- *
- * @param currentlyPlaying - The game variant currently being played, or null if none.
- * @param currentlyPlayingVersion - The version of the game variant currently being played, or null if none.
- */
 export function usePlayTimeMonitor(
   currentlyPlaying: GameVariant | null,
   currentlyPlayingVersion: string | null,
@@ -38,7 +26,6 @@ export function usePlayTimeMonitor(
     }
 
     const scheduleNextLog = async () => {
-      // Skip if a log is already in flight to prevent overlapping calls
       if (inFlightRef.current) {
         return;
       }
@@ -51,7 +38,6 @@ export function usePlayTimeMonitor(
           DURATION_TO_LOG_SECONDS,
         );
 
-        // Invalidate queries to update UI in real-time if PlayPage is open
         queryClient.invalidateQueries({
           queryKey: queryKeys.playTimeForVariant(currentlyPlaying),
         });
@@ -69,7 +55,6 @@ export function usePlayTimeMonitor(
       }
     };
 
-    // Start the first log immediately
     scheduleNextLog();
 
     return () => {

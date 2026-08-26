@@ -4,7 +4,6 @@ use ts_rs::TS;
 
 use crate::game_release::game_release::ReleaseType;
 
-/// Represents the different variants of the game supported by the launcher.
 #[derive(
   Debug,
   Display,
@@ -22,11 +21,10 @@ use crate::game_release::game_release::ReleaseType;
 )]
 #[non_exhaustive]
 pub enum GameVariant {
-  /// Cataclysm: Dark Days Ahead
   DarkDaysAhead,
-  /// Cataclysm: Bright Nights
+
   BrightNights,
-  /// The Last Generation
+
   TheLastGeneration,
 }
 
@@ -40,12 +38,10 @@ const DDA_CATEGORIES: &[&str] = &[
 ];
 
 impl GameVariant {
-  /// Returns a stable string identifier for the variant.
   pub fn id(&self) -> &'static str {
     self.into()
   }
 
-  /// Returns the human-readable name of the variant.
   pub fn name(&self) -> &'static str {
     match self {
       GameVariant::DarkDaysAhead => "Dark Days Ahead",
@@ -54,8 +50,6 @@ impl GameVariant {
     }
   }
 
-  /// Determines the `ReleaseType` based on the tag name and prerelease flag,
-  /// which varies depending on the variant's naming conventions.
   pub fn determine_release_type(
     &self,
     tag_name: &str,
@@ -81,7 +75,6 @@ impl GameVariant {
     }
   }
 
-  /// Returns the list of typeface categories supported by this variant.
   pub fn supported_typeface_categories(
     &self,
   ) -> &'static [&'static str] {

@@ -25,12 +25,10 @@ pub async fn uninstall_third_party_soundpack(
   data_dir: &Path,
   repository: &impl InstalledSoundpacksRepository,
 ) -> Result<(), UninstallThirdPartySoundpackError> {
-  // Remove from repository
   repository
     .delete_installed_soundpack(soundpack_id, game_variant)
     .await?;
 
-  // Delete soundpack directory
   let user_game_data_dir =
     get_or_create_user_game_data_dir(game_variant, data_dir).await?;
   let soundpack_dir =

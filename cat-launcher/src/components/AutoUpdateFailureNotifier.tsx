@@ -15,15 +15,7 @@ import {
 } from "@/providers/hooks";
 import { ExternalLink } from "./ui/ExternalLink";
 
-/**
- * A dialog component that notifies the user when an automatic update has failed.
- * It provides a link to manually update the application.
- *
- * @returns A React element representing the auto-update notifier dialog, or null if no failure state is present.
- *
- * @public
- */
-const AutoUpdateNotifier = () => {
+const AutoUpdateFailureNotifier = () => {
   const { autoUpdateStatus, resetAutoUpdateStatus } =
     useAutoUpdateEvents();
 
@@ -52,4 +44,4 @@ const AutoUpdateNotifier = () => {
   );
 };
 
-export default AutoUpdateNotifier;
+export default AutoUpdateFailureNotifier;

@@ -39,10 +39,6 @@ pub trait ManualBackupRepository: Send + Sync {
     notes: Option<String>,
   ) -> Result<i64, ManualBackupRepositoryError>;
 
-  /// Re-inserts a manual backup entry using its original id.
-  ///
-  /// Used to roll back a deletion that failed on the filesystem so that the
-  /// archive path derived from the id stays resolvable.
   async fn reinsert_manual_backup_entry(
     &self,
     id: i64,

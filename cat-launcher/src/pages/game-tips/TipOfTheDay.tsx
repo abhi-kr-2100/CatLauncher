@@ -12,20 +12,10 @@ import { useGetTips } from "./hooks/useGetTips";
 import { NO_TIPS_AVAILABLE } from "./lib/constants";
 import { TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS } from "@/lib/constants";
 
-/**
- * Props for the {@link TipOfTheDayContent} component.
- */
 interface TipOfTheDayContentProps {
-  /** The tip text to display. */
   tip: string;
 }
 
-/**
- * Renders the visual content of a game tip within an Alert component.
- *
- * @param props - Component properties.
- * @returns A React element displaying the tip.
- */
 function TipOfTheDayContent({ tip }: TipOfTheDayContentProps) {
   return (
     <Alert className="flex flex-col bg-secondary text-secondary-foreground">
@@ -40,21 +30,10 @@ function TipOfTheDayContent({ tip }: TipOfTheDayContentProps) {
   );
 }
 
-/**
- * Props for the {@link TipOfTheDay} component.
- */
 interface TipOfTheDayProps {
-  /** The game variant to fetch and display tips for. */
   variant: GameVariant;
 }
 
-/**
- * Component that displays a randomly selected game tip for a given variant.
- * The tip is automatically shuffled at regular intervals.
- *
- * @param props - Component properties.
- * @returns A React element that manages tip selection and display.
- */
 export function TipOfTheDay({ variant }: TipOfTheDayProps) {
   const { data, status } = useGetTips(variant);
 
@@ -76,7 +55,6 @@ export function TipOfTheDay({ variant }: TipOfTheDayProps) {
   }, [tips]);
 
   useEffect(() => {
-    // auto shuffle every 10 seconds
     const timerId = setImmediateInterval(() => {
       shuffleTips();
     }, TIP_OF_THE_DAY_AUTOSHUFFLE_INTERVAL_MS);

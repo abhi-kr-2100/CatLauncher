@@ -19,27 +19,21 @@ use crate::soundpacks::types::{
 };
 use crate::variants::GameVariant;
 
-/// Errors that can occur when listing all soundpacks.
 #[derive(thiserror::Error, Debug)]
 pub enum ListAllSoundpacksError {
-  /// An error occurred while determining the stock soundpacks directory.
   #[error("failed to get stock soundpacks dir: {0}")]
   GetStockSoundpacksDir(#[from] GetStockSoundpacksDirError),
 
-  /// An error occurred while listing stock soundpacks.
   #[error("failed to read stock soundpack dir: {0}")]
   ExtractStockSoundpack(#[from] ListAllStockSoundpacksError),
 
-  /// An error occurred while retrieving the active release version.
   #[error("failed to get active release: {0}")]
   GetActiveRelease(#[from] ActiveReleaseRepositoryError),
 
-  /// An error occurred while listing third-party soundpacks.
   #[error("failed to list third-party soundpacks: {0}")]
   ListThirdPartySoundpacks(#[from] ListThirdPartySoundpacksError),
 }
 
-/// Lists all available soundpacks (both stock and third-party) for a game variant.
 pub async fn list_all_soundpacks(
   game_variant: &GameVariant,
   data_dir: &Path,
@@ -49,13 +43,11 @@ pub async fn list_all_soundpacks(
 ) -> Result<Vec<Soundpack>, ListAllSoundpacksError> {
   let mut soundpacks = Vec::new();
 
-  // Add third-party soundpacks
   let third_party_soundpacks =
     list_all_third_party_soundpacks(game_variant, resource_dir)
       .await?;
   soundpacks.extend(third_party_soundpacks);
 
-  // Add stock soundpacks
   let release_version = active_release_repository
     .get_active_release(game_variant)
     .await?;
@@ -78,13 +70,11 @@ pub async fn list_all_soundpacks(
   Ok(soundpacks)
 }
 
-/// Errors that can occur when extracting stock soundpack information.
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractStockSoundpackError {
-  /// An error occurred while reading the `soundpack.txt` file.
   #[error("failed to read soundpack.txt: {0}")]
   ReadSoundpackTxt(#[from] io::Error),
-  /// A required field is missing from `soundpack.txt`.
+
   #[error("missing field in soundpack.txt: {0}")]
   MissingField(String),
 }
@@ -126,10 +116,8 @@ async fn extract_stock_soundpack_from_soundpack_txt(
   Ok(StockSoundpack { id, name })
 }
 
-/// Errors that can occur when listing all stock soundpacks.
 #[derive(Debug, thiserror::Error)]
 pub enum ListAllStockSoundpacksError {
-  /// An error occurred while reading the stock soundpacks directory.
   #[error("failed to read stock soundpacks directory: {0}")]
   ReadDir(#[from] io::Error),
 }
@@ -162,7 +150,6 @@ async fn list_all_stock_soundpacks(
           soundpacks.push(Soundpack::Stock(stock_soundpack));
         }
         Err(_) => {
-          // Failed to parse, skip
           continue;
         }
       }
@@ -172,14 +159,11 @@ async fn list_all_stock_soundpacks(
   Ok(soundpacks)
 }
 
-/// Errors that can occur when listing third-party soundpacks.
 #[derive(thiserror::Error, Debug)]
 pub enum ListThirdPartySoundpacksError {
-  /// An error occurred while reading the `soundpacks.json` file.
   #[error("failed to read soundpacks.json: {0}")]
   ReadSoundpacksJson(#[from] io::Error),
 
-  /// An error occurred while parsing the `soundpacks.json` file.
   #[error("failed to parse soundpacks.json: {0}")]
   ParseSoundpacksJson(#[from] serde_json::Error),
 }
@@ -188,11 +172,9 @@ async fn list_all_third_party_soundpacks(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<Soundpack>, ListThirdPartySoundpacksError> {
-  // Construct the path to soundpacks.json
   let soundpacks_json_path =
     get_soundpacks_resource_path(resource_dir);
 
-  // Try to read the soundpacks.json file
   let content = match read_to_string(&soundpacks_json_path).await {
     Ok(content) => content,
     Err(e) => {

@@ -75,7 +75,7 @@ pub async fn get_assets(
   let cached_releases = releases_repository
     .get_cached_releases(&release.variant)
     .await
-    .unwrap_or_default(); // It's okay if cached releases couldn't be read.
+    .unwrap_or_default();
   let default_releases =
     get_default_releases(&release.variant, resources_dir).await;
   let all_releases =

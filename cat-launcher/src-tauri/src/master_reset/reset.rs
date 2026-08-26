@@ -81,7 +81,6 @@ pub async fn master_reset(
     }
   }
 
-  // Update DB sequentially to avoid deadlocks
   installed_mods_repository
     .delete_all_installed_mods(variant)
     .await?;
@@ -359,7 +358,6 @@ mod tests {
         .add_installed_tileset("tileset1", &variant)
         .await?;
 
-      // Seed records for other_variant to verify reset isolates target variant
       mods_repo
         .add_installed_mod("mod_other", &other_variant)
         .await?;
@@ -396,7 +394,6 @@ mod tests {
         "installed tilesets should be cleared"
       );
 
-      // Verify other_variant records remain intact
       assert!(
         mods_repo
           .is_mod_installed("mod_other", &other_variant)
@@ -434,7 +431,6 @@ mod tests {
     let temp_data = TempDir::new()?;
     let variant = GameVariant::DarkDaysAhead;
 
-    // DB has entries only for another variant; the target variant has none
     mods_repo
       .add_installed_mod("mod_other", &GameVariant::BrightNights)
       .await?;
@@ -460,7 +456,6 @@ mod tests {
     )
     .await?;
 
-    // User data dir was created but must contain nothing
     let user_data =
       temp_data.path().join("UserData").join(variant.id());
     assert!(user_data.is_dir());
@@ -470,7 +465,6 @@ mod tests {
       "user data directory should be empty"
     );
 
-    // Other variants' entries must remain intact
     assert!(
       mods_repo
         .is_mod_installed("mod_other", &GameVariant::BrightNights)
@@ -516,7 +510,6 @@ mod tests {
       get_or_create_user_game_data_dir(&variant, temp_data.path())
         .await?;
 
-    // "SAVE" dir must be skipped case-insensitively
     let save_dir = user_data.join("SAVE");
     tokio::fs::create_dir_all(&save_dir).await?;
     tokio::fs::write(save_dir.join("world.json"), b"world").await?;
@@ -562,7 +555,6 @@ mod tests {
       get_or_create_user_game_data_dir(&variant, temp_data.path())
         .await?;
 
-    // A file named "save" is NOT a directory and must be deleted
     tokio::fs::write(user_data.join("save"), b"not a directory")
       .await?;
 
@@ -627,7 +619,6 @@ mod tests {
       "expected mods delete failure, got {result:?}"
     );
 
-    // File deletion happens before DB steps, so it must have completed
     assert!(
       !config_dir.exists(),
       "files should still be deleted before the DB step fails"
@@ -638,7 +629,6 @@ mod tests {
       "save directory must be preserved on partial failure"
     );
 
-    // Steps after the mods delete must not have run
     assert!(
       soundpacks_repo
         .is_soundpack_installed("soundpack1", &variant)
@@ -691,7 +681,6 @@ mod tests {
       "expected soundpacks delete failure, got {result:?}"
     );
 
-    // Steps before the failure must have completed
     assert!(
       !config_dir.exists(),
       "files should still be deleted before the DB step fails"
@@ -701,7 +690,6 @@ mod tests {
       "mods should be deleted before the soundpacks step"
     );
 
-    // Steps after the soundpacks delete must not have run
     assert!(
       tilesets_repo
         .is_tileset_installed("tileset1", &variant)
@@ -753,7 +741,6 @@ mod tests {
       "expected tilesets delete failure, got {result:?}"
     );
 
-    // Steps before the failure must have completed
     assert!(
       !config_dir.exists(),
       "files should still be deleted before the DB step fails"

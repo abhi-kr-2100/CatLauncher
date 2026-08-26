@@ -108,9 +108,6 @@ pub async fn delete_manual_backup(
   if let Err(e) = tokio::fs::remove_file(path).await
     && e.kind() != std::io::ErrorKind::NotFound
   {
-    // If we fail to delete the file for reasons other than NotFound,
-    // re-insert the backup entry using its original id so the archive
-    // path stays resolvable.
     let _ = backup_repository
       .reinsert_manual_backup_entry(
         backup.id,
@@ -165,9 +162,6 @@ pub async fn restore_manual_backup(
   if let Err(e) = tokio::fs::metadata(&archive_path).await
     && e.kind() == std::io::ErrorKind::NotFound
   {
-    // The archive file is missing, so the backup can never be restored.
-    // Delete the entry to avoid leaving an orphaned record behind, and
-    // propagate the deletion failure if cleanup could not be performed.
     backup_repository
       .delete_manual_backup_entry(id)
       .await
@@ -580,7 +574,6 @@ mod tests {
         )
         .await?;
 
-      // Create a directory at archive_path so tokio::fs::remove_file fails with a non-NotFound error
       tokio::fs::create_dir_all(&archive_path).await?;
 
       let result =

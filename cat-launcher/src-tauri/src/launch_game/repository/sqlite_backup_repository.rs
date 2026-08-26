@@ -11,14 +11,12 @@ use crate::variants::GameVariant;
 
 type Pool = r2d2::Pool<SqliteConnectionManager>;
 
-/// A SQLite-backed implementation of the [`BackupRepository`] trait.
 #[derive(Clone)]
 pub struct SqliteBackupRepository {
   pool: Pool,
 }
 
 impl SqliteBackupRepository {
-  /// Creates a new instance of [`SqliteBackupRepository`] with the given connection pool.
   pub fn new(pool: Pool) -> Self {
     Self { pool }
   }

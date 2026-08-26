@@ -7,25 +7,14 @@ import ReleaseDropdown from "./ReleaseDropdown";
 import ReleaseFilter, { FilterFn } from "./ReleaseFilter";
 import ReleaseNotesButton from "./ReleaseNotesButton";
 
-/**
- * Props for the {@link ReleaseSelector} component.
- */
 interface ReleaseSelectorProps {
-  /** The game variant to select a release for. */
   variant: GameVariant;
-  /** The currently selected release ID (version string). */
+
   selectedReleaseId: string | undefined;
-  /** Callback to update the selected release ID. */
+
   setSelectedReleaseId: (value: string | undefined) => void;
 }
 
-/**
- * A compound component for selecting a game release, including filtering by type
- * and viewing release notes.
- *
- * @param props - The component props.
- * @returns A React element containing the release selector UI.
- */
 export default function ReleaseSelector({
   variant,
   selectedReleaseId,

@@ -3,13 +3,6 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator";
 
 import { cn } from "@/lib/utils";
 
-/**
- * A visual divider component used to separate content.
- *
- * @param props - Component props extending Radix UI's Separator Root props.
- * @returns A React element representing the separator.
- * @public
- */
 function Separator({
   className,
   orientation = "horizontal",

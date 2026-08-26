@@ -5,22 +5,10 @@ import { useSearch } from "@/hooks/useSearch";
 import { useMods } from "./hooks";
 import ModCard from "./ModCard";
 
-/**
- * Props for the {@link ModsList} component.
- */
 interface ModsListProps {
-  /**
-   * The game variant for which to list mods.
-   */
   variant: GameVariant;
 }
 
-/**
- * A component that displays a searchable list of mods for a specific game variant.
- *
- * @param props - The component props.
- * @returns A React element representing the mods list.
- */
 export default function ModsList({ variant }: ModsListProps) {
   const variantLabel = getVariantLabel(variant);
   const { mods, isLoading } = useMods(
@@ -49,7 +37,6 @@ export default function ModsList({ variant }: ModsListProps) {
     },
   });
 
-  // Mods arrive in chunks; show loading message until first chunk arrives.
   if (isLoading && mods.length === 0) {
     return <p className="text-muted-foreground">Loading mods...</p>;
   }

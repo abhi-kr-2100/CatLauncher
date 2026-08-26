@@ -18,35 +18,27 @@ use crate::infra::utils::OS;
 use crate::install_release::installation_status::status::GetInstallationStatusError;
 use crate::variants::GameVariant;
 
-/// Errors that can occur when retrieving game tips for a variant.
 #[derive(Debug, Error)]
 pub enum GetAllTipsForVariantError {
-  /// Failed to determine the paths for the tips files.
   #[error("failed to get tip file paths: {0}")]
   GetTipFilePaths(#[from] GetTipFilePathsError),
 
-  /// Failed to parse the tips JSON file.
   #[error("serde json error: {0}")]
   SerdeJson(#[from] serde_json::Error),
 
-  /// Failed to retrieve the active release information.
   #[error("failed to get active release: {0}")]
   GetActiveRelease(#[from] ActiveReleaseRepositoryError),
 
-  /// A tokio IO error occurred while reading the tips file.
   #[error("tokio io error: {0}")]
   Tokio(#[from] tokio::io::Error),
 
-  /// Failed to check the installation status of a release.
   #[error("failed to get installation status: {0}")]
   GetInstallationStatus(#[from] GetInstallationStatusError),
 
-  /// Failed to retrieve cached releases from the repository.
   #[error("failed to get cached releases: {0}")]
   GetCachedReleases(#[from] ReleasesRepositoryError),
 }
 
-/// Reads all tip files associated with a specific game version and collects the text.
 async fn get_tips_from_version(
   variant: &GameVariant,
   version: &str,
@@ -66,9 +58,7 @@ async fn get_tips_from_version(
           all_tips.extend(tips.into_iter().flat_map(|tip| tip.text));
         }
       }
-      Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-        // File not found, just skip it
-      }
+      Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
       Err(e) => return Err(e.into()),
     }
   }
@@ -76,7 +66,6 @@ async fn get_tips_from_version(
   Ok(all_tips)
 }
 
-/// Retrieves all game tips for the currently active or installed game release variant.
 pub async fn get_all_tips_for_variant(
   variant: &GameVariant,
   data_dir: &std::path::Path,

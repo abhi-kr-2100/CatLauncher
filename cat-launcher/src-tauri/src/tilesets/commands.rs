@@ -24,23 +24,18 @@ use crate::tilesets::uninstall_third_party_tileset::{
 };
 use crate::variants::GameVariant;
 
-/// Errors that can occur when listing all tilesets via a command.
 #[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum ListAllTilesetsCommandError {
-  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
-  /// An error occurred while retrieving OS information.
   #[error("failed to get OS information")]
   OSInfo(#[from] OSNotSupportedError),
 
-  /// An error occurred while listing the tilesets.
   #[error("failed to list tilesets: {0}")]
   ListTilesets(#[from] ListAllTilesetsError),
 }
 
-/// Lists all available tilesets (both stock and third-party) for a game variant.
 #[tauri::command]
 pub async fn list_all_tilesets_command(
   variant: GameVariant,
@@ -64,23 +59,18 @@ pub async fn list_all_tilesets_command(
   Ok(tilesets)
 }
 
-/// Errors that can occur when installing a third-party tileset via a command.
 #[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum InstallThirdPartyTilesetCommandError {
-  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory")]
   AppDataDir(#[from] tauri::Error),
 
-  /// An error occurred while retrieving OS information.
   #[error("failed to get OS information")]
   OSInfo(#[from] OSNotSupportedError),
 
-  /// An error occurred while installing the tileset.
   #[error("failed to install tileset: {0}")]
   Install(#[from] InstallThirdPartyTilesetError),
 }
 
-/// Installs a third-party tileset for a game variant.
 #[tauri::command]
 pub async fn install_third_party_tileset_command(
   id: String,
@@ -114,19 +104,15 @@ pub async fn install_third_party_tileset_command(
   Ok(())
 }
 
-/// Errors that can occur when uninstalling a third-party tileset via a command.
 #[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum UninstallThirdPartyTilesetCommandError {
-  /// An error occurred while accessing the application's local data directory.
   #[error("failed to get app data directory: {0}")]
   AppDataDir(#[from] tauri::Error),
 
-  /// An error occurred while uninstalling the tileset.
   #[error("failed to uninstall tileset: {0}")]
   Uninstall(#[from] UninstallThirdPartyTilesetError),
 }
 
-/// Uninstalls a previously installed third-party tileset.
 #[tauri::command]
 pub async fn uninstall_third_party_tileset_command(
   id: String,
@@ -146,15 +132,12 @@ pub async fn uninstall_third_party_tileset_command(
   Ok(())
 }
 
-/// Errors that can occur when retrieving the installation status of a third-party tileset via a command.
 #[derive(thiserror::Error, Debug, CommandErrorSerialize)]
 pub enum GetThirdPartyTilesetInstallationStatusCommandError {
-  /// An error occurred while getting the installation status.
   #[error("failed to get tileset installation status: {0}")]
   GetStatus(#[from] GetThirdPartyTilesetInstallationStatusError),
 }
 
-/// Retrieves the current installation status of a third-party tileset.
 #[tauri::command]
 pub async fn get_third_party_tileset_installation_status_command(
   id: String,

@@ -12,15 +12,12 @@ use crate::launch_game::repository::{
 };
 use crate::variants::GameVariant;
 
-/// Errors that can occur when listing backups.
 #[derive(thiserror::Error, Debug)]
 pub enum ListBackupsError {
-  /// Failed to retrieve backup entries from the repository.
   #[error("failed to get backup entries: {0}")]
   Get(#[from] BackupRepositoryError),
 }
 
-/// Retrieves a list of all backups for a specific game variant, sorted by timestamp.
 pub async fn list_backups(
   game_variant: &GameVariant,
   backup_repository: &impl BackupRepository,
@@ -34,29 +31,21 @@ pub async fn list_backups(
   Ok(backups)
 }
 
-/// Errors that can occur when deleting a backup.
 #[derive(thiserror::Error, Debug)]
 pub enum DeleteBackupError {
-  /// Failed to retrieve the backup entry.
   #[error("failed to get backup entry: {0}")]
   Get(#[from] BackupRepositoryError),
 
-  /// Failed to construct the file path to the backup archive.
   #[error("failed to get backup archive path: {0}")]
   BackupArchivePath(#[from] GetAutomaticBackupArchivePathError),
 
-  /// Failed to remove the backup file from the filesystem.
   #[error("failed to remove backup file: {0}")]
   RemoveBackupFile(#[from] std::io::Error),
 
-  /// Failed to re-insert the backup entry after a failed file removal.
   #[error("failed to re-insert backup entry: {0}")]
   Reinsert(BackupRepositoryError),
 }
 
-/// Deletes a backup from both the database and the filesystem.
-///
-/// If the file removal fails, it attempts to re-insert the backup entry back into the database.
 pub async fn delete_backup(
   id: i64,
   data_dir: &Path,
@@ -77,9 +66,6 @@ pub async fn delete_backup(
   if let Err(e) = tokio::fs::remove_file(path).await
     && e.kind() != std::io::ErrorKind::NotFound
   {
-    // If we fail to delete the file for reasons other than NotFound,
-    // re-insert the backup entry back into the database using its
-    // original id so the archive path stays resolvable.
     if let Err(reinsert_err) = backup_repository
       .reinsert_backup_entry(
         backup.id,
@@ -97,35 +83,27 @@ pub async fn delete_backup(
   Ok(())
 }
 
-/// Errors that can occur when restoring a backup.
 #[derive(thiserror::Error, Debug)]
 pub enum RestoreBackupError {
-  /// Failed to retrieve the backup entry.
   #[error("failed to get backup entry: {0}")]
   Get(#[from] BackupRepositoryError),
 
-  /// Failed to construct the file path to the backup archive.
   #[error("failed to get backup archive path: {0}")]
   BackupArchivePath(#[from] GetAutomaticBackupArchivePathError),
 
-  /// Failed to determine the user game data directory.
   #[error("failed to get user game data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
 
-  /// Failed to extract the backup archive.
   #[error("failed to extract archive: {0}")]
   Extract(#[from] ExtractionError),
 
-  /// The backup archive file does not exist.
   #[error("backup archive file does not exist")]
   ArchiveFileMissing,
 
-  /// Failed to delete the backup entry after the archive was found missing.
   #[error("failed to delete backup entry: {0}")]
   Delete(BackupRepositoryError),
 }
 
-/// Restores a backup by extracting its archive into the user's game data directory.
 pub async fn restore_backup(
   id: i64,
   data_dir: &Path,
@@ -145,8 +123,6 @@ pub async fn restore_backup(
   if let Err(e) = tokio::fs::metadata(&archive_path).await
     && e.kind() == std::io::ErrorKind::NotFound
   {
-    // The archive file is missing, so the backup can never be restored.
-    // Delete the entry to avoid leaving an orphaned record behind.
     backup_repository
       .delete_backup_entry(id)
       .await
@@ -312,7 +288,6 @@ mod tests {
       )
       .await?;
 
-    // Create a directory at archive_path so tokio::fs::remove_file fails with a non-NotFound error
     tokio::fs::create_dir_all(&archive_path).await?;
 
     let result = delete_backup(b1, data_dir, repo).await;

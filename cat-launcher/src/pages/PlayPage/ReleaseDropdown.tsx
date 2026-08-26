@@ -12,30 +12,18 @@ import { useActiveRelease, useReleases } from "./hooks";
 import type { FilterFn } from "./ReleaseFilter";
 import ReleaseLabel from "./ReleaseLabel";
 
-/**
- * Props for the {@link ReleaseDropdown} component.
- */
 export interface ReleaseDropdownProps {
-  /** The game variant to list releases for. */
   variant: GameVariant;
-  /** The currently selected release ID (version string). */
+
   selectedReleaseId: string | undefined;
-  /** Callback to update the selected release ID. */
+
   setSelectedReleaseId: (value: string | undefined) => void;
-  /** Optional filter function to restrict the list of visible releases. */
+
   appliedFilter?: FilterFn;
-  /** Whether to hide the "Active" label next to the currently active version. */
+
   hideActiveLabel?: boolean;
 }
 
-/**
- * A searchable, virtualized dropdown component for selecting a specific game release.
- * It automatically handles loading releases, identifying the active release,
- * and managing installation statuses.
- *
- * @param props - The component props.
- * @returns A React element containing the release selection dropdown.
- */
 export default function ReleaseDropdown({
   variant,
   selectedReleaseId,
@@ -100,7 +88,6 @@ export default function ReleaseDropdown({
   ]);
 
   useEffect(() => {
-    // Selected release may become unavailable after filtering
     if (
       selectedReleaseId &&
       !comboboxItems.find((item) => item.value === selectedReleaseId)

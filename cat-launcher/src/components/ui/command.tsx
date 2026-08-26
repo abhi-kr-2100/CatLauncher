@@ -11,15 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/**
- * The root component for the command palette.
- * Built on top of the `cmdk` library.
- *
- * @param props - The properties for the command component.
- * @returns A React element representing the command palette root.
- *
- * @public
- */
 function Command({
   className,
   ...props
@@ -36,14 +27,6 @@ function Command({
   );
 }
 
-/**
- * A dialog component that contains a command palette.
- *
- * @param props - The properties for the command dialog, including title, description, and an option to show a close button.
- * @returns A React element representing the command dialog.
- *
- * @public
- */
 function CommandDialog({
   title = "Command Palette",
   description = "Search for a command to run...",
@@ -75,14 +58,6 @@ function CommandDialog({
   );
 }
 
-/**
- * The input field for searching within the command palette.
- *
- * @param props - The properties for the command input component.
- * @returns A React element representing the command input.
- *
- * @public
- */
 function CommandInput({
   className,
   ...props
@@ -105,14 +80,6 @@ function CommandInput({
   );
 }
 
-/**
- * A container for the list of items in the command palette.
- *
- * @param props - The properties for the command list component.
- * @returns A React element representing the command list.
- *
- * @public
- */
 function CommandList({
   className,
   ...props
@@ -129,14 +96,6 @@ function CommandList({
   );
 }
 
-/**
- * The component to display when no search results are found.
- *
- * @param props - The properties for the command empty component.
- * @returns A React element representing the empty state of the command palette.
- *
- * @public
- */
 function CommandEmpty({
   ...props
 }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
@@ -149,14 +108,6 @@ function CommandEmpty({
   );
 }
 
-/**
- * A component for grouping items in the command palette.
- *
- * @param props - The properties for the command group component.
- * @returns A React element representing a group of command items.
- *
- * @public
- */
 function CommandGroup({
   className,
   ...props
@@ -173,14 +124,6 @@ function CommandGroup({
   );
 }
 
-/**
- * A separator for dividing groups or items in the command palette.
- *
- * @param props - The properties for the command separator component.
- * @returns A React element representing a separator.
- *
- * @public
- */
 function CommandSeparator({
   className,
   ...props
@@ -194,14 +137,6 @@ function CommandSeparator({
   );
 }
 
-/**
- * An individual item within the command palette.
- *
- * @param props - The properties for the command item component.
- * @returns A React element representing a command item.
- *
- * @public
- */
 function CommandItem({
   className,
   ...props
@@ -218,14 +153,6 @@ function CommandItem({
   );
 }
 
-/**
- * A shortcut key display for a command item.
- *
- * @param props - The properties for the command shortcut component.
- * @returns A React element representing a command shortcut.
- *
- * @public
- */
 function CommandShortcut({
   className,
   ...props

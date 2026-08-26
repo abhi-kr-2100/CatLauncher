@@ -5,18 +5,15 @@ use crate::variants::repository::game_variant_order_repository::GameVariantOrder
 use crate::variants::GameVariant;
 use ts_rs::TS;
 
-/// Information about a game variant, suitable for display in the UI.
 #[derive(serde::Serialize, TS)]
 #[ts(export)]
 pub struct GameVariantInfo {
-  /// The unique identifier for the game variant.
   pub id: GameVariant,
-  /// The human-readable name of the game variant.
+
   pub name: String,
 }
 
 impl GameVariantInfo {
-  /// Creates a new `GameVariantInfo` from a `GameVariant`.
   pub fn from_variant(variant: GameVariant) -> Self {
     GameVariantInfo {
       id: variant,
@@ -25,15 +22,12 @@ impl GameVariantInfo {
   }
 }
 
-/// Errors that can occur when retrieving game variant information.
 #[derive(thiserror::Error, Debug)]
 pub enum GetGameVariantsInfoError {
-  /// Failed to retrieve the variant order from the repository.
   #[error("failed to get game variant order")]
     Get(#[from] crate::variants::repository::game_variant_order_repository::GameVariantOrderRepositoryError),
 }
 
-/// Retrieves information for all game variants in their preferred display order.
 pub async fn get_game_variants_info(
   game_variant_order_repository: &impl GameVariantOrderRepository,
 ) -> Result<Vec<GameVariantInfo>, GetGameVariantsInfoError> {
@@ -43,8 +37,6 @@ pub async fn get_game_variants_info(
   let variants_to_display = if ordered_variants.is_empty() {
     GameVariant::iter().collect::<Vec<_>>()
   } else {
-    // When the order table is partially populated, return ordered variants first
-    // followed by unordered variants in default enum order
     let all_variants: Vec<GameVariant> =
       GameVariant::iter().collect();
     let ordered_set: std::collections::HashSet<_> =
@@ -54,7 +46,6 @@ pub async fn get_game_variants_info(
       .filter(|v| !ordered_set.contains(v))
       .collect();
 
-    // Maintain order: ordered variants first, then unordered in default order
     let mut result = ordered_variants;
     result.append(&mut unordered_variants);
     result

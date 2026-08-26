@@ -1,7 +1,3 @@
-/**
- * This module exports all custom hooks used in the PlayPage.
- */
-
 export * from "./useReleases";
 export * from "./useReleaseNotes";
 export * from "./useAllReleasesInstallationStatuses";

@@ -109,7 +109,6 @@ where
   let mut all_mods = Vec::new();
   let mut mod_ids = HashSet::new();
 
-  // 1. First, get cached mods from database and emit them.
   let cached_mods =
     list_cached_third_party_mods(game_variant, mods_repository)
       .await
@@ -129,7 +128,6 @@ where
   })
   .map_err(ListAllModsError::Send)?;
 
-  // 2. Fetch online mods from all registries and emit them.
   for repo in online_mod_repositories {
     let online_mods =
       repo.get_mods_for_variant(game_variant, client).await?;
@@ -154,7 +152,6 @@ where
     }
   }
 
-  // 3. Add bundled third-party mods and stock mods, then emit final success.
   let local_third_party_mods =
     list_all_third_party_mods(game_variant, resource_dir)
       .await
@@ -181,7 +178,6 @@ where
 
   sort_assets(&mut all_mods);
 
-  // Save all discovered third-party mods to DB
   mods_repository
     .save_third_party_mods(
       game_variant,
@@ -198,7 +194,6 @@ where
     )
     .await?;
 
-  // Emit final list
   on_update(ModsUpdatePayload {
     variant: *game_variant,
     mods: all_mods,
@@ -227,7 +222,6 @@ fn extract_stock_mod_from_modinfo(
   let entries: Vec<serde_json::Value> =
     serde_json::from_str(modinfo_content)?;
 
-  // Find the MOD_INFO entry
   let mod_info = entries
     .iter()
     .find(|entry| {
@@ -294,12 +288,10 @@ async fn list_all_stock_mods(
           mods.push(stock_mod);
         }
         Err(_) => {
-          // Failed to parse modinfo.json, skip this entry
           continue;
         }
       },
       Err(_) => {
-        // This directory doesn't have a modinfo.json file, skip it
         continue;
       }
     }
@@ -321,10 +313,8 @@ pub async fn list_all_third_party_mods(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<ThirdPartyMod>, ListThirdPartyModsError> {
-  // Construct the path to mods.json
   let mods_json_path = get_mods_resource_path(resource_dir);
 
-  // Try to read the mods.json file
   let content = match read_to_string(&mods_json_path).await {
     Ok(content) => content,
     Err(e) => return Err(ListThirdPartyModsError::ReadModsJson(e)),

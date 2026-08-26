@@ -21,12 +21,6 @@ import type { Tileset } from "@/generated-types/Tileset";
 import type { TilesetInstallationStatus } from "@/generated-types/TilesetInstallationStatus";
 import type { UpdateStatus } from "@/generated-types/UpdateStatus";
 
-/**
- * Listens for a request to quit the application.
- *
- * @param onQuitRequested - Callback function to be executed when a quit is requested.
- * @returns A promise that resolves to an unlisten function.
- */
 export async function listenToQuitRequested(
   onQuitRequested: () => void,
 ) {
@@ -35,12 +29,6 @@ export async function listenToQuitRequested(
   });
 }
 
-/**
- * Listens for updates to the available game releases.
- *
- * @param onUpdate - Callback function that receives the {@link ReleasesUpdatePayload}.
- * @returns A promise that resolves to an unlisten function.
- */
 export async function listenToReleasesUpdate(
   onUpdate: (payload: ReleasesUpdatePayload) => void,
 ) {
@@ -52,12 +40,6 @@ export async function listenToReleasesUpdate(
   );
 }
 
-/**
- * Listens for updates to the available mods.
- *
- * @param onUpdate - Callback function that receives the {@link ModsUpdatePayload}.
- * @returns A promise that resolves to an unlisten function.
- */
 export async function listenToModsUpdate(
   onUpdate: (payload: ModsUpdatePayload) => void,
 ) {
@@ -66,12 +48,6 @@ export async function listenToModsUpdate(
   });
 }
 
-/**
- * Listens for status updates of the autoupdate process.
- *
- * @param onUpdate - Callback function that receives the {@link UpdateStatus}.
- * @returns A promise that resolves to an unlisten function.
- */
 export async function listenToAutoupdateStatus(
   onUpdate: (payload: UpdateStatus) => void,
 ) {
@@ -80,12 +56,6 @@ export async function listenToAutoupdateStatus(
   });
 }
 
-/**
- * Listens for generic game events.
- *
- * @param onEvent - Callback function that receives the {@link GameEvent}.
- * @returns A promise that resolves to an unlisten function.
- */
 export async function listenToGameEvent(
   onEvent: (payload: GameEvent) => void,
 ) {
@@ -94,18 +64,10 @@ export async function listenToGameEvent(
   });
 }
 
-/**
- * Notifies the backend that the frontend is ready.
- */
 export async function onFrontendReady(): Promise<void> {
   await emit("frontend-ready");
 }
 
-/**
- * Triggers a fetch for releases of a specific game variant.
- *
- * @param variant - The game variant to fetch releases for.
- */
 export async function triggerFetchReleasesForVariant(
   variant: GameVariant,
 ): Promise<void> {
@@ -114,11 +76,6 @@ export async function triggerFetchReleasesForVariant(
   });
 }
 
-/**
- * Fetches information about all supported game variants.
- *
- * @returns A promise that resolves to an array of {@link GameVariantInfo}.
- */
 export async function fetchGameVariantsInfo(): Promise<
   GameVariantInfo[]
 > {
@@ -128,34 +85,18 @@ export async function fetchGameVariantsInfo(): Promise<
   return response;
 }
 
-/**
- * Deletes a backup entry by its unique identifier.
- *
- * @param id - The unique identifier of the backup.
- */
 export async function deleteBackupById(id: bigint): Promise<void> {
   await invoke("delete_backup_by_id", {
     id,
   });
 }
 
-/**
- * Restores a backup entry by its unique identifier.
- *
- * @param id - The unique identifier of the backup to restore.
- */
 export async function restoreBackupById(id: bigint): Promise<void> {
   await invoke("restore_backup_by_id", {
     id,
   });
 }
 
-/**
- * Fetches game tips for a specific variant.
- *
- * @param variant - The game variant to fetch tips for.
- * @returns A promise that resolves to an array of strings representing tips.
- */
 export async function getTips(
   variant: GameVariant,
 ): Promise<string[]> {
@@ -166,12 +107,6 @@ export async function getTips(
   return response;
 }
 
-/**
- * Lists all manual backups available for a specific variant.
- *
- * @param variant - The game variant to list manual backups for.
- * @returns A promise that resolves to an array of {@link ManualBackupEntry}.
- */
 export async function listManualBackupsForVariant(
   variant: GameVariant,
 ): Promise<ManualBackupEntry[]> {
@@ -185,13 +120,6 @@ export async function listManualBackupsForVariant(
   return response;
 }
 
-/**
- * Creates a manual backup for a specific game variant.
- *
- * @param variant - The game variant to create a backup for.
- * @param name - The name of the manual backup.
- * @param notes - Optional notes associated with the backup.
- */
 export async function createManualBackupForVariant(
   variant: GameVariant,
   name: string,
@@ -204,11 +132,6 @@ export async function createManualBackupForVariant(
   });
 }
 
-/**
- * Deletes a manual backup entry by its unique identifier.
- *
- * @param id - The unique identifier of the manual backup.
- */
 export async function deleteManualBackupById(
   id: bigint,
 ): Promise<void> {
@@ -217,11 +140,6 @@ export async function deleteManualBackupById(
   });
 }
 
-/**
- * Restores a manual backup entry by its unique identifier.
- *
- * @param id - The unique identifier of the manual backup to restore.
- */
 export async function restoreManualBackupById(
   id: bigint,
 ): Promise<void> {
@@ -230,12 +148,6 @@ export async function restoreManualBackupById(
   });
 }
 
-/**
- * Lists all automatic backups available for a specific variant.
- *
- * @param variant - The game variant to list backups for.
- * @returns A promise that resolves to an array of {@link BackupEntry}.
- */
 export async function listBackupsForVariant(
   variant: GameVariant,
 ): Promise<BackupEntry[]> {
@@ -249,11 +161,6 @@ export async function listBackupsForVariant(
   return response;
 }
 
-/**
- * Updates the display order of game variants.
- *
- * @param variants - The new ordered list of game variants.
- */
 export async function updateGameVariantOrder(
   variants: GameVariant[],
 ): Promise<void> {
@@ -262,12 +169,6 @@ export async function updateGameVariantOrder(
   });
 }
 
-/**
- * Gets the total play time for a specific game variant.
- *
- * @param variant - The game variant to get the play time for.
- * @returns A promise that resolves to the total play time in seconds.
- */
 export async function getPlayTimeForVariant(
   variant: GameVariant,
 ): Promise<number> {
@@ -278,13 +179,6 @@ export async function getPlayTimeForVariant(
   return response;
 }
 
-/**
- * Gets the play time for a specific version of a game variant.
- *
- * @param variant - The game variant.
- * @param version - The specific version string.
- * @returns A promise that resolves to the play time in seconds.
- */
 export async function getPlayTimeForVersion(
   variant: GameVariant,
   version: string,
@@ -297,13 +191,6 @@ export async function getPlayTimeForVersion(
   return response;
 }
 
-/**
- * Logs the play time for a specific version of a game variant.
- *
- * @param variant - The game variant.
- * @param version - The specific version string.
- * @param durationInSeconds - The duration of the session in seconds.
- */
 export async function logPlayTime(
   variant: GameVariant,
   version: string,
@@ -316,12 +203,6 @@ export async function logPlayTime(
   });
 }
 
-/**
- * Gets the currently active (installed/selected) release ID for a variant.
- *
- * @param variant - The game variant.
- * @returns A promise that resolves to the active release ID, or an empty string if none.
- */
 export async function getActiveRelease(
   variant: GameVariant,
 ): Promise<string> {
@@ -329,17 +210,9 @@ export async function getActiveRelease(
     variant,
   });
 
-  // useQuery doesn't work with null/undefined query data. That's why "" is returned.
   return response ?? "";
 }
 
-/**
- * Fetches the release notes for a specific release of a game variant.
- *
- * @param variant - The game variant.
- * @param releaseId - The unique identifier of the release.
- * @returns A promise that resolves to the release notes as a string, or null if not found.
- */
 export async function fetchReleaseNotes(
   variant: GameVariant,
   releaseId: string,
@@ -354,14 +227,6 @@ export async function fetchReleaseNotes(
   return response;
 }
 
-/**
- * Installs a specific release for a game variant, with progress tracking.
- *
- * @param releaseId - The unique identifier of the release to install.
- * @param variant - The game variant.
- * @param onDownloadProgress - Callback function for download progress updates.
- * @returns A promise that resolves to the installed {@link GameRelease}.
- */
 export async function installReleaseForVariant(
   releaseId: string,
   variant: GameVariant,
@@ -381,13 +246,6 @@ export async function installReleaseForVariant(
   return response;
 }
 
-/**
- * Launches the game with the specified release and optional world.
- *
- * @param variant - The game variant.
- * @param releaseId - The unique identifier of the release to launch.
- * @param world - Optional world name to load directly.
- */
 export async function launchGame(
   variant: GameVariant,
   releaseId: string,
@@ -400,13 +258,6 @@ export async function launchGame(
   });
 }
 
-/**
- * Gets the installation status of a specific release for a game variant.
- *
- * @param variant - The game variant.
- * @param releaseId - The unique identifier of the release.
- * @returns A promise that resolves to the {@link GameReleaseStatus}.
- */
 export async function getInstallationStatus(
   variant: GameVariant,
   releaseId: string,
@@ -422,12 +273,6 @@ export async function getInstallationStatus(
   return response;
 }
 
-/**
- * Gets the name of the last played world for a specific variant.
- *
- * @param variant - The game variant.
- * @returns A promise that resolves to the name of the last played world, or null if none.
- */
 export async function getLastPlayedWorld(
   variant: GameVariant,
 ): Promise<string | null> {
@@ -441,11 +286,6 @@ export async function getLastPlayedWorld(
   return response;
 }
 
-/**
- * Gets the user's preferred theme setting.
- *
- * @returns A promise that resolves to the {@link ThemePreference}.
- */
 export async function getPreferredTheme(): Promise<ThemePreference> {
   const response = await invoke<ThemePreference>(
     "get_preferred_theme",
@@ -453,32 +293,17 @@ export async function getPreferredTheme(): Promise<ThemePreference> {
   return response;
 }
 
-/**
- * Sets the user's preferred theme.
- *
- * @param theme - The theme to set as preferred.
- */
 export async function setPreferredTheme(theme: Theme): Promise<void> {
   await invoke("set_preferred_theme", {
     theme,
   });
 }
 
-/**
- * Gets the user's unique identifier.
- *
- * @returns A promise that resolves to the user ID string.
- */
 export async function getUserId(): Promise<string> {
   const response = await invoke<string>("get_user_id");
   return response;
 }
 
-/**
- * Triggers a fetch for available mods for a specific variant.
- *
- * @param variant - The game variant to fetch mods for.
- */
 export async function triggerFetchModsForVariant(
   variant: GameVariant,
 ): Promise<void> {
@@ -487,13 +312,6 @@ export async function triggerFetchModsForVariant(
   });
 }
 
-/**
- * Installs a third-party mod for a game variant.
- *
- * @param modId - The unique identifier of the mod to install.
- * @param variant - The game variant.
- * @param onDownloadProgress - Callback function for download progress updates.
- */
 export async function installThirdPartyMod(
   modId: string,
   variant: GameVariant,
@@ -511,13 +329,6 @@ export async function installThirdPartyMod(
   });
 }
 
-/**
- * Gets the installation status of a third-party mod.
- *
- * @param modId - The unique identifier of the mod.
- * @param variant - The game variant.
- * @returns A promise that resolves to the {@link ModInstallationStatus}.
- */
 export async function getThirdPartyModInstallationStatus(
   modId: string,
   variant: GameVariant,
@@ -532,12 +343,6 @@ export async function getThirdPartyModInstallationStatus(
   return response;
 }
 
-/**
- * Uninstalls a third-party mod.
- *
- * @param modId - The unique identifier of the mod to uninstall.
- * @param variant - The game variant.
- */
 export async function uninstallThirdPartyMod(
   modId: string,
   variant: GameVariant,
@@ -548,13 +353,6 @@ export async function uninstallThirdPartyMod(
   });
 }
 
-/**
- * Gets the last activity recorded for a third-party mod.
- *
- * @param modId - The unique identifier of the mod.
- * @param variant - The game variant.
- * @returns A promise that resolves to the {@link LastModActivity}.
- */
 export async function getLastModActivity(
   modId: string,
   variant: GameVariant,
@@ -569,12 +367,6 @@ export async function getLastModActivity(
   return response;
 }
 
-/**
- * Lists all available tilesets for a specific variant.
- *
- * @param variant - The game variant.
- * @returns A promise that resolves to an array of {@link Tileset}.
- */
 export async function listAllTilesets(
   variant: GameVariant,
 ): Promise<Tileset[]> {
@@ -587,13 +379,6 @@ export async function listAllTilesets(
   return response;
 }
 
-/**
- * Installs a third-party tileset for a game variant.
- *
- * @param tilesetId - The unique identifier of the tileset to install.
- * @param variant - The game variant.
- * @param onDownloadProgress - Callback function for download progress updates.
- */
 export async function installThirdPartyTileset(
   tilesetId: string,
   variant: GameVariant,
@@ -611,13 +396,6 @@ export async function installThirdPartyTileset(
   });
 }
 
-/**
- * Gets the installation status of a third-party tileset.
- *
- * @param tilesetId - The unique identifier of the tileset.
- * @param variant - The game variant.
- * @returns A promise that resolves to the {@link TilesetInstallationStatus}.
- */
 export async function getThirdPartyTilesetInstallationStatus(
   tilesetId: string,
   variant: GameVariant,
@@ -632,12 +410,6 @@ export async function getThirdPartyTilesetInstallationStatus(
   return response;
 }
 
-/**
- * Uninstalls a third-party tileset.
- *
- * @param tilesetId - The unique identifier of the tileset to uninstall.
- * @param variant - The game variant.
- */
 export async function uninstallThirdPartyTileset(
   tilesetId: string,
   variant: GameVariant,
@@ -648,12 +420,6 @@ export async function uninstallThirdPartyTileset(
   });
 }
 
-/**
- * Lists all available soundpacks for a specific variant.
- *
- * @param variant - The game variant.
- * @returns A promise that resolves to an array of {@link Soundpack}.
- */
 export async function listAllSoundpacks(
   variant: GameVariant,
 ): Promise<Soundpack[]> {
@@ -666,13 +432,6 @@ export async function listAllSoundpacks(
   return response;
 }
 
-/**
- * Installs a third-party soundpack for a game variant.
- *
- * @param soundpackId - The unique identifier of the soundpack to install.
- * @param variant - The game variant.
- * @param onDownloadProgress - Callback function for download progress updates.
- */
 export async function installThirdPartySoundpack(
   soundpackId: string,
   variant: GameVariant,
@@ -690,13 +449,6 @@ export async function installThirdPartySoundpack(
   });
 }
 
-/**
- * Gets the installation status of a third-party soundpack.
- *
- * @param soundpackId - The unique identifier of the soundpack.
- * @param variant - The game variant.
- * @returns A promise that resolves to the {@link SoundpackInstallationStatus}.
- */
 export async function getThirdPartySoundpackInstallationStatus(
   soundpackId: string,
   variant: GameVariant,
@@ -711,12 +463,6 @@ export async function getThirdPartySoundpackInstallationStatus(
   return response;
 }
 
-/**
- * Uninstalls a third-party soundpack.
- *
- * @param soundpackId - The unique identifier of the soundpack to uninstall.
- * @param variant - The game variant.
- */
 export async function uninstallThirdPartySoundpack(
   soundpackId: string,
   variant: GameVariant,
@@ -727,9 +473,6 @@ export async function uninstallThirdPartySoundpack(
   });
 }
 
-/**
- * Confirms that the application can quit.
- */
 export async function confirmQuit(): Promise<void> {
   await invoke("confirm_quit");
 }

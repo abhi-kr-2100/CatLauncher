@@ -65,18 +65,15 @@ pub async fn install_third_party_soundpack(
   repository: &impl InstalledSoundpacksRepository,
   reporter: Arc<dyn Reporter + Send + Sync>,
 ) -> Result<(), InstallThirdPartySoundpackError> {
-  // Get soundpack details from soundpacks.json
   let soundpack_details =
     get_soundpack_from_json(game_variant, soundpack_id, resource_dir)
       .await?;
 
-  // Create a temp directory for this soundpack download
   let soundpack_temp_dir = temp_dir
     .join("cat-launcher-soundpack-install-dir")
     .join(soundpack_id);
   create_dir_all(&soundpack_temp_dir).await?;
 
-  // Download the soundpack
   let downloaded_file = downloader
     .download_file(
       &soundpack_details.installation.download_url,
@@ -85,34 +82,28 @@ pub async fn install_third_party_soundpack(
     )
     .await?;
 
-  // Extract the soundpack to the temp directory
   let extraction_dir = soundpack_temp_dir.join("extracted");
   create_dir_all(&extraction_dir).await?;
   extract_archive(&downloaded_file, &extraction_dir, os).await?;
 
-  // Get the soundpack parent directory from the soundpack path
   let soundpack_parent_dir = get_soundpack_parent_dir(
     &extraction_dir,
     &soundpack_details.installation.soundpack,
   )?;
 
-  // Get the sounds directory in user game data
   let user_game_data_dir =
     get_or_create_user_game_data_dir(game_variant, data_dir).await?;
   let sounds_dir =
     get_or_create_directory(&user_game_data_dir, "sound").await?;
 
-  // Copy the soundpack parent directory to the sounds directory
   let soundpack_install_dir = sounds_dir.join(soundpack_id);
   copy_dir_all(&soundpack_parent_dir, &soundpack_install_dir, os)
     .await?;
 
-  // Mark the soundpack as installed in the repository
   repository
     .add_installed_soundpack(soundpack_id, game_variant)
     .await?;
 
-  // Clean up temp files, ignore any errors
   let _ = tokio::fs::remove_dir_all(&soundpack_temp_dir).await;
 
   Ok(())

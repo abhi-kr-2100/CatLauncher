@@ -33,7 +33,6 @@ pub async fn fetch_github_releases(
     return Ok(Vec::new());
   }
 
-  // GitHub API returns at most 1000 releases.
   let limit = num_releases.unwrap_or(1000).min(1000);
 
   let mut all_releases = Vec::new();

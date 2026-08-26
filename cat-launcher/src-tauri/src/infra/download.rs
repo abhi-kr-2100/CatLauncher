@@ -8,7 +8,6 @@ use crate::infra::http_client::{
 use downloader::progress::Reporter;
 use thiserror::Error;
 
-/// Represents errors that can occur during file download.
 #[derive(Error, Debug)]
 pub enum DownloadFileError {
   #[error("downloader creation failed: {0}")]
@@ -18,14 +17,12 @@ pub enum DownloadFileError {
   NoDownloadResult,
 }
 
-/// A struct for managing file downloads using a client C that implements `HttpClient`.
 pub struct Downloader<C = ReqwestHttpClient> {
   client: C,
   parallel_requests: NonZeroU16,
 }
 
 impl<C: HttpClient + Clone + 'static> Downloader<C> {
-  /// Creates a new `Downloader` with the given client and max parallel requests.
   pub fn new(client: C, parallel_requests: NonZeroU16) -> Self {
     Self {
       client,
@@ -33,7 +30,6 @@ impl<C: HttpClient + Clone + 'static> Downloader<C> {
     }
   }
 
-  /// Downloads a file from the given `url` to the `download_dir` and reports progress.
   pub async fn download_file(
     &self,
     url: &str,
@@ -64,7 +60,6 @@ impl<C: HttpClient + Clone + 'static> Downloader<C> {
   }
 }
 
-/// Adapts the launcher's `HttpClient` to the `downloader` crate's `HttpClient` trait.
 #[derive(Clone)]
 struct DownloaderClient<C>(C);
 
@@ -88,7 +83,6 @@ impl<C: HttpClient + Clone + 'static> downloader::HttpClient
   }
 }
 
-/// Adapts a `reqwest::Response` to the `downloader` crate's `Response` trait.
 struct DownloaderResponse(reqwest::Response);
 
 impl downloader::Response for DownloaderResponse {

@@ -11,35 +11,22 @@ import { setupEventListener } from "@/lib/utils";
 import { clearCurrentlyPlaying } from "@/store/gameSessionSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-/**
- * Hook that notifies the backend that the frontend is ready.
- * This should be called once when the application starts.
- */
 export function useFrontendReady() {
   useEffect(() => {
     onFrontendReady();
   }, []);
 }
 
-/**
- * Represents the status of a game session.
- */
 export enum GameStatus {
-  /** The game is not running or has exited normally. */
   IDLE = "IDLE",
-  /** The game crashed with a non-zero exit code. */
+
   CRASHED = "CRASHED",
-  /** An error occurred while trying to launch or monitor the game. */
+
   ERROR = "ERROR",
-  /** The game was terminated by an external signal. */
+
   TERMINATED = "TERMINATED",
 }
 
-/**
- * Hook that listens for game session events (logs, exits, errors) and manages the game status and logs.
- *
- * @returns An object containing the current game status, logs as text, exit code, and a function to reset the monitor.
- */
 export function useGameSessionEvents() {
   const [gameStatus, setGameStatus] = useState<GameStatus>(
     GameStatus.IDLE,
@@ -75,14 +62,11 @@ export function useGameSessionEvents() {
           setExitCode(code);
 
           if (code === null) {
-            // Game was terminated by signal (null)
             setGameStatus(GameStatus.TERMINATED);
           } else if (
             code === 0 ||
             currentlyPlaying === "BrightNights"
           ) {
-            // BrightNights returns non-zero exit code almost always, even if it exited
-            // successfully. To not overwhelm the user, we don't show crash logs for it.
             resetGameSessionMonitor();
           } else {
             setGameStatus(GameStatus.CRASHED);
@@ -112,21 +96,12 @@ export function useGameSessionEvents() {
   return { gameStatus, logsText, exitCode, resetGameSessionMonitor };
 }
 
-/**
- * Represents the status of the application's auto-update process.
- */
 export enum AutoUpdateStatus {
-  /** No update is in progress or an update succeeded. */
   IDLE = "IDLE",
-  /** The auto-update process failed. */
+
   FAILURE = "FAILURE",
 }
 
-/**
- * Hook that listens for auto-update status events and manages the auto-update status.
- *
- * @returns An object containing the current auto-update status and a function to reset it.
- */
 export function useAutoUpdateEvents() {
   const [autoUpdateStatus, setAutoUpdateStatus] =
     useState<AutoUpdateStatus>(AutoUpdateStatus.IDLE);

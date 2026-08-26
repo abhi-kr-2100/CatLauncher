@@ -32,7 +32,6 @@ impl HttpClient for Client {
   }
 }
 
-/// Creates and returns a `reqwest::Client` instance configured with a user-agent
 pub fn create_http_client() -> Result<Client, HttpClientError> {
   let builder = Client::builder().user_agent("cat-launcher");
   builder.build().map_err(HttpClientError::from)

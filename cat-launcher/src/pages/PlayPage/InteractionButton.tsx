@@ -19,14 +19,6 @@ import {
   useUpgradeInfo,
 } from "./hooks";
 
-/**
- * Component that renders the primary interaction buttons for a game variant.
- * Handles Play, Install, Resume, and Upgrade actions based on the current
- * installation and running status of the selected release.
- *
- * @param props - Component properties.
- * @returns A React element containing the interaction buttons.
- */
 export default function InteractionButton({
   variant,
   selectedReleaseId,
@@ -84,8 +76,6 @@ export default function InteractionButton({
     installationStatus === "NotAvailable" ||
     installationProgressStatus === "Downloading" ||
     installationProgressStatus === "Installing" ||
-    // Only one variant should be running at a time.
-    // Disable button if any variant is already running.
     isAnyVariantRunning ||
     isStartingGame;
 
@@ -158,27 +148,14 @@ export default function InteractionButton({
   return button;
 }
 
-/**
- * Props for the {@link InteractionButton} component.
- */
 interface InteractionButtonProps {
-  /** The game variant this button is associated with. */
   variant: GameVariant;
-  /** The currently selected release ID for this variant. */
+
   selectedReleaseId: string | undefined;
-  /** Callback to update the selected release ID. */
+
   setSelectedReleaseId: (value: string) => void;
 }
 
-/**
- * Determines the appropriate label for the main action button based on the game's state.
- *
- * @param selectedReleaseId - The ID of the currently selected release.
- * @param isRunning - Whether the game is currently running.
- * @param installationStatus - The current installation status of the release.
- * @param installationProgressStatus - The progress status if an installation is active.
- * @returns A string label for the action button.
- */
 function getActionButtonLabel(
   selectedReleaseId: string | undefined,
   isRunning: boolean,

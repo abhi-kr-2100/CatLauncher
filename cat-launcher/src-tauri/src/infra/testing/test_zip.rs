@@ -1,7 +1,6 @@
 use std::io::Write;
 use zip::write::SimpleFileOptions;
 
-/// Creates an in-memory zip archive containing the given (filename, content) pairs.
 pub fn create_test_zip(
   files: &[(&str, &[u8])],
 ) -> Result<Vec<u8>, Box<dyn std::error::Error>> {

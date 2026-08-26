@@ -11,7 +11,6 @@ use crate::infra::http_client::{
 
 use std::sync::Arc;
 
-/// A test HTTP client that can rewrite URLs based on host mappings.
 #[derive(Clone)]
 pub struct TestHttpClient {
   client: Client,
@@ -20,7 +19,6 @@ pub struct TestHttpClient {
 }
 
 impl TestHttpClient {
-  /// Creates a new `TestHttpClient` with the given host mappings.
   pub fn new(
     host_mappings: HashMap<String, String>,
   ) -> Result<Self, HttpClientError> {
@@ -50,7 +48,6 @@ impl TestHttpClient {
       .get(host)
       .ok_or_else(|| HttpClientError::NoMapping(host.to_string()))?;
 
-    // mapped_host can be "localhost:8080"
     let mapped_url = Url::parse(&format!("http://{}", mapped_host))
       .map_err(HttpClientError::from)?;
 

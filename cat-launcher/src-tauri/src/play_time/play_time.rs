@@ -3,7 +3,6 @@ use crate::play_time::repository::{
 };
 use crate::variants::game_variant::GameVariant;
 
-/// Retrieves the total play time for a specific game variant from the repository.
 pub async fn get_play_time_for_variant(
   game_variant: &GameVariant,
   play_time_repository: &impl PlayTimeRepository,
@@ -13,7 +12,6 @@ pub async fn get_play_time_for_variant(
     .await
 }
 
-/// Retrieves the play time for a specific version of a game variant from the repository.
 pub async fn get_play_time_for_version(
   game_variant: &GameVariant,
   version: &str,
@@ -24,7 +22,6 @@ pub async fn get_play_time_for_version(
     .await
 }
 
-/// Logs play time for a specific version of a game variant in the repository.
 pub async fn log_play_time(
   game_variant: &GameVariant,
   version: &str,

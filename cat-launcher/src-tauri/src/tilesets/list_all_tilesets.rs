@@ -19,27 +19,21 @@ use crate::tilesets::types::{
 };
 use crate::variants::GameVariant;
 
-/// Errors that can occur when listing all tilesets.
 #[derive(thiserror::Error, Debug)]
 pub enum ListAllTilesetsError {
-  /// An error occurred while determining the stock tilesets directory.
   #[error("failed to get stock tilesets dir: {0}")]
   GetStockTilesetsDir(#[from] GetStockTilesetsDirError),
 
-  /// An error occurred while listing stock tilesets.
   #[error("failed to read stock tileset dir: {0}")]
   ExtractStockTileset(#[from] ListAllStockTilesetsError),
 
-  /// An error occurred while retrieving the active release version.
   #[error("failed to get active release: {0}")]
   GetActiveRelease(#[from] ActiveReleaseRepositoryError),
 
-  /// An error occurred while listing third-party tilesets.
   #[error("failed to list third-party tilesets: {0}")]
   ListThirdPartyTilesets(#[from] ListThirdPartyTilesetsError),
 }
 
-/// Lists all available tilesets (both stock and third-party) for a game variant.
 pub async fn list_all_tilesets(
   game_variant: &GameVariant,
   data_dir: &Path,
@@ -49,12 +43,10 @@ pub async fn list_all_tilesets(
 ) -> Result<Vec<Tileset>, ListAllTilesetsError> {
   let mut tilesets = Vec::new();
 
-  // Add third-party tilesets
   let third_party_tilesets =
     list_all_third_party_tilesets(game_variant, resource_dir).await?;
   tilesets.extend(third_party_tilesets);
 
-  // Add stock tilesets
   let release_version = active_release_repository
     .get_active_release(game_variant)
     .await?;
@@ -77,13 +69,11 @@ pub async fn list_all_tilesets(
   Ok(tilesets)
 }
 
-/// Errors that can occur when extracting stock tileset information.
 #[derive(thiserror::Error, Debug)]
 pub enum ExtractStockTilesetError {
-  /// An error occurred while reading the `tileset.txt` file.
   #[error("failed to read tileset.txt: {0}")]
   ReadTilesetTxt(#[from] io::Error),
-  /// A required field is missing from `tileset.txt`.
+
   #[error("missing field in tileset.txt: {0}")]
   MissingField(String),
 }
@@ -157,7 +147,6 @@ async fn list_all_stock_tilesets(
           tilesets.push(Tileset::Stock(stock_tileset));
         }
         Err(_) => {
-          // Failed to parse, skip
           continue;
         }
       }
@@ -167,14 +156,11 @@ async fn list_all_stock_tilesets(
   Ok(tilesets)
 }
 
-/// Errors that can occur when listing third-party tilesets.
 #[derive(thiserror::Error, Debug)]
 pub enum ListThirdPartyTilesetsError {
-  /// An error occurred while reading the `tilesets.json` resource file.
   #[error("failed to read tilesets.json: {0}")]
   ReadTilesetsJson(#[from] io::Error),
 
-  /// An error occurred while parsing the `tilesets.json` file.
   #[error("failed to parse tilesets.json: {0}")]
   ParseTilesetsJson(#[from] serde_json::Error),
 }
@@ -183,10 +169,8 @@ async fn list_all_third_party_tilesets(
   game_variant: &GameVariant,
   resource_dir: &Path,
 ) -> Result<Vec<Tileset>, ListThirdPartyTilesetsError> {
-  // Construct the path to tilesets.json
   let tilesets_json_path = get_tilesets_resource_path(resource_dir);
 
-  // Try to read the tilesets.json file
   let content = match read_to_string(&tilesets_json_path).await {
     Ok(content) => content,
     Err(e) => {

@@ -31,96 +31,72 @@ use crate::launch_game::repository::{
 use crate::launch_game::utils::{BackupError, backup_save_files};
 use crate::variants::GameVariant;
 
-/// Errors that can occur during the game launch process.
 #[derive(thiserror::Error, Debug)]
 pub enum LaunchGameError {
-  /// Error related to the download directory.
   #[error("download directory not found: {0}")]
   DownloadDir(#[from] AssetDownloadDirError),
 
-  /// Error related to the game extraction directory.
   #[error("game directory not found: {0}")]
   GameDir(#[from] AssetExtractionDirError),
 
-  /// Error related to the game executable path.
   #[error("executable not found: {0}")]
   Executable(#[from] GetExecutablePathError),
 
-  /// The directory containing the executable could not be determined.
   #[error("executable directory not found")]
   ExecutableDir,
 
-  /// Failed to spawn the game process.
   #[error("failed to launch game: {0}")]
   Launch(#[from] io::Error),
 
-  /// Error while interacting with the backup repository.
   #[error("failed to access backup repository: {0}")]
   BackupRepository(#[from] BackupRepositoryError),
 
-  /// Error related to the user's game data directory.
   #[error("failed to get user data directory: {0}")]
   UserGameDataDir(#[from] GetUserGameDataDirError),
 
-  /// Failed to capture stdout from the game process.
   #[error("failed to get stdout from child process")]
   Stdout,
 
-  /// Failed to capture stderr from the game process.
   #[error("failed to get stderr from child process")]
   Stderr,
 
-  /// Failed to retrieve information about the game release.
   #[error("failed to obtain release: {0}")]
   Release(#[from] GetReleaseError),
 
-  /// An error occurred while waiting for asynchronous subtasks to complete.
   #[error("failed to wait for subtasks: {0}")]
   Subtasks(#[from] JoinError),
 
-  /// Failed to determine the path for a backup archive.
   #[error("failed to get backup archive path: {0}")]
   BackupArchivePath(#[from] GetAutomaticBackupArchivePathError),
 
-  /// Failed to remove an old backup file.
   #[error("failed to remove backup file: {0}")]
   RemoveBackupFile(io::Error),
 }
 
-/// Events emitted during the game session.
 #[derive(Serialize, Clone, TS)]
 #[ts(export)]
 #[serde(tag = "type", content = "payload")]
 pub enum GameEvent {
-  /// A log line captured from the game's stdout or stderr.
   Log(String),
-  /// The game process has exited.
+
   Exit(GameExitPayload),
-  /// An error occurred during the game session.
+
   Error(GameErrorPayload),
 }
 
-/// Payload for the `Error` game event.
 #[derive(Serialize, Clone, serde::Deserialize, TS)]
 #[ts(export)]
 pub struct GameErrorPayload {
-  /// The error message.
   pub message: String,
 }
 
-/// Payload for the `Exit` game event.
 #[derive(Serialize, Clone, serde::Deserialize, TS)]
 #[ts(export)]
 pub struct GameExitPayload {
-  /// The exit code of the game process, if available.
   pub code: Option<i32>,
 }
 
 impl GameRelease {
-  /// Prepares the command and environment for launching this release.
-  ///
-  /// This includes setting up the executable path, creating a backup of save files,
-  /// and configuring the command arguments (e.g., `--userdir`, `--world`).
   pub async fn prepare_launch(
     &self,
     os: &OS,
@@ -146,9 +122,6 @@ impl GameRelease {
       .add_backup_entry(&self.variant, &self.version, timestamp)
       .await?;
 
-    // A backup failure is not fatal: clear the entry and continue launching
-    // the game. The failure is reported via a non-terminal Log event by the
-    // caller.
     let backup_failure = match backup_save_files(
       &self.variant,
       backup_id,
@@ -190,10 +163,6 @@ impl GameRelease {
   }
 }
 
-/// Runs the game process and monitors its output.
-///
-/// Spawns the command, captures stdout and stderr, and forwards logs
-/// and the exit event via the provided `on_game_event` callback.
 pub async fn run_game_and_monitor<F, Fut>(
   mut command: Command,
   on_game_event: F,
@@ -235,8 +204,6 @@ where
   let stdout_task_result = stdout_task.await;
   let stderr_task_result = stderr_task.await;
 
-  // Exit is emitted before waiting for other tasks to complete so that
-  // an error does not prevent the exit event from being ever emitted.
   on_game_event(GameEvent::Exit(GameExitPayload {
     code: status.code(),
   }))
@@ -286,7 +253,6 @@ async fn cleanup_old_backups(
         .is_ok()
         && let Ok(path) = path_res
       {
-        // file deletion fails is ignored.
         let _ = tokio::fs::remove_file(&path).await;
       }
     });
@@ -297,10 +263,6 @@ async fn cleanup_old_backups(
   Ok(())
 }
 
-/// High-level function to launch and monitor a game release.
-///
-/// This function coordinates retrieving the release information, preparing the launch
-/// environment (including backups), and starting the monitoring task.
 #[allow(clippy::too_many_arguments)]
 pub async fn launch_and_monitor_game<F, Fut>(
   variant: &GameVariant,
@@ -329,7 +291,6 @@ where
   )
   .await?;
 
-  // Ignore non-critical error where active release could not be set
   let _ = variant
     .set_active_release(release_id, active_release_repository)
     .await;
@@ -374,8 +335,6 @@ where
 
   let on_game_event_for_error = on_game_event.clone();
 
-  // It's important to not await the task here, as it be blocking.
-  // run_game_and_monitor streams to the frontend.
   tokio::spawn(async move {
     let result = run_game_and_monitor(command, on_game_event).await;
 
@@ -577,7 +536,6 @@ mod tests {
     let backup_repo = SqliteBackupRepository::new(db.pool().clone());
     let temp_data = TempDir::new()?;
 
-    // Block Backups directory creation to force backup_save_files to fail
     tokio::fs::write(temp_data.path().join("Backups"), b"not a dir")
       .await?;
 
