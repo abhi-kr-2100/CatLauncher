@@ -351,3 +351,549 @@ pub async fn list_cached_third_party_mods(
 ) -> Result<Vec<ThirdPartyMod>, ListCachedThirdPartyModsError> {
   mods_repository.get_third_party_mods(game_variant).await
 }
+
+#[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::unwrap_used
+)]
+mod tests {
+  use super::*;
+  use async_trait::async_trait;
+  use std::sync::{Arc, Mutex};
+  use tempfile::tempdir;
+
+  use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+  use crate::active_release::repository::ActiveReleaseRepository;
+  use crate::filesystem::paths::get_or_create_asset_installation_dir;
+  use crate::infra::http_client::ReqwestHttpClient;
+  use crate::infra::testing::test_database::TestDatabase;
+  use crate::mods::repository::sqlite_mods_repository::SqliteModsRepository;
+  use crate::mods::types::ModInstallation;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  struct MockOnlineModRepo {
+    mods: Vec<ThirdPartyMod>,
+  }
+
+  #[async_trait]
+  impl OnlineModRepository for MockOnlineModRepo {
+    async fn get_mods_for_variant(
+      &self,
+      _variant: &GameVariant,
+      _client: &dyn HttpClient,
+    ) -> Result<Vec<ThirdPartyMod>, FetchOnlineModsError> {
+      Ok(self.mods.clone())
+    }
+  }
+
+  fn create_sample_third_party_mod(id: &str) -> ThirdPartyMod {
+    ThirdPartyMod {
+      id: id.to_string(),
+      name: format!("Name for {id}"),
+      description: format!("Description for {id}"),
+      category: "Content".to_string(),
+      installation: ModInstallation {
+        download_url: format!("https://example.com/{id}.zip"),
+        modinfo: "modinfo.json".to_string(),
+      },
+      activity: None,
+    }
+  }
+
+  #[test]
+  fn test_extract_stock_mod_from_modinfo_valid() {
+    let json = r#"[
+      {
+        "type": "MOD_INFO",
+        "id": "dda_stock",
+        "name": "DDA Stock",
+        "description": "Stock mod for testing",
+        "category": "content"
+      }
+    ]"#;
+
+    let stock_mod = extract_stock_mod_from_modinfo(json).unwrap();
+    assert_eq!(stock_mod.id, "dda_stock");
+    assert_eq!(stock_mod.name, "DDA Stock");
+    assert_eq!(stock_mod.description, "Stock mod for testing");
+    assert_eq!(stock_mod.category, "content");
+  }
+
+  #[test]
+  fn test_extract_stock_mod_from_modinfo_missing_optional_fields() {
+    let json = r#"[
+      {
+        "type": "MOD_INFO",
+        "id": "minimal_mod",
+        "name": "Minimal Mod"
+      }
+    ]"#;
+
+    let stock_mod = extract_stock_mod_from_modinfo(json).unwrap();
+    assert_eq!(stock_mod.id, "minimal_mod");
+    assert_eq!(stock_mod.name, "Minimal Mod");
+    assert_eq!(stock_mod.description, "");
+    assert_eq!(stock_mod.category, "");
+  }
+
+  #[test]
+  fn test_extract_stock_mod_from_modinfo_errors() {
+    // Missing MOD_INFO type
+    let no_mod_info = r#"[{"type": "item", "id": "rock"}]"#;
+    assert!(matches!(
+      extract_stock_mod_from_modinfo(no_mod_info),
+      Err(ExtractStockModError::NoModInfo)
+    ));
+
+    // Missing id
+    let no_id = r#"[{"type": "MOD_INFO", "name": "No ID"}]"#;
+    assert!(matches!(
+      extract_stock_mod_from_modinfo(no_id),
+      Err(ExtractStockModError::MissingField("id"))
+    ));
+
+    // Missing name
+    let no_name = r#"[{"type": "MOD_INFO", "id": "no_name"}]"#;
+    assert!(matches!(
+      extract_stock_mod_from_modinfo(no_name),
+      Err(ExtractStockModError::MissingField("name"))
+    ));
+
+    // Invalid JSON
+    assert!(matches!(
+      extract_stock_mod_from_modinfo("not json"),
+      Err(ExtractStockModError::ParseModInfo(_))
+    ));
+  }
+
+  #[tokio::test]
+  async fn test_list_all_stock_mods_dir() -> TestResult {
+    let temp = tempdir()?;
+    let stock_dir = temp.path();
+
+    // Valid mod 1
+    let mod1_dir = stock_dir.join("mod1");
+    tokio::fs::create_dir_all(&mod1_dir).await?;
+    tokio::fs::write(
+      mod1_dir.join("modinfo.json"),
+      br#"[{"type": "MOD_INFO", "id": "mod1", "name": "Mod 1"}]"#,
+    )
+    .await?;
+
+    // Valid mod 2
+    let mod2_dir = stock_dir.join("mod2");
+    tokio::fs::create_dir_all(&mod2_dir).await?;
+    tokio::fs::write(
+      mod2_dir.join("modinfo.json"),
+      br#"[{"type": "MOD_INFO", "id": "mod2", "name": "Mod 2"}]"#,
+    )
+    .await?;
+
+    // Non-directory file (should be ignored)
+    tokio::fs::write(stock_dir.join("readme.txt"), b"hello").await?;
+
+    // Directory without modinfo.json (should be ignored)
+    let invalid_dir = stock_dir.join("invalid");
+    tokio::fs::create_dir_all(&invalid_dir).await?;
+
+    let stock_mods = list_all_stock_mods(stock_dir).await?;
+    assert_eq!(stock_mods.len(), 2);
+    assert!(stock_mods.iter().any(|m| m.id == "mod1"));
+    assert!(stock_mods.iter().any(|m| m.id == "mod2"));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_third_party_mods_resource() -> TestResult {
+    let temp = tempdir()?;
+    let content_dir = temp.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+
+    let mods_json = r#"{
+      "DarkDaysAhead": {
+        "mod_a": {
+          "id": "mod_a",
+          "name": "Mod A",
+          "description": "Desc A",
+          "category": "content",
+          "installation": {
+            "download_url": "https://example.com/a.zip",
+            "modinfo": "modinfo.json"
+          },
+          "activity": null
+        }
+      },
+      "BrightNights": {
+        "mod_b": {
+          "id": "mod_b",
+          "name": "Mod B",
+          "description": "Desc B",
+          "category": "content",
+          "installation": {
+            "download_url": "https://example.com/b.zip",
+            "modinfo": "modinfo.json"
+          },
+          "activity": null
+        }
+      }
+    }"#;
+    tokio::fs::write(content_dir.join("mods.json"), mods_json)
+      .await?;
+
+    let dda_mods = list_all_third_party_mods(
+      &GameVariant::DarkDaysAhead,
+      temp.path(),
+    )
+    .await?;
+    assert_eq!(dda_mods.len(), 1);
+    assert_eq!(dda_mods[0].id, "mod_a");
+
+    let bn_mods = list_all_third_party_mods(
+      &GameVariant::BrightNights,
+      temp.path(),
+    )
+    .await?;
+    assert_eq!(bn_mods.len(), 1);
+    assert_eq!(bn_mods[0].id, "mod_b");
+
+    let tlg_mods = list_all_third_party_mods(
+      &GameVariant::TheLastGeneration,
+      temp.path(),
+    )
+    .await?;
+    assert_eq!(tlg_mods.len(), 0);
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_third_party_mods_missing_file() -> TestResult
+  {
+    let temp = tempdir()?;
+    let result = list_all_third_party_mods(
+      &GameVariant::DarkDaysAhead,
+      temp.path(),
+    )
+    .await;
+    assert!(matches!(
+      result,
+      Err(ListThirdPartyModsError::ReadModsJson(_))
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_cached_third_party_mods_repo() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    let sample = create_sample_third_party_mod("cached_1");
+    repo.save_third_party_mods(&variant, vec![sample]).await?;
+
+    let cached =
+      list_cached_third_party_mods(&variant, &repo).await?;
+    assert_eq!(cached.len(), 1);
+    assert_eq!(cached[0].id, "cached_1");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_mods_full_workflow() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let mods_repo = SqliteModsRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    // 1. Setup cached mod in db
+    let cached_mod = create_sample_third_party_mod("cached_mod");
+    mods_repo
+      .save_third_party_mods(&variant, vec![cached_mod])
+      .await?;
+
+    // 2. Setup online mod repo
+    let online_mod = create_sample_third_party_mod("online_mod");
+    let online_repos: Vec<Box<dyn OnlineModRepository>> =
+      vec![Box::new(MockOnlineModRepo {
+        mods: vec![online_mod],
+      })];
+
+    // 3. Setup bundled mods.json in resource_dir
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    let bundled_json = r#"{
+      "DarkDaysAhead": {
+        "bundled_mod": {
+          "id": "bundled_mod",
+          "name": "Bundled Mod",
+          "description": "Bundled Description",
+          "category": "content",
+          "installation": {
+            "download_url": "https://example.com/bundled.zip",
+            "modinfo": "modinfo.json"
+          },
+          "activity": null
+        }
+      }
+    }"#;
+    tokio::fs::write(content_dir.join("mods.json"), bundled_json)
+      .await?;
+
+    // 4. Setup active release & stock mod
+    let version = "v0.H";
+    active_release_repo
+      .set_active_release(&variant, version)
+      .await?;
+
+    let install_dir = get_or_create_asset_installation_dir(
+      &variant,
+      version,
+      temp_data.path(),
+    )
+    .await?;
+    let game_dir = install_dir.join("cataclysm-dda-v0.H");
+    let stock_mods_dir = game_dir.join("data").join("mods");
+    let stock_mod_dir = stock_mods_dir.join("stock_mod");
+    tokio::fs::create_dir_all(&stock_mod_dir).await?;
+    tokio::fs::write(
+      stock_mod_dir.join("modinfo.json"),
+      br#"[{"type": "MOD_INFO", "id": "stock_mod", "name": "Stock Mod"}]"#,
+    )
+    .await?;
+
+    let updates: Arc<Mutex<Vec<ModsUpdatePayload>>> =
+      Arc::new(Mutex::new(Vec::new()));
+    let updates_clone = Arc::clone(&updates);
+
+    let client = ReqwestHttpClient::new(reqwest::Client::new());
+
+    list_all_mods(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+      &mods_repo,
+      &online_repos,
+      &client,
+      move |payload| {
+        updates_clone.lock().unwrap().push(payload);
+        Ok::<(), std::io::Error>(())
+      },
+    )
+    .await?;
+
+    let recorded_updates = updates.lock().unwrap().clone();
+    assert!(recorded_updates.len() >= 2);
+
+    // Initial update has Fetching status
+    assert_eq!(
+      recorded_updates[0].status,
+      ModsUpdateStatus::Fetching
+    );
+
+    // Final update has Success status and contains all mods
+    let final_update = recorded_updates.last().unwrap();
+    assert_eq!(final_update.status, ModsUpdateStatus::Success);
+
+    let mod_ids: Vec<String> = final_update
+      .mods
+      .iter()
+      .map(|m| match m {
+        Mod::ThirdParty(tp) => tp.id.clone(),
+        Mod::Stock(s) => s.id.clone(),
+      })
+      .collect();
+
+    assert!(mod_ids.contains(&"cached_mod".to_string()));
+    assert!(mod_ids.contains(&"online_mod".to_string()));
+    assert!(mod_ids.contains(&"bundled_mod".to_string()));
+    assert!(mod_ids.contains(&"stock_mod".to_string()));
+
+    // Verify all third-party mods were saved in database
+    let db_cached = mods_repo.get_third_party_mods(&variant).await?;
+    let db_ids: Vec<String> =
+      db_cached.into_iter().map(|m| m.id).collect();
+    assert!(db_ids.contains(&"cached_mod".to_string()));
+    assert!(db_ids.contains(&"online_mod".to_string()));
+    assert!(db_ids.contains(&"bundled_mod".to_string()));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_mods_no_active_release() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let mods_repo = SqliteModsRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Resource dir with empty mods.json
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    tokio::fs::write(content_dir.join("mods.json"), "{}").await?;
+
+    let final_payload: Arc<Mutex<Option<ModsUpdatePayload>>> =
+      Arc::new(Mutex::new(None));
+    let final_payload_clone = Arc::clone(&final_payload);
+
+    let client = ReqwestHttpClient::new(reqwest::Client::new());
+
+    list_all_mods(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+      &mods_repo,
+      &[],
+      &client,
+      move |payload| {
+        *final_payload_clone.lock().unwrap() = Some(payload);
+        Ok::<(), std::io::Error>(())
+      },
+    )
+    .await?;
+
+    let result = final_payload.lock().unwrap().take().unwrap();
+    assert_eq!(result.status, ModsUpdateStatus::Success);
+    // No stock mods because active release was None
+    assert!(result.mods.is_empty());
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_mods_deduplication() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let mods_repo = SqliteModsRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Same mod in cache and online and bundled
+    let duplicate_mod = create_sample_third_party_mod("duplicate_id");
+    mods_repo
+      .save_third_party_mods(&variant, vec![duplicate_mod.clone()])
+      .await?;
+
+    let online_repos: Vec<Box<dyn OnlineModRepository>> =
+      vec![Box::new(MockOnlineModRepo {
+        mods: vec![duplicate_mod],
+      })];
+
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    let bundled_json = r#"{
+      "DarkDaysAhead": {
+        "duplicate_id": {
+          "id": "duplicate_id",
+          "name": "Duplicate Mod",
+          "description": "Desc",
+          "category": "content",
+          "installation": {
+            "download_url": "https://example.com/dup.zip",
+            "modinfo": "modinfo.json"
+          },
+          "activity": null
+        }
+      }
+    }"#;
+    tokio::fs::write(content_dir.join("mods.json"), bundled_json)
+      .await?;
+
+    let final_payload: Arc<Mutex<Option<ModsUpdatePayload>>> =
+      Arc::new(Mutex::new(None));
+    let final_payload_clone = Arc::clone(&final_payload);
+    let client = ReqwestHttpClient::new(reqwest::Client::new());
+
+    list_all_mods(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+      &mods_repo,
+      &online_repos,
+      &client,
+      move |payload| {
+        *final_payload_clone.lock().unwrap() = Some(payload);
+        Ok::<(), std::io::Error>(())
+      },
+    )
+    .await?;
+
+    let result = final_payload.lock().unwrap().take().unwrap();
+    let dup_count = result
+      .mods
+      .iter()
+      .filter(|m| match m {
+        Mod::ThirdParty(tp) => tp.id == "duplicate_id",
+        Mod::Stock(s) => s.id == "duplicate_id",
+      })
+      .count();
+    assert_eq!(dup_count, 1);
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_mods_on_update_error() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let mods_repo = SqliteModsRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    tokio::fs::write(content_dir.join("mods.json"), "{}").await?;
+
+    let client = ReqwestHttpClient::new(reqwest::Client::new());
+
+    let result = list_all_mods(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+      &mods_repo,
+      &[],
+      &client,
+      |_payload| {
+        Err(std::io::Error::new(
+          std::io::ErrorKind::BrokenPipe,
+          "channel closed",
+        ))
+      },
+    )
+    .await;
+
+    assert!(matches!(result, Err(ListAllModsError::Send(_))));
+
+    Ok(())
+  }
+}
