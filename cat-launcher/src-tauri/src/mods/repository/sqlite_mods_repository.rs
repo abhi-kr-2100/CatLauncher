@@ -301,3 +301,208 @@ impl ModsRepository for SqliteModsRepository {
     .map_err(|e| ListCachedThirdPartyModsError::Get(Box::new(e)))?
   }
 }
+
+#[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::unwrap_used
+)]
+mod tests {
+  use super::*;
+  use crate::infra::testing::test_database::TestDatabase;
+  use crate::mods::types::ModInstallation;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  fn create_mod(id: &str, github: Option<&str>) -> ThirdPartyMod {
+    ThirdPartyMod {
+      id: id.to_string(),
+      name: format!("Name {id}"),
+      description: format!("Desc {id}"),
+      category: "items".to_string(),
+      installation: ModInstallation {
+        download_url: "https://example.com/mod.zip".to_string(),
+        modinfo: "modinfo.json".to_string(),
+      },
+      activity: github.map(|g| ModActivity::GithubCommit {
+        github: g.to_string(),
+      }),
+    }
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_save_and_get() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    let test_mod = create_mod(
+      "sample",
+      Some("https://github.com/owner/sample-repo"),
+    );
+    repo.save_third_party_mods(&variant, vec![test_mod]).await?;
+
+    let fetched =
+      repo.get_third_party_mod_by_id("sample", &variant).await?;
+    assert_eq!(fetched.id, "sample");
+    assert_eq!(fetched.name, "Name sample");
+    assert_eq!(
+      fetched.installation.download_url,
+      "https://example.com/mod.zip"
+    );
+
+    match fetched.activity {
+      Some(ModActivity::GithubCommit { github }) => {
+        assert_eq!(github, "https://github.com/owner/sample-repo");
+      }
+      None => panic!("Expected github activity"),
+    }
+
+    let all = repo.get_third_party_mods(&variant).await?;
+    assert_eq!(all.len(), 1);
+    assert_eq!(all[0].id, "sample");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_upsert() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    let mut test_mod = create_mod("mod_upsert", None);
+    repo
+      .save_third_party_mods(&variant, vec![test_mod.clone()])
+      .await?;
+
+    let fetched1 = repo
+      .get_third_party_mod_by_id("mod_upsert", &variant)
+      .await?;
+    assert_eq!(fetched1.name, "Name mod_upsert");
+
+    test_mod.name = "Updated Name".to_string();
+    test_mod.description = "Updated Description".to_string();
+    repo.save_third_party_mods(&variant, vec![test_mod]).await?;
+
+    let fetched2 = repo
+      .get_third_party_mod_by_id("mod_upsert", &variant)
+      .await?;
+    assert_eq!(fetched2.name, "Updated Name");
+    assert_eq!(fetched2.description, "Updated Description");
+
+    let all = repo.get_third_party_mods(&variant).await?;
+    assert_eq!(all.len(), 1);
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_empty_github_url_error()
+  -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    let test_mod = create_mod("bad_github", Some(""));
+    let result =
+      repo.save_third_party_mods(&variant, vec![test_mod]).await;
+
+    assert!(matches!(
+      result,
+      Err(SaveThirdPartyModsError::InvalidData(_))
+    ));
+
+    let all = repo.get_third_party_mods(&variant).await?;
+    assert!(all.is_empty());
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_not_found() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    let result =
+      repo.get_third_party_mod_by_id("missing", &variant).await;
+    assert!(matches!(
+      result,
+      Err(GetThirdPartyModByIdError::NotFound(id, var)) if id == "missing" && var == variant.to_string()
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_inconsistent_activity_data()
+  -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Insert directly into `mods` table with github_commit activity_type,
+    // but without corresponding row in `github_commit_mod_activity` table
+    {
+      let conn = db.pool().get()?;
+      conn.execute(
+        "INSERT INTO mods (id, game_variant, name, description, category, download_url, modinfo_path, activity_type)
+         VALUES ('broken', ?1, 'Broken', 'Desc', 'items', 'https://example.com/mod.zip', 'modinfo.json', 'github_commit')",
+        [variant.to_string()],
+      )?;
+    }
+
+    let result =
+      repo.get_third_party_mod_by_id("broken", &variant).await;
+    assert!(matches!(
+      result,
+      Err(GetThirdPartyModByIdError::InconsistentData(_))
+    ));
+
+    let list_result = repo.get_third_party_mods(&variant).await;
+    assert!(matches!(
+      list_result,
+      Err(ListCachedThirdPartyModsError::InconsistentData(_))
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_sqlite_mods_repository_unsupported_activity_type()
+  -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let repo = SqliteModsRepository::new(db.pool().clone());
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Insert directly with unknown activity_type
+    {
+      let conn = db.pool().get()?;
+      conn.execute(
+        "INSERT INTO mods (id, game_variant, name, description, category, download_url, modinfo_path, activity_type)
+         VALUES ('weird', ?1, 'Weird', 'Desc', 'items', 'https://example.com/mod.zip', 'modinfo.json', 'alien_activity')",
+        [variant.to_string()],
+      )?;
+    }
+
+    let result =
+      repo.get_third_party_mod_by_id("weird", &variant).await;
+    assert!(matches!(
+      result,
+      Err(GetThirdPartyModByIdError::UnsupportedActivityType(t)) if t == "alien_activity"
+    ));
+
+    let list_result = repo.get_third_party_mods(&variant).await;
+    assert!(matches!(
+      list_result,
+      Err(ListCachedThirdPartyModsError::UnsupportedActivityType(t)) if t == "alien_activity"
+    ));
+
+    Ok(())
+  }
+}

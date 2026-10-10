@@ -70,7 +70,7 @@ impl Asset for Mod {
   }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub enum ModInstallationStatus {
   Installed,
