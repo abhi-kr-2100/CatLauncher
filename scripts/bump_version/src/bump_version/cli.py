@@ -102,7 +102,7 @@ def main(args: Optional[list[str]] = None) -> None:
 
     readme_path = BASE_PATH / "README.md"
     package_json_path = BASE_PATH / "cat-launcher" / "package.json"
-    cargo_lock_path = BASE_PATH / "cat-launcher" / "src-tauri" / "Cargo.lock"
+    cargo_lock_path = BASE_PATH / "cat-launcher" / "Cargo.lock"
     cargo_toml_path = BASE_PATH / "cat-launcher" / "src-tauri" / "Cargo.toml"
     tauri_conf_path = BASE_PATH / "cat-launcher" / "src-tauri" / "tauri.conf.json"
 

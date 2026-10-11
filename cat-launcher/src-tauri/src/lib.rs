@@ -69,8 +69,8 @@ use crate::tilesets::commands::{
 use crate::users::commands::get_user_id;
 use crate::utils::{
   autoupdate, manage_downloader, manage_http_client,
-  manage_online_mod_repository_registry, manage_posthog,
-  manage_repositories, migrate_to_local_data_dir, on_quit,
+  manage_online_mod_repository_registry, manage_repositories,
+  on_quit,
 };
 use crate::variants::commands::get_game_variants_info;
 use crate::variants::commands::update_game_variant_order;
@@ -91,9 +91,6 @@ pub fn run() {
       manage_repositories(app)?;
       manage_online_mod_repository_registry(app);
       manage_downloader(app);
-      manage_posthog(app);
-
-      migrate_to_local_data_dir(app);
 
       autoupdate(app);
       on_quit(app);
