@@ -174,3 +174,265 @@ pub fn on_quit(app: &App) {
 
   register_quit_handler(&window, app.handle().clone());
 }
+
+#[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::unwrap_used
+)]
+mod tests {
+  use std::fs::File;
+
+  use super::*;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  #[test]
+  fn test_constants() {
+    assert_eq!(FRONTEND_READY_EVENT, "frontend-ready");
+    assert_eq!(QUIT_REQUESTED_EVENT, "quit-requested");
+  }
+
+  #[test]
+  fn test_repository_error_system_dir() {
+    let tauri_err = tauri::Error::AssetNotFound("missing.png".into());
+    let repo_err = RepositoryError::from(tauri_err);
+    let repo_err_msg = repo_err.to_string();
+    assert!(
+      repo_err_msg.starts_with("failed to get system directory: ")
+    );
+    assert!(repo_err_msg.contains("missing.png"));
+    assert!(format!("{:?}", repo_err).contains("SystemDir"));
+  }
+
+  #[test]
+  fn test_repository_error_schema_file_path() {
+    let schema_err = GetSchemaFilePathError::ResourceDir(
+      tauri::Error::AssetNotFound("schema.sql".into()),
+    );
+    let repo_err = RepositoryError::from(schema_err);
+    let repo_err_msg = repo_err.to_string();
+    assert!(
+      repo_err_msg.starts_with("failed to get schema file path: ")
+    );
+    assert!(repo_err_msg.contains("schema.sql"));
+    assert!(format!("{:?}", repo_err).contains("SchemaFilePath"));
+  }
+
+  #[test]
+  fn test_repository_error_connection_pool_from_r2d2() -> TestResult {
+    let pool = r2d2::Pool::builder()
+      .max_size(1)
+      .build(r2d2_sqlite::SqliteConnectionManager::memory())?;
+    let _conn = pool.get()?;
+    let r2d2_err = pool
+      .get_timeout(std::time::Duration::from_millis(10))
+      .unwrap_err();
+    let pool_err = CreateSqlitePoolError::ConnectionPool(r2d2_err);
+    let repo_err = RepositoryError::from(pool_err);
+    let repo_err_msg = repo_err.to_string();
+    assert!(
+      repo_err_msg
+        .starts_with("failed to create database connection pool: ")
+    );
+    assert!(repo_err_msg.contains("timed out"));
+    assert!(format!("{:?}", repo_err).contains("ConnectionPool"));
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_repository_error_connection_pool_from_schema() {
+    let schema_init_err =
+      crate::infra::repository::db_schema::InitializeDatabaseError::ReadFile(
+        std::io::Error::new(std::io::ErrorKind::NotFound, "schema file missing"),
+      );
+    let pool_schema_err =
+      CreateSqlitePoolError::Schema(schema_init_err);
+    let repo_err = RepositoryError::from(pool_schema_err);
+    let repo_err_msg = repo_err.to_string();
+    assert!(
+      repo_err_msg
+        .starts_with("failed to create database connection pool: ")
+    );
+    assert!(repo_err_msg.contains("schema file missing"));
+    assert!(format!("{:?}", repo_err).contains("ConnectionPool"));
+  }
+
+  #[test]
+  fn test_create_repository_pool_success() -> TestResult {
+    let temp_data_dir = tempfile::tempdir()?;
+    let resources_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+
+    let pool =
+      create_repository_pool(temp_data_dir.path(), resources_dir)?;
+    let db_path = temp_data_dir.path().join("cat-launcher.db");
+    assert!(db_path.exists());
+
+    let conn = pool.get()?;
+    let expected_tables = [
+      "releases",
+      "active_release",
+      "backups",
+      "manual_backups",
+      "play_time",
+      "game_variant_order",
+      "theme_preferences",
+      "installed_mods",
+      "installed_tilesets",
+      "installed_soundpacks",
+      "users",
+      "variants",
+    ];
+    for table in expected_tables {
+      let count: i64 = conn.query_row(
+        "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?1",
+        [table],
+        |row| row.get(0),
+      )?;
+      assert_eq!(count, 1, "expected table {} to exist", table);
+    }
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_create_repository_pool_missing_schema_error() -> TestResult
+  {
+    let temp_data_dir = tempfile::tempdir()?;
+    let temp_resources_dir = tempfile::tempdir()?;
+
+    let result = create_repository_pool(
+      temp_data_dir.path(),
+      temp_resources_dir.path(),
+    );
+    assert!(result.is_err());
+    let err = result.err().unwrap();
+    assert!(matches!(err, RepositoryError::ConnectionPool(_)));
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_create_repository_pool_invalid_data_dir_error() -> TestResult
+  {
+    let temp_dir = tempfile::tempdir()?;
+    let blocking_file_path = temp_dir.path().join("not_a_dir");
+    File::create(&blocking_file_path)?;
+    let resources_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+
+    let result =
+      create_repository_pool(&blocking_file_path, resources_dir);
+    assert!(result.is_err());
+    let err = result.err().unwrap();
+    assert!(matches!(err, RepositoryError::ConnectionPool(_)));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_create_online_mod_repository_registry() -> TestResult
+  {
+    let registry = create_online_mod_repository_registry();
+    assert_eq!(registry.repositories().len(), 1);
+
+    let client = ReqwestHttpClient::new(reqwest::Client::new());
+    let mods = registry.repositories()[0]
+      .get_mods_for_variant(
+        &crate::variants::GameVariant::DarkDaysAhead,
+        &client,
+      )
+      .await?;
+    assert!(mods.is_empty());
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_create_downloader() {
+    let client = reqwest::Client::new();
+    let _downloader = create_downloader(client);
+  }
+
+  #[test]
+  fn test_register_repositories() -> TestResult {
+    let app = tauri::test::mock_app();
+    let pool = r2d2::Pool::new(
+      r2d2_sqlite::SqliteConnectionManager::memory(),
+    )?;
+
+    register_repositories(&app, pool);
+
+    assert!(app.try_state::<SqliteReleasesRepository>().is_some());
+    assert!(app.try_state::<SqliteBackupRepository>().is_some());
+    assert!(
+      app.try_state::<SqliteManualBackupRepository>().is_some()
+    );
+    assert!(
+      app.try_state::<SqliteActiveReleaseRepository>().is_some()
+    );
+    assert!(app.try_state::<SqlitePlayTimeRepository>().is_some());
+    assert!(
+      app
+        .try_state::<SqliteGameVariantOrderRepository>()
+        .is_some()
+    );
+    assert!(
+      app.try_state::<SqliteThemePreferenceRepository>().is_some()
+    );
+    assert!(
+      app.try_state::<SqliteInstalledModsRepository>().is_some()
+    );
+    assert!(app.try_state::<SqliteModsRepository>().is_some());
+    assert!(
+      app
+        .try_state::<SqliteInstalledTilesetsRepository>()
+        .is_some()
+    );
+    assert!(
+      app
+        .try_state::<SqliteInstalledSoundpacksRepository>()
+        .is_some()
+    );
+    assert!(app.try_state::<SqliteUsersRepository>().is_some());
+
+    Ok(())
+  }
+
+  #[test]
+  fn test_register_online_mod_repository_registry() {
+    let app = tauri::test::mock_app();
+
+    register_online_mod_repository_registry(&app);
+
+    let state = app.try_state::<OnlineModRepositoryRegistry>();
+    assert!(state.is_some());
+    let registry = state.unwrap();
+    assert_eq!(registry.repositories().len(), 1);
+  }
+
+  #[test]
+  fn test_register_downloader() {
+    let app = tauri::test::mock_app();
+    let client = reqwest::Client::new();
+
+    register_downloader(&app, client);
+
+    assert!(app.try_state::<Downloader>().is_some());
+  }
+
+  #[test]
+  fn test_register_http_client() {
+    let app = tauri::test::mock_app();
+    let client = reqwest::Client::new();
+
+    register_http_client(&app, client);
+
+    assert!(app.try_state::<reqwest::Client>().is_some());
+    assert!(app.try_state::<ReqwestHttpClient>().is_some());
+  }
+}

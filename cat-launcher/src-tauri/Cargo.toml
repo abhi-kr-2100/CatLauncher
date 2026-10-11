@@ -49,6 +49,7 @@ walkdir = "2.5.0"
 [dev-dependencies]
 tempfile = "3.23.0"
 github-mock-api = { git = "https://github.com/abhi-kr-2100/github-mock-api.git", rev = "68bbeca7b0e4035ced327e840f8a118d5a31aedf" }
+tauri = { version = "2.11.0", features = ["test"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2.10.1"
