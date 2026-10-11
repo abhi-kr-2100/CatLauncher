@@ -207,3 +207,457 @@ async fn list_all_third_party_tilesets(
 
   Ok(tilesets)
 }
+
+#[cfg(test)]
+#[allow(
+  clippy::panic_in_result_fn,
+  clippy::indexing_slicing,
+  clippy::expect_used,
+  clippy::io_other_error,
+  clippy::unwrap_used
+)]
+mod tests {
+  use super::*;
+  use strum::IntoEnumIterator;
+  use tempfile::tempdir;
+
+  use crate::active_release::repository::sqlite_active_release_repository::SqliteActiveReleaseRepository;
+  use crate::filesystem::paths::get_or_create_asset_installation_dir;
+  use crate::infra::testing::test_database::TestDatabase;
+  use crate::infra::utils::Asset;
+
+  type TestResult<T = ()> =
+    std::result::Result<T, Box<dyn std::error::Error>>;
+
+  #[tokio::test]
+  async fn test_extract_stock_tileset_from_tileset_txt_valid()
+  -> TestResult {
+    let temp = tempdir()?;
+    let tileset_file = temp.path().join("tileset.txt");
+    let content = "# Tileset configuration\n# Comment\n\nNAME: ChestHoleTileset\nVIEW: ChestHole Tileset\n";
+    tokio::fs::write(&tileset_file, content).await?;
+
+    let ts =
+      extract_stock_tileset_from_tileset_txt(&tileset_file).await?;
+    assert_eq!(ts.id, "ChestHoleTileset");
+    assert_eq!(ts.name, "ChestHole Tileset");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_extract_stock_tileset_from_tileset_txt_missing_fields()
+  -> TestResult {
+    let temp = tempdir()?;
+
+    // Missing VIEW
+    let no_view = temp.path().join("no_view.txt");
+    tokio::fs::write(&no_view, "NAME: only_name\n# no view here\n")
+      .await?;
+    assert!(matches!(
+      extract_stock_tileset_from_tileset_txt(&no_view).await,
+      Err(ExtractStockTilesetError::MissingField(f)) if f == "VIEW"
+    ));
+
+    // Missing NAME
+    let no_name = temp.path().join("no_name.txt");
+    tokio::fs::write(&no_name, "VIEW: only_view\n# no name here\n")
+      .await?;
+    assert!(matches!(
+      extract_stock_tileset_from_tileset_txt(&no_name).await,
+      Err(ExtractStockTilesetError::MissingField(f)) if f == "NAME"
+    ));
+
+    // Non-existent file
+    let missing = temp.path().join("non_existent.txt");
+    assert!(matches!(
+      extract_stock_tileset_from_tileset_txt(&missing).await,
+      Err(ExtractStockTilesetError::ReadTilesetTxt(_))
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_stock_tilesets_dir() -> TestResult {
+    let temp = tempdir()?;
+    let stock_dir = temp.path();
+
+    // Valid pack 1
+    let pack1 = stock_dir.join("pack1");
+    tokio::fs::create_dir_all(&pack1).await?;
+    tokio::fs::write(
+      pack1.join("tileset.txt"),
+      "NAME: pack1\nVIEW: Tileset One\n",
+    )
+    .await?;
+
+    // Valid pack 2
+    let pack2 = stock_dir.join("pack2");
+    tokio::fs::create_dir_all(&pack2).await?;
+    tokio::fs::write(
+      pack2.join("tileset.txt"),
+      "NAME: pack2\nVIEW: Tileset Two\n",
+    )
+    .await?;
+
+    // Invalid pack (missing VIEW)
+    let pack_invalid = stock_dir.join("pack_invalid");
+    tokio::fs::create_dir_all(&pack_invalid).await?;
+    tokio::fs::write(
+      pack_invalid.join("tileset.txt"),
+      "NAME: invalid\n",
+    )
+    .await?;
+
+    // Dir without tileset.txt
+    let empty_dir = stock_dir.join("empty_dir");
+    tokio::fs::create_dir_all(&empty_dir).await?;
+
+    // Loose file (should be ignored)
+    tokio::fs::write(stock_dir.join("readme.txt"), "ignore me")
+      .await?;
+
+    let stock_packs = list_all_stock_tilesets(stock_dir).await?;
+    assert_eq!(stock_packs.len(), 2);
+    let ids: Vec<&str> = stock_packs.iter().map(|s| s.id()).collect();
+    assert!(ids.contains(&"pack1"));
+    assert!(ids.contains(&"pack2"));
+
+    // Non-existent dir returns empty vec
+    let non_existent = temp.path().join("does_not_exist");
+    let empty_result = list_all_stock_tilesets(&non_existent).await?;
+    assert!(empty_result.is_empty());
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_third_party_tilesets_resource() -> TestResult
+  {
+    let temp = tempdir()?;
+    let content_dir = temp.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+
+    let json = serde_json::json!({
+      "DarkDaysAhead": {
+        "ts_a": {
+          "id": "ts_a",
+          "name": "Tileset A",
+          "installation": {
+            "download_url": "https://example.com/a.zip",
+            "tileset": "tileset.txt"
+          },
+          "activity": {
+            "activity_type": "github",
+            "github": null
+          }
+        }
+      },
+      "BrightNights": {
+        "ts_b": {
+          "id": "ts_b",
+          "name": "Tileset B",
+          "installation": {
+            "download_url": "https://example.com/b.zip",
+            "tileset": "tileset.txt"
+          },
+          "activity": {
+            "activity_type": "github",
+            "github": null
+          }
+        }
+      }
+    });
+
+    tokio::fs::write(
+      content_dir.join("tilesets.json"),
+      serde_json::to_string(&json)?,
+    )
+    .await?;
+
+    let dda = list_all_third_party_tilesets(
+      &GameVariant::DarkDaysAhead,
+      temp.path(),
+    )
+    .await?;
+    assert_eq!(dda.len(), 1);
+    assert_eq!(dda[0].id(), "ts_a");
+
+    let bn = list_all_third_party_tilesets(
+      &GameVariant::BrightNights,
+      temp.path(),
+    )
+    .await?;
+    assert_eq!(bn.len(), 1);
+    assert_eq!(bn[0].id(), "ts_b");
+
+    let tlg = list_all_third_party_tilesets(
+      &GameVariant::TheLastGeneration,
+      temp.path(),
+    )
+    .await?;
+    assert!(tlg.is_empty());
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_third_party_tilesets_missing_file()
+  -> TestResult {
+    let temp = tempdir()?;
+    let result = list_all_third_party_tilesets(
+      &GameVariant::DarkDaysAhead,
+      temp.path(),
+    )
+    .await;
+
+    assert!(matches!(
+      result,
+      Err(ListThirdPartyTilesetsError::ReadTilesetsJson(_))
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_third_party_tilesets_malformed_json()
+  -> TestResult {
+    let temp = tempdir()?;
+    let content_dir = temp.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    tokio::fs::write(
+      content_dir.join("tilesets.json"),
+      "not valid json data",
+    )
+    .await?;
+
+    let result = list_all_third_party_tilesets(
+      &GameVariant::DarkDaysAhead,
+      temp.path(),
+    )
+    .await;
+
+    assert!(matches!(
+      result,
+      Err(ListThirdPartyTilesetsError::ParseTilesetsJson(_))
+    ));
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_tilesets_full_workflow() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    // 1. Setup active release
+    let version = "v0.H";
+    active_release_repo
+      .set_active_release(&variant, version)
+      .await?;
+
+    // 2. Setup stock tilesets on disk (out of alphabetical order)
+    let install_dir = get_or_create_asset_installation_dir(
+      &variant,
+      version,
+      temp_data.path(),
+    )
+    .await?;
+    let game_dir = install_dir.join("cataclysm-dda-v0.H");
+    let stock_gfx_dir = game_dir.join("gfx");
+
+    let stock_pack_b = stock_gfx_dir.join("stock_ts_b");
+    tokio::fs::create_dir_all(&stock_pack_b).await?;
+    tokio::fs::write(
+      stock_pack_b.join("tileset.txt"),
+      "NAME: stock_ts_b\nVIEW: Stock Tileset B\n",
+    )
+    .await?;
+
+    let stock_pack_a = stock_gfx_dir.join("stock_ts_a");
+    tokio::fs::create_dir_all(&stock_pack_a).await?;
+    tokio::fs::write(
+      stock_pack_a.join("tileset.txt"),
+      "NAME: stock_ts_a\nVIEW: Stock Tileset A\n",
+    )
+    .await?;
+
+    // 3. Setup bundled tilesets.json (out of alphabetical order)
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    let json = serde_json::json!({
+      "DarkDaysAhead": {
+        "tp_ts_b": {
+          "id": "tp_ts_b",
+          "name": "Third Party Tileset B",
+          "installation": {
+            "download_url": "https://example.com/tp_b.zip",
+            "tileset": "tileset.txt"
+          },
+          "activity": {
+            "activity_type": "github",
+            "github": null
+          }
+        },
+        "tp_ts_a": {
+          "id": "tp_ts_a",
+          "name": "Third Party Tileset A",
+          "installation": {
+            "download_url": "https://example.com/tp_a.zip",
+            "tileset": "tileset.txt"
+          },
+          "activity": {
+            "activity_type": "github",
+            "github": null
+          }
+        }
+      }
+    });
+    tokio::fs::write(
+      content_dir.join("tilesets.json"),
+      serde_json::to_string(&json)?,
+    )
+    .await?;
+
+    let result = list_all_tilesets(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+    )
+    .await?;
+
+    assert_eq!(result.len(), 4);
+    // Third party should come first, sorted alphabetically by id
+    assert!(result[0].is_third_party());
+    assert_eq!(result[0].id(), "tp_ts_a");
+
+    assert!(result[1].is_third_party());
+    assert_eq!(result[1].id(), "tp_ts_b");
+
+    // Stock tilesets follow, sorted alphabetically by id
+    assert!(!result[2].is_third_party());
+    assert_eq!(result[2].id(), "stock_ts_a");
+
+    assert!(!result[3].is_third_party());
+    assert_eq!(result[3].id(), "stock_ts_b");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_tilesets_no_active_release() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+    let variant = GameVariant::DarkDaysAhead;
+
+    // Bundled tilesets.json
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+    let json = serde_json::json!({
+      "DarkDaysAhead": {
+        "bundled_ts": {
+          "id": "bundled_ts",
+          "name": "Bundled Tileset",
+          "installation": {
+            "download_url": "https://example.com/b.zip",
+            "tileset": "tileset.txt"
+          },
+          "activity": {
+            "activity_type": "github",
+            "github": null
+          }
+        }
+      }
+    });
+    tokio::fs::write(
+      content_dir.join("tilesets.json"),
+      serde_json::to_string(&json)?,
+    )
+    .await?;
+
+    let result = list_all_tilesets(
+      &variant,
+      temp_data.path(),
+      temp_res.path(),
+      &os,
+      &active_release_repo,
+    )
+    .await?;
+
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].id(), "bundled_ts");
+
+    Ok(())
+  }
+
+  #[tokio::test]
+  async fn test_list_all_tilesets_all_variants() -> TestResult {
+    let db = TestDatabase::builder().build()?;
+    let active_release_repo =
+      SqliteActiveReleaseRepository::new(db.pool().clone());
+    let temp_data = tempdir()?;
+    let temp_res = tempdir()?;
+    let os = OS::Linux;
+
+    let content_dir = temp_res.path().join("content");
+    tokio::fs::create_dir_all(&content_dir).await?;
+
+    let mut json_variants = serde_json::Map::new();
+    for variant in GameVariant::iter() {
+      let id = format!("ts_{}", variant);
+      json_variants.insert(
+        variant.to_string(),
+        serde_json::json!({
+          (id.clone()): {
+            "id": id,
+            "name": format!("Tileset {}", variant),
+            "installation": {
+              "download_url": format!("https://example.com/{}.zip", variant),
+              "tileset": "tileset.txt"
+            },
+            "activity": {
+              "activity_type": "github",
+              "github": null
+            }
+          }
+        }),
+      );
+    }
+    let json = serde_json::Value::Object(json_variants);
+
+    tokio::fs::write(
+      content_dir.join("tilesets.json"),
+      serde_json::to_string(&json)?,
+    )
+    .await?;
+
+    for variant in GameVariant::iter() {
+      let expected_id = format!("ts_{}", variant);
+      let result = list_all_tilesets(
+        &variant,
+        temp_data.path(),
+        temp_res.path(),
+        &os,
+        &active_release_repo,
+      )
+      .await?;
+
+      assert_eq!(result.len(), 1);
+      assert_eq!(result[0].id(), expected_id);
+    }
+
+    Ok(())
+  }
+}
