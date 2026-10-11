@@ -15,7 +15,7 @@ Where `<version>` is the new version in format `X.Y` or `X.Y.Z` (e.g., `0.13.0` 
 - `README.md` - Updates the AppImage filename in installation instructions
 - `cat-launcher/package.json` - Updates the package version
 - `cat-launcher/src-tauri/Cargo.toml` - Updates the crate version
-- `cat-launcher/src-tauri/Cargo.lock` - Updates the locked cat-launcher package version
+- `cat-launcher/Cargo.lock` - Updates the locked cat-launcher package version
 - `cat-launcher/src-tauri/tauri.conf.json` - Updates the Tauri app version
 
 ## Example
